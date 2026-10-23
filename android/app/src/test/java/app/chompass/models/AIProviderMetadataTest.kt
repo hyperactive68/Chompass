@@ -58,7 +58,7 @@ class AIProviderMetadataTest {
         // fetch a runtime lineup; GEMINI/ANTHROPIC keep curated lists, and the
         // local/device entries have no hosted /models.
         val expected = setOf(
-            AIProvider.OPENAI, AIProvider.XAI, AIProvider.TOGETHER_AI, AIProvider.GROQ,
+            AIProvider.CHATGPT, AIProvider.OPENAI, AIProvider.XAI, AIProvider.TOGETHER_AI, AIProvider.GROQ,
             AIProvider.HUGGING_FACE, AIProvider.FIREWORKS, AIProvider.DEEP_INFRA,
             AIProvider.MISTRAL,
         )

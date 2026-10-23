@@ -1,5 +1,7 @@
 package app.chompass.ui.settings
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Add
@@ -26,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import app.chompass.R
 import app.chompass.models.AIProvider
 import app.chompass.models.LocaleFormat
@@ -48,6 +51,7 @@ internal fun SettingsAiSection(
     onOpenSheet: (SettingsSheet) -> Unit,
 ) {
     var confirmDeleteProfile by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     SectionCard(title = stringResource(R.string.settings_section_ai_profile)) {
                 // Phase 2 of Codeberg #20: the master AI-features switch. When
                 // off, nothing is sent to any LLM provider (gated at the service
@@ -136,6 +140,46 @@ internal fun SettingsAiSection(
                 ) { onOpenSheet(SettingsSheet.AI_PROVIDER) }
                 HorizontalDivider()
                 SettingRow(stringResource(R.string.settings_ai_model), ui.activeModel.ifEmpty { stringResource(R.string.settings_ai_model_unset) }, icon = Icons.Outlined.Tune) { onOpenSheet(SettingsSheet.AI_MODEL) }
+                if (ui.activeProvider == AIProvider.CHATGPT) {
+                    HorizontalDivider()
+                    SettingRow(
+                        stringResource(
+                            if (ui.chatGptConnected) R.string.settings_chatgpt_account
+                            else R.string.settings_chatgpt_continue
+                        ),
+                        when {
+                            ui.chatGptAuthBusy -> stringResource(R.string.settings_chatgpt_connecting)
+                            ui.chatGptConnected -> ui.chatGptEmail ?: stringResource(R.string.onboarding_health_connected)
+                            else -> stringResource(R.string.settings_not_set)
+                        },
+                        icon = Icons.Outlined.AccountCircle,
+                    ) {
+                        if (!ui.chatGptConnected || !ui.chatGptPlanUsageEnabled) vm.signInWithChatGpt()
+                    }
+                    SettingFootnote(
+                        ui.chatGptAuthError ?: stringResource(
+                            if (ui.chatGptPlanUsageEnabled) R.string.settings_chatgpt_plan_enabled
+                            else if (ui.chatGptConnected) R.string.settings_chatgpt_plan_disabled
+                            else R.string.settings_chatgpt_plan_footer
+                        )
+                    )
+                    if (ui.chatGptConnected) {
+                        HorizontalDivider()
+                        SettingRow(
+                            stringResource(R.string.settings_chatgpt_manage_usage),
+                            "",
+                            icon = Icons.Outlined.Link,
+                        ) {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://chatgpt.com/settings/usage")))
+                        }
+                        HorizontalDivider()
+                        SettingRow(
+                            stringResource(R.string.settings_chatgpt_disconnect),
+                            "",
+                            icon = Icons.Outlined.Delete,
+                        ) { vm.disconnectChatGpt() }
+                    }
+                }
                 if (ui.activeProvider.requiresApiKey) {
                     HorizontalDivider()
                     // ✓/✗ mirrors the fresh key-test result from the key sheet.
@@ -172,6 +216,7 @@ internal fun SettingsAiSection(
                 val showVisionModel = ui.activeProvider != AIProvider.ON_DEVICE
                 val showReasoningEffort = OpenAICompatibleClient.usesReasoningEffort(ui.activeProvider)
                 val showMaxTokens = ui.activeProvider.apiFormat != AIProvider.ApiFormat.GEMINI &&
+                    ui.activeProvider.apiFormat != AIProvider.ApiFormat.CHATGPT_RESPONSES &&
                     ui.activeProvider != AIProvider.ON_DEVICE
                 val showReadTimeout = ui.activeProvider != AIProvider.ON_DEVICE
                 val showGoalTier = ui.activeProvider.usesConfigurableRequestTimeout

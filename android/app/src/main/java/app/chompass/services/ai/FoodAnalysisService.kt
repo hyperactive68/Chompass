@@ -328,6 +328,8 @@ class FoodAnalysisService(
     internal val watchdogSecondsOverride: Int? = null,
     /** Test seam: supplies profile API keys without a real encrypted KeyStore. */
     internal val keyLookup: ((AiProfile) -> String?)? = null,
+    /** OAuth bearer source for the official ChatGPT-plan Responses route. */
+    private val chatGptAuth: ChatGptAuthManager? = null,
 ) {
     init {
         require((prefs != null && (keyStore != null || keyLookup != null)) || callAiDelegate != null) {
@@ -1984,8 +1986,13 @@ class FoodAnalysisService(
         }
 
         val primaryBaseUrl = cfg.customBaseUrl?.takeIf { it.isNotEmpty() }?.let(AiHttp::normalizeCustomBaseUrl) ?: primary.baseUrl
-        val primaryKey = keyLookup?.invoke(cfg.profile)
-            ?: AiHttp.sanitizeApiKey(keyStore!!.profileApiKey(cfg.profile.id))
+        val primaryKey = if (primary == AIProvider.CHATGPT) {
+            chatGptAuth?.accessToken()
+                ?: throw ChatGptAuthException("Connect your ChatGPT account in Settings first.")
+        } else {
+            keyLookup?.invoke(cfg.profile)
+                ?: AiHttp.sanitizeApiKey(keyStore!!.profileApiKey(cfg.profile.id))
+        }
         val userCap = cfg.maxResponseTokens
         val maxTokens = userCap
         if (PerfLog.enabled) {
@@ -2297,6 +2304,8 @@ class FoodAnalysisService(
                     GeminiClient.analyze(httpClient, baseUrl, model, sanitizedKey!!, effectivePrompt, imageBytesList, enableGoogleSearch, maxTokens, jsonResponse = !enableGoogleSearch)
                 AIProvider.ApiFormat.ANTHROPIC ->
                     AnthropicClient.analyze(httpClient, baseUrl, model, sanitizedKey!!, effectivePrompt, imageBytesList, maxTokens)
+                AIProvider.ApiFormat.CHATGPT_RESPONSES ->
+                    ChatGptResponsesClient.analyze(httpClient, model, sanitizedKey!!, effectivePrompt, imageBytesList)
                 AIProvider.ApiFormat.OPENAI_COMPATIBLE ->
                     OpenAICompatibleClient.analyze(
                         httpClient, baseUrl, model, sanitizedKey, effectivePrompt, imageBytesList, provider, maxTokens, reasoningEffort,
@@ -2331,6 +2340,10 @@ class FoodAnalysisService(
                 AnthropicClient.analyzeStreaming(
                     httpClient, baseUrl, model, sanitizedKey!!, effectivePrompt, imageBytesList, maxTokens, onDelta,
                 )
+            AIProvider.ApiFormat.CHATGPT_RESPONSES ->
+                ChatGptResponsesClient.analyze(
+                    httpClient, model, sanitizedKey!!, effectivePrompt, imageBytesList, onDelta,
+                )
             AIProvider.ApiFormat.OPENAI_COMPATIBLE -> {
                 val streamed = OpenAICompatibleClient.analyzeStreaming(
                     httpClient, baseUrl, model, sanitizedKey, effectivePrompt, imageBytesList, provider, maxTokens, onDelta, reasoningEffort,
@@ -2345,7 +2358,7 @@ class FoodAnalysisService(
         }
     }
 
-    private fun currentFallbackConfig(
+    private suspend fun currentFallbackConfig(
         primary: AIProvider,
         primaryModel: String,
         cfg: AiCallConfig,
@@ -2365,8 +2378,12 @@ class FoodAnalysisService(
             if (onDeviceModelDownloaded?.invoke(entry.modelId) != true) return null
             return FallbackConfig(provider, model, baseUrl = "", apiKey = null, visionModel = fb.visionModel)
         }
-        val key = keyLookup?.invoke(fb)
-            ?: AiHttp.sanitizeApiKey(keyStore!!.profileApiKey(fb.id))
+        val key = if (provider == AIProvider.CHATGPT) {
+            chatGptAuth?.accessToken() ?: return null
+        } else {
+            keyLookup?.invoke(fb)
+                ?: AiHttp.sanitizeApiKey(keyStore!!.profileApiKey(fb.id))
+        }
         if (provider.requiresApiKey && key.isNullOrEmpty()) return null
         val baseUrl = fb.baseUrl?.takeIf { it.isNotEmpty() }?.let(AiHttp::normalizeCustomBaseUrl) ?: provider.baseUrl
         if (baseUrl.isEmpty()) return null

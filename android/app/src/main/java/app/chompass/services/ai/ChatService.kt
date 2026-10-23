@@ -131,6 +131,9 @@ class ChatService(
         if (provider.apiFormat == AIProvider.ApiFormat.ON_DEVICE) {
             throw AiError.Api("Coach isn't available with the on-device provider yet. Switch to a cloud provider in Settings → AI Provider.", messageRes = R.string.ai_error_coach_on_device)
         }
+        if (provider.apiFormat == AIProvider.ApiFormat.CHATGPT_RESPONSES) {
+            throw AiError.Api("The ChatGPT plan connection currently powers food analysis only. Choose another provider for Coach.")
+        }
         if (provider.requiresApiKey && apiKey.isNullOrEmpty()) throw AiError.NoApiKey
         if (baseUrl.isEmpty()) throw AiError.InvalidUrl(baseUrl)
         AiHttp.assertCleartextAllowed(baseUrl, cfg.allowInsecureHttp)
@@ -142,6 +145,7 @@ class ChatService(
         val reply = when (provider.apiFormat) {
             AIProvider.ApiFormat.GEMINI -> runGeminiToolLoop(httpClient, baseUrl, model, apiKey!!, systemPrompt, history, newUserMessage, tools, imageBytes, geminiGoogleSearch, maxTokens)
             AIProvider.ApiFormat.ANTHROPIC -> runAnthropicToolLoop(httpClient, baseUrl, model, apiKey!!, systemPrompt, history, newUserMessage, tools, imageBytes, maxTokens)
+            AIProvider.ApiFormat.CHATGPT_RESPONSES -> error("unreachable — guarded above")
             AIProvider.ApiFormat.OPENAI_COMPATIBLE -> runOpenAIToolLoop(httpClient, baseUrl, model, apiKey, systemPrompt, history, newUserMessage, provider, tools, imageBytes, maxTokens, cfg.reasoningEffort)
             AIProvider.ApiFormat.ON_DEVICE -> error("unreachable — guarded above")
         }

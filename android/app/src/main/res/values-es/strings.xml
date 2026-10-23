@@ -2780,4 +2780,15 @@ macros reequilibradas al nuevo total calórico</string>
         <item>restablecer</item>
         <item>fábrica</item>
     </string-array>
+    <string name="ai_provider_chatgpt">Plan de ChatGPT</string>
+    <string name="ai_provider_subtitle_chatgpt">Usa un plan de ChatGPT Plus o Pro compatible</string>
+    <string name="settings_chatgpt_account">Cuenta de ChatGPT</string>
+    <string name="settings_chatgpt_continue">Continuar con ChatGPT</string>
+    <string name="settings_chatgpt_connecting">Conectando…</string>
+    <string name="settings_chatgpt_plan_enabled">El uso del plan de ChatGPT está activado para el análisis de alimentos. El uso se comparte con tu plan de ChatGPT.</string>
+    <string name="settings_chatgpt_plan_footer">Inicia sesión para usar un plan de ChatGPT Plus o Pro compatible para el análisis de alimentos. No se necesita una clave de API.</string>
+    <string name="settings_chatgpt_plan_disabled">Has iniciado sesión, pero el uso del plan de ChatGPT no está activado. Toca la fila de la cuenta para autorizarlo.</string>
+    <string name="settings_chatgpt_revoke_unconfirmed">Se desconectó localmente. No se pudo confirmar la revocación remota; también puedes eliminar Chompass en los ajustes de ChatGPT.</string>
+    <string name="settings_chatgpt_manage_usage">Gestionar el uso de ChatGPT</string>
+    <string name="settings_chatgpt_disconnect">Desconectar ChatGPT</string>
 </resources>

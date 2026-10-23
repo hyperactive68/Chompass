@@ -59,6 +59,9 @@ object GroundedToolLoop {
         if (provider.apiFormat == AIProvider.ApiFormat.ON_DEVICE) {
             throw AiError.Api("Grounded tool loop is not available for on-device models.")
         }
+        if (provider.apiFormat == AIProvider.ApiFormat.CHATGPT_RESPONSES) {
+            throw AiError.Api("Grounded entry is not available with the ChatGPT plan connection.")
+        }
         onProgress(FoodAnalysisProgress.Phase(EntryAnalysisPhase.Recognizing))
         val images = if (imageBytesList.isEmpty()) {
             imageBytesList
@@ -78,6 +81,7 @@ object GroundedToolLoop {
             AIProvider.ApiFormat.GEMINI -> runGemini(
                 client, baseUrl, model, apiKey!!, system, userMessage, images, tools, onProgress,
             )
+            AIProvider.ApiFormat.CHATGPT_RESPONSES -> error("unreachable — guarded above")
             AIProvider.ApiFormat.ON_DEVICE -> error("unreachable")
         }
         onProgress(FoodAnalysisProgress.Phase(EntryAnalysisPhase.Resolving))

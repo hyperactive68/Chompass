@@ -2806,4 +2806,15 @@ makro rebalansowane do nowej sumy kalorii</string>
         <item>reset</item>
         <item>fabryczne</item>
     </string-array>
+    <string name="ai_provider_chatgpt">Plan ChatGPT</string>
+    <string name="ai_provider_subtitle_chatgpt">Użyj kwalifikującego się planu ChatGPT Plus lub Pro</string>
+    <string name="settings_chatgpt_account">Konto ChatGPT</string>
+    <string name="settings_chatgpt_continue">Kontynuuj z ChatGPT</string>
+    <string name="settings_chatgpt_connecting">Łączenie…</string>
+    <string name="settings_chatgpt_plan_enabled">Użycie planu ChatGPT jest włączone dla analizy żywności. Wykorzystanie jest współdzielone z Twoim planem ChatGPT.</string>
+    <string name="settings_chatgpt_plan_footer">Zaloguj się, aby użyć kwalifikującego się planu ChatGPT Plus lub Pro do analizy żywności. Klucz API nie jest wymagany.</string>
+    <string name="settings_chatgpt_plan_disabled">Zalogowano, ale użycie planu ChatGPT nie jest włączone. Dotknij wiersza konta, aby je autoryzować.</string>
+    <string name="settings_chatgpt_revoke_unconfirmed">Rozłączono lokalnie. Nie udało się potwierdzić zdalnego unieważnienia; możesz też usunąć Chompass w ustawieniach ChatGPT.</string>
+    <string name="settings_chatgpt_manage_usage">Zarządzaj użyciem ChatGPT</string>
+    <string name="settings_chatgpt_disconnect">Odłącz ChatGPT</string>
 </resources>

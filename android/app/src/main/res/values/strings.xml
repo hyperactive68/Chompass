@@ -2803,4 +2803,15 @@
     <string name="settings_fill_missing_reminders">Missing-value reminders</string>
     <string name="settings_fill_missing_reminders_footer">Show the Home banner when logged meals or favorites have missing values</string>
     <string name="fill_gaps_never_remind">Don\'t remind me again</string>
+    <string name="ai_provider_chatgpt">ChatGPT plan</string>
+    <string name="ai_provider_subtitle_chatgpt">Use an eligible ChatGPT Plus or Pro plan</string>
+    <string name="settings_chatgpt_account">ChatGPT account</string>
+    <string name="settings_chatgpt_continue">Continue with ChatGPT</string>
+    <string name="settings_chatgpt_connecting">Connecting…</string>
+    <string name="settings_chatgpt_plan_enabled">ChatGPT plan usage is enabled for food analysis. Usage is shared with your ChatGPT plan.</string>
+    <string name="settings_chatgpt_plan_footer">Sign in to use an eligible ChatGPT Plus or Pro plan for food analysis. No API key is required.</string>
+    <string name="settings_chatgpt_plan_disabled">Signed in, but ChatGPT plan usage is not enabled. Tap the account row to authorize it.</string>
+    <string name="settings_chatgpt_revoke_unconfirmed">Disconnected locally. Remote revocation could not be confirmed; you can also remove Chompass in ChatGPT settings.</string>
+    <string name="settings_chatgpt_manage_usage">Manage ChatGPT usage</string>
+    <string name="settings_chatgpt_disconnect">Disconnect ChatGPT</string>
 </resources>

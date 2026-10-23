@@ -2782,4 +2782,15 @@ macro-urile reechilibrate la noul total caloric</string>
         <item>resetare</item>
         <item>fabrică</item>
     </string-array>
+    <string name="ai_provider_chatgpt">Plan ChatGPT</string>
+    <string name="ai_provider_subtitle_chatgpt">Folosește un plan ChatGPT Plus sau Pro eligibil</string>
+    <string name="settings_chatgpt_account">Cont ChatGPT</string>
+    <string name="settings_chatgpt_continue">Continuă cu ChatGPT</string>
+    <string name="settings_chatgpt_connecting">Se conectează…</string>
+    <string name="settings_chatgpt_plan_enabled">Utilizarea planului ChatGPT este activată pentru analiza alimentelor. Utilizarea este partajată cu planul tău ChatGPT.</string>
+    <string name="settings_chatgpt_plan_footer">Autentifică-te pentru a folosi un plan ChatGPT Plus sau Pro eligibil la analiza alimentelor. Nu este necesară o cheie API.</string>
+    <string name="settings_chatgpt_plan_disabled">Ești autentificat, dar utilizarea planului ChatGPT nu este activată. Atinge rândul contului pentru autorizare.</string>
+    <string name="settings_chatgpt_revoke_unconfirmed">Deconectat local. Revocarea la distanță nu a putut fi confirmată; poți elimina Chompass și din setările ChatGPT.</string>
+    <string name="settings_chatgpt_manage_usage">Gestionează utilizarea ChatGPT</string>
+    <string name="settings_chatgpt_disconnect">Deconectează ChatGPT</string>
 </resources>

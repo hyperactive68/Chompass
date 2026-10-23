@@ -2765,4 +2765,15 @@ macro\'s opnieuw verdeeld over het nieuwe calorieëntotaal</string>
         <item>resetten</item>
         <item>fabrieksinstellingen</item>
     </string-array>
+    <string name="ai_provider_chatgpt">ChatGPT-abonnement</string>
+    <string name="ai_provider_subtitle_chatgpt">Gebruik een geschikt ChatGPT Plus- of Pro-abonnement</string>
+    <string name="settings_chatgpt_account">ChatGPT-account</string>
+    <string name="settings_chatgpt_continue">Doorgaan met ChatGPT</string>
+    <string name="settings_chatgpt_connecting">Verbinden…</string>
+    <string name="settings_chatgpt_plan_enabled">Gebruik via je ChatGPT-abonnement is ingeschakeld voor voedingsanalyse. Het verbruik wordt gedeeld met je ChatGPT-abonnement.</string>
+    <string name="settings_chatgpt_plan_footer">Log in om een geschikt ChatGPT Plus- of Pro-abonnement voor voedingsanalyse te gebruiken. Er is geen API-key nodig.</string>
+    <string name="settings_chatgpt_plan_disabled">Je bent ingelogd, maar gebruik via je ChatGPT-abonnement is niet ingeschakeld. Tik op de accountregel om toestemming te geven.</string>
+    <string name="settings_chatgpt_revoke_unconfirmed">Lokaal losgekoppeld. Intrekken op afstand kon niet worden bevestigd; je kunt Chompass ook verwijderen in de ChatGPT-instellingen.</string>
+    <string name="settings_chatgpt_manage_usage">ChatGPT-verbruik beheren</string>
+    <string name="settings_chatgpt_disconnect">ChatGPT loskoppelen</string>
 </resources>

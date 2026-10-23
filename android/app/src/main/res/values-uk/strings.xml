@@ -2712,4 +2712,15 @@ LBM = вага × (1 − %жиру)</string>
         <item>скинути</item>
         <item>заводські</item>
     </string-array>
+    <string name="ai_provider_chatgpt">План ChatGPT</string>
+    <string name="ai_provider_subtitle_chatgpt">Використовуйте відповідний план ChatGPT Plus або Pro</string>
+    <string name="settings_chatgpt_account">Обліковий запис ChatGPT</string>
+    <string name="settings_chatgpt_continue">Продовжити з ChatGPT</string>
+    <string name="settings_chatgpt_connecting">Підключення…</string>
+    <string name="settings_chatgpt_plan_enabled">Використання плану ChatGPT увімкнено для аналізу їжі. Ліміт використання спільний із вашим планом ChatGPT.</string>
+    <string name="settings_chatgpt_plan_footer">Увійдіть, щоб використовувати відповідний план ChatGPT Plus або Pro для аналізу їжі. Ключ API не потрібен.</string>
+    <string name="settings_chatgpt_plan_disabled">Ви ввійшли, але використання плану ChatGPT не ввімкнено. Торкніться рядка облікового запису, щоб надати дозвіл.</string>
+    <string name="settings_chatgpt_revoke_unconfirmed">Локально від’єднано. Віддалене відкликання не підтверджено; Chompass також можна видалити в налаштуваннях ChatGPT.</string>
+    <string name="settings_chatgpt_manage_usage">Керувати використанням ChatGPT</string>
+    <string name="settings_chatgpt_disconnect">Від’єднати ChatGPT</string>
 </resources>

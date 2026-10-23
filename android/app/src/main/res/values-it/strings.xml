@@ -2767,4 +2767,15 @@ macro riequilibrate al nuovo totale calorico</string>
         <item>reimposta</item>
         <item>ripristino di fabbrica</item>
     </string-array>
+    <string name="ai_provider_chatgpt">Piano ChatGPT</string>
+    <string name="ai_provider_subtitle_chatgpt">Usa un piano ChatGPT Plus o Pro idoneo</string>
+    <string name="settings_chatgpt_account">Account ChatGPT</string>
+    <string name="settings_chatgpt_continue">Continua con ChatGPT</string>
+    <string name="settings_chatgpt_connecting">Connessione…</string>
+    <string name="settings_chatgpt_plan_enabled">L’uso del piano ChatGPT è abilitato per l’analisi degli alimenti. L’utilizzo è condiviso con il tuo piano ChatGPT.</string>
+    <string name="settings_chatgpt_plan_footer">Accedi per usare un piano ChatGPT Plus o Pro idoneo per l’analisi degli alimenti. Non serve una chiave API.</string>
+    <string name="settings_chatgpt_plan_disabled">Hai effettuato l’accesso, ma l’uso del piano ChatGPT non è abilitato. Tocca la riga dell’account per autorizzarlo.</string>
+    <string name="settings_chatgpt_revoke_unconfirmed">Disconnesso localmente. Non è stato possibile confermare la revoca remota; puoi anche rimuovere Chompass nelle impostazioni di ChatGPT.</string>
+    <string name="settings_chatgpt_manage_usage">Gestisci l’utilizzo di ChatGPT</string>
+    <string name="settings_chatgpt_disconnect">Disconnetti ChatGPT</string>
 </resources>

@@ -9,6 +9,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 enum class AIProvider {
     @SerialName("Google Gemini") GEMINI,
+    @SerialName("ChatGPT Plan") CHATGPT,
     @SerialName("OpenAI") OPENAI,
     @SerialName("Anthropic Claude") ANTHROPIC,
     @SerialName("xAI Grok") XAI,
@@ -26,6 +27,7 @@ enum class AIProvider {
     @get:StringRes
     val displayNameRes: Int get() = when (this) {
         GEMINI -> R.string.ai_provider_gemini
+        CHATGPT -> R.string.ai_provider_chatgpt
         OPENAI -> R.string.ai_provider_openai
         ANTHROPIC -> R.string.ai_provider_anthropic
         XAI -> R.string.ai_provider_xai
@@ -43,6 +45,7 @@ enum class AIProvider {
 
     val baseUrl: String get() = when (this) {
         GEMINI -> "https://generativelanguage.googleapis.com/v1beta"
+        CHATGPT -> "https://api.openai.com/v1"
         OPENAI -> "https://api.openai.com/v1"
         ANTHROPIC -> "https://api.anthropic.com/v1"
         XAI -> "https://api.x.ai/v1"
@@ -74,6 +77,7 @@ enum class AIProvider {
             "gemini-3.1-flash-lite",
             "gemini-3.1-pro-preview"
         )
+        CHATGPT -> listOf("gpt-6.1-sol")
         OPENAI -> listOf(
             "gpt-5.4-mini",
             "gpt-5.4-nano",
@@ -212,7 +216,7 @@ enum class AIProvider {
         }
     }
 
-    val requiresApiKey: Boolean get() = this != OLLAMA && this != ON_DEVICE
+    val requiresApiKey: Boolean get() = this != CHATGPT && this != OLLAMA && this != ON_DEVICE
     val requiresCustomEndpoint: Boolean get() = this == CUSTOM_OPENAI
     val requiresCustomModelName: Boolean get() = this == CUSTOM_OPENAI
     val usesConfigurableRequestTimeout: Boolean get() = this == OLLAMA || this == CUSTOM_OPENAI
@@ -225,11 +229,12 @@ enum class AIProvider {
      * curated default stays the fallback when no key is saved or the fetch fails.
      */
     val supportsRuntimeLineup: Boolean
-        get() = this == OPENAI || this == XAI || this == TOGETHER_AI || this == GROQ ||
+        get() = this == CHATGPT || this == OPENAI || this == XAI || this == TOGETHER_AI || this == GROQ ||
             this == HUGGING_FACE || this == FIREWORKS || this == DEEP_INFRA || this == MISTRAL
 
     val apiFormat: ApiFormat get() = when (this) {
         GEMINI -> ApiFormat.GEMINI
+        CHATGPT -> ApiFormat.CHATGPT_RESPONSES
         ANTHROPIC -> ApiFormat.ANTHROPIC
         OPENAI, XAI, OPENROUTER, TOGETHER_AI, GROQ, HUGGING_FACE,
         FIREWORKS, DEEP_INFRA, MISTRAL, OLLAMA, CUSTOM_OPENAI -> ApiFormat.OPENAI_COMPATIBLE
@@ -247,6 +252,7 @@ enum class AIProvider {
 
     val group: ProviderGroup get() = when (this) {
         GEMINI -> ProviderGroup.RECOMMENDED
+        CHATGPT -> ProviderGroup.RECOMMENDED
         OPENAI, ANTHROPIC, XAI, OPENROUTER, TOGETHER_AI, GROQ, HUGGING_FACE,
         FIREWORKS, DEEP_INFRA, MISTRAL -> ProviderGroup.CLOUD
         OLLAMA, CUSTOM_OPENAI -> ProviderGroup.LOCAL
@@ -257,6 +263,7 @@ enum class AIProvider {
     @get:StringRes
     val subtitleRes: Int get() = when (this) {
         GEMINI -> R.string.ai_provider_subtitle_gemini
+        CHATGPT -> R.string.ai_provider_subtitle_chatgpt
         OPENAI -> R.string.ai_provider_subtitle_openai
         ANTHROPIC -> R.string.ai_provider_subtitle_anthropic
         XAI -> R.string.ai_provider_subtitle_xai
@@ -275,6 +282,7 @@ enum class AIProvider {
     /** Where to get an API key; null for local / self-hosted / on-device. */
     val signupUrl: String? get() = when (this) {
         GEMINI -> "https://aistudio.google.com/apikey"
+        CHATGPT -> null
         OPENAI -> "https://platform.openai.com/api-keys"
         ANTHROPIC -> "https://console.anthropic.com/settings/keys"
         XAI -> "https://console.x.ai"
@@ -288,7 +296,7 @@ enum class AIProvider {
         OLLAMA, CUSTOM_OPENAI, ON_DEVICE -> null
     }
 
-    enum class ApiFormat { GEMINI, OPENAI_COMPATIBLE, ANTHROPIC, ON_DEVICE }
+    enum class ApiFormat { GEMINI, CHATGPT_RESPONSES, OPENAI_COMPATIBLE, ANTHROPIC, ON_DEVICE }
 
     companion object {
         fun normalizeModelId(model: String): String =

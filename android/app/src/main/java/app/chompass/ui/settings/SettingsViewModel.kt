@@ -206,6 +206,11 @@ data class SettingsUiState(
     /** Localized error for the "Estimate with AI" call; null = no alert shown. */
     val optionalNutrientEstimateAlertMessage: String? = null,
     val apiKeyMasked: String = "",
+    val chatGptConnected: Boolean = false,
+    val chatGptEmail: String? = null,
+    val chatGptPlanUsageEnabled: Boolean = false,
+    val chatGptAuthBusy: Boolean = false,
+    val chatGptAuthError: String? = null,
     val speechApiKeyMasked: String = "",
     /** Settings key-test probe: in-flight flag + last result; reset on profile/provider change. */
     val apiKeyTesting: Boolean = false,
@@ -512,6 +517,7 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
                 val active = container.prefs.activeAiProfile.first()
                 val fallbackProfileId = container.prefs.fallbackAiProfileId.first()
                 val masked = runCatching { maskKey(active?.let { container.keyStore.profileApiKey(it.id) }) }.getOrDefault("")
+                val chatGpt = container.chatGptAuth.session()
                 val speechMasked = runCatching { maskKey(container.keyStore.speechApiKey(speech)) }.getOrDefault("")
                 lastRecalcSignature = snap.lastRecalcGoalSignature ?: profile?.goalInputSignature
                 if (snap.lastRecalcGoalSignature == null && profile != null) {
@@ -608,6 +614,9 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
                     healthBackgroundReadGranted = container.health.hasBackgroundRead(),
                     adaptiveGoalsEnabled = snap.adaptiveGoalsEnabled,
                     apiKeyMasked = masked,
+                    chatGptConnected = chatGpt != null,
+                    chatGptEmail = chatGpt?.email,
+                    chatGptPlanUsageEnabled = chatGpt?.planUsageEnabled == true,
                     speechApiKeyMasked = speechMasked,
                     onDeviceAvailable = early.onDeviceAvailable,
                     onDeviceModels = early.onDeviceModels,
@@ -1106,6 +1115,7 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
         val active = container.prefs.activeAiProfile.first()
         val models = onDeviceModels
             ?: if (active?.provider == AIProvider.ON_DEVICE) supportedOnDeviceModels() else emptyList()
+        val chatGpt = container.chatGptAuth.session()
         _ui.value = _ui.value.copy(
             profiles = container.prefs.aiProfiles.first(),
             activeProfile = active,
@@ -1113,6 +1123,11 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
             apiKeyMasked = runCatching {
                 maskKey(active?.let { container.keyStore.profileApiKey(it.id) })
             }.getOrDefault(""),
+            chatGptConnected = chatGpt != null,
+            chatGptEmail = chatGpt?.email,
+            chatGptPlanUsageEnabled = chatGpt?.planUsageEnabled == true,
+            chatGptAuthBusy = false,
+            chatGptAuthError = null,
             maxResponseTokens = effectiveMaxResponseTokens(active, container.prefs.maxResponseTokens.first()),
             aiReadTimeoutSeconds = effectiveReadTimeoutSeconds(active, container.prefs.aiReadTimeoutSeconds.first()),
             geminiGoogleSearchEnabled = active?.geminiGoogleSearch
@@ -1227,6 +1242,54 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
     fun currentProfileApiKey(): String? =
         _ui.value.activeProfile?.let { container.keyStore.profileApiKey(it.id) }
 
+    fun signInWithChatGpt() {
+        if (_ui.value.chatGptAuthBusy) return
+        viewModelScope.launch {
+            _ui.value = _ui.value.copy(chatGptAuthBusy = true, chatGptAuthError = null)
+            val result = runCatching { container.chatGptAuth.signIn() }
+            result.onSuccess { session ->
+                val models = runCatching { container.chatGptAuth.listModels() }.getOrNull()
+                _ui.value = _ui.value.copy(
+                    chatGptConnected = true,
+                    chatGptEmail = session.email,
+                    chatGptPlanUsageEnabled = session.planUsageEnabled,
+                    chatGptAuthBusy = false,
+                    chatGptAuthError = null,
+                    runtimeModels = models,
+                )
+                val active = _ui.value.activeProfile
+                if (active?.provider == AIProvider.CHATGPT && !models.isNullOrEmpty() && active.model !in models) {
+                    setProfileModel(models.first())
+                }
+            }.onFailure { error ->
+                _ui.value = _ui.value.copy(
+                    chatGptAuthBusy = false,
+                    chatGptAuthError = error.message ?: "ChatGPT sign-in failed.",
+                )
+            }
+        }
+    }
+
+    fun disconnectChatGpt() {
+        if (_ui.value.chatGptAuthBusy) return
+        viewModelScope.launch {
+            _ui.value = _ui.value.copy(chatGptAuthBusy = true, chatGptAuthError = null)
+            val result = runCatching { container.chatGptAuth.disconnect() }
+            _ui.value = if (result.isSuccess) {
+                _ui.value.copy(
+                    chatGptConnected = false,
+                    chatGptEmail = null,
+                    chatGptPlanUsageEnabled = false,
+                    chatGptAuthBusy = false,
+                    chatGptAuthError = if (result.getOrDefault(false)) null else container.appContext.getString(R.string.settings_chatgpt_revoke_unconfirmed),
+                    runtimeModels = null,
+                )
+            } else {
+                _ui.value.copy(chatGptAuthBusy = false, chatGptAuthError = result.exceptionOrNull()?.message)
+            }
+        }
+    }
+
     /**
      * Settings-side API-key probe, routed by the active provider's API format:
      * GeminiClient / AnthropicClient validate, or a /v1/models fetch for every
@@ -1253,6 +1316,7 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
                             baseUrl = AIProvider.ANTHROPIC.baseUrl,
                             apiKey = key,
                         )
+                        AIProvider.ApiFormat.CHATGPT_RESPONSES -> container.chatGptAuth.listModels()
                         else -> {
                             val base = active.baseUrl?.takeIf { it.isNotEmpty() }
                                 ?.let(AiHttp::normalizeCustomBaseUrl) ?: provider.baseUrl
@@ -1410,14 +1474,16 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
         val provider = active.provider
         if (!provider.supportsRuntimeLineup) return
         val key = container.keyStore.profileApiKey(active.id)
-        if (key.isNullOrBlank()) {
+        if (provider != AIProvider.CHATGPT && key.isNullOrBlank()) {
             _ui.value = _ui.value.copy(runtimeModels = null)
             return
         }
         viewModelScope.launch {
             val result = withContext(Dispatchers.IO) {
                 runCatching {
-                    if (provider == AIProvider.OPENAI) {
+                    if (provider == AIProvider.CHATGPT) {
+                        container.chatGptAuth.listModels()
+                    } else if (provider == AIProvider.OPENAI) {
                         app.chompass.services.ai.OpenAiModelsClient.filterGptLineup(
                             app.chompass.services.ai.OpenAiModelsClient.listModelsWithMeta(
                                 baseUrl = provider.baseUrl,

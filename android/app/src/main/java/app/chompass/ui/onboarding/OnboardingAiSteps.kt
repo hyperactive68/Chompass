@@ -99,6 +99,9 @@ internal fun ProviderStep(
     val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
     val providerChoices = remember(onDeviceAvailable) {
         AIProvider.values()
+            // ChatGPT plan sign-in starts a browser/loopback OAuth flow and lives
+            // in Settings, where connection state and usage controls are shown.
+            .filter { it != AIProvider.CHATGPT }
             .filter { it != AIProvider.ON_DEVICE || onDeviceAvailable }
             .sortedBy { it.group.ordinal }
     }

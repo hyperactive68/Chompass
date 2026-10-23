@@ -4229,4 +4229,15 @@ für dich ein</string>
         <item>zurücksetzen</item>
         <item>Werkseinstellungen</item>
     </string-array>
+    <string name="ai_provider_chatgpt">ChatGPT-Tarif</string>
+    <string name="ai_provider_subtitle_chatgpt">Geeigneten ChatGPT-Plus- oder Pro-Tarif verwenden</string>
+    <string name="settings_chatgpt_account">ChatGPT-Konto</string>
+    <string name="settings_chatgpt_continue">Mit ChatGPT fortfahren</string>
+    <string name="settings_chatgpt_connecting">Verbindung wird hergestellt…</string>
+    <string name="settings_chatgpt_plan_enabled">Die Nutzung des ChatGPT-Tarifs ist für die Lebensmittelanalyse aktiviert. Die Nutzung wird mit deinem ChatGPT-Tarif geteilt.</string>
+    <string name="settings_chatgpt_plan_footer">Melde dich an, um einen geeigneten ChatGPT-Plus- oder Pro-Tarif für die Lebensmittelanalyse zu verwenden. Kein API-Schlüssel erforderlich.</string>
+    <string name="settings_chatgpt_plan_disabled">Du bist angemeldet, aber die Nutzung des ChatGPT-Tarifs ist nicht aktiviert. Tippe zum Autorisieren auf die Kontozeile.</string>
+    <string name="settings_chatgpt_revoke_unconfirmed">Lokal getrennt. Der entfernte Widerruf konnte nicht bestätigt werden; du kannst Chompass auch in den ChatGPT-Einstellungen entfernen.</string>
+    <string name="settings_chatgpt_manage_usage">ChatGPT-Nutzung verwalten</string>
+    <string name="settings_chatgpt_disconnect">ChatGPT trennen</string>
 </resources>

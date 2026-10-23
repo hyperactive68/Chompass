@@ -2764,4 +2764,15 @@
         <item>重置</item>
         <item>出厂</item>
     </string-array>
+    <string name="ai_provider_chatgpt">ChatGPT 套餐</string>
+    <string name="ai_provider_subtitle_chatgpt">使用符合条件的 ChatGPT Plus 或 Pro 套餐</string>
+    <string name="settings_chatgpt_account">ChatGPT 账户</string>
+    <string name="settings_chatgpt_continue">使用 ChatGPT 继续</string>
+    <string name="settings_chatgpt_connecting">正在连接…</string>
+    <string name="settings_chatgpt_plan_enabled">已启用 ChatGPT 套餐进行食物分析。用量与您的 ChatGPT 套餐共享。</string>
+    <string name="settings_chatgpt_plan_footer">登录以使用符合条件的 ChatGPT Plus 或 Pro 套餐进行食物分析。无需 API 密钥。</string>
+    <string name="settings_chatgpt_plan_disabled">已登录，但未启用 ChatGPT 套餐用量。请点按账户行进行授权。</string>
+    <string name="settings_chatgpt_revoke_unconfirmed">已在本地断开连接。无法确认远程撤销；您也可以在 ChatGPT 设置中移除 Chompass。</string>
+    <string name="settings_chatgpt_manage_usage">管理 ChatGPT 用量</string>
+    <string name="settings_chatgpt_disconnect">断开 ChatGPT</string>
 </resources>

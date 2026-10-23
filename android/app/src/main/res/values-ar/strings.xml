@@ -2810,4 +2810,15 @@
         <item>إعادة تعيين</item>
         <item>ضبط المصنع</item>
     </string-array>
+    <string name="ai_provider_chatgpt">خطة ChatGPT</string>
+    <string name="ai_provider_subtitle_chatgpt">استخدم خطة ChatGPT Plus أو Pro مؤهلة</string>
+    <string name="settings_chatgpt_account">حساب ChatGPT</string>
+    <string name="settings_chatgpt_continue">المتابعة باستخدام ChatGPT</string>
+    <string name="settings_chatgpt_connecting">جارٍ الاتصال…</string>
+    <string name="settings_chatgpt_plan_enabled">تم تمكين استخدام خطة ChatGPT لتحليل الطعام. تتم مشاركة الاستخدام مع خطتك في ChatGPT.</string>
+    <string name="settings_chatgpt_plan_footer">سجّل الدخول لاستخدام خطة ChatGPT Plus أو Pro مؤهلة لتحليل الطعام. لا يلزم مفتاح API.</string>
+    <string name="settings_chatgpt_plan_disabled">تم تسجيل الدخول، لكن استخدام خطة ChatGPT غير مفعّل. اضغط على صف الحساب لمنح الإذن.</string>
+    <string name="settings_chatgpt_revoke_unconfirmed">تم قطع الاتصال محليًا. تعذر تأكيد الإلغاء عن بُعد؛ يمكنك أيضًا إزالة Chompass من إعدادات ChatGPT.</string>
+    <string name="settings_chatgpt_manage_usage">إدارة استخدام ChatGPT</string>
+    <string name="settings_chatgpt_disconnect">قطع اتصال ChatGPT</string>
 </resources>

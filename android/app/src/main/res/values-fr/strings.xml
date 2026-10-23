@@ -2780,4 +2780,15 @@ macros rééquilibrées au nouveau total calorique</string>
         <item>réinitialiser</item>
         <item>usine</item>
     </string-array>
+    <string name="ai_provider_chatgpt">Forfait ChatGPT</string>
+    <string name="ai_provider_subtitle_chatgpt">Utiliser un forfait ChatGPT Plus ou Pro éligible</string>
+    <string name="settings_chatgpt_account">Compte ChatGPT</string>
+    <string name="settings_chatgpt_continue">Continuer avec ChatGPT</string>
+    <string name="settings_chatgpt_connecting">Connexion…</string>
+    <string name="settings_chatgpt_plan_enabled">L’utilisation du forfait ChatGPT est activée pour l’analyse des aliments. Elle est partagée avec votre forfait ChatGPT.</string>
+    <string name="settings_chatgpt_plan_footer">Connectez-vous pour utiliser un forfait ChatGPT Plus ou Pro éligible pour l’analyse des aliments. Aucune clé API n’est requise.</string>
+    <string name="settings_chatgpt_plan_disabled">Vous êtes connecté, mais l’utilisation du forfait ChatGPT n’est pas activée. Touchez la ligne du compte pour l’autoriser.</string>
+    <string name="settings_chatgpt_revoke_unconfirmed">Déconnecté localement. La révocation à distance n’a pas pu être confirmée ; vous pouvez aussi supprimer Chompass dans les réglages de ChatGPT.</string>
+    <string name="settings_chatgpt_manage_usage">Gérer l’utilisation de ChatGPT</string>
+    <string name="settings_chatgpt_disconnect">Déconnecter ChatGPT</string>
 </resources>

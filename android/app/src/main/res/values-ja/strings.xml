@@ -2764,4 +2764,15 @@
         <item>リセット</item>
         <item>初期化</item>
     </string-array>
+    <string name="ai_provider_chatgpt">ChatGPT プラン</string>
+    <string name="ai_provider_subtitle_chatgpt">対象の ChatGPT Plus または Pro プランを使用</string>
+    <string name="settings_chatgpt_account">ChatGPT アカウント</string>
+    <string name="settings_chatgpt_continue">ChatGPT で続行</string>
+    <string name="settings_chatgpt_connecting">接続中…</string>
+    <string name="settings_chatgpt_plan_enabled">食品分析で ChatGPT プランを使用できます。使用量は ChatGPT プランと共有されます。</string>
+    <string name="settings_chatgpt_plan_footer">対象の ChatGPT Plus または Pro プランを食品分析に使用するにはサインインしてください。API キーは不要です。</string>
+    <string name="settings_chatgpt_plan_disabled">サインイン済みですが、ChatGPT プランの使用が有効ではありません。アカウント行をタップして許可してください。</string>
+    <string name="settings_chatgpt_revoke_unconfirmed">端末上では切断しました。リモートでの取り消しを確認できませんでした。ChatGPT の設定から Chompass を削除することもできます。</string>
+    <string name="settings_chatgpt_manage_usage">ChatGPT の使用量を管理</string>
+    <string name="settings_chatgpt_disconnect">ChatGPT を切断</string>
 </resources>

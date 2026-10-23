@@ -2767,4 +2767,15 @@ makrolar yeni kalori cəminə uyğun yenidən tarazlaşdırılır</string>
         <item>sıfırlama</item>
         <item>zavod ayarları</item>
     </string-array>
+    <string name="ai_provider_chatgpt">ChatGPT planı</string>
+    <string name="ai_provider_subtitle_chatgpt">Uyğun ChatGPT Plus və ya Pro planından istifadə edin</string>
+    <string name="settings_chatgpt_account">ChatGPT hesabı</string>
+    <string name="settings_chatgpt_continue">ChatGPT ilə davam et</string>
+    <string name="settings_chatgpt_connecting">Qoşulur…</string>
+    <string name="settings_chatgpt_plan_enabled">Qida analizi üçün ChatGPT planından istifadə aktivdir. İstifadə ChatGPT planınızla paylaşılır.</string>
+    <string name="settings_chatgpt_plan_footer">Qida analizi üçün uyğun ChatGPT Plus və ya Pro planından istifadə etmək üçün daxil olun. API açarı lazım deyil.</string>
+    <string name="settings_chatgpt_plan_disabled">Daxil olmusunuz, lakin ChatGPT planından istifadə aktiv deyil. İcazə vermək üçün hesab sətrinə toxunun.</string>
+    <string name="settings_chatgpt_revoke_unconfirmed">Yerli olaraq ayrıldı. Uzaqdan ləğv təsdiqlənmədi; Chompass-ı ChatGPT ayarlarından da silə bilərsiniz.</string>
+    <string name="settings_chatgpt_manage_usage">ChatGPT istifadəsini idarə et</string>
+    <string name="settings_chatgpt_disconnect">ChatGPT bağlantısını kəs</string>
 </resources>

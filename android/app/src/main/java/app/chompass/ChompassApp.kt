@@ -41,6 +41,7 @@ import app.chompass.services.TestDataSeeder
 import app.chompass.services.WaterReminderPlanner
 import app.chompass.services.WidgetSnapshotWriter
 import app.chompass.services.ai.ChatService
+import app.chompass.services.ai.ChatGptAuthManager
 import app.chompass.services.ai.FoodAnalysisService
 import app.chompass.services.grounding.FoodDatabaseSearch
 import app.chompass.services.grounding.GroundedFoodEntryService
@@ -288,6 +289,7 @@ class AppContainer(app: ChompassApp) {
     val openMeteo = OpenMeteoClient(FoodAnalysisService.defaultClient)
     val weatherRepository = WeatherRepository(prefs, openMeteo)
 
+    val chatGptAuth = ChatGptAuthManager(appContext, keyStore, FoodAnalysisService.defaultClient)
     val onDeviceLlmGateway = OnDeviceLlmGateway(appContext, prefs)
     val onDeviceModelDownloadManager = ModelDownloadManager(appContext)
     val foodAnalysis = FoodAnalysisService(
@@ -297,6 +299,7 @@ class AppContainer(app: ChompassApp) {
         onDeviceModelDownloaded = { modelId ->
             onDeviceModelDownloadManager.isDownloaded(ModelCatalog.forModelId(modelId))
         },
+        chatGptAuth = chatGptAuth,
     )
     /** AI fill-missing scan / banner / mass-fill session (Batch 2). */
     val fillGapsEngine = FillGapsEngine(foodRepository, prefs, foodAnalysis, appContext)

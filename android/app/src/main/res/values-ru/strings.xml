@@ -2861,4 +2861,15 @@
         <item>сброс</item>
         <item>заводские</item>
     </string-array>
+    <string name="ai_provider_chatgpt">Тариф ChatGPT</string>
+    <string name="ai_provider_subtitle_chatgpt">Использовать подходящий тариф ChatGPT Plus или Pro</string>
+    <string name="settings_chatgpt_account">Аккаунт ChatGPT</string>
+    <string name="settings_chatgpt_continue">Продолжить с ChatGPT</string>
+    <string name="settings_chatgpt_connecting">Подключение…</string>
+    <string name="settings_chatgpt_plan_enabled">Использование тарифа ChatGPT включено для анализа еды. Лимит использования общий с вашим тарифом ChatGPT.</string>
+    <string name="settings_chatgpt_plan_footer">Войдите, чтобы использовать подходящий тариф ChatGPT Plus или Pro для анализа еды. Ключ API не требуется.</string>
+    <string name="settings_chatgpt_plan_disabled">Вы вошли, но использование тарифа ChatGPT не включено. Нажмите на строку аккаунта, чтобы разрешить его.</string>
+    <string name="settings_chatgpt_revoke_unconfirmed">Локальное подключение отключено. Удалённый отзыв не подтверждён; Chompass также можно удалить в настройках ChatGPT.</string>
+    <string name="settings_chatgpt_manage_usage">Управлять использованием ChatGPT</string>
+    <string name="settings_chatgpt_disconnect">Отключить ChatGPT</string>
 </resources>
