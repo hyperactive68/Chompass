@@ -1,6 +1,7 @@
 package app.chompass.services.ai
 
 import kotlinx.coroutines.runBlocking
+import app.chompass.models.ChatMessage
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -93,4 +94,57 @@ class ChatGptResponsesClientTest {
 
         assertEquals(AiError.InvalidResponse, error)
     }
+
+    @Test
+    fun coachExecutesResponsesFunctionCallAndContinuesWithOutput() = runBlocking {
+        server.enqueue(
+            MockResponse()
+                .setHeader("Content-Type", "application/json")
+                .setBody(
+                    """{"status":"completed","output":[{"type":"function_call","call_id":"call_1","name":"get_data_summary","arguments":"{}"}]}""",
+                ),
+        )
+        server.enqueue(
+            MockResponse()
+                .setHeader("Content-Type", "application/json")
+                .setBody(
+                    """{"status":"completed","output":[{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Your logged intake is on track."}]}]}""",
+                ),
+        )
+
+        val toolCalls = mutableListOf<String>()
+        val result = ChatGptResponsesClient.coach(
+            client = OkHttpClient(),
+            model = "gpt-test",
+            accessToken = "oauth-token",
+            systemPrompt = "You are Coach.",
+            history = listOf(ChatMessage(role = ChatMessage.Role.USER, content = "How am I doing?")),
+            newUserMessage = "Summarize my intake.",
+            imageBytes = null,
+            tools = org.json.JSONArray().put(
+                JSONObject()
+                    .put("type", "function")
+                    .put("name", "get_data_summary")
+                    .put("parameters", JSONObject().put("type", "object")),
+            ),
+            maxOutputTokens = 256,
+            executeTool = { name, args ->
+                toolCalls += "$name:${args.toString()}"
+                "{\"foods\":{\"count\":3}}"
+            },
+            resourceBaseUrl = server.url("v1").toString(),
+        )
+
+        assertEquals("Your logged intake is on track.", result)
+        assertEquals(listOf("get_data_summary:{}"), toolCalls)
+        val first = JSONObject(server.takeRequest().body.readUtf8())
+        assertEquals("gpt-test", first.getString("model"))
+        assertFalse(first.getBoolean("store"))
+        assertEquals("auto", first.getString("tool_choice"))
+        val second = JSONObject(server.takeRequest().body.readUtf8())
+        val secondInput = second.getJSONArray("input")
+        assertEquals("function_call", secondInput.getJSONObject(secondInput.length() - 2).getString("type"))
+        assertEquals("function_call_output", secondInput.getJSONObject(secondInput.length() - 1).getString("type"))
+    }
 }
+
