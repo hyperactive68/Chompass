@@ -180,6 +180,15 @@ class ChatService(
                 put("strict", false)
             })
         }
+        // ChatGPT-plan Responses requires client functions to be grouped in a
+        // namespace (top-level programmatic_tool_calling is not supported).
+        val chatGptTools = JSONArray().put(
+            JSONObject()
+                .put("type", "namespace")
+                .put("name", "chompass")
+                .put("description", "Local nutrition data and user-confirmed logging tools for Chompass Coach.")
+                .put("tools", declarations),
+        )
         return ChatGptResponsesClient.coach(
             client = client,
             model = model,
@@ -188,7 +197,7 @@ class ChatService(
             history = history,
             newUserMessage = newUserMessage,
             imageBytes = imageBytes,
-            tools = declarations,
+            tools = chatGptTools,
             maxOutputTokens = maxTokens,
             executeTool = tools::execute,
         )
