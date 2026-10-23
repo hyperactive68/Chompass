@@ -144,7 +144,8 @@ object ChatGptResponsesClient {
                 .post(body.toString().toRequestBody(jsonMedia))
                 .build()
             val response = executeStreamingResponse(client, request)
-            val output = response.optJSONArray("output") ?: throw AiError.InvalidResponse
+            val output = response.optJSONArray("output")
+                ?: return responseText(response) ?: throw AiError.InvalidResponse
             val functionCalls = buildList {
                 for (i in 0 until output.length()) {
                     val item = output.optJSONObject(i) ?: continue
