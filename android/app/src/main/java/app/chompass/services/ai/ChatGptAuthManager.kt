@@ -290,7 +290,12 @@ class ChatGptAuthManager(
         if (!verified) throw ChatGptAuthException("ChatGPT identity signature was invalid.")
 
         val claims = JSONObject(String(base64UrlDecode(parts[1]), StandardCharsets.UTF_8))
-        if (claims.optString("iss") != ISSUER) throw ChatGptAuthException("ChatGPT identity issuer was invalid.")
+        // OpenID issuer values may be serialized with a trailing slash. Treat
+        // that equivalent form as the same fixed OpenAI issuer; otherwise a
+        // successful browser consent is discarded before the session is saved.
+        if (claims.optString("iss").trimEnd('/') != ISSUER) {
+            throw ChatGptAuthException("ChatGPT identity issuer was invalid.")
+        }
         val audienceMatches = when (val aud = claims.opt("aud")) {
             is String -> aud == clientId
             is JSONArray -> (0 until aud.length()).any { aud.optString(it) == clientId }
@@ -378,3 +383,4 @@ class ChatGptAuthException(message: String) : Exception(message)
 private fun JSONObject.requiredString(name: String): String =
     optString(name).takeIf(String::isNotBlank)
         ?: throw ChatGptAuthException("ChatGPT response was missing $name.")
+
