@@ -1,0 +1,68 @@
+name: Chompass Android release
+
+on:
+  push:
+    branches:
+      - feature/chatgpt-plan-login
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build debug APK
+        shell: bash
+        run: |
+          chmod +x android/gradlew
+          cd android
+          ./gradlew :app:assembleDebug --no-daemon
+
+      - name: Collect APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          apk="$(find android/app/build/outputs/apk -type f -name '*universal*.apk' | head -n 1)"
+          if [ -z "$apk" ]; then
+            apk="$(find android/app/build/outputs/apk -type f -name '*.apk' | head -n 1)"
+          fi
+          test -n "$apk"
+          cp "$apk" dist/Chompass-5.11.2-debug-universal.apk
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Chompass-5.11.2-debug-universal
+          path: dist/Chompass-5.11.2-debug-universal.apk
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v5.11.2
+          name: Chompass 5.11.2
+          target_commitish: feature/chatgpt-plan-login
+          body: |
+            ## Chompass 5.11.2
+
+            This release fixes the official Sign in with ChatGPT callback validation.
+
+            - Accepts the normalized OpenAI issuer form after browser consent.
+            - Keeps the official ChatGPT plan OAuth and Responses API flow.
+            - No API key is required for eligible ChatGPT Plus or Pro plan usage.
+
+            This downloadable APK is the debug-signed Android build. It can be installed alongside a production-signed Chompass APK.
+          files: dist/Chompass-5.11.2-debug-universal.apk
