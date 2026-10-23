@@ -62,6 +62,8 @@ class ChatService(
      *  when set and fasting is enabled, the coach prompt carries a fasting
      *  snapshot so "should I eat now?" answers differ at hour 2 vs hour 15. */
     private val fastingRepository: FastingRepository? = null,
+    /** OAuth-backed ChatGPT plan session for the Responses tool loop. */
+    private val chatGptAuth: ChatGptAuthManager? = null,
 ) {
     init {
         require(keyStore != null || keyLookup != null) {
@@ -131,9 +133,6 @@ class ChatService(
         if (provider.apiFormat == AIProvider.ApiFormat.ON_DEVICE) {
             throw AiError.Api("Coach isn't available with the on-device provider yet. Switch to a cloud provider in Settings → AI Provider.", messageRes = R.string.ai_error_coach_on_device)
         }
-        if (provider.apiFormat == AIProvider.ApiFormat.CHATGPT_RESPONSES) {
-            throw AiError.Api("The ChatGPT plan connection currently powers food analysis only. Choose another provider for Coach.")
-        }
         if (provider.requiresApiKey && apiKey.isNullOrEmpty()) throw AiError.NoApiKey
         if (baseUrl.isEmpty()) throw AiError.InvalidUrl(baseUrl)
         AiHttp.assertCleartextAllowed(baseUrl, cfg.allowInsecureHttp)
@@ -145,7 +144,7 @@ class ChatService(
         val reply = when (provider.apiFormat) {
             AIProvider.ApiFormat.GEMINI -> runGeminiToolLoop(httpClient, baseUrl, model, apiKey!!, systemPrompt, history, newUserMessage, tools, imageBytes, geminiGoogleSearch, maxTokens)
             AIProvider.ApiFormat.ANTHROPIC -> runAnthropicToolLoop(httpClient, baseUrl, model, apiKey!!, systemPrompt, history, newUserMessage, tools, imageBytes, maxTokens)
-            AIProvider.ApiFormat.CHATGPT_RESPONSES -> error("unreachable — guarded above")
+            AIProvider.ApiFormat.CHATGPT_RESPONSES -> runChatGptToolLoop(httpClient, model, systemPrompt, history, newUserMessage, tools, imageBytes, maxTokens)
             AIProvider.ApiFormat.OPENAI_COMPATIBLE -> runOpenAIToolLoop(httpClient, baseUrl, model, apiKey, systemPrompt, history, newUserMessage, provider, tools, imageBytes, maxTokens, cfg.reasoningEffort)
             AIProvider.ApiFormat.ON_DEVICE -> error("unreachable — guarded above")
         }
@@ -154,6 +153,42 @@ class ChatService(
             proposedFood = (tools.lastProposal as? CoachProposal.Food)?.entry,
             proposedWeight = (tools.lastProposal as? CoachProposal.Weight)?.entry,
             proposedWater = (tools.lastProposal as? CoachProposal.Water)?.entry,
+        )
+    }
+
+    // MARK: - ChatGPT-plan Responses tool loop
+
+    private suspend fun runChatGptToolLoop(
+        client: OkHttpClient,
+        model: String,
+        systemPrompt: String,
+        history: List<ChatMessage>,
+        newUserMessage: String,
+        tools: CoachTools,
+        imageBytes: ByteArray?,
+        maxTokens: Int,
+    ): String {
+        val auth = chatGptAuth ?: throw ChatGptAuthException("Connect your ChatGPT account in Settings first.")
+        val declarations = JSONArray()
+        for (name in CoachTools.TOOL_NAMES) {
+            declarations.put(JSONObject().apply {
+                put("type", "function")
+                put("name", name)
+                put("description", CoachTools.TOOL_DESCRIPTIONS[name] ?: "")
+                put("parameters", parametersSchemaFor(name))
+            })
+        }
+        return ChatGptResponsesClient.coach(
+            client = client,
+            model = model,
+            accessToken = auth.accessToken(),
+            systemPrompt = systemPrompt,
+            history = history,
+            newUserMessage = newUserMessage,
+            imageBytes = imageBytes,
+            tools = declarations,
+            maxOutputTokens = maxTokens,
+            executeTool = tools::execute,
         )
     }
 
@@ -885,3 +920,4 @@ private fun dayTypeScheduleEnglish(plan: app.chompass.models.MacroPlan): String 
         MacroPlanMode.CYCLE -> "repeating cycle " + plan.cyclePattern.map { nameOf(it) }.joinToString(" → ")
     }
 }
+
