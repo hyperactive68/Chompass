@@ -8,6 +8,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: chompass-release-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-release:
     runs-on: ubuntu-latest
@@ -32,46 +36,70 @@ jobs:
           api_status="$(curl --silent --show-error -o /dev/null -w '%{http_code}' https://api.openai.com/v1/models)"
           test "$api_status" != "000"
 
-      - name: Build and test debug APK
+      - name: Configure release signing
+        shell: bash
+        env:
+          RELEASE_KEYSTORE_B64: ${{ secrets.CHOMPASS_RELEASE_KEYSTORE_B64 }}
+          RELEASE_STORE_PASSWORD: ${{ secrets.CHOMPASS_RELEASE_STORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.CHOMPASS_RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.CHOMPASS_RELEASE_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$RELEASE_KEYSTORE_B64" || { echo "::error::Missing CHOMPASS_RELEASE_KEYSTORE_B64"; exit 1; }
+          test -n "$RELEASE_STORE_PASSWORD" || { echo "::error::Missing CHOMPASS_RELEASE_STORE_PASSWORD"; exit 1; }
+          test -n "$RELEASE_KEY_ALIAS" || { echo "::error::Missing CHOMPASS_RELEASE_KEY_ALIAS"; exit 1; }
+          test -n "$RELEASE_KEY_PASSWORD" || { echo "::error::Missing CHOMPASS_RELEASE_KEY_PASSWORD"; exit 1; }
+          printf '%s' "$RELEASE_KEYSTORE_B64" | base64 --decode > android/chompass-release.jks
+          cat > android/keystore.properties <<EOF
+          storeFile=../chompass-release.jks
+          storePassword=$RELEASE_STORE_PASSWORD
+          keyAlias=$RELEASE_KEY_ALIAS
+          keyPassword=$RELEASE_KEY_PASSWORD
+          EOF
+          test -s android/chompass-release.jks
+          chmod 600 android/chompass-release.jks android/keystore.properties
+
+      - name: Build and test signed release APK
         shell: bash
         run: |
+          set -euo pipefail
           chmod +x android/gradlew
           cd android
-          ./gradlew :app:testDebugUnitTest :app:assembleDebug --no-daemon
+          ./gradlew :app:testDebugUnitTest :app:assembleRelease --no-daemon
 
-      - name: Collect APK
+      - name: Collect signed release APK
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p dist
           apk="$(find android/app/build/outputs/apk -type f -name '*universal*.apk' | head -n 1)"
           if [ -z "$apk" ]; then
-            apk="$(find android/app/build/outputs/apk -type f -name '*.apk' | head -n 1)"
+            apk="$(find android/app/build/outputs/apk -type f -name '*release*.apk' | head -n 1)"
           fi
           test -n "$apk"
-          cp "$apk" dist/Chompass-5.11.4-debug-universal.apk
+          cp "$apk" dist/Chompass-5.11.5-universal.apk
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Chompass-5.11.4-debug-universal
-          path: dist/Chompass-5.11.4-debug-universal.apk
+          name: Chompass-5.11.5-universal
+          path: dist/Chompass-5.11.5-universal.apk
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v5.11.4
-          name: Chompass 5.11.4
+          tag_name: v5.11.5
+          name: Chompass 5.11.5
           target_commitish: feature/chatgpt-plan-login
           body: |
-            ## Chompass 5.11.4
+            ## Chompass 5.11.5
 
-            This release fixes Android DNS failures and enables Coach tool-calling for the official Sign in with ChatGPT flow.
+            This release provides a signed Android build with stable update signing and fixes Coach tool-calling for the official Sign in with ChatGPT flow.
 
             - Uses system DNS first, with Cloudflare and Google DNS-over-HTTPS fallback when Android returns no address.
             - Keeps the official ChatGPT OAuth and Responses API flow unchanged.
             - Coach can now retrieve local nutrition data and prepare user-confirmed log proposals through Responses function calling.
             - No API key is embedded or required for eligible ChatGPT Plus or Pro plan usage.
 
-            This downloadable APK is the debug-signed Android build. It can be installed alongside a production-signed Chompass APK.
-          files: dist/Chompass-5.11.4-debug-universal.apk
+            This APK is release-signed with the project keystore and is intended to update earlier Chompass builds signed with the same key.
+          files: dist/Chompass-5.11.5-universal.apk
