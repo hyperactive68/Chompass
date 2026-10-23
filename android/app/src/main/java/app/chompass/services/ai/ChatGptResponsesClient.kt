@@ -1,5 +1,6 @@
 package app.chompass.services.ai
 
+import app.chompass.models.ChatMessage
 import java.util.Base64
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
@@ -80,4 +81,119 @@ object ChatGptResponsesClient {
         if (!completed) throw AiError.InvalidResponse
         return text.toString().takeIf(String::isNotBlank) ?: throw AiError.InvalidResponse
     }
+
+    /**
+     * Tool-enabled Coach turn for ChatGPT-plan tokens.
+     *
+     * Responses function calls are returned as output items. The app executes
+     * each requested local tool, appends the original output items plus
+     * function_call_output items, and asks Responses for the next turn. This is
+     * the same multi-round contract used by the other Coach providers, without
+     * exposing an API key or using ChatGPT's private backend endpoints.
+     */
+    suspend fun coach(
+        client: OkHttpClient,
+        model: String,
+        accessToken: String,
+        systemPrompt: String,
+        history: List<ChatMessage>,
+        newUserMessage: String,
+        imageBytes: ByteArray?,
+        tools: JSONArray,
+        maxOutputTokens: Int,
+        maxToolRounds: Int = 6,
+        executeTool: suspend (name: String, arguments: JSONObject) -> String,
+        resourceBaseUrl: String = ChatGptAuthManager.RESOURCE,
+    ): String {
+        val input = JSONArray()
+        for (message in history) {
+            input.put(
+                JSONObject()
+                    .put("role", if (message.role == ChatMessage.Role.USER) "user" else "assistant")
+                    .put("content", message.content),
+            )
+        }
+        val userContent = JSONArray().apply {
+            imageBytes?.let { image ->
+                put(
+                    JSONObject()
+                        .put("type", "input_image")
+                        .put("image_url", "data:image/jpeg;base64,${Base64.getEncoder().encodeToString(image)}"),
+                )
+            }
+            put(JSONObject().put("type", "input_text").put("text", newUserMessage))
+        }
+        input.put(JSONObject().put("role", "user").put("content", userContent))
+
+        repeat(maxToolRounds) {
+            val body = JSONObject()
+                .put("model", model)
+                .put("instructions", systemPrompt)
+                .put("input", input)
+                .put("tools", tools)
+                .put("tool_choice", "auto")
+                .put("max_output_tokens", maxOutputTokens)
+                .put("store", false)
+            val request = Request.Builder()
+                .url("${resourceBaseUrl.trimEnd('/')}/responses")
+                .header("Authorization", "Bearer $accessToken")
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
+                .post(body.toString().toRequestBody(jsonMedia))
+                .build()
+            val raw = RetryPolicy.execute { client.newCall(request) }
+            val response = runCatching { JSONObject(raw) }.getOrElse { throw AiError.InvalidResponse }
+            val output = response.optJSONArray("output") ?: throw AiError.InvalidResponse
+            val functionCalls = buildList {
+                for (i in 0 until output.length()) {
+                    val item = output.optJSONObject(i) ?: continue
+                    if (item.optString("type") == "function_call") add(item)
+                }
+            }
+            if (functionCalls.isEmpty()) {
+                return responseText(response) ?: throw AiError.InvalidResponse
+            }
+
+            // Responses requires the model's function_call output items to be
+            // passed back alongside the matching function_call_output items.
+            for (i in 0 until output.length()) {
+                output.optJSONObject(i)?.let(input::put)
+            }
+            for (call in functionCalls) {
+                val callId = call.optString("call_id").takeIf(String::isNotBlank)
+                    ?: throw AiError.InvalidResponse
+                val name = call.optString("name").takeIf(String::isNotBlank)
+                    ?: throw AiError.InvalidResponse
+                val arguments = runCatching { JSONObject(call.optString("arguments", "{}")) }
+                    .getOrElse { JSONObject() }
+                val result = executeTool(name, arguments)
+                input.put(
+                    JSONObject()
+                        .put("type", "function_call_output")
+                        .put("call_id", callId)
+                        .put("output", result),
+                )
+            }
+        }
+        throw AiError.Api("Coach exceeded the tool-call round limit. Try rephrasing your question.", messageRes = R.string.ai_error_coach_round_limit)
+    }
+
+    private fun responseText(response: JSONObject): String? {
+        response.optString("output_text").takeIf(String::isNotBlank)?.let { return it.trim() }
+        val output = response.optJSONArray("output") ?: return null
+        val text = StringBuilder()
+        for (i in 0 until output.length()) {
+            val item = output.optJSONObject(i) ?: continue
+            if (item.optString("type") != "message") continue
+            val content = item.optJSONArray("content") ?: continue
+            for (j in 0 until content.length()) {
+                val block = content.optJSONObject(j) ?: continue
+                if (block.optString("type") == "output_text") {
+                    text.append(block.optString("text"))
+                }
+            }
+        }
+        return text.toString().takeIf(String::isNotBlank)?.trim()
+    }
 }
+
