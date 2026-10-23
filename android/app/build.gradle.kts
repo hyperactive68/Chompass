@@ -66,8 +66,8 @@ android {
         applicationId = "app.chompass"
         minSdk = 26
         targetSdk = 36
-        versionCode = 103
-        versionName = "5.11.2"
+        versionCode = 104
+        versionName = "5.11.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         if (releaseAbi != null) {
@@ -227,6 +227,7 @@ dependencies {
     implementation(libs.androidx.camera.view)
     implementation(libs.zxing.cpp.android)
     implementation(libs.okhttp)
+    implementation(libs.okhttp.dnsoverhttps)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.vico.compose.m3)
