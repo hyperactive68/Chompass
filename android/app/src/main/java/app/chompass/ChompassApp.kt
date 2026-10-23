@@ -335,7 +335,13 @@ class AppContainer(app: ChompassApp) {
             usdaIndex = usdaFoodIndex,
         )
     }
-    val chatService = ChatService(prefs, keyStore, foodAnalysis, fastingRepository = fastingRepository)
+    val chatService = ChatService(
+        prefs,
+        keyStore,
+        foodAnalysis,
+        fastingRepository = fastingRepository,
+        chatGptAuth = chatGptAuth,
+    )
     val speechService = SpeechService(prefs, keyStore)
 
     val widgetSnapshotWriter = WidgetSnapshotWriter(app, prefs, foodRepository, profileRepository, homeActivityReader, waterRepository, weatherRepository, caffeineRepository)
@@ -425,3 +431,4 @@ class AppContainer(app: ChompassApp) {
     suspend fun refreshAdaptiveGoalsIfNeeded(force: Boolean = false): AdaptiveGoalResult? =
         adaptiveGoals.refreshIfNeeded(force)
 }
+
