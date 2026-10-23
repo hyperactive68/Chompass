@@ -183,10 +183,31 @@ object ChatGptResponsesClient {
     private suspend fun executeStreamingResponse(client: OkHttpClient, request: Request): JSONObject {
         var completed: JSONObject? = null
         var failure: AiError? = null
+        val streamedText = StringBuilder()
+        val completedItems = sortedMapOf<Int, JSONObject>()
         val response = RetryPolicy.open { client.newCall(request) }
         AiSse.read(response) { payload ->
             val event = runCatching { Json.parseToJsonElement(payload).jsonObject }.getOrNull() ?: return@read
             when (event["type"]?.jsonPrimitive?.content) {
+                // Keep a text fallback for Responses implementations that omit
+                // output_text from the final response object while still sending
+                // the documented delta events.
+                "response.output_text.delta" -> {
+                    streamedText.append(event["delta"]?.jsonPrimitive?.content.orEmpty())
+                }
+                "response.output_text.done" -> {
+                    if (streamedText.isEmpty()) {
+                        streamedText.append(event["text"]?.jsonPrimitive?.content.orEmpty())
+                    }
+                }
+                // The completed event normally contains the full output array.
+                // Some proxies only include the final output items separately;
+                // retain those items and merge them below.
+                "response.output_item.done" -> {
+                    val index = event["output_index"]?.jsonPrimitive?.content?.toIntOrNull()
+                    val item = event["item"]?.let { JSONObject(it.toString()) }
+                    if (index != null && item != null) completedItems[index] = item
+                }
                 "response.completed" -> {
                     completed = event["response"]?.let { JSONObject(it.toString()) }
                 }
@@ -205,7 +226,14 @@ object ChatGptResponsesClient {
             }
         }
         failure?.let { throw it }
-        return completed ?: throw AiError.InvalidResponse
+        val result = completed ?: throw AiError.InvalidResponse
+        if ((result.optJSONArray("output")?.length() ?: 0) == 0 && completedItems.isNotEmpty()) {
+            result.put("output", JSONArray().apply { completedItems.values.forEach { put(it) } })
+        }
+        if (result.optString("output_text").isBlank() && streamedText.isNotBlank()) {
+            result.put("output_text", streamedText.toString())
+        }
+        return result
     }
 
     private fun responseText(response: JSONObject): String? {
