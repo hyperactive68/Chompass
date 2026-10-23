@@ -1,5 +1,6 @@
 package app.chompass.services.ai
 
+import app.chompass.R
 import app.chompass.models.ChatMessage
 import java.util.Base64
 import kotlinx.serialization.json.Json
