@@ -6,7 +6,7 @@
 
 **Private calorie tracking for Android and the browser**
 
-Bring your own AI key. On Android you can also run Gemma 4 on-device. No ads, no analytics, no account.
+Bring your own AI key, connect an eligible ChatGPT plan on Android, or run Gemma 4 on-device. No ads, no analytics, no Chompass account.
 
 [Website](https://chompass.app/) · [Download](https://chompass.app/download/) · [Web app](https://chompass.app/app/) · [Privacy](docs/PRIVACY.md)
 
@@ -110,7 +110,7 @@ On both the [PWA](https://chompass.app/app/) and the Android app unless noted:
 
 ### AI
 
-- **AI**: your own cloud key (a free [Google AI Studio](https://aistudio.google.com/apikey) key is enough for casual use). Progress steps and a live field preview. Coach chat on both clients. You can turn all AI features off; barcode, search, and manual logging stay on.
+- **AI**: your own cloud key (a free [Google AI Studio](https://aistudio.google.com/apikey) key is enough for casual use). On Android, the AI-analysis path can instead use an eligible ChatGPT Plus or Pro plan through OpenAI's official Sign in with ChatGPT flow; Coach remains on the existing cloud-key providers. Progress steps and a live field preview. Coach chat on both clients. You can turn all AI features off; barcode, search, and manual logging stay on.
 - **On-device AI** (Android): optional **On-Device (Private)** Gemma 4. See below.
 
 ### Progress and trackers

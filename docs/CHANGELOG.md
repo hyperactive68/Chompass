@@ -4,6 +4,12 @@ All notable changes to Chompass are documented here.
 
 Style: entries follow the release-text style guide (maintainer-local, not published; user-visible first, no internals). The version section is pasted verbatim onto the Codeberg release.
 
+## Unreleased
+
+### Added
+
+- **Use an eligible ChatGPT plan for AI analysis** (Android): Settings → AI Provider now offers OpenAI's official Continue with ChatGPT flow. Plus and Pro users who grant plan access can run eligible analysis requests without an API key, inspect their shared usage in ChatGPT settings, and disconnect again. Credentials stay encrypted on the device; the PWA and Coach are unchanged.
+
 ## [5.11.0] - 2026-10-22
 
 ### Added
