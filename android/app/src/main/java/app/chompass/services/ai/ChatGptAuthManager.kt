@@ -8,6 +8,7 @@ import java.math.BigInteger
 import java.net.InetAddress
 import java.net.ServerSocket
 import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import java.nio.charset.StandardCharsets
 import java.security.KeyFactory
 import java.security.MessageDigest
@@ -201,7 +202,13 @@ class ChatGptAuthManager(
         executeJson(Request.Builder().url(TOKEN_ENDPOINT).post(body).build())
 
     private suspend fun executeJson(request: Request): JSONObject {
-        val response = client.newCall(request).await()
+        val response = try {
+            client.newCall(request).await()
+        } catch (_: UnknownHostException) {
+            throw ChatGptAuthException(
+                "OpenAI-authenticatie kan auth.openai.com niet vinden. Controleer je netwerkverbinding en probeer opnieuw.",
+            )
+        }
         response.use {
             val text = it.body?.string().orEmpty()
             if (!it.isSuccessful) {
