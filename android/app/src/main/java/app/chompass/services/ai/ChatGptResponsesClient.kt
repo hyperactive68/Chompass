@@ -133,17 +133,17 @@ object ChatGptResponsesClient {
                 .put("input", input)
                 .put("tools", tools)
                 .put("tool_choice", "auto")
-                .put("max_output_tokens", maxOutputTokens)
+                // ChatGPT-plan preview requires streaming and rejects max_output_tokens.
                 .put("store", false)
+                .put("stream", true)
             val request = Request.Builder()
                 .url("${resourceBaseUrl.trimEnd('/')}/responses")
                 .header("Authorization", "Bearer $accessToken")
                 .header("Content-Type", "application/json")
-                .header("Accept", "application/json")
+                .header("Accept", "text/event-stream")
                 .post(body.toString().toRequestBody(jsonMedia))
                 .build()
-            val raw = RetryPolicy.execute { client.newCall(request) }
-            val response = runCatching { JSONObject(raw) }.getOrElse { throw AiError.InvalidResponse }
+            val response = executeStreamingResponse(client, request)
             val output = response.optJSONArray("output") ?: throw AiError.InvalidResponse
             val functionCalls = buildList {
                 for (i in 0 until output.length()) {
@@ -177,6 +177,35 @@ object ChatGptResponsesClient {
             }
         }
         throw AiError.Api("Coach exceeded the tool-call round limit. Try rephrasing your question.", messageRes = R.string.ai_error_coach_round_limit)
+    }
+
+    /** Reads one ChatGPT-plan Responses stream and returns its completed response object. */
+    private suspend fun executeStreamingResponse(client: OkHttpClient, request: Request): JSONObject {
+        var completed: JSONObject? = null
+        var failure: AiError? = null
+        val response = RetryPolicy.open { client.newCall(request) }
+        AiSse.read(response) { payload ->
+            val event = runCatching { Json.parseToJsonElement(payload).jsonObject }.getOrNull() ?: return@read
+            when (event["type"]?.jsonPrimitive?.content) {
+                "response.completed" -> {
+                    completed = event["response"]?.let { JSONObject(it.toString()) }
+                }
+                "response.failed", "response.incomplete" -> {
+                    val responseNode = event["response"]?.jsonObject
+                    val error = responseNode?.get("error")?.jsonObject
+                    val code = error?.get("code")?.jsonPrimitive?.content.orEmpty()
+                    val message = error?.get("message")?.jsonPrimitive?.content.orEmpty()
+                    val suffix = code.takeIf(String::isNotBlank)?.let { ": $it" }.orEmpty()
+                    failure = AiError.Api(
+                        message.ifBlank { "ChatGPT response failed$suffix." },
+                        httpStatus = null,
+                        providerMessage = code.takeIf(String::isNotBlank),
+                    )
+                }
+            }
+        }
+        failure?.let { throw it }
+        return completed ?: throw AiError.InvalidResponse
     }
 
     private fun responseText(response: JSONObject): String? {
