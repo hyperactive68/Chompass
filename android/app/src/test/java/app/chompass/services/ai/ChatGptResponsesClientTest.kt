@@ -99,16 +99,22 @@ class ChatGptResponsesClientTest {
     fun coachExecutesResponsesFunctionCallAndContinuesWithOutput() = runBlocking {
         server.enqueue(
             MockResponse()
-                .setHeader("Content-Type", "application/json")
+                .setHeader("Content-Type", "text/event-stream")
                 .setBody(
-                    """{"status":"completed","output":[{"type":"function_call","call_id":"call_1","name":"get_data_summary","arguments":"{}"}]}""",
+                    """data: {"type":"response.completed","response":{"status":"completed","output":[{"type":"function_call","call_id":"call_1","name":"get_data_summary","arguments":"{}"}]}}
+
+data: [DONE]
+""".trimIndent(),
                 ),
         )
         server.enqueue(
             MockResponse()
-                .setHeader("Content-Type", "application/json")
+                .setHeader("Content-Type", "text/event-stream")
                 .setBody(
-                    """{"status":"completed","output":[{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Your logged intake is on track."}]}]}""",
+                    """data: {"type":"response.completed","response":{"status":"completed","output":[{"type":"message","role":"assistant","content":[{"type":"output_text","text":"Your logged intake is on track."}]}]}}
+
+data: [DONE]
+""".trimIndent(),
                 ),
         )
 
@@ -140,6 +146,8 @@ class ChatGptResponsesClientTest {
         val first = JSONObject(server.takeRequest().body.readUtf8())
         assertEquals("gpt-test", first.getString("model"))
         assertFalse(first.getBoolean("store"))
+        assertTrue(first.getBoolean("stream"))
+        assertFalse(first.has("max_output_tokens"))
         assertEquals("auto", first.getString("tool_choice"))
         val second = JSONObject(server.takeRequest().body.readUtf8())
         val secondInput = second.getJSONArray("input")
