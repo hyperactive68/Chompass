@@ -72,6 +72,40 @@ class ChatGptResponsesClientTest {
     }
 
     @Test
+    fun coachUsesStreamedTextWhenCompletedResponseOmitsOutput() = runBlocking {
+        server.enqueue(
+            MockResponse()
+                .setHeader("Content-Type", "text/event-stream")
+                .setBody(
+                    """
+                    data: {"type":"response.output_text.delta","delta":"Coach antwoord"}
+                    
+                    data: {"type":"response.completed","response":{"status":"completed"}}
+                    
+                    data: [DONE]
+                    
+                    """.trimIndent(),
+                ),
+        )
+
+        val result = ChatGptResponsesClient.coach(
+            client = OkHttpClient(),
+            model = "gpt-test",
+            accessToken = "oauth-token",
+            systemPrompt = "You are Coach.",
+            history = emptyList(),
+            newUserMessage = "What should I eat?",
+            imageBytes = null,
+            tools = org.json.JSONArray(),
+            maxOutputTokens = 256,
+            executeTool = { _, _ -> error("no tool expected") },
+            resourceBaseUrl = server.url("v1").toString(),
+        )
+
+        assertEquals("Coach antwoord", result)
+    }
+
+    @Test
     fun streamWithoutCompletedEvent_isRejected() {
         server.enqueue(
             MockResponse()
@@ -129,9 +163,18 @@ data: [DONE]
             imageBytes = null,
             tools = org.json.JSONArray().put(
                 JSONObject()
-                    .put("type", "function")
-                    .put("name", "get_data_summary")
-                    .put("parameters", JSONObject().put("type", "object")),
+                    .put("type", "namespace")
+                    .put("name", "chompass")
+                    .put("description", "Local Coach tools")
+                    .put(
+                        "tools",
+                        org.json.JSONArray().put(
+                            JSONObject()
+                                .put("type", "function")
+                                .put("name", "get_data_summary")
+                                .put("parameters", JSONObject().put("type", "object")),
+                        ),
+                    ),
             ),
             maxOutputTokens = 256,
             executeTool = { name, args ->
@@ -149,6 +192,9 @@ data: [DONE]
         assertTrue(first.getBoolean("stream"))
         assertFalse(first.has("max_output_tokens"))
         assertEquals("auto", first.getString("tool_choice"))
+        val namespace = first.getJSONArray("tools").getJSONObject(0)
+        assertEquals("namespace", namespace.getString("type"))
+        assertEquals("chompass", namespace.getString("name"))
         val second = JSONObject(server.takeRequest().body.readUtf8())
         val secondInput = second.getJSONArray("input")
         assertEquals("function_call", secondInput.getJSONObject(secondInput.length() - 2).getString("type"))
