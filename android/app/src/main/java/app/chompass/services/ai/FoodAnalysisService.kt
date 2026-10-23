@@ -61,7 +61,12 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.Dispatchers
 import okhttp3.OkHttpClient
+import okhttp3.Dns
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.dnsoverhttps.DnsOverHttps
+import java.net.InetAddress
 import java.io.IOException
+import java.net.UnknownHostException
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId
@@ -2426,13 +2431,40 @@ class FoodAnalysisService(
             (maxOf(readTimeoutSeconds * 2, 120) * 1000L)
 
         internal val defaultClient: OkHttpClient by lazy {
+            // Some Android networks return an empty/failed system lookup for
+            // auth.openai.com while the system browser still resolves it. Use
+            // the same HTTPS-DNS fallback as the NutriLens client: system DNS
+            // first, then Cloudflare and Google over HTTPS. The fallback is
+            // only used when the device resolver returns no addresses.
+            val bootstrapClient = OkHttpClient.Builder()
+                .retryOnConnectionFailure(true)
+                .connectTimeout(20, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build()
+            val cloudflareDns = DnsOverHttps.Builder()
+                .client(bootstrapClient)
+                .url("https://1.1.1.1/dns-query".toHttpUrl())
+                .build()
+            val googleDns = DnsOverHttps.Builder()
+                .client(bootstrapClient)
+                .url("https://8.8.8.8/dns-query".toHttpUrl())
+                .build()
             OkHttpClient.Builder()
                 // Debug-only: capture per-call network latency phases (DNS/connect/
                 // TLS/TTFB/total + byte counts) for every AI/STT/OpenFoodFacts call.
                 .apply { if (BuildConfig.DEBUG) eventListenerFactory(PerfEventListener.Factory) }
-                .connectTimeout(20, java.util.concurrent.TimeUnit.SECONDS)
-                .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
-                .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                .dns(object : Dns {
+                    override fun lookup(hostname: String): List<InetAddress> {
+                        val system = runCatching { Dns.SYSTEM.lookup(hostname) }.getOrDefault(emptyList())
+                        if (system.isNotEmpty()) return system
+                        return runCatching { cloudflareDns.lookup(hostname) }
+                            .recoverCatching { googleDns.lookup(hostname) }
+                            .getOrElse { throw UnknownHostException(hostname) }
+                    }
+                })
+                .connectTimeout(20, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
                 .build()
         }
     }
