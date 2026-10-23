@@ -176,6 +176,8 @@ class ChatService(
                 put("name", name)
                 put("description", CoachTools.TOOL_DESCRIPTIONS[name] ?: "")
                 put("parameters", parametersSchemaFor(name))
+                // Keep optional arguments non-strict; ChatGPT-plan Responses normalizes schemas otherwise.
+                put("strict", false)
             })
         }
         return ChatGptResponsesClient.coach(
