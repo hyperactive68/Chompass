@@ -49,28 +49,29 @@ jobs:
             apk="$(find android/app/build/outputs/apk -type f -name '*.apk' | head -n 1)"
           fi
           test -n "$apk"
-          cp "$apk" dist/Chompass-5.11.3-debug-universal.apk
+          cp "$apk" dist/Chompass-5.11.4-debug-universal.apk
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Chompass-5.11.3-debug-universal
-          path: dist/Chompass-5.11.3-debug-universal.apk
+          name: Chompass-5.11.4-debug-universal
+          path: dist/Chompass-5.11.4-debug-universal.apk
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v5.11.3
-          name: Chompass 5.11.3
+          tag_name: v5.11.4
+          name: Chompass 5.11.4
           target_commitish: feature/chatgpt-plan-login
           body: |
-            ## Chompass 5.11.3
+            ## Chompass 5.11.4
 
-            This release fixes Android DNS failures during the official Sign in with ChatGPT flow.
+            This release fixes Android DNS failures and enables Coach tool-calling for the official Sign in with ChatGPT flow.
 
             - Uses system DNS first, with Cloudflare and Google DNS-over-HTTPS fallback when Android returns no address.
             - Keeps the official ChatGPT OAuth and Responses API flow unchanged.
+            - Coach can now retrieve local nutrition data and prepare user-confirmed log proposals through Responses function calling.
             - No API key is embedded or required for eligible ChatGPT Plus or Pro plan usage.
 
             This downloadable APK is the debug-signed Android build. It can be installed alongside a production-signed Chompass APK.
-          files: dist/Chompass-5.11.3-debug-universal.apk
+          files: dist/Chompass-5.11.4-debug-universal.apk
