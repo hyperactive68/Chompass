@@ -11,6 +11,7 @@ permissions:
 jobs:
   build-release:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Check out source
         uses: actions/checkout@v4
@@ -21,12 +22,22 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Build debug APK
+      - name: Verify OpenAI endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          auth_status="$(curl --silent --show-error -o /tmp/openai-oidc.json -w '%{http_code}' https://auth.openai.com/.well-known/openid-configuration)"
+          test "$auth_status" = "200"
+          grep -q '"authorization_endpoint"' /tmp/openai-oidc.json
+          api_status="$(curl --silent --show-error -o /dev/null -w '%{http_code}' https://api.openai.com/v1/models)"
+          test "$api_status" != "000"
+
+      - name: Build and test debug APK
         shell: bash
         run: |
           chmod +x android/gradlew
           cd android
-          ./gradlew :app:assembleDebug --no-daemon
+          ./gradlew :app:testDebugUnitTest :app:assembleDebug --no-daemon
 
       - name: Collect APK
         shell: bash
@@ -38,28 +49,28 @@ jobs:
             apk="$(find android/app/build/outputs/apk -type f -name '*.apk' | head -n 1)"
           fi
           test -n "$apk"
-          cp "$apk" dist/Chompass-5.11.2-debug-universal.apk
+          cp "$apk" dist/Chompass-5.11.3-debug-universal.apk
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Chompass-5.11.2-debug-universal
-          path: dist/Chompass-5.11.2-debug-universal.apk
+          name: Chompass-5.11.3-debug-universal
+          path: dist/Chompass-5.11.3-debug-universal.apk
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v5.11.2
-          name: Chompass 5.11.2
+          tag_name: v5.11.3
+          name: Chompass 5.11.3
           target_commitish: feature/chatgpt-plan-login
           body: |
-            ## Chompass 5.11.2
+            ## Chompass 5.11.3
 
-            This release fixes the official Sign in with ChatGPT callback validation.
+            This release fixes Android DNS failures during the official Sign in with ChatGPT flow.
 
-            - Accepts the normalized OpenAI issuer form after browser consent.
-            - Keeps the official ChatGPT plan OAuth and Responses API flow.
-            - No API key is required for eligible ChatGPT Plus or Pro plan usage.
+            - Uses system DNS first, with Cloudflare and Google DNS-over-HTTPS fallback when Android returns no address.
+            - Keeps the official ChatGPT OAuth and Responses API flow unchanged.
+            - No API key is embedded or required for eligible ChatGPT Plus or Pro plan usage.
 
             This downloadable APK is the debug-signed Android build. It can be installed alongside a production-signed Chompass APK.
-          files: dist/Chompass-5.11.2-debug-universal.apk
+          files: dist/Chompass-5.11.3-debug-universal.apk
