@@ -73,6 +73,29 @@ fun SyncSettingsScreen(
         }
     }
 
+    val googleDriveBackupLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        if (uri == null) {
+            syncMessage = activityContext.getString(R.string.settings_google_drive_backup_cancelled)
+            return@rememberLauncherForActivityResult
+        }
+        scope.launch {
+            runCatching {
+                val content = container.syncRepository.exportDocumentJson()
+                val output = activityContext.contentResolver.openOutputStream(uri)
+                    ?: error(activityContext.getString(R.string.settings_google_drive_backup_no_stream))
+                output.bufferedWriter(Charsets.UTF_8).use { it.write(content) }
+                syncMessage = activityContext.getString(R.string.settings_google_drive_backup_success)
+            }.onFailure { t ->
+                syncMessage = activityContext.getString(
+                    R.string.settings_google_drive_backup_failed,
+                    t.localizedMessage ?: activityContext.getString(R.string.error_unknown),
+                )
+            }
+        }
+    }
+
     SettingsSubScreen(
         title = stringResource(R.string.settings_sync_section),
         onBack = onBack,
@@ -121,6 +144,7 @@ fun SyncSettingsScreen(
                     }
                 }
             },
+            onGoogleDriveBackup = { googleDriveBackupLauncher.launch("Chompass-backup.json") },
             onImportSync = { importSyncLauncher.launch(arrayOf("application/json", "text/plain")) },
             onSyncNow = {
                 scope.launch {
