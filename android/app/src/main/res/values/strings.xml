@@ -1919,7 +1919,7 @@
     <string name="export_sync_title">Export sync JSON</string>
     <string name="import_sync_title">Import sync JSON</string>
     <string name="settings_google_drive_backup">Back up to Google Drive</string>
-    <string name="settings_google_drive_backup_desc">Save this sync JSON through Android's file picker. Choose Google Drive to store it there; Chompass never handles your Drive password.</string>
+    <string name="settings_google_drive_backup_desc">Save this sync JSON through Android\'s file picker. Choose Google Drive to store it there; Chompass never handles your Drive password.</string>
     <string name="settings_google_drive_backup_success">Backup saved. Check the selected Google Drive location.</string>
     <string name="settings_google_drive_backup_cancelled">Backup cancelled.</string>
     <string name="settings_google_drive_backup_no_stream">The selected location cannot be written.</string>
