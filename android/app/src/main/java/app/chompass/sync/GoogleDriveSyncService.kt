@@ -62,7 +62,7 @@ class GoogleDriveSyncService(
     /** Coalesced background sync used after a food log or edit. */
     fun scheduleSyncAfterFoodChange() {
         scope.launch {
-            if (!prefs.googleDriveSyncOnFoodLog.firstOrFalse()) return@launch
+            if (!prefs.googleDriveSyncOnFoodLog.first()) return@launch
             syncMutex.withLock {
                 runCatching { syncIfAlreadyAuthorized() }
             }
@@ -77,7 +77,7 @@ class GoogleDriveSyncService(
     }
 
     suspend fun syncIfAlreadyAuthorized(): SyncRepository.SyncResult? {
-        if (!prefs.googleDriveConnected.firstOrFalse()) return null
+        if (!prefs.googleDriveConnected.first()) return null
         val existing = accessToken
         if (existing != null) return uploadAndMerge(existing)
         val result = runCatching { requestAuthorization() }.getOrNull() ?: return null
@@ -166,8 +166,6 @@ class GoogleDriveSyncService(
 
     private fun Request.Builder.bearer(token: String): Request.Builder =
         header("Authorization", "Bearer $token")
-
-    private suspend fun kotlinx.coroutines.flow.Flow<Boolean>.firstOrFalse(): Boolean = first()
 
     private companion object {
         const val DRIVE_APPDATA_SCOPE = "https://www.googleapis.com/auth/drive.appdata"
