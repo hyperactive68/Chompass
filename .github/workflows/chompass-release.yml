@@ -77,30 +77,32 @@ jobs:
             apk="$(find android/app/build/outputs/apk -type f -name '*release*.apk' | head -n 1)"
           fi
           test -n "$apk"
-          cp "$apk" dist/Chompass-5.11.6-universal.apk
+          cp "$apk" dist/Chompass-5.11.7-universal.apk
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Chompass-5.11.6-universal
-          path: dist/Chompass-5.11.6-universal.apk
+          name: Chompass-5.11.7-universal
+          path: dist/Chompass-5.11.7-universal.apk
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v5.11.6
-          name: Chompass 5.11.6
+          tag_name: v5.11.7
+          name: Chompass 5.11.7
           target_commitish: feature/chatgpt-plan-login
           body: |
-            ## Chompass 5.11.6
+            ## Chompass 5.11.7
 
-            This release provides a signed Android build with stable update signing, fixes Coach tool-calling for the official Sign in with ChatGPT flow, and adds a manual Google Drive backup through the Android document picker.
+            This release provides a signed Android build with stable update signing and a real Google Drive app-data backup/sync flow.
 
             - Uses system DNS first, with Cloudflare and Google DNS-over-HTTPS fallback when Android returns no address.
             - Keeps the official ChatGPT OAuth and Responses API flow unchanged.
             - Coach can now retrieve local nutrition data and prepare user-confirmed log proposals through Responses function calling.
             - No API key is embedded or required for eligible ChatGPT Plus or Pro plan usage.
-            - “Back up to Google Drive” uses Android’s system file picker; choose Google Drive as the destination. No Google Drive token or password is stored by Chompass.
+            - Google Drive uses the official Android AuthorizationClient consent flow, so the Google Drive app is not required on the phone.
+            - The backup is stored in Drive’s private appDataFolder using the limited drive.appdata scope.
+            - Optional “Sync after logging food” uploads the updated privacy-limited JSON after food additions, edits, and deletions. Photos, API keys, passwords, and OAuth tokens are not included.
 
             This APK is release-signed with the project keystore and is intended to update earlier Chompass builds signed with the same key.
-          files: dist/Chompass-5.11.6-universal.apk
+          files: dist/Chompass-5.11.7-universal.apk

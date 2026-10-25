@@ -1,5 +1,7 @@
 package app.chompass.ui.settings
 
+import android.app.Activity
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,6 +39,8 @@ fun SyncSettingsScreen(
     var webDavUsername by remember { mutableStateOf("") }
     var webDavPassword by remember { mutableStateOf("") }
     var webDavAutoSync by remember { mutableStateOf(false) }
+    var googleDriveConnected by remember { mutableStateOf(false) }
+    var googleDriveSyncOnFoodLog by remember { mutableStateOf(false) }
     var lastSyncAt by remember { mutableStateOf<String?>(null) }
     var syncMessage by remember { mutableStateOf<String?>(null) }
     val activityContext = LocalContext.current
@@ -47,6 +51,8 @@ fun SyncSettingsScreen(
         webDavUsername = container.prefs.webDavUsername.first()
         webDavPassword = container.keyStore.webDavPassword().orEmpty()
         webDavAutoSync = container.prefs.webDavEnabled.first()
+        googleDriveConnected = container.prefs.googleDriveConnected.first()
+        googleDriveSyncOnFoodLog = container.prefs.googleDriveSyncOnFoodLog.first()
         lastSyncAt = container.prefs.lastSyncAt.first()
     }
 
@@ -73,25 +79,30 @@ fun SyncSettingsScreen(
         }
     }
 
-    val googleDriveBackupLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("application/json")
-    ) { uri ->
-        if (uri == null) {
-            syncMessage = activityContext.getString(R.string.settings_google_drive_backup_cancelled)
+    val googleDriveAuthLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult(),
+    ) { result ->
+        val data = result.data
+        if (result.resultCode != Activity.RESULT_OK || data == null) {
+            syncMessage = activityContext.getString(R.string.settings_google_drive_auth_cancelled)
+            return@rememberLauncherForActivityResult
+        }
+        val auth = runCatching {
+            com.google.android.gms.auth.api.identity.Identity
+                .getAuthorizationClient(activityContext)
+                .getAuthorizationResultFromIntent(data)
+        }.getOrNull()
+        if (auth == null || !container.googleDriveSync.acceptAuthorization(auth)) {
+            syncMessage = activityContext.getString(R.string.settings_google_drive_auth_failed)
             return@rememberLauncherForActivityResult
         }
         scope.launch {
-            runCatching {
-                val content = container.syncRepository.exportDocumentJson()
-                val output = activityContext.contentResolver.openOutputStream(uri)
-                    ?: error(activityContext.getString(R.string.settings_google_drive_backup_no_stream))
-                output.bufferedWriter(Charsets.UTF_8).use { it.write(content) }
-                syncMessage = activityContext.getString(R.string.settings_google_drive_backup_success)
-            }.onFailure { t ->
-                syncMessage = activityContext.getString(
-                    R.string.settings_google_drive_backup_failed,
-                    t.localizedMessage ?: activityContext.getString(R.string.error_unknown),
-                )
+            container.prefs.setGoogleDriveConnected(true)
+            googleDriveConnected = true
+            syncMessage = activityContext.getString(R.string.settings_google_drive_syncing)
+            when (val resultNow = container.googleDriveSync.syncNow()) {
+                is SyncRepository.SyncResult.Success -> syncMessage = resultNow.message
+                is SyncRepository.SyncResult.Failed -> syncMessage = resultNow.message
             }
         }
     }
@@ -106,6 +117,8 @@ fun SyncSettingsScreen(
             webDavUsername = webDavUsername,
             webDavPassword = webDavPassword,
             webDavAutoSync = webDavAutoSync,
+            googleDriveConnected = googleDriveConnected,
+            googleDriveSyncOnFoodLog = googleDriveSyncOnFoodLog,
             lastSyncAt = lastSyncAt,
             syncStatus = syncMessage,
             onWebDavUrlChange = { webDavUrl = it },
@@ -144,7 +157,33 @@ fun SyncSettingsScreen(
                     }
                 }
             },
-            onGoogleDriveBackup = { googleDriveBackupLauncher.launch("Chompass-backup.json") },
+            onGoogleDriveConnect = {
+                scope.launch {
+                    val auth = runCatching { container.googleDriveSync.requestAuthorization() }.getOrNull()
+                    when {
+                        auth == null -> syncMessage = activityContext.getString(R.string.settings_google_drive_auth_failed)
+                        auth.hasResolution() -> auth.pendingIntent?.let { pending ->
+                            googleDriveAuthLauncher.launch(
+                                IntentSenderRequest.Builder(pending.intentSender).build(),
+                            )
+                        } ?: run { syncMessage = activityContext.getString(R.string.settings_google_drive_auth_failed) }
+                        container.googleDriveSync.acceptAuthorization(auth) -> {
+                            container.prefs.setGoogleDriveConnected(true)
+                            googleDriveConnected = true
+                            syncMessage = activityContext.getString(R.string.settings_google_drive_syncing)
+                            when (val resultNow = container.googleDriveSync.syncNow()) {
+                                is SyncRepository.SyncResult.Success -> syncMessage = resultNow.message
+                                is SyncRepository.SyncResult.Failed -> syncMessage = resultNow.message
+                            }
+                        }
+                        else -> syncMessage = activityContext.getString(R.string.settings_google_drive_auth_failed)
+                    }
+                }
+            },
+            onGoogleDriveSyncOnFoodLogChange = { enabled ->
+                googleDriveSyncOnFoodLog = enabled
+                scope.launch { container.prefs.setGoogleDriveSyncOnFoodLog(enabled) }
+            },
             onImportSync = { importSyncLauncher.launch(arrayOf("application/json", "text/plain")) },
             onSyncNow = {
                 scope.launch {

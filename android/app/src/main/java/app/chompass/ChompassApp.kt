@@ -252,9 +252,16 @@ class AppContainer(app: ChompassApp) {
     val homeActivityReader = HomeActivityReader(health, prefs)
 
     val syncRepository = SyncRepository(prefs, keyStore, appContext = appContext)
+    val googleDriveSync = app.chompass.sync.GoogleDriveSyncService(appContext, syncRepository, prefs)
     val profileRepository = ProfileRepository(prefs)
     val goalJournalService = GoalJournalService(prefs, profileRepository)
-    val foodRepository = FoodRepository(prefs, health, imageStore, syncRepository)
+    val foodRepository = FoodRepository(
+        prefs,
+        health,
+        imageStore,
+        syncRepository,
+        onFoodChanged = { googleDriveSync.scheduleSyncAfterFoodChange() },
+    )
     val recipeRepository = RecipeRepository(prefs, foodRepository, syncRepository)
     val weightRepository = WeightRepository(prefs, profileRepository, health, syncRepository)
     val bodyFatRepository = BodyFatRepository(prefs, profileRepository, health, syncRepository)

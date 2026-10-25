@@ -651,6 +651,12 @@ class PreferencesStore(private val appContext: Context) : NutritionSyncStore {
     suspend fun setLastSyncAt(iso: String?) = setLastSyncAtImpl(iso)
     val lastSyncEtag: Flow<String?> get() = lastSyncEtagImpl
     suspend fun setLastSyncEtag(etag: String?) = setLastSyncEtagImpl(etag)
+    val googleDriveConnected: Flow<Boolean> get() = googleDriveConnectedImpl
+    suspend fun setGoogleDriveConnected(connected: Boolean) = setGoogleDriveConnectedImpl(connected)
+    val googleDriveSyncOnFoodLog: Flow<Boolean> get() = googleDriveSyncOnFoodLogImpl
+    suspend fun setGoogleDriveSyncOnFoodLog(enabled: Boolean) = setGoogleDriveSyncOnFoodLogImpl(enabled)
+    val googleDriveLastSyncAt: Flow<String?> get() = googleDriveLastSyncAtImpl
+    suspend fun setGoogleDriveLastSyncAt(iso: String?) = setGoogleDriveLastSyncAtImpl(iso)
     /** Last magnitude-wheel entry mode: "wheel" or "typed". */
     val numericPickerEntry: Flow<String> get() = numericPickerEntryImpl
     suspend fun setNumericPickerEntry(mode: String) = setNumericPickerEntryImpl(mode)

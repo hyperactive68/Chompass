@@ -95,3 +95,27 @@ internal suspend fun PreferencesStore.setLastSyncEtagImpl(etag: String?) {
         else it[Keys.LAST_SYNC_ETAG] = etag
     }
 }
+
+internal val PreferencesStore.googleDriveConnectedImpl: Flow<Boolean>
+    get() = dataStore.data.map { it[Keys.GOOGLE_DRIVE_CONNECTED] ?: false }
+
+internal suspend fun PreferencesStore.setGoogleDriveConnectedImpl(connected: Boolean) {
+    dataStore.edit { it[Keys.GOOGLE_DRIVE_CONNECTED] = connected }
+}
+
+internal val PreferencesStore.googleDriveSyncOnFoodLogImpl: Flow<Boolean>
+    get() = dataStore.data.map { it[Keys.GOOGLE_DRIVE_SYNC_ON_FOOD_LOG] ?: false }
+
+internal suspend fun PreferencesStore.setGoogleDriveSyncOnFoodLogImpl(enabled: Boolean) {
+    dataStore.edit { it[Keys.GOOGLE_DRIVE_SYNC_ON_FOOD_LOG] = enabled }
+}
+
+internal val PreferencesStore.googleDriveLastSyncAtImpl: Flow<String?>
+    get() = dataStore.data.map { it[Keys.GOOGLE_DRIVE_LAST_SYNC_AT] }
+
+internal suspend fun PreferencesStore.setGoogleDriveLastSyncAtImpl(iso: String?) {
+    dataStore.edit {
+        if (iso.isNullOrBlank()) it.remove(Keys.GOOGLE_DRIVE_LAST_SYNC_AT)
+        else it[Keys.GOOGLE_DRIVE_LAST_SYNC_AT] = iso
+    }
+}

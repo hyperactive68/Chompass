@@ -328,6 +328,9 @@ internal object Keys {
         val WEBDAV_AUTO_SYNC_DAY = stringPreferencesKey("webDavAutoSyncDay")
         val LAST_SYNC_AT = stringPreferencesKey("lastSyncAt")
         val LAST_SYNC_ETAG = stringPreferencesKey("lastSyncEtag")
+        val GOOGLE_DRIVE_CONNECTED = booleanPreferencesKey("googleDriveConnected")
+        val GOOGLE_DRIVE_SYNC_ON_FOOD_LOG = booleanPreferencesKey("googleDriveSyncOnFoodLog")
+        val GOOGLE_DRIVE_LAST_SYNC_AT = stringPreferencesKey("googleDriveLastSyncAt")
         /** Serialized [app.chompass.services.ai.RecalcSheetData] of the latest goal change (AI Recalculate or Adaptive). */
         val LAST_GOAL_CHANGE_SHEET_JSON = stringPreferencesKey("lastGoalChangeSheetJson")
         /** Last magnitude-wheel entry mode: "wheel" | "typed" (Codeberg #62). */

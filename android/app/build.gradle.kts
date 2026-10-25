@@ -66,8 +66,8 @@ android {
         applicationId = "app.chompass"
         minSdk = 26
         targetSdk = 36
-        versionCode = 107
-        versionName = "5.11.6"
+        versionCode = 108
+        versionName = "5.11.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         if (releaseAbi != null) {
@@ -219,6 +219,7 @@ dependencies {
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.health.connect)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.play.services.auth)
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.glance.material3)
     implementation(libs.androidx.camera.core)

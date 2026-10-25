@@ -115,6 +115,7 @@ class FoodRepository(
     private val health: HealthConnectManager? = null,
     private val imageStore: FoodImageStore? = null,
     private val sync: app.chompass.sync.SyncRepository? = null,
+    private val onFoodChanged: (() -> Unit)? = null,
 ) {
     /** One-shot gate so concurrent first logs cannot double-fire the review prompt. */
     private val reviewPromptGate = AtomicBoolean(false)
@@ -248,6 +249,7 @@ class FoodRepository(
             prefs.applyFoodEntryBucketChanges(upsertsByMonth = resolved.groupBy { it.month() })
         }
         sync?.touchMany(resolved.map { it.id to "food" })
+        onFoodChanged?.invoke()
         if (writeHealth) {
             PerfLog.measure("save", "healthWrite", "count=${resolved.size}") {
                 healthRetry.syncAll(resolved, isUpdate = false)
@@ -310,6 +312,7 @@ class FoodRepository(
         }
         PerfLog.event("op=editEntry phase=updateEntryDone id=${updated.id.toString().take(8)}")
         sync?.touch(updated.id, "food")
+        onFoodChanged?.invoke()
         if (shouldSyncHealth()) {
             healthRetry.sync(updated, isUpdate = true)
         } else {
@@ -336,6 +339,7 @@ class FoodRepository(
             prefs.applyFoodEntryBucketChanges(upsertsByMonth = entries.groupBy { it.month() })
         }
         sync?.touchMany(entries.map { it.id to "food" })
+        onFoodChanged?.invoke()
         if (shouldSyncHealth()) {
             healthRetry.syncAll(entries, isUpdate = true)
         } else {
@@ -350,6 +354,7 @@ class FoodRepository(
         healthRetry.forget(entry.id)
         prefs.applyFoodEntryBucketChanges(removalIdsByMonth = mapOf(entry.month() to setOf(entry.id)))
         sync?.tombstone(entry.id, "food")
+        onFoodChanged?.invoke()
         pruneOrphanedImages()
         // Delete even when sync is off (iOS parity, best-effort) — a surviving
         // fudai-tagged record would resurrect through restoreFromHealthConnect.

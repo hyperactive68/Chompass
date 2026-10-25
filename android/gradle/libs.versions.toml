@@ -26,6 +26,7 @@ splashscreen = "1.0.1"
 screenshot = "0.0.1-alpha15"
 litertlm = "0.16.1"
 robolectric = "4.15.1"
+playServicesAuth = "21.4.0"
 
 [libraries]
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
@@ -69,6 +70,7 @@ androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscree
 screenshot-validation-api = { group = "com.android.tools.screenshot", name = "screenshot-validation-api", version.ref = "screenshot" }
 litertlm-android = { group = "com.google.ai.edge.litertlm", name = "litertlm-android", version.ref = "litertlm" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

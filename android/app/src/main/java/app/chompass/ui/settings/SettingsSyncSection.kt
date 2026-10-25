@@ -39,6 +39,8 @@ internal fun SettingsSyncSection(
     webDavUsername: String,
     webDavPassword: String,
     webDavAutoSync: Boolean,
+    googleDriveConnected: Boolean,
+    googleDriveSyncOnFoodLog: Boolean,
     lastSyncAt: String?,
     syncStatus: String?,
     onWebDavUrlChange: (String) -> Unit,
@@ -47,7 +49,8 @@ internal fun SettingsSyncSection(
     onSaveWebDav: () -> Unit,
     onWebDavAutoSyncChange: (Boolean) -> Unit,
     onExportSync: () -> Unit,
-    onGoogleDriveBackup: () -> Unit,
+    onGoogleDriveConnect: () -> Unit,
+    onGoogleDriveSyncOnFoodLogChange: (Boolean) -> Unit,
     onImportSync: () -> Unit,
     onSyncNow: () -> Unit,
 ) {
@@ -120,7 +123,7 @@ internal fun SettingsSyncSection(
         Row(
             Modifier
                 .fillMaxWidth()
-                .clickable { onGoogleDriveBackup() }
+                .clickable { onGoogleDriveConnect() }
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -128,7 +131,10 @@ internal fun SettingsSyncSection(
             Spacer(Modifier.width(14.dp))
             Column {
                 Text(
-                    stringResource(R.string.settings_google_drive_backup),
+                    stringResource(
+                        if (googleDriveConnected) R.string.settings_google_drive_connected
+                        else R.string.settings_google_drive_connect,
+                    ),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                 )
@@ -139,6 +145,18 @@ internal fun SettingsSyncSection(
                 )
             }
         }
+        HorizontalDivider()
+        ToggleRow(
+            label = stringResource(R.string.settings_google_drive_sync_on_food_log),
+            checked = googleDriveSyncOnFoodLog,
+            onChange = onGoogleDriveSyncOnFoodLogChange,
+        )
+        Text(
+            stringResource(R.string.settings_google_drive_sync_on_food_log_desc),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary),
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
+        )
         HorizontalDivider()
         Row(
             Modifier
