@@ -160,14 +160,18 @@ fun SyncSettingsScreen(
             onGoogleDriveConnect = {
                 scope.launch {
                     val auth = runCatching { container.googleDriveSync.requestAuthorization() }.getOrNull()
-                    when {
-                        auth == null -> syncMessage = activityContext.getString(R.string.settings_google_drive_auth_failed)
-                        auth.hasResolution() -> auth.pendingIntent?.let { pending ->
+                    if (auth == null) {
+                        syncMessage = activityContext.getString(R.string.settings_google_drive_auth_failed)
+                    } else if (auth.hasResolution()) {
+                        val pending = auth.getPendingIntent()
+                        if (pending != null) {
                             googleDriveAuthLauncher.launch(
                                 IntentSenderRequest.Builder(pending.intentSender).build(),
                             )
-                        } ?: run { syncMessage = activityContext.getString(R.string.settings_google_drive_auth_failed) }
-                        container.googleDriveSync.acceptAuthorization(auth) -> {
+                        } else {
+                            syncMessage = activityContext.getString(R.string.settings_google_drive_auth_failed)
+                        }
+                    } else if (container.googleDriveSync.acceptAuthorization(auth)) {
                             container.prefs.setGoogleDriveConnected(true)
                             googleDriveConnected = true
                             syncMessage = activityContext.getString(R.string.settings_google_drive_syncing)
@@ -175,8 +179,8 @@ fun SyncSettingsScreen(
                                 is SyncRepository.SyncResult.Success -> syncMessage = resultNow.message
                                 is SyncRepository.SyncResult.Failed -> syncMessage = resultNow.message
                             }
-                        }
-                        else -> syncMessage = activityContext.getString(R.string.settings_google_drive_auth_failed)
+                    } else {
+                        syncMessage = activityContext.getString(R.string.settings_google_drive_auth_failed)
                     }
                 }
             },

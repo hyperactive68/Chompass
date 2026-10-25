@@ -53,6 +53,7 @@ import app.chompass.services.health.HealthConnectReadSync
 import app.chompass.services.health.HealthSyncWorker
 import app.chompass.services.health.HomeActivityReader
 import app.chompass.sync.SyncRepository
+import app.chompass.sync.GoogleDriveSyncService
 import app.chompass.utils.LocaleHelper
 import app.chompass.services.ondevice.ModelCatalog
 import app.chompass.services.ondevice.ModelDownloadManager
@@ -252,7 +253,7 @@ class AppContainer(app: ChompassApp) {
     val homeActivityReader = HomeActivityReader(health, prefs)
 
     val syncRepository = SyncRepository(prefs, keyStore, appContext = appContext)
-    val googleDriveSync = app.chompass.sync.GoogleDriveSyncService(appContext, syncRepository, prefs)
+    val googleDriveSync = GoogleDriveSyncService(appContext, syncRepository, prefs)
     val profileRepository = ProfileRepository(prefs)
     val goalJournalService = GoalJournalService(prefs, profileRepository)
     val foodRepository = FoodRepository(
