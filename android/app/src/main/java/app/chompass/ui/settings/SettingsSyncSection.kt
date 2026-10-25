@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CloudSync
+import androidx.compose.material.icons.outlined.CloudUpload
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material.icons.outlined.Upload
@@ -46,6 +47,7 @@ internal fun SettingsSyncSection(
     onSaveWebDav: () -> Unit,
     onWebDavAutoSyncChange: (Boolean) -> Unit,
     onExportSync: () -> Unit,
+    onGoogleDriveBackup: () -> Unit,
     onImportSync: () -> Unit,
     onSyncNow: () -> Unit,
 ) {
@@ -114,6 +116,29 @@ internal fun SettingsSyncSection(
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary),
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
         )
+        HorizontalDivider()
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clickable { onGoogleDriveBackup() }
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            ChompassIconBubble(icon = Icons.Outlined.CloudUpload, size = 22.dp, iconSize = 14.dp, tint = AppColors.Calorie)
+            Spacer(Modifier.width(14.dp))
+            Column {
+                Text(
+                    stringResource(R.string.settings_google_drive_backup),
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                )
+                Text(
+                    stringResource(R.string.settings_google_drive_backup_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                )
+            }
+        }
         HorizontalDivider()
         Row(
             Modifier
