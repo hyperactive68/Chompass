@@ -1918,6 +1918,12 @@
     <string name="settings_webdav_auto_sync_desc">Once a day when you open the app, if WebDAV is configured. Off by default. Manual Sync now still works anytime.</string>
     <string name="export_sync_title">Export sync JSON</string>
     <string name="import_sync_title">Import sync JSON</string>
+    <string name="settings_google_drive_backup">Back up to Google Drive</string>
+    <string name="settings_google_drive_backup_desc">Save this sync JSON through Android's file picker. Choose Google Drive to store it there; Chompass never handles your Drive password.</string>
+    <string name="settings_google_drive_backup_success">Backup saved. Check the selected Google Drive location.</string>
+    <string name="settings_google_drive_backup_cancelled">Backup cancelled.</string>
+    <string name="settings_google_drive_backup_no_stream">The selected location cannot be written.</string>
+    <string name="settings_google_drive_backup_failed">Could not save the Google Drive backup: %1$s</string>
     <string name="settings_sync_now">Sync now</string>
     <string name="settings_last_sync">Last sync: %1$s</string>
     <string name="settings_not_synced">Not synced yet</string>
