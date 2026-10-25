@@ -3,6 +3,7 @@ package app.chompass.sync
 import android.content.Context
 import com.google.android.gms.auth.api.identity.AuthorizationRequest
 import com.google.android.gms.auth.api.identity.AuthorizationResult
+import com.google.android.gms.auth.api.identity.ClearTokenRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.common.api.Scope
 import com.google.android.gms.tasks.Tasks
@@ -54,7 +55,17 @@ class GoogleDriveSyncService(
     }
 
     fun acceptAuthorization(result: AuthorizationResult): Boolean {
-        val token = result.accessToken?.takeIf { it.isNotBlank() } ?: return false
+        val token = result.accessToken?.takeIf { it.isNotBlank() } ?: run {
+            accessToken = null
+            return false
+        }
+        // Google can return a token even when the user granted only a subset of
+        // requested scopes. Never mark Drive as connected unless the exact
+        // app-data scope required by the sync API was granted.
+        if (!hasRequiredScope(result.getGrantedScopes().orEmpty())) {
+            accessToken = null
+            return false
+        }
         accessToken = token
         return true
     }
@@ -70,21 +81,29 @@ class GoogleDriveSyncService(
     }
 
     suspend fun syncNow(): SyncRepository.SyncResult = syncMutex.withLock {
-        val token = accessToken ?: return@withLock SyncRepository.SyncResult.Failed(
-            context.getString(app.chompass.R.string.settings_google_drive_not_connected),
-        )
+        val token = accessToken ?: silentlyAuthorize()
+            ?: return@withLock SyncRepository.SyncResult.Failed(
+                context.getString(app.chompass.R.string.settings_google_drive_not_connected),
+            )
         uploadAndMerge(token)
     }
 
     suspend fun syncIfAlreadyAuthorized(): SyncRepository.SyncResult? {
         if (!prefs.googleDriveConnected.first()) return null
-        val existing = accessToken
-        if (existing != null) return uploadAndMerge(existing)
-        val result = runCatching { requestAuthorization() }.getOrNull() ?: return null
-        if (result.hasResolution()) return null
-        val token = result.accessToken?.takeIf { it.isNotBlank() } ?: return null
-        accessToken = token
+        val token = silentlyAuthorize() ?: return null
         return uploadAndMerge(token)
+    }
+
+    /**
+     * Reuses a previously granted Google grant without showing UI. If a
+     * process restart or an expired access token requires user interaction,
+     * the caller returns to the explicit Connect action instead.
+     */
+    private suspend fun silentlyAuthorize(): String? {
+        accessToken?.let { return it }
+        val result = runCatching { requestAuthorization() }.getOrNull() ?: return null
+        if (result.hasResolution() || !acceptAuthorization(result)) return null
+        return accessToken
     }
 
     private suspend fun uploadAndMerge(token: String): SyncRepository.SyncResult = withContext(Dispatchers.IO) {
@@ -120,7 +139,7 @@ class GoogleDriveSyncService(
             .addQueryParameter("fields", "files(id,name)")
             .addQueryParameter("q", "'appDataFolder' in parents and name = '$FILE_NAME' and trashed = false")
             .build()
-        val body = execute(Request.Builder().url(url).get().bearer(token).build())
+        val body = execute(Request.Builder().url(url).get().bearer(token).build(), token)
         val files = JSONObject(body).optJSONArray("files") ?: return null
         return files.optJSONObject(0)?.optString("id")?.takeIf { it.isNotBlank() }
     }
@@ -129,7 +148,7 @@ class GoogleDriveSyncService(
         val url = "https://www.googleapis.com/drive/v3/files/$fileId".toHttpUrl().newBuilder()
             .addQueryParameter("alt", "media")
             .build()
-        return execute(Request.Builder().url(url).get().bearer(token).build())
+        return execute(Request.Builder().url(url).get().bearer(token).build(), token)
     }
 
     private fun create(token: String, json: String) {
@@ -146,30 +165,52 @@ class GoogleDriveSyncService(
             .addQueryParameter("uploadType", "multipart")
             .addQueryParameter("fields", "id")
             .build()
-        execute(Request.Builder().url(url).post(multipart).bearer(token).build())
+        execute(Request.Builder().url(url).post(multipart).bearer(token).build(), token)
     }
 
     private fun update(token: String, fileId: String, json: String) {
         val url = "https://www.googleapis.com/upload/drive/v3/files/$fileId".toHttpUrl().newBuilder()
             .addQueryParameter("uploadType", "media")
             .build()
-        execute(Request.Builder().url(url).patch(json.toRequestBody(JSON_MEDIA)).bearer(token).build())
+        execute(Request.Builder().url(url).patch(json.toRequestBody(JSON_MEDIA)).bearer(token).build(), token)
     }
 
-    private fun execute(request: Request): String {
+    private fun execute(request: Request, token: String): String {
         client.newCall(request).execute().use { response ->
             val text = response.body?.string().orEmpty()
-            if (!response.isSuccessful) throw IOException("Google Drive HTTP ${response.code}: ${text.take(200)}")
+            if (!response.isSuccessful) {
+                // AuthorizationClient will return a fresh token on the next
+                // request after the in-memory token is discarded. This avoids
+                // repeatedly reusing a one-hour token after a 401 response.
+                if (response.code == 401 && accessToken == token) {
+                    accessToken = null
+                    clearCachedToken(token)
+                }
+                throw IOException("Google Drive HTTP ${response.code}: ${text.take(200)}")
+            }
             return text
+        }
+    }
+
+    private fun clearCachedToken(token: String) {
+        runCatching {
+            Tasks.await(
+                Identity.getAuthorizationClient(context).clearToken(
+                    ClearTokenRequest.builder().setToken(token).build(),
+                ),
+            )
         }
     }
 
     private fun Request.Builder.bearer(token: String): Request.Builder =
         header("Authorization", "Bearer $token")
 
-    private companion object {
+    internal companion object {
         const val DRIVE_APPDATA_SCOPE = "https://www.googleapis.com/auth/drive.appdata"
         const val FILE_NAME = "Chompass-sync.json"
         val JSON_MEDIA = "application/json; charset=utf-8".toMediaType()
+
+        internal fun hasRequiredScope(grantedScopes: Collection<String>): Boolean =
+            DRIVE_APPDATA_SCOPE in grantedScopes
     }
 }

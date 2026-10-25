@@ -10,6 +10,16 @@ Style: entries follow the release-text style guide (maintainer-local, not publis
 
 - **Use an eligible ChatGPT plan for AI analysis** (Android): Settings → AI Provider now offers OpenAI's official Continue with ChatGPT flow. Plus and Pro users who grant plan access can run eligible analysis requests without an API key, inspect their shared usage in ChatGPT settings, and disconnect again. Credentials stay encrypted on the device; the PWA and Coach are unchanged.
 
+## [5.11.8] - 2026-10-25
+
+### Added
+
+- **Google Drive app-data sync uses the official Android authorization flow** (Android): Google Drive authorization is requested through Google Play services with the limited `drive.appdata` scope. Chompass stores only the privacy-limited sync JSON in Drive's private app-data area; photos, API keys, passwords, and OAuth tokens are excluded.
+
+### Fixed
+
+- **Drive connection state requires the requested scope** (Android): the app no longer treats an access token as a valid connection when Google granted a different or partial scope. Expired access tokens are discarded so the next authorization request can obtain a fresh token.
+
 ## [5.11.0] - 2026-10-22
 
 ### Added

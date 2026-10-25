@@ -59,6 +59,19 @@ jobs:
           test -s android/chompass-release.jks
           chmod 600 android/chompass-release.jks android/keystore.properties
 
+      - name: Print release certificate fingerprints
+        shell: bash
+        env:
+          RELEASE_STORE_PASSWORD: ${{ secrets.CHOMPASS_RELEASE_STORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.CHOMPASS_RELEASE_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          keytool -list -v \
+            -keystore android/chompass-release.jks \
+            -storepass "$RELEASE_STORE_PASSWORD" \
+            -alias "$RELEASE_KEY_ALIAS" \
+            | grep -E 'Alias name:|SHA1:|SHA-256:'
+
       - name: Build and test signed release APK
         shell: bash
         run: |
@@ -77,32 +90,33 @@ jobs:
             apk="$(find android/app/build/outputs/apk -type f -name '*release*.apk' | head -n 1)"
           fi
           test -n "$apk"
-          cp "$apk" dist/Chompass-5.11.7-universal.apk
+          cp "$apk" dist/Chompass-5.11.8-universal.apk
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Chompass-5.11.7-universal
-          path: dist/Chompass-5.11.7-universal.apk
+          name: Chompass-5.11.8-universal
+          path: dist/Chompass-5.11.8-universal.apk
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v5.11.7
-          name: Chompass 5.11.7
+          tag_name: v5.11.8
+          name: Chompass 5.11.8
           target_commitish: feature/chatgpt-plan-login
           body: |
-            ## Chompass 5.11.7
+            ## Chompass 5.11.8
 
-            This release provides a signed Android build with stable update signing and a real Google Drive app-data backup/sync flow.
+            This release provides a signed Android build with stable update signing and the official Google Android AuthorizationClient flow for Drive app-data backup/sync.
 
             - Uses system DNS first, with Cloudflare and Google DNS-over-HTTPS fallback when Android returns no address.
             - Keeps the official ChatGPT OAuth and Responses API flow unchanged.
             - Coach can now retrieve local nutrition data and prepare user-confirmed log proposals through Responses function calling.
             - No API key is embedded or required for eligible ChatGPT Plus or Pro plan usage.
-            - Google Drive uses the official Android AuthorizationClient consent flow, so the Google Drive app is not required on the phone.
+            - Google Drive uses the official Android AuthorizationClient consent flow; the Google Drive app is not required on the phone.
+            - One-time Google Cloud OAuth setup is required for the `app.chompass` package and the release signing certificate. No HTTPS domain or client secret in the APK is required.
             - The backup is stored in Drive’s private appDataFolder using the limited drive.appdata scope.
             - Optional “Sync after logging food” uploads the updated privacy-limited JSON after food additions, edits, and deletions. Photos, API keys, passwords, and OAuth tokens are not included.
 
             This APK is release-signed with the project keystore and is intended to update earlier Chompass builds signed with the same key.
-          files: dist/Chompass-5.11.7-universal.apk
+          files: dist/Chompass-5.11.8-universal.apk
