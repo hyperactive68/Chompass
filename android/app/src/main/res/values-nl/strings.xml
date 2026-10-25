@@ -1107,6 +1107,12 @@
     <string name="import_sync_failed">Sync-import mislukt: %1$s</string>
     <string name="import_sync_success">Sync-document geïmporteerd.</string>
     <string name="import_sync_title">Sync-JSON importeren</string>
+    <string name="settings_google_drive_backup">Back-up naar Google Drive</string>
+    <string name="settings_google_drive_backup_desc">Sla deze sync-JSON op via de Android-bestandskiezer. Kies Google Drive als opslaglocatie; Chompass verwerkt nooit je Drive-wachtwoord.</string>
+    <string name="settings_google_drive_backup_success">Back-up opgeslagen. Controleer de gekozen Google Drive-locatie.</string>
+    <string name="settings_google_drive_backup_cancelled">Back-up geannuleerd.</string>
+    <string name="settings_google_drive_backup_no_stream">De gekozen locatie kan niet worden beschreven.</string>
+    <string name="settings_google_drive_backup_failed">Google Drive-back-up opslaan mislukt: %1$s</string>
     <string name="keto_carb_manual_hint">Handmatig doel wordt begrensd tussen 20 en 50 g/dag netto koolhydraten.</string>
     <string name="keto_carb_mode_adaptive">Adaptieve koolhydraten</string>
     <string name="keto_carb_mode_adaptive_subtitle">Aanbevolen op basis van je profiel en doel.</string>
