@@ -835,6 +835,8 @@
     <string name="ai_provider_on_device">Op apparaat (privé)</string>
     <string name="ai_reasoning_effort_auto">Auto</string>
     <string name="ai_reasoning_effort_high">Hoog</string>
+    <string name="ai_reasoning_effort_xhigh">Extra hoog</string>
+    <string name="ai_reasoning_effort_max">Maximaal</string>
     <string name="ai_reasoning_effort_disabled">Uit (geen denken)</string>
     <string name="ai_reasoning_effort_low">Laag</string>
     <string name="ai_reasoning_effort_medium">Gemiddeld</string>
@@ -1364,7 +1366,7 @@
     <string name="goal_tier_safe">Veilig (compact)</string>
     <string name="goal_tier_smart">Slim (volledige geschiedenis)</string>
     <string name="settings_ai_reasoning_effort">Redeneerinspanning</string>
-    <string name="settings_ai_reasoning_effort_footer">OpenRouter-modellen: stelt het denkbudget in. Eigen servers en Ollama: stuurt reasoning_effort als de server dat ondersteunt. Weigert je server het verzoek, kies dan Auto.</string>
+    <string name="settings_ai_reasoning_effort_footer">ChatGPT-planmodellen: gebruikt het gekozen redeneerniveau van de Responses API als het model dit ondersteunt. OpenRouter, eigen servers en Ollama gebruiken hun ondersteunde instelling. Auto gebruikt de standaard van het model.</string>
     <string name="settings_ai_vision_model">Visiemodel</string>
     <string name="settings_ai_vision_model_footer">Foto\'s gebruiken dit model; tekst gebruikt het hoofdmodel. Laat leeg om voor alles het hoofdmodel te gebruiken.</string>
     <string name="settings_ai_vision_model_unset">(zelfde als Model)</string>

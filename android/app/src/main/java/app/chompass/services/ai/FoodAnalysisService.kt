@@ -2311,7 +2311,18 @@ class FoodAnalysisService(
                 AIProvider.ApiFormat.ANTHROPIC ->
                     AnthropicClient.analyze(httpClient, baseUrl, model, sanitizedKey!!, effectivePrompt, imageBytesList, maxTokens)
                 AIProvider.ApiFormat.CHATGPT_RESPONSES ->
-                    ChatGptResponsesClient.analyze(httpClient, model, sanitizedKey!!, effectivePrompt, imageBytesList)
+                    ChatGptResponsesClient.analyze(
+                        httpClient,
+                        model,
+                        sanitizedKey!!,
+                        effectivePrompt,
+                        imageBytesList,
+                        reasoningEffort = OpenRouterReasoningEffort.sanitizeFor(
+                            provider,
+                            model,
+                            reasoningEffort,
+                        ),
+                    )
                 AIProvider.ApiFormat.OPENAI_COMPATIBLE ->
                     OpenAICompatibleClient.analyze(
                         httpClient, baseUrl, model, sanitizedKey, effectivePrompt, imageBytesList, provider, maxTokens, reasoningEffort,
@@ -2348,7 +2359,17 @@ class FoodAnalysisService(
                 )
             AIProvider.ApiFormat.CHATGPT_RESPONSES ->
                 ChatGptResponsesClient.analyze(
-                    httpClient, model, sanitizedKey!!, effectivePrompt, imageBytesList, onDelta,
+                    httpClient,
+                    model,
+                    sanitizedKey!!,
+                    effectivePrompt,
+                    imageBytesList,
+                    onDelta,
+                    reasoningEffort = OpenRouterReasoningEffort.sanitizeFor(
+                        provider,
+                        model,
+                        reasoningEffort,
+                    ),
                 )
             AIProvider.ApiFormat.OPENAI_COMPATIBLE -> {
                 val streamed = OpenAICompatibleClient.analyzeStreaming(

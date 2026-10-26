@@ -7,6 +7,7 @@ import app.chompass.models.FoodGroundingProvenance
 import app.chompass.models.GroundingConfidence
 import app.chompass.models.MacroPlanEdit
 import app.chompass.models.MicronutrientValues
+import app.chompass.models.MicronutrientField
 import app.chompass.models.ServingUnitOption
 import app.chompass.models.OptionalNutrientGoals
 import app.chompass.models.UserProfile
@@ -68,6 +69,22 @@ fun FoodAnalysis.toMicronutrients() = MicronutrientValues(
     omega3 = omega3,
     caffeine = caffeine,
 )
+
+/** Fields that this analysis explicitly supplied, including legitimate zeroes. */
+fun FoodAnalysis.nutritionAnsweredFields(): Set<String> = buildSet {
+    add("calories")
+    add("protein")
+    add("carbs")
+    add("fat")
+    val micros = toMicronutrients()
+    MicronutrientField.entries.forEach { field ->
+        if (micros[field] != null) add(field.jsonKey)
+    }
+}
+
+/** Constituent names supplied by the same analysis, including legitimate all-zero rows. */
+fun FoodAnalysis.nutritionAnsweredConstituentNames(): Set<String> =
+    constituents.mapNotNull { it.name.trim().lowercase().takeIf(String::isNotBlank) }.toSet()
 
 /**
  * Words that stay lowercase mid-name (EN + DE connector words), so
@@ -204,6 +221,8 @@ fun FoodAnalysis.toFoodEntry(
             constituents = constituents,
             productMetadata = productMetadata,
             microsCompositionSignature = app.chompass.models.microsCompositionSignature(constituents),
+            gapAnsweredFields = nutritionAnsweredFields(),
+            gapAnsweredConstituentNames = nutritionAnsweredConstituentNames(),
         )
     )
 

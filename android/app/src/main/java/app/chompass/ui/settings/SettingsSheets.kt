@@ -226,9 +226,15 @@ internal fun SettingsSheets(
                 )
                 SettingsSheet.AI_REASONING_EFFORT -> ListSheet(
                     title = stringResource(R.string.settings_ai_reasoning_effort),
-                    items = OpenRouterReasoningEffort.entries,
+                    items = OpenRouterReasoningEffort.availableFor(ui.activeProvider, ui.activeModel),
                     label = { stringResource(it.displayNameRes) },
-                    selected = { it == ui.openRouterReasoningEffort },
+                    selected = {
+                        it == OpenRouterReasoningEffort.sanitizeFor(
+                            ui.activeProvider,
+                            ui.activeModel,
+                            ui.openRouterReasoningEffort,
+                        )
+                    },
                     onSelect = { vm.setOpenRouterReasoningEffort(it); onDismiss() },
                     footer = stringResource(R.string.settings_ai_reasoning_effort_footer),
                 )

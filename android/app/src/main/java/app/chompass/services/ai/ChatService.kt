@@ -144,7 +144,17 @@ class ChatService(
         val reply = when (provider.apiFormat) {
             AIProvider.ApiFormat.GEMINI -> runGeminiToolLoop(httpClient, baseUrl, model, apiKey!!, systemPrompt, history, newUserMessage, tools, imageBytes, geminiGoogleSearch, maxTokens)
             AIProvider.ApiFormat.ANTHROPIC -> runAnthropicToolLoop(httpClient, baseUrl, model, apiKey!!, systemPrompt, history, newUserMessage, tools, imageBytes, maxTokens)
-            AIProvider.ApiFormat.CHATGPT_RESPONSES -> runChatGptToolLoop(httpClient, model, systemPrompt, history, newUserMessage, tools, imageBytes, maxTokens)
+            AIProvider.ApiFormat.CHATGPT_RESPONSES -> runChatGptToolLoop(
+                httpClient,
+                model,
+                systemPrompt,
+                history,
+                newUserMessage,
+                tools,
+                imageBytes,
+                maxTokens,
+                cfg.reasoningEffort,
+            )
             AIProvider.ApiFormat.OPENAI_COMPATIBLE -> runOpenAIToolLoop(httpClient, baseUrl, model, apiKey, systemPrompt, history, newUserMessage, provider, tools, imageBytes, maxTokens, cfg.reasoningEffort)
             AIProvider.ApiFormat.ON_DEVICE -> error("unreachable — guarded above")
         }
@@ -167,6 +177,7 @@ class ChatService(
         tools: CoachTools,
         imageBytes: ByteArray?,
         maxTokens: Int,
+        reasoningEffort: OpenRouterReasoningEffort,
     ): String {
         val auth = chatGptAuth ?: throw ChatGptAuthException("Connect your ChatGPT account in Settings first.")
         val declarations = JSONArray()
@@ -200,6 +211,11 @@ class ChatService(
             tools = chatGptTools,
             maxOutputTokens = maxTokens,
             executeTool = tools::execute,
+            reasoningEffort = OpenRouterReasoningEffort.sanitizeFor(
+                AIProvider.CHATGPT,
+                model,
+                reasoningEffort,
+            ),
         )
     }
 

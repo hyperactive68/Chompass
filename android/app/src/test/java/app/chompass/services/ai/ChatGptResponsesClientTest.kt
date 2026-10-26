@@ -1,6 +1,7 @@
 package app.chompass.services.ai
 
 import kotlinx.coroutines.runBlocking
+import app.chompass.data.OpenRouterReasoningEffort
 import app.chompass.models.ChatMessage
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
@@ -72,6 +73,43 @@ class ChatGptResponsesClientTest {
     }
 
     @Test
+    fun reasoningEffort_isSentAsResponsesReasoningObject() = runBlocking {
+        server.enqueue(
+            MockResponse()
+                .setHeader("Content-Type", "text/event-stream")
+                .setBody(
+                    """
+                    data: {"type":"response.output_text.delta","delta":"ok"}
+
+                    data: {"type":"response.completed","response":{"status":"completed"}}
+
+                    data: [DONE]
+
+                    """.trimIndent(),
+                ),
+        )
+
+        ChatGptResponsesClient.analyze(
+            client = OkHttpClient(),
+            model = "gpt-5.6-sol",
+            accessToken = "oauth-token",
+            prompt = "Analyze",
+            imageBytesList = emptyList(),
+            reasoningEffort = OpenRouterReasoningEffort.XHIGH,
+            resourceBaseUrl = server.url("v1").toString(),
+        )
+
+        val body = JSONObject(server.takeRequest().body.readUtf8())
+        assertEquals("xhigh", body.getJSONObject("reasoning").getString("effort"))
+    }
+
+    @Test
+    fun autoReasoning_omitsOptionalField() {
+        assertTrue(ChatGptResponsesClient.reasoningBody(OpenRouterReasoningEffort.AUTO) == null)
+        assertEquals("max", ChatGptResponsesClient.reasoningBody(OpenRouterReasoningEffort.MAX)?.getString("effort"))
+    }
+
+    @Test
     fun coachUsesStreamedTextWhenCompletedResponseOmitsOutput() = runBlocking {
         server.enqueue(
             MockResponse()
@@ -99,10 +137,13 @@ class ChatGptResponsesClientTest {
             tools = org.json.JSONArray(),
             maxOutputTokens = 256,
             executeTool = { _, _ -> error("no tool expected") },
+            reasoningEffort = OpenRouterReasoningEffort.MAX,
             resourceBaseUrl = server.url("v1").toString(),
         )
 
         assertEquals("Coach antwoord", result)
+        val body = JSONObject(server.takeRequest().body.readUtf8())
+        assertEquals("max", body.getJSONObject("reasoning").getString("effort"))
     }
 
     @Test

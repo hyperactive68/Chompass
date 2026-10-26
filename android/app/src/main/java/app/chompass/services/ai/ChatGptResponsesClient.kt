@@ -1,6 +1,7 @@
 package app.chompass.services.ai
 
 import app.chompass.R
+import app.chompass.data.OpenRouterReasoningEffort
 import app.chompass.models.ChatMessage
 import java.util.Base64
 import kotlinx.serialization.json.Json
@@ -17,6 +18,10 @@ import org.json.JSONObject
 object ChatGptResponsesClient {
     private val jsonMedia = "application/json; charset=utf-8".toMediaType()
 
+    /** Responses API reasoning object; AUTO deliberately leaves model defaulting intact. */
+    internal fun reasoningBody(effort: OpenRouterReasoningEffort): JSONObject? =
+        effort.requestValue?.let { JSONObject().put("effort", it) }
+
     suspend fun analyze(
         client: OkHttpClient,
         model: String,
@@ -25,6 +30,7 @@ object ChatGptResponsesClient {
         imageBytesList: List<ByteArray>,
         onDelta: (String) -> Unit = {},
         resourceBaseUrl: String = ChatGptAuthManager.RESOURCE,
+        reasoningEffort: OpenRouterReasoningEffort = OpenRouterReasoningEffort.AUTO,
     ): String {
         val content = JSONArray().apply {
             imageBytesList.forEach { image ->
@@ -41,6 +47,7 @@ object ChatGptResponsesClient {
             .put("input", JSONArray().put(JSONObject().put("role", "user").put("content", content)))
             .put("store", false)
             .put("stream", true)
+            .also { reasoningBody(reasoningEffort)?.let { value -> it.put("reasoning", value) } }
         val request = Request.Builder()
             .url("${resourceBaseUrl.trimEnd('/')}/responses")
             .header("Authorization", "Bearer $accessToken")
@@ -105,6 +112,7 @@ object ChatGptResponsesClient {
         maxToolRounds: Int = 6,
         executeTool: suspend (name: String, arguments: JSONObject) -> String,
         resourceBaseUrl: String = ChatGptAuthManager.RESOURCE,
+        reasoningEffort: OpenRouterReasoningEffort = OpenRouterReasoningEffort.AUTO,
     ): String {
         val input = JSONArray()
         for (message in history) {
@@ -136,6 +144,7 @@ object ChatGptResponsesClient {
                 // ChatGPT-plan preview requires streaming and rejects max_output_tokens.
                 .put("store", false)
                 .put("stream", true)
+                .also { reasoningBody(reasoningEffort)?.let { value -> it.put("reasoning", value) } }
             val request = Request.Builder()
                 .url("${resourceBaseUrl.trimEnd('/')}/responses")
                 .header("Authorization", "Bearer $accessToken")

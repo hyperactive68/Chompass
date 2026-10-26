@@ -29,6 +29,8 @@ import kotlinx.coroutines.launch
 import app.chompass.services.FillGapsFeature
 import app.chompass.services.ai.FoodAnalysis
 import app.chompass.services.ai.toMicronutrients
+import app.chompass.services.ai.nutritionAnsweredFields
+import app.chompass.services.ai.nutritionAnsweredConstituentNames
 import app.chompass.services.ai.AiError
 import app.chompass.services.ai.userMessage
 import androidx.compose.material.icons.Icons
@@ -276,6 +278,8 @@ fun EditFoodEntrySheet(
     var editableCarbs by remember(currentBaseEntry) { mutableStateOf(currentBaseEntry.carbs) }
     var editableFat by remember(currentBaseEntry) { mutableStateOf(currentBaseEntry.fat) }
     var editableMicros by remember(currentBaseEntry) { mutableStateOf(MicronutrientValues.from(currentBaseEntry)) }
+    var manuallyAnsweredFields by remember(currentBaseEntry) { mutableStateOf(emptySet<String>()) }
+    var manuallyAnsweredConstituentNames by remember(currentBaseEntry) { mutableStateOf(emptySet<String>()) }
     var mealMenuExpanded by remember { mutableStateOf(false) }
     var servingMenuExpanded by remember { mutableStateOf(false) }
     val zone = remember { ZoneId.systemDefault() }
@@ -350,6 +354,8 @@ fun EditFoodEntrySheet(
                     protein = saveMath.scaledMacro(editableProtein),
                     carbs = saveMath.scaledMacro(editableCarbs),
                     fat = saveMath.scaledMacro(editableFat),
+                    gapAnsweredFields = currentBaseEntry.gapAnsweredFields + manuallyAnsweredFields,
+                    gapAnsweredConstituentNames = currentBaseEntry.gapAnsweredConstituentNames + manuallyAnsweredConstituentNames,
                     timestamp = loggedDate.atTime(loggedTime).atZone(zone).toInstant(),
                     mealType = mealType,
                     customNote = noteText.trim().takeIf { it.isNotEmpty() },
@@ -413,7 +419,14 @@ fun EditFoodEntrySheet(
                         carbs = newAnalysis.carbs,
                         fat = newAnalysis.fat,
                         customNote = noteText.trim().takeIf { it.isNotEmpty() },
-                    ).let { newAnalysis.toMicronutrients().applyTo(it) }
+                    ).let {
+                        newAnalysis.toMicronutrients().applyTo(
+                            it.copy(
+                                gapAnsweredFields = newAnalysis.nutritionAnsweredFields(),
+                                gapAnsweredConstituentNames = newAnalysis.nutritionAnsweredConstituentNames(),
+                            ),
+                        )
+                    }
                 } else {
                     currentBaseEntry.copy(
                         name = newAnalysis.name,
@@ -429,7 +442,14 @@ fun EditFoodEntrySheet(
                         emoji = newAnalysis.emoji,
                         constituents = newAnalysis.constituents,
                         microsCompositionSignature = app.chompass.models.microsCompositionSignature(newAnalysis.constituents),
-                    ).let { newAnalysis.toMicronutrients().applyTo(it) }
+                    ).let {
+                        newAnalysis.toMicronutrients().applyTo(
+                            it.copy(
+                                gapAnsweredFields = newAnalysis.nutritionAnsweredFields(),
+                                gapAnsweredConstituentNames = newAnalysis.nutritionAnsweredConstituentNames(),
+                            ),
+                        )
+                    }
                 }
                 editableCalories = newAnalysis.calories
                 editableProtein = newAnalysis.protein
@@ -850,7 +870,10 @@ fun EditFoodEntrySheet(
                         unit = energyUnitLabel(),
                         unlocked = nutritionUnlocked,
                         accentColor = AppColors.Calorie,
-                        onEdit = { editableCalories = EnergyFormat.toKcal(math.baseDoubleFromText(it).roundToInt(), unit) }
+                        onEdit = {
+                            editableCalories = EnergyFormat.toKcal(math.baseDoubleFromText(it).roundToInt(), unit)
+                            manuallyAnsweredFields = manuallyAnsweredFields + "calories"
+                        }
                     )
                     SheetHairline()
                     ReviewNutritionValueRow(
@@ -860,7 +883,10 @@ fun EditFoodEntrySheet(
                         unit = stringResource(R.string.unit_g),
                         unlocked = nutritionUnlocked,
                         accentColor = AppColors.Protein,
-                        onEdit = { editableProtein = math.baseDoubleFromText(it) }
+                        onEdit = {
+                            editableProtein = math.baseDoubleFromText(it)
+                            manuallyAnsweredFields = manuallyAnsweredFields + "protein"
+                        }
                     )
                     SheetHairline()
                     ReviewNutritionValueRow(
@@ -870,7 +896,10 @@ fun EditFoodEntrySheet(
                         unit = stringResource(R.string.unit_g),
                         unlocked = nutritionUnlocked,
                         accentColor = AppColors.Carbs,
-                        onEdit = { editableCarbs = math.baseDoubleFromText(it) }
+                        onEdit = {
+                            editableCarbs = math.baseDoubleFromText(it)
+                            manuallyAnsweredFields = manuallyAnsweredFields + "carbs"
+                        }
                     )
                     SheetHairline()
                     ReviewNutritionValueRow(
@@ -880,7 +909,10 @@ fun EditFoodEntrySheet(
                         unit = stringResource(R.string.unit_g),
                         unlocked = nutritionUnlocked,
                         accentColor = AppColors.Fat,
-                        onEdit = { editableFat = math.baseDoubleFromText(it) }
+                        onEdit = {
+                            editableFat = math.baseDoubleFromText(it)
+                            manuallyAnsweredFields = manuallyAnsweredFields + "fat"
+                        }
                     )
                     SheetHairline()
                     ReviewNutritionValueRow(
@@ -895,6 +927,7 @@ fun EditFoodEntrySheet(
                                 MicronutrientField.FIBER,
                                 math.baseOptionalFromText(it),
                             )
+                            manuallyAnsweredFields = manuallyAnsweredFields + MicronutrientField.FIBER.jsonKey
                         }
                     )
                 }
@@ -955,6 +988,7 @@ fun EditFoodEntrySheet(
                                     dim = true,
                                     onEdit = {
                                         editableMicros = editableMicros.with(field, math.baseOptionalFromText(it))
+                                        manuallyAnsweredFields = manuallyAnsweredFields + field.jsonKey
                                     }
                                 )
                             }
@@ -980,6 +1014,9 @@ fun EditFoodEntrySheet(
                             editableProtein = commit.baseAggregate.protein
                             editableCarbs = commit.baseAggregate.carbs
                             editableFat = commit.baseAggregate.fat
+                            manuallyAnsweredFields = manuallyAnsweredFields + setOf("calories", "protein", "carbs", "fat")
+                            manuallyAnsweredConstituentNames = manuallyAnsweredConstituentNames +
+                                commit.bases.mapNotNull { it.name.trim().lowercase().takeIf(String::isNotBlank) }
                         }
                         if (commit.baseSum > 0) {
                             baseServingGrams = commit.baseSum

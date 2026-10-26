@@ -7,10 +7,10 @@ import kotlin.math.roundToInt
 
 /**
  * Which entry-level macro the AI fill-missing scan may ask for. Entry-level
- * zeros are the Mealie-import / logged-by-name signature (0 already renders
- * as an em dash, so a fill is display-equivalent to missing → filled).
- * Legit zeros (black coffee) count as gaps by design: the scan never
- * auto-fills, the user drives it from the edit sheet.
+ * zeros without an explicit answer marker are the Mealie-import /
+ * logged-by-name signature (0 already renders as an em dash, so a fill is
+ * display-equivalent to missing → filled). Explicit zeroes from analysis or
+ * manual editing are marked in [FoodEntry.gapAnsweredFields] and are complete.
  */
 enum class GapMacroField(val labelRes: Int, val jsonKey: String) {
     CALORIES(R.string.unit_kcal, "calories"),

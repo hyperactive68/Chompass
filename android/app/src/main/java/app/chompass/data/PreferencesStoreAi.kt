@@ -457,17 +457,21 @@ internal suspend fun PreferencesStore.setAiReadTimeoutSecondsImpl(v: Int) {
         dataStore.edit { it[Keys.AI_READ_TIMEOUT_SECONDS] = clampAiReadTimeoutSeconds(v) }
     }
 
-/** Reasoning-effort control for OpenRouter reasoning-capable models (upstream #194)
- *  and selfhosted OpenAI-compatible hosts (#97). AUTO keeps the app's historical
- *  behavior: `exclude: true` always with `effort: "low"` on compact retries only
- *  (OpenRouter), and no reasoning field at all (Custom/Ollama). DISABLED asks for
- *  no thinking: `reasoning_effort: "none"` on Custom/Ollama, exclude-only on
- *  OpenRouter. Explicit efforts are sent with every request. */
+/** Reasoning-effort control for model providers.
+ *
+ * AUTO omits the field so the selected model uses its documented default.
+ * LOW through MAX are the Responses API effort values supported by the current
+ * GPT-5.6/GPT-6 families. DISABLED remains for OpenAI-compatible hosts that
+ * expose `reasoning_effort: "none"`; it is never offered for ChatGPT-plan
+ * Responses requests.
+ */
 enum class OpenRouterReasoningEffort(val storageKey: String, val requestValue: String?) {
     AUTO("auto", null),
     LOW("low", "low"),
     MEDIUM("medium", "medium"),
     HIGH("high", "high"),
+    XHIGH("xhigh", "xhigh"),
+    MAX("max", "max"),
     DISABLED("disabled", "none");
 
     @get:StringRes
@@ -476,12 +480,40 @@ enum class OpenRouterReasoningEffort(val storageKey: String, val requestValue: S
         LOW -> R.string.ai_reasoning_effort_low
         MEDIUM -> R.string.ai_reasoning_effort_medium
         HIGH -> R.string.ai_reasoning_effort_high
+        XHIGH -> R.string.ai_reasoning_effort_xhigh
+        MAX -> R.string.ai_reasoning_effort_max
         DISABLED -> R.string.ai_reasoning_effort_disabled
     }
 
     companion object {
         fun fromStorage(raw: String?): OpenRouterReasoningEffort =
             entries.firstOrNull { it.storageKey == raw } ?: AUTO
+
+        /**
+         * Values that are safe to show/send for the selected provider/model.
+         * ChatGPT-plan uses the public Responses API, whose reasoning effort
+         * is model-dependent. The current GPT-5.6/GPT-6 lineups support the
+         * complete low-to-max range; unknown runtime model ids stay on AUTO so
+         * the app never guesses an unsupported request field.
+         */
+        fun availableFor(provider: AIProvider, model: String): List<OpenRouterReasoningEffort> {
+            val normalized = model.trim().lowercase()
+            val gptReasoningModel = normalized.startsWith("gpt-5.6") ||
+                normalized.startsWith("gpt-6")
+            return when {
+                provider == AIProvider.CHATGPT && gptReasoningModel ->
+                    listOf(AUTO, LOW, MEDIUM, HIGH, XHIGH, MAX)
+                provider == AIProvider.CHATGPT -> listOf(AUTO)
+                provider == AIProvider.OPENROUTER ||
+                    provider == AIProvider.CUSTOM_OPENAI ||
+                    provider == AIProvider.OLLAMA ->
+                    listOf(AUTO, LOW, MEDIUM, HIGH, DISABLED)
+                else -> emptyList()
+            }
+        }
+
+        fun sanitizeFor(provider: AIProvider, model: String, selected: OpenRouterReasoningEffort): OpenRouterReasoningEffort =
+            selected.takeIf { it in availableFor(provider, model) } ?: AUTO
     }
 }
 

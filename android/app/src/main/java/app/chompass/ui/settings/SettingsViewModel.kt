@@ -936,7 +936,12 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
 
     fun setOpenRouterReasoningEffort(e: OpenRouterReasoningEffort) {
         viewModelScope.launch {
-            container.prefs.editActiveProfile { it.copy(reasoningEffort = e.storageKey) }
+            val active = _ui.value.activeProfile
+            val model = active?.let { it.provider.supportedModelOrDefault(it.model) }.orEmpty()
+            val selected = active?.provider?.let { provider ->
+                OpenRouterReasoningEffort.sanitizeFor(provider, model, e)
+            } ?: OpenRouterReasoningEffort.AUTO
+            container.prefs.editActiveProfile { it.copy(reasoningEffort = selected.storageKey) }
             refreshAiState()
         }
     }
@@ -1132,8 +1137,12 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
             aiReadTimeoutSeconds = effectiveReadTimeoutSeconds(active, container.prefs.aiReadTimeoutSeconds.first()),
             geminiGoogleSearchEnabled = active?.geminiGoogleSearch
                 ?: container.prefs.geminiGoogleSearchEnabled.first(),
-            openRouterReasoningEffort = active?.reasoningEffort?.let(OpenRouterReasoningEffort::fromStorage)
-                ?: container.prefs.openRouterReasoningEffort.first(),
+            openRouterReasoningEffort = OpenRouterReasoningEffort.sanitizeFor(
+                active?.provider ?: AIProvider.GEMINI,
+                active?.let { it.provider.supportedModelOrDefault(it.model) }.orEmpty(),
+                active?.reasoningEffort?.let(OpenRouterReasoningEffort::fromStorage)
+                    ?: container.prefs.openRouterReasoningEffort.first(),
+            ),
             apiKeyTesting = false,
             apiKeyTestOk = null,
             apiKeyTestMessage = null,

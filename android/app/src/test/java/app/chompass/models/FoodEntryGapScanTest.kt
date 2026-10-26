@@ -93,9 +93,8 @@ class FoodEntryGapScanTest {
 
     @Test
     fun legitZeroMacros_stillCountAsGaps_byDesign() {
-        // Black coffee: no protein/carbs/fat worth recording — still gaps,
-        // because 0 and "unknown" are display-equivalent and the user drives
-        // every fill from the edit sheet.
+        // Legacy/unmarked black coffee: no protein/carbs/fat worth recording,
+        // but old rows still use zero as the missing-value sentinel.
         val report = entry(calories = 2).gapReport()
 
         assertEquals(

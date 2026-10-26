@@ -79,6 +79,8 @@ import app.chompass.services.health.HomeActivitySnapshot
 import app.chompass.services.ai.FoodAnalysis
 import app.chompass.services.ai.applyTo
 import app.chompass.services.ai.toMicronutrients
+import app.chompass.services.ai.nutritionAnsweredFields
+import app.chompass.services.ai.nutritionAnsweredConstituentNames
 import app.chompass.services.ai.userMessage
 import app.chompass.services.ai.errorDetail
 import app.chompass.models.MicronutrientValues
@@ -2719,6 +2721,8 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
                         constituents = constituents,
                         productMetadata = analysis.productMetadata,
                         microsCompositionSignature = app.chompass.models.microsCompositionSignature(constituents),
+                        gapAnsweredFields = analysis.nutritionAnsweredFields(),
+                        gapAnsweredConstituentNames = analysis.nutritionAnsweredConstituentNames(),
                         planned = plannedFor(
                             _ui.value.mealPlanningEnabled,
                             planAction = false,
@@ -2846,6 +2850,8 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
                             constituents = constituents,
                             productMetadata = analysis.productMetadata,
                             microsCompositionSignature = app.chompass.models.microsCompositionSignature(constituents),
+                            gapAnsweredFields = analysis.nutritionAnsweredFields(),
+                            gapAnsweredConstituentNames = analysis.nutritionAnsweredConstituentNames(),
                             planned = false,
                         )
                     )
@@ -3792,6 +3798,15 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
                         servingUnitOptions = servingUnitOptions,
                         selectedServingUnit = if (servingUnitOptions.isEmpty()) null else selectedServingUnit,
                         selectedServingQuantity = if (servingUnitOptions.isEmpty()) null else selectedServingQuantity,
+                        gapAnsweredFields = buildSet {
+                            add("calories")
+                            add("protein")
+                            add("carbs")
+                            add("fat")
+                            app.chompass.models.MicronutrientField.entries.forEach { field ->
+                                if (micronutrients[field] != null) add(field.jsonKey)
+                            }
+                        },
                         planned = plannedFor(
                             _ui.value.mealPlanningEnabled,
                             planAction = false,

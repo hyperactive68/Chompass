@@ -99,6 +99,8 @@ import app.chompass.services.ai.FoodAnalysis
 import app.chompass.services.ai.PartialFoodAnalysis
 import app.chompass.services.ai.applyTo
 import app.chompass.services.ai.toMicronutrients
+import app.chompass.services.ai.nutritionAnsweredFields
+import app.chompass.services.ai.nutritionAnsweredConstituentNames
 import app.chompass.services.ai.AiError
 import app.chompass.services.ai.userMessage
 import app.chompass.ui.theme.AppColors
@@ -477,6 +479,8 @@ fun FoodResultSheet(
                 scale,
             ),
             productMetadata = effectiveAnalysis.productMetadata,
+            gapAnsweredFields = effectiveAnalysis.nutritionAnsweredFields(),
+            gapAnsweredConstituentNames = effectiveAnalysis.nutritionAnsweredConstituentNames(),
         )
     )
     var whatIfEntry by remember { mutableStateOf<FoodEntry?>(null) }

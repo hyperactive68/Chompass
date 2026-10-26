@@ -168,6 +168,9 @@ data class FoodEntry(
         constituents = constituents,
         productMetadata = productMetadata,
         microsCompositionSignature = microsCompositionSignature,
+        gapAnsweredFields = gapAnsweredFields,
+        gapAnsweredConstituentNames = gapAnsweredConstituentNames,
+        planned = planned,
     )
 }
 
