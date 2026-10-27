@@ -330,6 +330,31 @@ private data class EarlyHydration(
     val onDeviceModels: List<String>,
 )
 
+private data class AiProfileSlice(
+    val profiles: List<AiProfile>,
+    val active: AiProfile?,
+    val fallbackProfileId: String?,
+    val globalReasoning: OpenRouterReasoningEffort,
+)
+
+/**
+ * Resolves the reasoning level shown by Settings from the active profile.
+ *
+ * Reasoning is stored as a per-profile override, while the legacy DataStore
+ * value is only the fallback for profiles that do not have an override. Keep
+ * this resolution in one place so the startup hydration path cannot replace a
+ * saved profile value with the global default (usually Auto).
+ */
+internal fun resolveReasoningEffortForProfile(
+    profile: AiProfile?,
+    global: OpenRouterReasoningEffort,
+): OpenRouterReasoningEffort {
+    if (profile == null) return global
+    val model = profile.provider.supportedModelOrDefault(profile.model)
+    val selected = profile.reasoningEffort?.let(OpenRouterReasoningEffort::fromStorage) ?: global
+    return OpenRouterReasoningEffort.sanitizeFor(profile.provider, model, selected)
+}
+
 internal fun commitSettingsHydrate(
     current: SettingsUiState,
     incoming: SettingsUiState,
@@ -362,6 +387,10 @@ internal fun commitSettingsHydrate(
         activeProfile = current.activeProfile ?: incoming.activeProfile,
         fallbackProfileId = current.fallbackProfileId ?: incoming.fallbackProfileId,
         apiKeyMasked = current.apiKeyMasked.ifEmpty { incoming.apiKeyMasked },
+        openRouterReasoningEffort = resolveReasoningEffortForProfile(
+            current.activeProfile ?: incoming.activeProfile,
+            incoming.openRouterReasoningEffort,
+        ),
     )
 }
 
@@ -414,20 +443,23 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
                 container.prefs.aiProfiles,
                 container.prefs.activeAiProfile,
                 container.prefs.fallbackAiProfileId,
-            ) { profiles, active, fallbackId -> Triple(profiles, active, fallbackId) }
-                .collect { (profiles, active, fallbackId) ->
-                    val masked = runCatching {
-                        maskKey(active?.let { container.keyStore.profileApiKey(it.id) })
-                    }.getOrDefault("")
-                    _ui.update {
-                        it.copy(
-                            profiles = profiles,
-                            activeProfile = active,
-                            fallbackProfileId = fallbackId,
-                            apiKeyMasked = masked,
-                        )
-                    }
+                container.prefs.openRouterReasoningEffort,
+            ) { profiles, active, fallbackId, globalReasoning ->
+                AiProfileSlice(profiles, active, fallbackId, globalReasoning)
+            }.collect { (profiles, active, fallbackId, globalReasoning) ->
+                val masked = runCatching {
+                    maskKey(active?.let { container.keyStore.profileApiKey(it.id) })
+                }.getOrDefault("")
+                _ui.update {
+                    it.copy(
+                        profiles = profiles,
+                        activeProfile = active,
+                        fallbackProfileId = fallbackId,
+                        apiKeyMasked = masked,
+                        openRouterReasoningEffort = resolveReasoningEffortForProfile(active, globalReasoning),
+                    )
                 }
+            }
         }
 
         viewModelScope.launch {
@@ -639,7 +671,10 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
                     userContext = snap.userContext,
                     fallbackEnabled = snap.fallbackEnabled,
                     geminiGoogleSearchEnabled = snap.geminiGoogleSearchEnabled,
-                    openRouterReasoningEffort = snap.openRouterReasoningEffort,
+                    openRouterReasoningEffort = resolveReasoningEffortForProfile(
+                        active,
+                        snap.openRouterReasoningEffort,
+                    ),
                     goalRecalcTier = snap.goalRecalcTier,
                     mealConstituentsEnabled = snap.mealConstituentsEnabled,
                     fillMissingRemindersEnabled = snap.fillMissingRemindersEnabled,
@@ -1137,11 +1172,9 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
             aiReadTimeoutSeconds = effectiveReadTimeoutSeconds(active, container.prefs.aiReadTimeoutSeconds.first()),
             geminiGoogleSearchEnabled = active?.geminiGoogleSearch
                 ?: container.prefs.geminiGoogleSearchEnabled.first(),
-            openRouterReasoningEffort = OpenRouterReasoningEffort.sanitizeFor(
-                active?.provider ?: AIProvider.GEMINI,
-                active?.let { it.provider.supportedModelOrDefault(it.model) }.orEmpty(),
-                active?.reasoningEffort?.let(OpenRouterReasoningEffort::fromStorage)
-                    ?: container.prefs.openRouterReasoningEffort.first(),
+            openRouterReasoningEffort = resolveReasoningEffortForProfile(
+                active,
+                container.prefs.openRouterReasoningEffort.first(),
             ),
             apiKeyTesting = false,
             apiKeyTestOk = null,

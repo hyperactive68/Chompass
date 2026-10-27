@@ -90,22 +90,22 @@ jobs:
             apk="$(find android/app/build/outputs/apk -type f -name '*release*.apk' | head -n 1)"
           fi
           test -n "$apk"
-          cp "$apk" dist/Chompass-5.11.9-universal.apk
+          cp "$apk" dist/Chompass-5.11.10-universal.apk
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Chompass-5.11.9-universal
-          path: dist/Chompass-5.11.9-universal.apk
+          name: Chompass-5.11.10-universal
+          path: dist/Chompass-5.11.10-universal.apk
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v5.11.9
-          name: Chompass 5.11.9
+          tag_name: v5.11.10
+          name: Chompass 5.11.10
           target_commitish: feature/chatgpt-plan-login
           body: |
-            ## Chompass 5.11.9
+            ## Chompass 5.11.10
 
             This release provides a signed Android build with stable update signing and the official Google Android AuthorizationClient flow for Drive app-data backup/sync.
 
@@ -118,6 +118,7 @@ jobs:
             - The backup is stored in Drive’s private appDataFolder using the limited drive.appdata scope.
             - Optional “Sync after logging food” uploads the updated privacy-limited JSON after food additions, edits, and deletions. Photos, API keys, passwords, and OAuth tokens are not included.
             - Adds a model-aware Responses API reasoning-level picker (Auto through Maximum) and treats explicit zero nutrition values as answered.
+            - Restores the selected per-profile reasoning level after app restart and startup hydration.
 
             This APK is release-signed with the project keystore and is intended to update earlier Chompass builds signed with the same key.
-          files: dist/Chompass-5.11.9-universal.apk
+          files: dist/Chompass-5.11.10-universal.apk
