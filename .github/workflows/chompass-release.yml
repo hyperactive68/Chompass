@@ -2,8 +2,9 @@ name: Chompass Android release
 
 on:
   push:
-    branches:
-      - feature/chatgpt-plan-login
+    tags:
+      - 'v*'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -101,9 +102,9 @@ jobs:
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v6.0.0
-          name: Chompass 6.0.0
-          target_commitish: feature/chatgpt-plan-login
+          tag_name: ${{ github.ref_name }}
+          name: Chompass ${{ github.ref_name }}
+          target_commitish: ${{ github.sha }}
           body: |
             ## Chompass 6.0.0
 
