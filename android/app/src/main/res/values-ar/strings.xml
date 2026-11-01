@@ -79,7 +79,23 @@
 
     <!-- AI Provider names -->
     <string name="ai_provider_ollama">Ollama (محلي)</string>
-    <string name="ai_provider_custom">مخصص (متوافق مع OpenAI)</string>
+    <string name="ai_provider_ollama_cloud">Ollama Cloud</string>
+    <string name="ai_provider_custom">عنوان آخر</string>
+    <string name="ai_provider_subtitle_custom">اكتب عنوان الأساس</string>
+    <string name="ai_provider_search_hint">ابحث عن الاسم أو المضيف</string>
+    <string name="ai_provider_section_shortcuts">اختصارات</string>
+    <string name="ai_provider_section_phone">على هذا الهاتف</string>
+    <string name="ai_provider_section_server">خادمك</string>
+    <string name="ai_provider_section_cloud">سحابة</string>
+    <string name="ai_provider_chip_on_phone">على الهاتف</string>
+    <string name="ai_provider_chip_your_server">خادمك</string>
+    <string name="ai_provider_chip_native">أصلي</string>
+    <string name="ai_provider_chip_cloud">سحابة</string>
+    <string name="ai_provider_row_gemini">مفتاح · تبديل بحث Google</string>
+    <string name="ai_provider_row_anthropic">مفتاح · واجهة منفصلة</string>
+    <string name="ai_provider_row_ollama">هذه الشبكة · بلا مفتاح</string>
+    <string name="ai_provider_row_host_key">%1$s · مفتاح</string>
+    <string name="ai_provider_directory_footer">المضيفون المدرجون يأتون مع هذا الإصدار. يُرسل المفتاح فقط إلى المضيف الذي تختاره.</string>
 
     <!-- AI Provider API key placeholders -->
     <string name="api_key_placeholder">الصق مفتاح API</string>
@@ -517,6 +533,8 @@
     <string name="settings_server_url">عنوان URL للخادم</string>
     <string name="settings_tap_to_edit">اضغط للتعديل</string>
     <string name="settings_custom_url_title">عنوان URL أساسي مخصص</string>
+    <string name="settings_custom_directory_docs">الوثائق</string>
+    <string name="ai_model_accepts_images">يقبل الصور (مُصرَّح به)</string>
     <string name="settings_ai_allow_insecure_http">السماح بـ HTTP غير الآمن</string>
     <string name="settings_ai_allow_insecure_http_footer">يتيح لنقاط النهاية المخصصة وOllama استخدام عناوين http://، مثلاً على شبكتك المنزلية. مزوّدو السحابة يستخدمون https. أبقه مطفأ إلا إذا لم يكن لخادمك TLS.</string>
     <string name="settings_clear_key">مسح المفتاح</string>
@@ -592,7 +610,7 @@
     <!-- About -->
     <string name="about_rate">قيّم التطبيق</string>
     <string name="about_share">شارك التطبيق</string>
-    <string name="about_open_source">مفتوح المصدر (MIT)</string>
+    <string name="about_open_source">مفتوح المصدر (GPL v3)</string>
     <string name="about_report_issue">الإبلاغ عن مشكلة</string>
     <string name="about_request_feature">طلب ميزة</string>
     <string name="about_privacy">سياسة الخصوصية</string>
@@ -702,11 +720,7 @@
     <string name="ai_provider_subtitle_deepinfra">نماذج مفتوحة مستضافة</string>
     <string name="ai_provider_subtitle_mistral">نماذج Mistral</string>
     <string name="ai_provider_subtitle_ollama">حاسوبك، بلا سحابة</string>
-    <string name="ai_provider_subtitle_custom">LM Studio وvLLM وllama.cpp…</string>
-    <string name="ai_provider_group_recommended">موصى به</string>
-    <string name="ai_provider_group_cloud">مزودو السحابة</string>
-    <string name="ai_provider_group_local">محلي ومستضاف ذاتيًا</string>
-    <string name="ai_provider_group_device">على الجهاز</string>
+    <string name="ai_provider_subtitle_ollama_cloud">نماذج Ollama المستضافة</string>
     <string name="settings_section_ai_profile">الملف الشخصي</string>
     <string name="settings_section_ai_connection">الاتصال</string>
     <string name="settings_section_ai_advanced">متقدم</string>
@@ -715,7 +729,6 @@
     <string name="settings_ai_key_remove_title">إزالة مفتاح API؟</string>
     <string name="settings_ai_key_remove_body">حفظ مفتاح فارغ يحذف المفتاح المخزّن لهذا الملف الشخصي.</string>
     <string name="settings_ai_get_key">الحصول على مفتاح API</string>
-    <string name="settings_ai_value_default">%1$,d (افتراضي)</string>
     <string name="settings_ai_timeout_default">%1$,ds (افتراضي)</string>
     <string name="camera_scale_tip_message">نصيحة: ضع شوكة أو يدًا أو عملة بجانب طعامك. يساعد في تقدير حجم الحصة.</string>
     <string name="cd_relog_meal">تسجيل %1$s مرة أخرى</string>
@@ -836,19 +849,41 @@
     <string name="action_show">إظهار</string>
     <string name="action_undo">تراجع</string>
     <string name="action_save_to_favorites">حفظ في المفضلة</string>
+    <string name="action_save_to_library">حفظ في المكتبة</string>
+    <string name="action_hide_from_suggestions">إخفاء من الاقتراحات</string>
+    <string name="action_unhide">إظهار</string>
+    <string name="settings_saved_foods">الأطعمة المحفوظة</string>
+    <string name="library_hidden_section">مخفي</string>
+    <string name="library_empty">لا توجد أطعمة محفوظة بعد</string>
+    <string name="library_never_logged">لم يُسجل مطلقًا</string>
+    <string name="library_row_summary">%1$d سجلات · آخرها %2$s</string>
+    <string name="library_delete_rows_title">حذف السجلات؟</string>
+    <string name="library_delete_rows_message">حذف جميع سجلات “%2$s” البالغ عددها %1$d؟ ستُعاد حساب الأيام. يبقى الطعام المحفوظ هنا، وسيُحذف سجله من اليوميات فقط.</string>
+    <string name="library_merge_section">تكرارات محتملة</string>
+    <string name="library_merge_title">دمج التكرارات</string>
+    <string name="library_merge_intro">يبدو أنها نفس الطعام. اختر الاسم الذي تريد إبقاءه — سيُدمج الباقي فيه.</string>
+    <string name="library_merge_rows_message">ستتم إعادة تسمية %1$d سجلات إلى “%2$s”. لن يُحذف أي شيء؛ ستُعاد حساب الأيام.</string>
+    <string name="library_merge_action">دمج</string>
+    <string name="library_sort_last_logged">آخر تسجيل</string>
+    <string name="library_sort_name">الاسم</string>
+    <string name="library_sort_logs">السجلات</string>
     <string name="saved_to_favorites">تم الحفظ في المفضلة</string>
     <string name="action_what_if">ماذا لو؟</string>
     <string name="add_food_relog_kcal">%1$d سعرة %2$s</string>
     <string name="ai_error_coach_on_device">المدرب غير متاح بعد مع المزوّد المحلي. انتقل إلى مزوّد سحابي في الإعدادات ← مزوّد الذكاء الاصطناعي.</string>
     <string name="ai_error_coach_round_limit">تعذّر على المدرب الرد. حاول إعادة صياغة السؤال.</string>
-    <string name="ai_error_disabled">ميزات الذكاء الاصطناعي معطّلة في الإعدادات ← الذكاء الاصطناعي والصوت.</string>
     <string name="ai_error_grounded_on_device">حلقة أدوات Grounded غير متاحة للنماذج المحلية.</string>
     <string name="ai_error_grounded_requires_provider">حلقة أدوات Grounded تتطلب مزوّد ذكاء اصطناعي نشطًا.</string>
     <string name="ai_error_image_conversion_failed">تعذّرت معالجة الصورة.</string>
     <string name="ai_error_invalid_response">تعذّر فهم رد الذكاء الاصطناعي. حاول مرة أخرى.</string>
     <string name="ai_error_invalid_url">رابط API غير صالح. تحقق من إعدادات المزوّد.</string>
-    <string name="ai_error_insecure_http_blocked">HTTP غير الآمن محظور. فعّل «السماح بـ HTTP غير الآمن» في الإعدادات ← الذكاء الاصطناعي والصوت، أو استخدم عنوان https://.</string>
     <string name="ai_error_key_rejected">تم رفض مفتاح API الخاص بك. افتح الإعدادات ← مزوّد الذكاء الاصطناعي وأعد لصق مفتاح صالح.</string>
+    <string name="ai_error_timeout">استغرق مزوّد الذكاء الاصطناعي وقتًا طويلًا في الرد. حاول مجددًا؛ وإذا كنت تستخدم نقطة نهاية مستضافة ذاتيًا، فارفع مهلة الانتظار في الإعدادات ← مزوّد الذكاء الاصطناعي.</string>
+    <string name="ai_error_disabled">ميزات الذكاء الاصطناعي متوقفة في الإعدادات ← مزوّد الذكاء الاصطناعي.</string>
+    <string name="ai_error_insecure_http_blocked">بروتوكول HTTP غير الآمن محجوب. فعّل «السماح بـ HTTP غير الآمن» في الإعدادات ← مزوّد الذكاء الاصطناعي، أو استخدم رابط https://.</string>
+    <string name="ai_error_truncated_twice">اصطدم الرد بحد مخرجات النموذج مرتين — التفكير يُحتسب ضمنه. اضبط مستوى الاستدلال على منخفض أو إيقاف في الإعدادات ← مزوّد الذكاء الاصطناعي، أو جرّب سؤالًا أقصر.</string>
+    <string name="ai_error_truncated_twice_description">نفد النموذج مساحة المخرجات قبل إكمال الرد؛ رموز التفكير تُحتسب ضمن الحد. اضبط مستوى الاستدلال على منخفض أو إيقاف في الإعدادات ← مزوّد الذكاء الاصطناعي، ثم حاول مجددًا.</string>
+    <string name="ai_error_truncated">اصطدم الرد بحد مخرجات النموذج قبل اكتماله — التفكير يُحتسب ضمن الحد. اضبط مستوى الاستدلال على منخفض أو إيقاف في الإعدادات ← مزوّد الذكاء الاصطناعي، أو جرّب سؤالًا أقصر.</string>
     <string name="ai_error_location_unsupported">Gemini غير متاح من هذا الموقع الشبكي (البلد/عنوان IP). إذا كنت تستخدم VPN، فأوقفه أو انتقل إلى مخرج سكني. غالبًا ما تُحظر عناوين IP الخاصة بمراكز البيانات/VPN غير السكنية. أو فعّل الفوترة في مشروع Google AI Studio، وجرّب شبكة أخرى، أو غيّر المزوّد في الإعدادات ← مزوّد الذكاء الاصطناعي.</string>
     <string name="ai_error_model_unavailable">لم يعثر مزوّدك على هذا النموذج. قد يكون مدفوعًا حصريًا في الخطة المجانية، أو مقيدًا في منطقتك، أو قد تكون نقطة النهاية خاطئة. انتقل إلى نموذج Flash الافتراضي في الإعدادات ← مزوّد الذكاء الاصطناعي، أو فعّل الفوترة في مشروع AI Studio.</string>
     <string name="ai_error_network_format">خطأ في الشبكة: %1$s</string>
@@ -860,10 +895,6 @@
     <string name="ai_error_provider_error">أرجع مزوّد الذكاء الاصطناعي خطأ.</string>
     <string name="ai_error_provider_overloaded">مزوّد الذكاء الاصطناعي محمّل فوق طاقته الآن. حاولنا عدة مرات. أعد المحاولة بعد دقيقة، أو غيّر المزوّد/النموذج في الإعدادات ← مزوّد الذكاء الاصطناعي.</string>
     <string name="ai_error_rate_limit">بلغت حد الطلبات لمفتاح API الخاص بك. انتظر دقيقة، أو انتقل إلى مزوّد آخر في الإعدادات ← مزوّد الذكاء الاصطناعي. في الخطة المجانية، يملك نموذج Flash-Lite أعلى حصة.</string>
-    <string name="ai_error_timeout">استغرق مزوّد الذكاء الاصطناعي وقتًا طويلًا في الرد. حاول مرة أخرى، أو ارفع المهلة في الإعدادات ← الذكاء الاصطناعي والصوت.</string>
-    <string name="ai_error_truncated">تم اقتطاع رد الذكاء الاصطناعي عند حد طول الرد. ارفع أقصى طول للرد من الإعدادات ← الذكاء الاصطناعي والصوت، أو جرّب سؤالًا أقصر.</string>
-    <string name="ai_error_truncated_twice">تم اقتطاع رد الذكاء الاصطناعي مرتين عند حد طول الرد. ارفع أقصى طول للرد من الإعدادات ← الذكاء الاصطناعي والصوت، أو جرّب سؤالًا أقصر.</string>
-    <string name="ai_error_truncated_twice_description">وصل النموذج إلى حد طول الرد قبل أن يُكمل، والتفكير يُحتسب ضمن هذا الحد. ارفع أقصى طول للرد من الإعدادات ← الذكاء الاصطناعي والصوت، أو قيّد تفكير النموذج، ثم أعد المحاولة.</string>
     <string name="ai_model_tier_paid">نموذج مدفوع فقط (لم تعد الخطة المجانية تشمل Pro)</string>
     <string name="ai_model_tier_varies">تختلف التوفّر في الخطة المجانية حسب الحساب والمنطقة</string>
     <string name="ai_provider_on_device">على الجهاز (خاص)</string>
@@ -1008,6 +1039,12 @@
     <string name="export_format">الصيغة</string>
     <string name="export_from">من</string>
     <string name="export_no_meals">لا توجد وجبات مسجلة في النطاق المحدد.</string>
+    <string name="export_include_photos">تضمين الصور</string>
+    <string name="sync_photos">مزامنة الصور</string>
+    <string name="sync_photos_caption">عند التفعيل، يتم رفع صور الوجبات إلى خادم WebDAV الخاص بك</string>
+    <string name="sync_photos_wifi_only">الصور عبر Wi-Fi فقط</string>
+    <string name="sync_photos_syncing">جارٍ مزامنة الصور…</string>
+    <string name="sync_photos_failed">فشلت مزامنة الصور</string>
     <string name="export_range">النطاق</string>
     <string name="export_range_all">كل الوقت</string>
     <string name="export_range_custom">مخصص</string>
@@ -1097,7 +1134,7 @@
     <string name="home_display_show_active_calories_desc">إظهار الحرق النشط لليوم في مقياس السعرات.</string>
     <string name="home_display_show_steps">إظهار عدّاد الخطوات في الرئيسية</string>
     <string name="home_display_slim_full_names">أسماء العناصر الغذائية الكاملة</string>
-    <string name="home_display_slim_full_names_desc">تُظهر بطاقات الخطوط الرفيعة الاسم الكامل بدلاً من الاسم المختصر. قد تُقتطع الأسماء الطولية عند تحديد أربع بطاقات.</string>
+    <string name="home_display_slim_full_names_desc">تُظهر بطاقات العناصر الغذائية الاسم الكامل بدلاً من الاسم المختصر. قد تُقتطع الأسماء الطويلة عند تحديد أربع بطاقات.</string>
     <string name="home_display_show_steps_desc">بطاقة اختيارية أسفل المقياس. يتطلب Health Connect.</string>
     <string name="home_display_step_goal">هدف الخطوات اليومي</string>
     <string name="home_display_step_goal_hint">التغيير بمقدار 500. النطاق 1,000–50,000.</string>
@@ -1132,6 +1169,7 @@
     <string name="import_body_metrics_empty">لا يحتوي هذا الملف على سجلات وزن أو بيانات جسم للاستيراد.</string>
     <string name="import_body_metrics_malformed">تعذّرت قراءة الملف: %1$s</string>
     <string name="import_body_metrics_success">تم استيراد %1$d سجل وزن و%2$d دهون و%3$d قياسات.</string>
+    <string name="import_body_metrics_success_composition">تم أيضًا استيراد %1$d من سجلات مقاييس الميزان.</string>
     <string name="import_body_metrics_title">استيراد الوزن وبيانات الجسم</string>
     <string name="import_body_metrics_unsupported">ملف غير مدعوم. المدعوم: JSON/CSV من Chompass، أو CSV من openScale، أو CSV وزن عام.</string>
     <string name="import_diary_empty">لا يحتوي هذا الملف على سجلات يوميات للاستيراد.</string>
@@ -1406,7 +1444,7 @@
     <string name="settings_calc_intro">تحدد الذكاء الاصطناعي أهداف السعرات والمغذيات الكبرى اليومية. عند النقر على «إعادة حساب الأهداف»، أو تلقائيًا مرة أسبوعيًا تقريبًا إذا كانت الأهداف التكيفية مفعّلة، يرسل Chompass ملفك والمعادلات المرجعية أدناه وطعامك المسجل مؤخرًا واتجاه وزنك إلى مزوّد الذكاء الاصطناعي. يبدأ من هذه المعادلات المحكّمة، ثم يعدلها على بياناتك لتقدير الصيانة والأهداف.</string>
     <string name="settings_calc_katch_formula">BMR = 370 + 21,6 × LBM(كغ)\nLBM = الوزن × (1 − %الدهون)</string>
     <string name="settings_calc_katch_name">معادلة Katch-McArdle</string>
-    <string name="settings_calc_katch_used">تُستخدم تلقائيًا عند إدخال نسبة دهون الجسم. أدق للنحفاء والرياضيين لأنها تشتق BMR من الكتلة الخالية من الدهون بدل الوزن الكلي. القياسات الأقدم من 90 يومًا تعود إلى Mifflin-St Jeor.</string>
+    <string name="settings_calc_katch_used">تُستخدم تلقائيًا عند إدخال نسبة دهون الجسم. أدق للنحفاء والرياضيين لأنها تشتق BMR من الكتلة الخالية من الدهون بدل الوزن الكلي. القياسات الأقدم من 90 يومًا تعود إلى Mifflin-St Jeor. وقراءة حديثة للكتلة الخالية من الدهون من ميزان تقود BMR بالطريقة نفسها وتُقدَّم على نسبة الدهون.</string>
     <string name="settings_calc_macro_split">تقسيم المغذيات الكبرى</string>
     <string name="settings_calc_maintenance">الصيانة وتعديل الهدف</string>
     <string name="settings_calc_methods">طرق الحساب</string>
@@ -1443,6 +1481,18 @@
     <string name="settings_fixed_launcher_icon_subtitle">تبقي أيقونة التطبيق بلون تركوازي. تتوقف عن متابعة لون السمة والخلفية.</string>
     <string name="settings_system_date_time_pickers">منتقي التاريخ والوقت للنظام</string>
     <string name="settings_system_date_time_pickers_subtitle">استخدم نوافذ التاريخ والوقت في الهاتف عند تعديل وجبة.</string>
+    <string name="settings_glass_blur">زجاج مصنفر</string>
+    <string name="settings_glass_blur_subtitle">طمس المحتوى خلف اللوحات العائمة، مثل ترويسة نتائج إضافة الطعام.</string>
+    <string name="settings_ambient_motion">خلفية محيطية</string>
+    <string name="settings_ambient_motion_subtitle">حقول لونية ناعمة تنساب خلف كل شاشة. تتوقف في وضع توفير الطاقة أو عند تقليل الحركات.</string>
+    <string name="settings_frost_strength">قوة التزجيج المصنفر</string>
+    <string name="frost_strength_light">خفيف</string>
+    <string name="frost_strength_medium">متوسط</string>
+    <string name="frost_strength_strong">قوي</string>
+    <string name="settings_ambient_intensity">شدة الخلفية</string>
+    <string name="ambient_intensity_subtle">خفيف</string>
+    <string name="ambient_intensity_balanced">متوازن</string>
+    <string name="ambient_intensity_vivid">نابض</string>
     <string name="add_food_log_time">وقت التسجيل</string>
     <string name="add_food_log_time_now">الآن</string>
     <string name="cd_clear_log_time">استخدام الوقت الحالي</string>
@@ -1453,7 +1503,6 @@
     <string name="settings_food_section_photo">تحليل الصور</string>
     <string name="settings_food_section_serving">حجم الحصة</string>
     <string name="settings_gemini_google_search">الربط بالبحث في Google</string>
-    <string name="settings_glass_blur">تأثير الزجاج</string>
     <string name="settings_goal_auto">تلقائي</string>
     <string name="settings_goals_how_adaptive">تعيد الأهداف التكيفية حساب أهداف السعرات والمغذيات الكبرى مرة أسبوعيًا تقريبًا.</string>
     <string name="settings_goals_how_energy">يُرسي إنفاق الطاقة الأهداف على حرقك المقاس من Health Connect.</string>
@@ -1491,8 +1540,6 @@
     <string name="settings_macro_pinned_label_format">%1$s (مثبت)</string>
     <string name="settings_macro_unlocked">غير مقفل</string>
     <string name="settings_manage_health_access">إدارة الوصول إلى Health Connect</string>
-    <string name="settings_max_tokens">أقصى طول للرد</string>
-    <string name="settings_max_tokens_unit">رمز</string>
     <string name="settings_meal_constituents">تفصيل مكونات الوجبة</string>
     <string name="settings_meal_constituents_footer">عند التفعيل، قد يقسم الذكاء الاصطناعي الوجبات المركبة إلى مكونات قابلة للتحرير بالجرام والوحدات. تُطلب المغذيات الدقيقة لكل مكوّن من النماذج السحابية الأقوى فقط؛ وتُعيد النماذج الأصغر قائمة المكونات مع المغذيات الكبرى.</string>
     <string name="settings_meal_time_edit_format">%1$s</string>
@@ -2234,6 +2281,18 @@
     <string name="onboarding_goal_suggested_bmi">بناءً على مؤشر كتلة الجسم %1$.1f</string>
     <!-- Progress v2: طبقة الجسم، دمج السعرات، مراحل الهدف، الالتزام. -->
     <string name="progress_body_section">الجسم</string>
+    <string name="progress_scale_metrics">مقاييس الميزان</string>
+    <string name="progress_scale_metrics_bone_mass">كتلة العظام</string>
+    <string name="progress_scale_metrics_water">إجمالي ماء الجسم</string>
+    <string name="progress_scale_metrics_muscle">الكتلة العضلية</string>
+    <string name="progress_scale_metrics_lean">الكتلة الخالية من الدهون</string>
+    <string name="progress_scale_metrics_visceral">الدهون الحشوية</string>
+    <string name="progress_scale_metrics_note">تقدير من ميزان منزلي — الاتجاه أدق من الرقم المطلق</string>
+    <string name="progress_scale_metrics_tbw_percent">%1$.1f %% من وزن الجسم · النطاق المعتاد 45–65 %%</string>
+    <string name="progress_log_scale_metrics">مقاييس الميزان</string>
+    <string name="progress_log_scale_metrics_title">تسجيل مقاييس الميزان</string>
+    <string name="progress_estimated_smm">العضلات الهيكلية المقدَّرة (Lee)</string>
+    <string name="progress_estimated_smm_note">تقدير قياسي من الذراع والفخذ والسمانة · ± ~3 كغم</string>
     <string name="progress_overlay_off">إيقاف</string>
     <string name="progress_no_entries_in_range">لا توجد إدخالات في هذه الفترة</string>
     <string name="progress_no_series_selected">انقر على مقياس أعلاه لعرضه هنا</string>
@@ -2275,6 +2334,7 @@
     <string name="body_fat_method_dexa">DEXA</string>
     <string name="body_fat_method_tape">الشريط</string>
     <string name="cd_collapsed">مطوي</string>
+    <string name="cd_change_meal_type">تغيير نوع الوجبة</string>
     <string name="cd_decrease">إنقاص</string>
     <string name="cd_expanded">موسَّع</string>
     <string name="cd_import_mealie">استيراد من Mealie</string>
@@ -2715,11 +2775,6 @@
         <item>تنزيل</item>
         <item>محلي</item>
         <item>بدون اتصال</item>
-    </string-array>
-    <string-array name="settings_search_kw_max_tokens">
-        <item>الرموز</item>
-        <item>الطول</item>
-        <item>الحد</item>
     </string-array>
     <string-array name="settings_search_kw_ai_read_timeout">
         <item>المهلة</item>

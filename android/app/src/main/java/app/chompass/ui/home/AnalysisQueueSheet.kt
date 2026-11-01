@@ -26,7 +26,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddAPhoto
@@ -68,6 +67,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.chompass.AppContainer
 import app.chompass.R
+import app.chompass.services.ai.ProviderDirectory
+import app.chompass.services.ai.ProviderDirectory.Companion.matchedName
 import app.chompass.models.AiProfile
 import app.chompass.models.QueuedAnalysis
 import app.chompass.models.QueueStatus
@@ -83,9 +84,7 @@ import app.chompass.ui.components.rememberChompassSheetState
 import app.chompass.ui.components.rememberQueueThumbnail
 import app.chompass.ui.components.QueueThumb
 import app.chompass.ui.components.isDarkTheme
-import app.chompass.ui.theme.AppColors
-import app.chompass.ui.theme.AppTextOpacity
-import app.chompass.ui.theme.AppRadii
+import app.chompass.ui.components.PhotoRemoveBadgeScrimAlpha
 import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -116,6 +115,7 @@ fun AnalysisQueueSheet(
     onDelete: (UUID) -> Unit,
     onClearHistory: () -> Unit,
     onDismiss: () -> Unit,
+    providerDirectory: ProviderDirectory? = null,
 ) {
     var tab by remember { mutableStateOf(QueueTab.QUEUE) }
     var editing by remember { mutableStateOf<QueuedAnalysis?>(null) }
@@ -286,7 +286,7 @@ fun AnalysisQueueSheet(
                     Row(
                         Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(AppRadii.Field))
+                            .clip(MaterialTheme.shapes.medium)
                             .clickable {
                                 onRunWith(target.id, profile)
                                 runWithTarget = null
@@ -303,9 +303,10 @@ fun AnalysisQueueSheet(
                                 overflow = TextOverflow.Ellipsis,
                             )
                             Text(
-                                stringResource(profile.provider.displayNameRes),
+                                providerDirectory.matchedName(profile.provider, profile.baseUrl)
+                                    ?: stringResource(profile.provider.displayNameRes),
                                 fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
@@ -351,13 +352,13 @@ private fun QueueEmptyState(icon: androidx.compose.ui.graphics.vector.ImageVecto
             Icon(
                 icon,
                 contentDescription = null,
-                tint = AppColors.Calorie.copy(alpha = 0.4f),
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
                 modifier = Modifier.size(32.dp)
             )
             Text(
                 text,
                 fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
         }
@@ -395,7 +396,7 @@ private fun QueueEntryRow(
             Text(
                 queueTimeCaption(item, stringResource(R.string.analysis_queue_on_day)),
                 fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -416,35 +417,35 @@ private fun QueueEntryRow(
                 strokeWidth = 2.5.dp,
             )
         } else {
-            IconButton(onClick = onRun, modifier = Modifier.size(40.dp)) {
+            IconButton(onClick = onRun) {
                 Icon(
                     Icons.Filled.PlayArrow,
                     contentDescription = stringResource(R.string.analysis_queue_run_now),
-                    tint = AppColors.Calorie,
+                    tint = MaterialTheme.colorScheme.primary,
                 )
             }
         }
-        IconButton(onClick = onRunWith, modifier = Modifier.size(40.dp)) {
+        IconButton(onClick = onRunWith) {
             Icon(
                 Icons.Outlined.SwapHoriz,
                 contentDescription = stringResource(R.string.queue_run_with),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(18.dp),
             )
         }
-        IconButton(onClick = onEdit, modifier = Modifier.size(40.dp)) {
+        IconButton(onClick = onEdit) {
             Icon(
                 Icons.Filled.Edit,
                 contentDescription = stringResource(R.string.analysis_queue_edit),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(18.dp),
             )
         }
-        IconButton(onClick = onDelete, modifier = Modifier.size(40.dp)) {
+        IconButton(onClick = onDelete) {
             Icon(
                 Icons.Filled.Delete,
                 contentDescription = stringResource(R.string.action_delete),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(18.dp),
             )
         }
@@ -488,7 +489,7 @@ private fun HistoryEntryRow(
                             energyUnitLabel(),
                         ),
                         fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -507,27 +508,27 @@ private fun HistoryEntryRow(
         if (running) {
             CircularProgressIndicator(modifier = Modifier.size(22.dp), strokeWidth = 2.5.dp)
         } else {
-            IconButton(onClick = onRun, modifier = Modifier.size(40.dp)) {
+            IconButton(onClick = onRun) {
                 Icon(
                     Icons.Filled.PlayArrow,
                     contentDescription = stringResource(R.string.analysis_queue_re_run),
-                    tint = AppColors.Calorie,
+                    tint = MaterialTheme.colorScheme.primary,
                 )
             }
         }
-        IconButton(onClick = onRunWith, modifier = Modifier.size(40.dp)) {
+        IconButton(onClick = onRunWith) {
             Icon(
                 Icons.Outlined.SwapHoriz,
                 contentDescription = stringResource(R.string.queue_run_with),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(18.dp),
             )
         }
-        IconButton(onClick = onDelete, modifier = Modifier.size(40.dp)) {
+        IconButton(onClick = onDelete) {
             Icon(
                 Icons.Filled.Delete,
                 contentDescription = stringResource(R.string.action_delete),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(18.dp),
             )
         }
@@ -545,7 +546,7 @@ private fun lastAttemptCaption(item: QueuedAnalysis) {
             item.lastAttemptModel ?: "—",
         ),
         fontSize = 12.sp,
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
     )
@@ -557,12 +558,12 @@ private fun QueueRowSurface(content: @Composable androidx.compose.foundation.lay
     Row(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(AppRadii.Card))
-            .background(if (isDark) AppColors.TranslucentSurfaceDark else AppColors.TranslucentSurfaceLight)
+            .clip(MaterialTheme.shapes.large)
+            .background(MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.92f))
             .border(
                 0.5.dp,
-                if (isDark) AppColors.HairlineBorderDark else AppColors.HairlineBorderLight,
-                RoundedCornerShape(AppRadii.Card),
+                MaterialTheme.colorScheme.outlineVariant,
+                MaterialTheme.shapes.large,
             )
             .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -575,7 +576,7 @@ private fun QueueThumbnail(filename: String?, store: app.chompass.data.AnalysisQ
     Box(
         Modifier
             .size(52.dp)
-            .clip(RoundedCornerShape(AppRadii.Tile))
+            .clip(MaterialTheme.shapes.medium)
             .background(MaterialTheme.colorScheme.surfaceContainerHighest),
         contentAlignment = Alignment.Center,
     ) {
@@ -593,7 +594,7 @@ private fun QueueThumbnail(filename: String?, store: app.chompass.data.AnalysisQ
             QueueThumb.Missing -> Icon(
                 Icons.Filled.PhotoLibrary,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Faint),
+                tint = MaterialTheme.colorScheme.outline,
                 modifier = Modifier.size(22.dp),
             )
         }
@@ -729,7 +730,7 @@ private fun EditQueuedSheet(
 
                 Text(
                     stringResource(R.string.meal_photos_count, item.imageFilenames.size),
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     itemsIndexed(item.imageFilenames, key = { _, filename -> filename }) { index, filename ->
@@ -742,23 +743,30 @@ private fun EditQueuedSheet(
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
                                         .size(width = 96.dp, height = 96.dp)
-                                        .clip(RoundedCornerShape(AppRadii.Tile)),
+                                        .clip(MaterialTheme.shapes.medium),
                                 )
                             }
                             IconButton(
                                 onClick = { onRemovePhoto(filename) },
                                 modifier = Modifier
                                     .align(Alignment.TopEnd)
-                                    .padding(4.dp)
-                                    .size(28.dp)
-                                    .background(Color.Black.copy(alpha = AppTextOpacity.Subtle), CircleShape),
+                                    .padding(4.dp),
                             ) {
-                                Icon(
-                                    Icons.Filled.Close,
-                                    contentDescription = stringResource(R.string.action_remove),
-                                    tint = Color.White,
-                                    modifier = Modifier.size(14.dp),
-                                )
+                                // Small visual scrim over the photo corner; the
+                                // IconButton keeps the 48dp touch target.
+                                Box(
+                                    Modifier
+                                        .size(28.dp)
+                                        .background(Color.Black.copy(alpha = PhotoRemoveBadgeScrimAlpha), CircleShape),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Icon(
+                                        Icons.Filled.Close,
+                                        contentDescription = stringResource(R.string.action_remove),
+                                        tint = Color.White,
+                                        modifier = Modifier.size(14.dp),
+                                    )
+                                }
                             }
                         }
                     }
@@ -771,18 +779,18 @@ private fun EditQueuedSheet(
                                     )
                                 },
                                 modifier = Modifier.size(width = 96.dp, height = 96.dp),
-                                shape = RoundedCornerShape(AppRadii.Tile),
+                                shape = MaterialTheme.shapes.medium,
                             ) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Icon(
                                         Icons.Filled.AddAPhoto,
                                         contentDescription = null,
-                                        tint = AppColors.Calorie,
+                                        tint = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.size(22.dp),
                                     )
                                     Text(
                                         stringResource(R.string.meal_photos_add_photo),
-                                        color = AppColors.Calorie,
+                                        color = MaterialTheme.colorScheme.primary,
                                         fontSize = 11.sp,
                                     )
                                 }

@@ -79,7 +79,23 @@
 
     <!-- AI Provider names -->
     <string name="ai_provider_ollama">Ollama (लोकल)</string>
-    <string name="ai_provider_custom">कस्टम (OpenAI-संगत)</string>
+    <string name="ai_provider_ollama_cloud">Ollama Cloud</string>
+    <string name="ai_provider_custom">दूसरा URL</string>
+    <string name="ai_provider_subtitle_custom">आधार URL लिखें</string>
+    <string name="ai_provider_search_hint">नाम या होस्ट खोजें</string>
+    <string name="ai_provider_section_shortcuts">शॉर्टकट</string>
+    <string name="ai_provider_section_phone">इस फ़ोन पर</string>
+    <string name="ai_provider_section_server">आपका सर्वर</string>
+    <string name="ai_provider_section_cloud">क्लाउड</string>
+    <string name="ai_provider_chip_on_phone">फ़ोन पर</string>
+    <string name="ai_provider_chip_your_server">आपका सर्वर</string>
+    <string name="ai_provider_chip_native">नेटिव</string>
+    <string name="ai_provider_chip_cloud">क्लाउड</string>
+    <string name="ai_provider_row_gemini">कुंजी · Google Search टॉगल</string>
+    <string name="ai_provider_row_anthropic">कुंजी · अलग API</string>
+    <string name="ai_provider_row_ollama">यह नेटवर्क · बिना कुंजी</string>
+    <string name="ai_provider_row_host_key">%1$s · कुंजी</string>
+    <string name="ai_provider_directory_footer">सूची के होस्ट इस रिलीज़ के साथ आते हैं. कुंजी सिर्फ़ चुने हुए होस्ट को जाती है.</string>
 
     <!-- AI Provider API key placeholders -->
     <string name="api_key_placeholder">API की पेस्ट करें</string>
@@ -513,6 +529,8 @@
     <string name="settings_server_url">सर्वर URL</string>
     <string name="settings_tap_to_edit">संपादित करने के लिए टैप करें</string>
     <string name="settings_custom_url_title">कस्टम बेस URL</string>
+    <string name="settings_custom_directory_docs">दस्तावेज़</string>
+    <string name="ai_model_accepts_images">इमेज स्वीकार करता है (घोषित)</string>
     <string name="settings_ai_allow_insecure_http">असुरक्षित HTTP की अनुमति दें</string>
     <string name="settings_ai_allow_insecure_http_footer">कस्टम और Ollama एंडपॉइंट को सादे http:// URL इस्तेमाल करने देता है, जैसे आपके घर के नेटवर्क पर। क्लाउड प्रदाता https इस्तेमाल करते हैं। सर्वर में TLS होने पर बंद रखें।</string>
     <string name="settings_clear_key">कुंजी साफ़ करें</string>
@@ -588,7 +606,7 @@
     <!-- About -->
     <string name="about_rate">ऐप को रेट करें</string>
     <string name="about_share">ऐप शेयर करें</string>
-    <string name="about_open_source">ओपन सोर्स (MIT)</string>
+    <string name="about_open_source">ओपन सोर्स (GPL v3)</string>
     <string name="about_report_issue">समस्या की रिपोर्ट करें</string>
     <string name="about_request_feature">फीचर का अनुरोध करें</string>
     <string name="about_privacy">गोपनीयता नीति</string>
@@ -698,11 +716,7 @@
     <string name="ai_provider_subtitle_deepinfra">होस्टेड ओपन मॉडल</string>
     <string name="ai_provider_subtitle_mistral">Mistral मॉडल</string>
     <string name="ai_provider_subtitle_ollama">आपका कंप्यूटर, कोई क्लाउड नहीं</string>
-    <string name="ai_provider_subtitle_custom">LM Studio, vLLM, llama.cpp आदि</string>
-    <string name="ai_provider_group_recommended">अनुशंसित</string>
-    <string name="ai_provider_group_cloud">क्लाउड प्रदाता</string>
-    <string name="ai_provider_group_local">लोकल और सेल्फ-होस्टेड</string>
-    <string name="ai_provider_group_device">डिवाइस पर</string>
+    <string name="ai_provider_subtitle_ollama_cloud">Ollama के होस्टेड मॉडल</string>
     <string name="settings_section_ai_profile">प्रोफ़ाइल</string>
     <string name="settings_section_ai_connection">कनेक्शन</string>
     <string name="settings_section_ai_advanced">उन्नत</string>
@@ -711,7 +725,6 @@
     <string name="settings_ai_key_remove_title">API कुंजी हटाएं?</string>
     <string name="settings_ai_key_remove_body">खाली कुंजी सहेजने से इस प्रोफ़ाइल की संग्रहीत कुंजी मिट जाती है।</string>
     <string name="settings_ai_get_key">API कुंजी पाएं</string>
-    <string name="settings_ai_value_default">%1$,d (डिफ़ॉल्ट)</string>
     <string name="settings_ai_timeout_default">%1$,ds (डिफ़ॉल्ट)</string>
     <string name="camera_scale_tip_message">सुझाव: भोजन के बगल में कांटा, हाथ या सिक्का रखें। यह हिस्से का अनुमान लगाने में मदद करता है।</string>
     <string name="cd_relog_meal">%1$s फिर से लॉग करें</string>
@@ -832,19 +845,41 @@
     <string name="action_show">दिखाएं</string>
     <string name="action_undo">पूर्ववत</string>
     <string name="action_save_to_favorites">पसंदीदा में सहेजें</string>
+    <string name="action_save_to_library">लाइब्रेरी में सहेजें</string>
+    <string name="action_hide_from_suggestions">सुझावों से छिपाएँ</string>
+    <string name="action_unhide">दिखाएँ</string>
+    <string name="settings_saved_foods">सहेजे गए खाद्य पदार्थ</string>
+    <string name="library_hidden_section">छिपे हुए</string>
+    <string name="library_empty">अभी कोई सहेजा गया खाद्य पदार्थ नहीं</string>
+    <string name="library_never_logged">कभी लॉग नहीं किया</string>
+    <string name="library_row_summary">%1$d लॉग · अंतिम %2$s</string>
+    <string name="library_delete_rows_title">लॉग पंक्तियाँ हटाएँ?</string>
+    <string name="library_delete_rows_message">“%2$s” की सभी %1$d लॉग पंक्तियाँ हटाएँ? दिन फिर से गणना होंगे। सहेजा गया खाद्य पदार्थ यहाँ रहेगा; केवल उसका डायरी इतिहास हट जाएगा।</string>
+    <string name="library_merge_section">संभावित डुप्लिकेट</string>
+    <string name="library_merge_title">डुप्लिकेट मिलाएँ</string>
+    <string name="library_merge_intro">ये एक ही खाद्य पदार्थ लगते हैं। जो नाम रखना है उसे चुनें — बाकी उसी में मिल जाएँगे।</string>
+    <string name="library_merge_rows_message">%1$d लॉग पंक्तियों का नाम बदलकर “%2$s” हो जाएगा। कुछ भी नहीं हटता; दिन फिर से गणना होंगे।</string>
+    <string name="library_merge_action">मिलाएँ</string>
+    <string name="library_sort_last_logged">अंतिम लॉग</string>
+    <string name="library_sort_name">नाम</string>
+    <string name="library_sort_logs">लॉग</string>
     <string name="saved_to_favorites">पसंदीदा में सहेजा गया</string>
     <string name="action_what_if">क्या होगा अगर?</string>
     <string name="add_food_relog_kcal">%1$d %2$s</string>
     <string name="ai_error_coach_on_device">कोच अभी ऑन-डिवाइस प्रदाता के साथ उपलब्ध नहीं है। सेटिंग्स → AI प्रदाता में क्लाउड प्रदाता पर स्विच करें।</string>
     <string name="ai_error_coach_round_limit">कोच जवाब नहीं दे सका। अपना प्रश्न दोबारा लिखकर देखें।</string>
-    <string name="ai_error_disabled">AI सुविधाएं सेटिंग्स → AI और भाषण में बंद हैं।</string>
     <string name="ai_error_grounded_on_device">Grounded मोड ऑन-डिवाइस मॉडल के लिए उपलब्ध नहीं है।</string>
     <string name="ai_error_grounded_requires_provider">Grounded मोड के लिए एक सक्रिय AI प्रदाता आवश्यक है।</string>
     <string name="ai_error_image_conversion_failed">छवि संसाधित नहीं हो सकी।</string>
     <string name="ai_error_invalid_response">AI प्रतिक्रिया समझ में नहीं आई। कृपया फिर से प्रयास करें।</string>
     <string name="ai_error_invalid_url">अमान्य API URL। अपनी प्रदाता सेटिंग्स जांचें।</string>
-    <string name="ai_error_insecure_http_blocked">असुरक्षित HTTP अवरुद्ध है। सेटिंग्स → AI और भाषण में “असुरक्षित HTTP की अनुमति दें” चालू करें, या https:// URL इस्तेमाल करें।</string>
     <string name="ai_error_key_rejected">आपकी API कुंजी अस्वीकार कर दी गई। सेटिंग्स → AI प्रदाता खोलें और एक मान्य कुंजी दोबारा पेस्ट करें।</string>
+    <string name="ai_error_timeout">AI प्रदाता को जवाब देने में बहुत समय लगा। फिर से कोशिश करें; अगर आप सेल्फ-होस्टेड एंडपॉइंट इस्तेमाल करते हैं, तो सेटिंग्स → AI प्रदाता में टाइमआउट बढ़ाएँ।</string>
+    <string name="ai_error_disabled">AI सुविधाएँ सेटिंग्स → AI प्रदाता में बंद हैं।</string>
+    <string name="ai_error_insecure_http_blocked">असुरक्षित HTTP ब्लॉक है। सेटिंग्स → AI प्रदाता में “असुरक्षित HTTP की अनुमति दें” चालू करें या https:// URL इस्तेमाल करें।</string>
+    <string name="ai_error_truncated_twice">जवाब दो बार मॉडल की आउटपुट सीमा तक पहुँच गया — सोच भी इसमें गिनी जाती है। सेटिंग्स → AI प्रदाता में तर्क प्रयास को निम्न या बंद पर सेट करें, या छोटा सवाल आज़माएँ।</string>
+    <string name="ai_error_truncated_twice_description">मॉडल के पास पूरा करने से पहले ही आउटपुट जगह खत्म हो गई; सोचने के टोकन सीमा में गिने जाते हैं। सेटिंग्स → AI प्रदाता में तर्क प्रयास को निम्न या बंद पर सेट करें, फिर दोबारा कोशिश करें।</string>
+    <string name="ai_error_truncated">जवाब पूरा होने से पहले मॉडल की आउटपुट सीमा तक पहुँच गया — सोच भी सीमा में गिनी जाती है। सेटिंग्स → AI प्रदाता में तर्क प्रयास को निम्न या बंद पर सेट करें, या छोटा सवाल आज़माएँ।</string>
     <string name="ai_error_location_unsupported">Gemini इस नेटवर्क स्थान (देश/IP) से उपलब्ध नहीं है। VPN उपयोग कर रहे हैं तो उसे बंद करें या रेज़िडेंशियल आउटपुट पर स्विच करें। डेटासेंटर/गैर-रेज़िडेंशियल VPN IP अक्सर ब्लॉक होते हैं। या Google AI Studio प्रोजेक्ट पर बिलिंग सक्षम करें, कोई और नेटवर्क आज़माएं, या सेटिंग्स → AI प्रदाता में प्रदाता बदलें।</string>
     <string name="ai_error_model_unavailable">आपका प्रदाता यह मॉडल नहीं ढूंढ सका। यह मुफ्त टियर पर केवल-भुगतान वाला, आपके क्षेत्र में प्रतिबंधित, या endpoint गलत हो सकता है। सेटिंग्स → AI प्रदाता में डिफ़ॉल्ट Flash मॉडल पर स्विच करें, या अपने AI Studio प्रोजेक्ट पर बिलिंग सक्षम करें।</string>
     <string name="ai_error_network_format">नेटवर्क त्रुटि: %1$s</string>
@@ -856,10 +891,6 @@
     <string name="ai_error_provider_error">AI प्रदाता ने एक त्रुटि लौटाई।</string>
     <string name="ai_error_provider_overloaded">AI प्रदाता अभी अतिभारित है। हमने कुछ बार प्रयास किया। एक मिनट में फिर प्रयास करें, या सेटिंग्स → AI प्रदाता में प्रदाता/मॉडल बदलें।</string>
     <string name="ai_error_rate_limit">आपकी API कुंजी की अनुरोध सीमा पूरी हो गई। एक मिनट प्रतीक्षा करें या सेटिंग्स → AI प्रदाता में दूसरा प्रदाता चुनें। मुफ्त टियर पर Flash-Lite मॉडल की कोटा सबसे अधिक है।</string>
-    <string name="ai_error_timeout">AI प्रदाता ने जवाब देने में बहुत समय लिया। फिर प्रयास करें, या सेटिंग्स → AI और भाषण में टाइमआउट बढ़ाएं।</string>
-    <string name="ai_error_truncated">AI की प्रतिक्रिया लंबाई की सीमा पर कट गई। सेटिंग्स → AI और भाषण में अधिकतम प्रतिक्रिया लंबाई बढ़ाएं, या छोटा प्रश्न आज़माएं।</string>
-    <string name="ai_error_truncated_twice">AI की प्रतिक्रिया लंबाई की सीमा पर दो बार कट गई। सेटिंग्स → AI और भाषण में अधिकतम प्रतिक्रिया लंबाई बढ़ाएं, या छोटा प्रश्न आज़माएं।</string>
-    <string name="ai_error_truncated_twice_description">मॉडल जवाब पूरा करने से पहले ही प्रतिक्रिया लंबाई की सीमा तक पहुंच गया, और सोच भी इसी सीमा में गिनी जाती है। सेटिंग्स → AI और भाषण में अधिकतम प्रतिक्रिया लंबाई बढ़ाएं, या मॉडल की सोच सीमित करें, फिर दोबारा कोशिश करें।</string>
     <string name="ai_model_tier_paid">केवल-भुगतान मॉडल (मुफ्त टियर में अब Pro शामिल नहीं है)</string>
     <string name="ai_model_tier_varies">मुफ्त टियर पर उपलब्धता खाते और क्षेत्र के अनुसार भिन्न होती है</string>
     <string name="ai_provider_on_device">ऑन-डिवाइस (निजी)</string>
@@ -1000,6 +1031,12 @@
     <string name="export_format">प्रारूप</string>
     <string name="export_from">से</string>
     <string name="export_no_meals">चयनित सीमा में कोई भोजन लॉग नहीं हुआ।</string>
+    <string name="export_include_photos">फ़ोटो शामिल करें</string>
+    <string name="sync_photos">फ़ोटो सिंक करें</string>
+    <string name="sync_photos_caption">चालू होने पर, भोजन की फ़ोटो आपके WebDAV सर्वर पर अपलोड होती हैं</string>
+    <string name="sync_photos_wifi_only">फ़ोटो केवल Wi-Fi पर</string>
+    <string name="sync_photos_syncing">फ़ोटो सिंक हो रही हैं…</string>
+    <string name="sync_photos_failed">फ़ोटो सिंक विफल हुआ</string>
     <string name="export_range">सीमा</string>
     <string name="export_range_all">पूरा समय</string>
     <string name="export_range_custom">कस्टम</string>
@@ -1089,7 +1126,7 @@
     <string name="home_display_show_active_calories_desc">कैलोरी गेज में आज का सक्रिय खर्च दिखाएं।</string>
     <string name="home_display_show_steps">होम पर स्टेप काउंटर दिखाएं</string>
     <string name="home_display_slim_full_names">पूर्ण पोषक नाम</string>
-    <string name="home_display_slim_full_names_desc">स्लिम-लाइन कार्ड छोटे लेबल के बजाय पूरा नाम दिखाते हैं। चार कार्ड चुनने पर लंबे नाम कट सकते हैं।</string>
+    <string name="home_display_slim_full_names_desc">पोषक कार्ड छोटे लेबल के बजाय पूरा नाम दिखाते हैं। चार कार्ड चुनने पर लंबे नाम कट सकते हैं।</string>
     <string name="home_display_show_steps_desc">गेज के नीचे वैकल्पिक कार्ड। Health Connect आवश्यक है।</string>
     <string name="home_display_step_goal">दैनिक कदम लक्ष्य</string>
     <string name="home_display_step_goal_hint">500 का बदलाव। 1,000–50,000।</string>
@@ -1124,6 +1161,7 @@
     <string name="import_body_metrics_empty">इस फ़ाइल में आयात करने के लिए कोई वज़न या शरीर डेटा प्रविष्टि नहीं है।</string>
     <string name="import_body_metrics_malformed">फ़ाइल पढ़ी नहीं जा सकी: %1$s</string>
     <string name="import_body_metrics_success">%1$d वज़न, %2$d वसा और %3$d माप प्रविष्टियां आयात हुईं।</string>
+    <string name="import_body_metrics_success_composition">%1$d स्केल-मेट्रिक प्रविष्टियां भी आयात हुईं।</string>
     <string name="import_body_metrics_title">वज़न और शरीर डेटा आयात करें</string>
     <string name="import_body_metrics_unsupported">असमर्थित फ़ाइल। समर्थित: Chompass JSON/CSV, openScale CSV, या सामान्य वज़न CSV।</string>
     <string name="import_diary_empty">इस फ़ाइल में आयात करने के लिए कोई डायरी प्रविष्टि नहीं है।</string>
@@ -1394,7 +1432,7 @@
     <string name="settings_calc_intro">आपके दैनिक कैलोरी और मैक्रो लक्ष्य AI द्वारा सेट किए जाते हैं। जब आप "लक्ष्य पुनर्गणना करें" टैप करते हैं, या अनुकूली लक्ष्य चालू होने पर सप्ताह में लगभग एक बार स्वचालित रूप से, Chompass आपका प्रोफ़ाइल, नीचे दिए संदर्भ समीकरण, हाल में लॉग किया खाना और वज़न प्रवृत्ति आपके AI प्रदाता को भेजता है। यह इन सहकर्मी-समीक्षित सूत्रों से शुरू होता है, फिर आपके डेटा के अनुसार उन्हें समायोजित कर आपका रखरखाव और लक्ष्य अनुमानित करता है।</string>
     <string name="settings_calc_katch_formula">BMR = 370 + 21.6 × LBM(किग्रा)\nLBM = वज़न × (1 − %वसा)</string>
     <string name="settings_calc_katch_name">Katch-McArdle समीकरण</string>
-    <string name="settings_calc_katch_used">जब आप शारीरिक वसा % दर्ज करते हैं तो स्वचालित रूप से उपयोग होता है। दुबले और एथलेटिक उपयोगकर्ताओं के लिए अधिक सटीक क्योंकि यह कुल वज़न के बजाय दुबले शरीर द्रव्यमान से BMR व्युत्पन्न करता है। 90 दिन से पुराने माप Mifflin-St Jeor पर लौट आते हैं।</string>
+    <string name="settings_calc_katch_used">जब आप शारीरिक वसा % दर्ज करते हैं तो स्वचालित रूप से उपयोग होता है। दुबले और एथलेटिक उपयोगकर्ताओं के लिए अधिक सटीक क्योंकि यह कुल वज़न के बजाय दुबले शरीर द्रव्यमान से BMR व्युत्पन्न करता है। 90 दिन से पुराने माप Mifflin-St Jeor पर लौट आते हैं। स्केल से हाल की दुबला-द्रव्यमान रीडिंग भी उसी तरह BMR निकालती है और शरीर वसा पर प्राथमिकता पाती है।</string>
     <string name="settings_calc_macro_split">मैक्रोन्यूट्रिएंट विभाजन</string>
     <string name="settings_calc_maintenance">रखरखाव और लक्ष्य समायोजन</string>
     <string name="settings_calc_methods">गणना विधियां</string>
@@ -1431,6 +1469,18 @@
     <string name="settings_fixed_launcher_icon_subtitle">लॉन्चर आइकन को टील रखता है। यह थीम रंग और वॉलपेपर का अनुसरण करना बंद कर देता है।</string>
     <string name="settings_system_date_time_pickers">सिस्टम तारीख और समय चुनने वाले</string>
     <string name="settings_system_date_time_pickers_subtitle">भोजन संपादित करते समय फ़ोन के तारीख और समय संवाद इस्तेमाल करें।</string>
+    <string name="settings_glass_blur">फ्रॉस्टेड ग्लास</string>
+    <string name="settings_glass_blur_subtitle">तैरते पैनलों के पीछे की सामग्री को धुंधला करता है, जैसे भोजन जोड़ें परिणाम शीर्षक।</string>
+    <string name="settings_ambient_motion">एम्बिएंट बैकग्राउंड</string>
+    <string name="settings_ambient_motion_subtitle">हर स्क्रीन के पीछे धीरे-धीरे बहते रंगीन क्षेत्र। बैटरी सेवर या कम एनिमेशन पर रुक जाता है।</string>
+    <string name="settings_frost_strength">फ्रॉस्ट तीव्रता</string>
+    <string name="frost_strength_light">हल्का</string>
+    <string name="frost_strength_medium">मध्यम</string>
+    <string name="frost_strength_strong">मजबूत</string>
+    <string name="settings_ambient_intensity">एम्बिएंट तीव्रता</string>
+    <string name="ambient_intensity_subtle">सूक्ष्म</string>
+    <string name="ambient_intensity_balanced">संतुलित</string>
+    <string name="ambient_intensity_vivid">जीवंत</string>
     <string name="add_food_log_time">लॉग समय</string>
     <string name="add_food_log_time_now">अभी</string>
     <string name="cd_clear_log_time">अभी का समय इस्तेमाल करें</string>
@@ -1441,7 +1491,6 @@
     <string name="settings_food_section_photo">फोटो विश्लेषण</string>
     <string name="settings_food_section_serving">सर्विंग आकार</string>
     <string name="settings_gemini_google_search">Google खोज ग्राउंडिंग</string>
-    <string name="settings_glass_blur">ग्लास ब्लर</string>
     <string name="settings_goal_auto">ऑटो</string>
     <string name="settings_goals_how_adaptive">अनुकूली लक्ष्य आपके कैलोरी और मैक्रो लक्ष्यों की सप्ताह में लगभग एक बार पुनर्गणना करते हैं।</string>
     <string name="settings_goals_how_energy">ऊर्जा व्यय लक्ष्यों को Health Connect के मापे खर्च पर आधारित करता है।</string>
@@ -1479,8 +1528,6 @@
     <string name="settings_macro_pinned_label_format">%1$s (पिन किया)</string>
     <string name="settings_macro_unlocked">अनलॉक किया</string>
     <string name="settings_manage_health_access">Health Connect पहुंच प्रबंधित करें</string>
-    <string name="settings_max_tokens">अधिकतम प्रतिक्रिया लंबाई</string>
-    <string name="settings_max_tokens_unit">टोकन</string>
     <string name="settings_meal_constituents">भोजन सामग्री विवरण</string>
     <string name="settings_meal_constituents_footer">सक्षम होने पर, AI जटिल भोजन को ग्राम और इकाइयों के साथ संपादन योग्य सामग्रियों में विभाजित कर सकता है। प्रति-सामग्री सूक्ष्मपोषक केवल मजबूत क्लाउड मॉडल से मांगे जाते हैं; छोटे मॉडल मैक्रोज़ के साथ सामग्री सूची लौटाते हैं।</string>
     <string name="settings_meal_time_edit_format">%1$s</string>
@@ -2190,6 +2237,18 @@
     <string name="onboarding_goal_suggested_bmi">BMI %1$.1f के आधार पर</string>
     <!-- Progress v2: शरीर ओवरले, कैलोरी कॉम्बो, लक्ष्य चरण, अनुपालन। -->
     <string name="progress_body_section">शरीर</string>
+    <string name="progress_scale_metrics">स्केल मेट्रिक्स</string>
+    <string name="progress_scale_metrics_bone_mass">हड्डी द्रव्यमान</string>
+    <string name="progress_scale_metrics_water">कुल शरीर जल</string>
+    <string name="progress_scale_metrics_muscle">मांसपेशी द्रव्यमान</string>
+    <string name="progress_scale_metrics_lean">दुबला द्रव्यमान</string>
+    <string name="progress_scale_metrics_visceral">विसेरल फैट</string>
+    <string name="progress_scale_metrics_note">घरेलू स्केल अनुमान — रुझान पूर्ण मान से अधिक भरोसेमंद है</string>
+    <string name="progress_scale_metrics_tbw_percent">शरीर भार का %1$.1f %% · सामान्य सीमा 45–65 %%</string>
+    <string name="progress_log_scale_metrics">स्केल मेट्रिक्स</string>
+    <string name="progress_log_scale_metrics_title">स्केल मेट्रिक्स लॉग करें</string>
+    <string name="progress_estimated_smm">अनुमानित कंकाल मांसपेशी (Lee)</string>
+    <string name="progress_estimated_smm_note">बांह, जांघ और पिंडली से एंथ्रोपोमेट्रिक अनुमान · ± ~3 किग्रा</string>
     <string name="progress_overlay_off">बंद</string>
     <string name="progress_no_entries_in_range">इस अवधि में कोई एंट्री नहीं</string>
     <string name="progress_no_series_selected">इसे यहाँ दिखाने के लिए ऊपर किसी मीट्रिक पर टैप करें</string>
@@ -2231,6 +2290,7 @@
     <string name="body_fat_method_dexa">DEXA</string>
     <string name="body_fat_method_tape">टेप</string>
     <string name="cd_collapsed">संकुचित</string>
+    <string name="cd_change_meal_type">भोजन का प्रकार बदलें</string>
     <string name="cd_decrease">घटाएँ</string>
     <string name="cd_expanded">विस्तारित</string>
     <string name="cd_import_mealie">Mealie से आयात करें</string>
@@ -2671,11 +2731,6 @@
         <item>डाउनलोड</item>
         <item>लोकल</item>
         <item>ऑफ़लाइन</item>
-    </string-array>
-    <string-array name="settings_search_kw_max_tokens">
-        <item>टोकन</item>
-        <item>लंबाई</item>
-        <item>सीमा</item>
     </string-array>
     <string-array name="settings_search_kw_ai_read_timeout">
         <item>टाइमआउट</item>

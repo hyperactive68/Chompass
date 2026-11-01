@@ -5,18 +5,20 @@ import app.chompass.ui.components.SplitDecimalWheelPicker
 import app.chompass.ui.components.NumericWheelPicker
 import app.chompass.ui.components.ChompassSheetLazyColumn
 import app.chompass.ui.components.ChompassBottomSheet
+import app.chompass.ui.components.ChompassDialog
 import app.chompass.ui.components.rememberChompassSheetState
 import app.chompass.ui.components.FoodReviewPositionalThreshold
 import app.chompass.ui.components.FoodReviewVelocityThreshold
 import app.chompass.ui.components.MagnitudeDrafts
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -30,7 +32,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -38,7 +39,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.UnfoldMore
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -104,8 +104,6 @@ import app.chompass.services.ai.nutritionAnsweredConstituentNames
 import app.chompass.services.ai.AiError
 import app.chompass.services.ai.userMessage
 import app.chompass.ui.theme.AppColors
-import app.chompass.ui.theme.AppRadii
-import app.chompass.ui.theme.AppTextOpacity
 import kotlin.math.roundToInt
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.asImageBitmap
@@ -115,6 +113,8 @@ import app.chompass.ui.components.energyText
 import app.chompass.ui.components.energyUnitLabel
 import app.chompass.ui.navigation.LocalEnergyUnit
 import app.chompass.ui.components.macroGramsText
+import app.chompass.ui.components.pressScale
+import app.chompass.ui.theme.AppMotion
 import app.chompass.ui.components.ChompassTextField
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.rememberScrollState
@@ -197,6 +197,24 @@ fun FoodResultSheet(
         editedAnalysis: FoodAnalysis,
         logTime: LocalTime,
     ) -> Unit)? = null,
+    /**
+     * Fix the reviewed saved template in the library (Codeberg #142): same
+     * 8-arg shape as [onSaveFavorite], but writes through to the stored
+     * template instead of creating a diary row. Only passed when the review
+     * came from a saved food.
+     */
+    onSaveToLibrary: ((
+        name: String,
+        servingGrams: Double?,
+        scale: Double,
+        mealType: String,
+        selectedServingUnit: String?,
+        selectedServingQuantity: Double?,
+        editedAnalysis: FoodAnalysis,
+        logTime: LocalTime,
+    ) -> Unit)? = null,
+    /** Hide this saved food from Add Food suggestions (reversible in Settings). */
+    onHideFromSuggestions: (() -> Unit)? = null,
     /**
      * Commit this review into the progressive meal draft.
      * [resumeCapture] true → reopen camera; false → show the meal sheet.
@@ -581,6 +599,20 @@ fun FoodResultSheet(
                 logTime,
             )
         }
+        fun commitSaveLibrary() {
+            if (isSaving || !analysisReady || analysis == null) return
+            val save = onSaveToLibrary ?: return
+            save(
+                name.trim().ifEmpty { analysis.name },
+                ServingUnitOption.persistedServingGrams(recordedServing, servingTouched, servingGrams),
+                saveScale(),
+                mealType,
+                if (servingUnitOptions.isEmpty()) null else selectedServingOption.unit,
+                if (servingUnitOptions.isEmpty()) null else saveQuantity(),
+                editedAnalysis(),
+                logTime,
+            )
+        }
 
         Column(
             Modifier
@@ -626,7 +658,7 @@ fun FoodResultSheet(
                                 ),
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = AppColors.Calorie,
+                                color = MaterialTheme.colorScheme.primary,
                                 textAlign = TextAlign.Center,
                             )
                         } ?: run {
@@ -635,7 +667,7 @@ fun FoodResultSheet(
                                     stringResource(R.string.entry_analysis_inferring_units),
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = AppColors.Calorie,
+                                    color = MaterialTheme.colorScheme.primary,
                                     textAlign = TextAlign.Center,
                                 )
                             }
@@ -644,7 +676,7 @@ fun FoodResultSheet(
                             Text(
                                 stringResource(R.string.entry_analysis_status_helper),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center,
                             )
                         }
@@ -654,7 +686,7 @@ fun FoodResultSheet(
                             stringResource(R.string.entry_analysis_ready),
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Faint),
+                            color = MaterialTheme.colorScheme.outline,
                         )
                     }
                 }
@@ -669,6 +701,7 @@ fun FoodResultSheet(
                     ?.takeIf { it.isNotEmpty() }
                     ?.let { "https://world.openfoodfacts.org/product/$it" }
                 val uriHandler = LocalUriHandler.current
+                val linkInteraction = remember { MutableInteractionSource() }
                 Box(
                     Modifier.fillMaxWidth().padding(vertical = 2.dp),
                     contentAlignment = Alignment.Center
@@ -687,11 +720,12 @@ fun FoodResultSheet(
                                     if (packShot) Modifier.fillMaxWidth().height(160.dp)
                                     else Modifier.size(96.dp),
                                 )
-                                .clip(RoundedCornerShape(AppRadii.Field))
+                                .clip(MaterialTheme.shapes.medium)
+                                .pressScale(linkInteraction, enabled = packShot && productUrl != null)
                                 .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
                                 .then(
                                     if (packShot && productUrl != null) {
-                                        Modifier.clickable { uriHandler.openUri(productUrl) }
+                                        Modifier.clickable(interactionSource = linkInteraction, indication = LocalIndication.current) { uriHandler.openUri(productUrl) }
                                     } else {
                                         Modifier
                                     },
@@ -711,7 +745,7 @@ fun FoodResultSheet(
                         contentAlignment = Alignment.Center,
                     ) {
                         CircularProgressIndicator(
-                            color = AppColors.Calorie,
+                            color = MaterialTheme.colorScheme.primary,
                             strokeWidth = 3.dp,
                             modifier = Modifier.size(36.dp),
                         )
@@ -768,7 +802,7 @@ fun FoodResultSheet(
                                 stringResource(R.string.grounding_badge_estimate)
                         },
                         style = MaterialTheme.typography.labelMedium,
-                        color = AppColors.Calorie,
+                        color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(bottom = 4.dp),
                     )
                 }
@@ -818,7 +852,7 @@ fun FoodResultSheet(
                             fontSize = 16.sp,
                             textAlign = androidx.compose.ui.text.style.TextAlign.End
                         ),
-                        cursorBrush = androidx.compose.ui.graphics.SolidColor(AppColors.Calorie),
+                        cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
                         modifier = Modifier.weight(2f)
                     )
                 }
@@ -837,21 +871,21 @@ fun FoodResultSheet(
                             Icon(
                                 sheetMealIcon(mealType),
                                 contentDescription = null,
-                                tint = AppColors.Calorie,
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(Modifier.width(6.dp))
                             Text(
                                 mealLabel(mealType),
                                 fontSize = 16.sp,
-                                color = AppColors.Calorie,
+                                color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.Medium
                             )
                             Spacer(Modifier.width(6.dp))
                             Icon(
                                 Icons.Filled.UnfoldMore,
                                 contentDescription = null,
-                                tint = AppColors.Calorie
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
                         SheetGlassDropdownMenu(
@@ -881,7 +915,7 @@ fun FoodResultSheet(
                     Text(
                         logTime.format(logTimeFormatter),
                         fontSize = 16.sp,
-                        color = AppColors.Calorie,
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Medium,
                     )
                 }
@@ -935,7 +969,7 @@ fun FoodResultSheet(
                     Text(
                         stringResource(R.string.sheet_serving_unlocked_hint),
                         fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         lineHeight = 18.sp,
                         modifier = Modifier.padding(horizontal = 18.dp),
                     )
@@ -984,7 +1018,7 @@ fun FoodResultSheet(
                         editValue = "${math.scaledInt(EnergyFormat.quantity(editableCalories, unit))}",
                         unit = energyUnitLabel(),
                         unlocked = nutritionUnlocked && analysisReady,
-                        accentColor = AppColors.Calorie,
+                        accentColor = MaterialTheme.colorScheme.primary,
                         onEdit = { editableCalories = EnergyFormat.toKcal(math.baseDoubleFromText(it).roundToInt(), unit); caloriesTouched = true }
                     )
                     SheetHairline()
@@ -1083,7 +1117,7 @@ fun FoodResultSheet(
                         if (moreNutritionExpanded) Icons.Filled.KeyboardArrowDown
                         else Icons.AutoMirrored.Filled.KeyboardArrowRight,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -1121,7 +1155,21 @@ fun FoodResultSheet(
                         Icon(
                             Icons.AutoMirrored.Filled.KeyboardArrowRight,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+            // Codeberg #142: hide this saved food from suggestions. No confirm —
+            // reversible from the Settings library browser.
+            if (onHideFromSuggestions != null) {
+                item {
+                    SheetPillRow(onClick = { onHideFromSuggestions() }) {
+                        Text(stringResource(R.string.action_hide_from_suggestions), fontSize = 16.sp, modifier = Modifier.weight(1f))
+                        Icon(
+                            Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -1140,7 +1188,7 @@ fun FoodResultSheet(
                 Text(
                     stringResource(R.string.saved_meal_review_hint),
                     fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp),
                 )
             }
@@ -1155,6 +1203,9 @@ fun FoodResultSheet(
                 textActionLabel = when {
                     onAddToProgressiveMeal != null && analysisReady && !isSaving ->
                         stringResource(R.string.progressive_meal_add_next)
+                    // Reviewed saved template → fix it in the library (Codeberg #142).
+                    onSaveToLibrary != null && analysisReady && !isSaving ->
+                        stringResource(R.string.action_save_to_library)
                     onSaveFavorite != null && source == FoodSource.BARCODE && analysisReady && !isSaving ->
                         stringResource(R.string.action_save_to_favorites)
                     else -> null
@@ -1162,6 +1213,9 @@ fun FoodResultSheet(
                 onTextAction = when {
                     onAddToProgressiveMeal != null && analysisReady -> {
                         { commitAddNext() }
+                    }
+                    onSaveToLibrary != null && analysisReady -> {
+                        { commitSaveLibrary() }
                     }
                     onSaveFavorite != null && source == FoodSource.BARCODE && analysisReady -> {
                         { commitSaveFavorite() }
@@ -1228,7 +1282,7 @@ internal fun EntryAnalysisTipStrip(
                 ) {
                     Text(
                         stringResource(R.string.entry_analysis_tip_cta),
-                        color = AppColors.Calorie,
+                        color = MaterialTheme.colorScheme.primary,
                         fontSize = 14.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -1242,7 +1296,7 @@ internal fun EntryAnalysisTipStrip(
                 ) {
                     Text(
                         stringResource(R.string.entry_analysis_add_photo),
-                        color = AppColors.Calorie,
+                        color = MaterialTheme.colorScheme.primary,
                         fontSize = 14.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -1259,7 +1313,7 @@ internal fun EntryAnalysisTipStrip(
                 Text(
                     stringResource(R.string.context_note_hint),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f),
                 )
                 var showGuide by remember { mutableStateOf(false) }
@@ -1295,7 +1349,7 @@ internal fun EntryAnalysisTipStrip(
                 Text(
                     stringResource(R.string.context_note_weight_unit),
                     fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             TextButton(
@@ -1304,7 +1358,7 @@ internal fun EntryAnalysisTipStrip(
             ) {
                 Text(
                     stringResource(R.string.entry_analysis_tip_apply),
-                    color = AppColors.Calorie,
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold,
                 )
             }
@@ -1328,7 +1382,7 @@ internal fun SheetSectionHeaderWithLock(
             title,
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(1f)
         )
         IconButton(
@@ -1341,8 +1395,8 @@ internal fun SheetSectionHeaderWithLock(
                     if (unlocked) R.string.nutrition_lock_editing
                     else R.string.nutrition_unlock_editing
                 ),
-                tint = if (unlocked) AppColors.Calorie
-                    else MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Faint),
+                tint = if (unlocked) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.outline,
                 modifier = Modifier.size(18.dp)
             )
         }
@@ -1366,9 +1420,9 @@ internal fun ReviewNutritionValueRow(
         if (unlocked) draft = editValue
     }
     val labelColor = accentColor?.let {
-        if (dim) it.copy(alpha = AppTextOpacity.Secondary) else it
+        if (dim) it.copy(alpha = 0.7f) else it
     } ?: if (dim) {
-        MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+        MaterialTheme.colorScheme.onSurfaceVariant
     } else {
         MaterialTheme.colorScheme.onSurface
     }
@@ -1386,7 +1440,7 @@ internal fun ReviewNutritionValueRow(
                 .fillMaxWidth()
                 .padding(horizontal = 18.dp, vertical = 12.dp)
                 .clickable(enabled = unlocked) { expanded = !expanded }
-                .background(Color.Transparent, RoundedCornerShape(AppRadii.Tile)),
+                .background(Color.Transparent, MaterialTheme.shapes.medium),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -1405,7 +1459,7 @@ internal fun ReviewNutritionValueRow(
                 Spacer(Modifier.width(8.dp))
                 val rotation by animateFloatAsState(
                     targetValue = if (expanded) 180f else 0f,
-                    animationSpec = spring(dampingRatio = 0.75f)
+                    animationSpec = AppMotion.pressSpring()
                 )
                 Icon(
                     Icons.Filled.KeyboardArrowDown,
@@ -1425,17 +1479,17 @@ internal fun ReviewNutritionValueRow(
                 Text(
                     unit,
                     fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.width(36.dp)
                 )
             }
         }
 
-        // Expanded wheel picker
+        // Expanded wheel picker (Morphe: tweened disclosure, expand from top)
         AnimatedVisibility(
             visible = expanded && unlocked,
-            enter = expandVertically(animationSpec = spring(dampingRatio = 0.75f)),
-            exit = shrinkVertically(animationSpec = spring(dampingRatio = 0.75f))
+            enter = expandVertically(expandFrom = Alignment.Top, animationSpec = AppMotion.spatialSpring()),
+            exit = shrinkVertically(shrinkTowards = Alignment.Top, animationSpec = AppMotion.spatialSpring()),
         ) {
             if (isCalories) {
                 val currentCalories = currentValue.roundToInt().coerceIn(0, calorieWheelMax)
@@ -1535,17 +1589,13 @@ internal fun WhatIfMealImpactDialog(
         loading = false
     }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(AppRadii.Sheet),
-        title = {
-            Text(
-                stringResource(R.string.what_if_title),
-                fontWeight = FontWeight.Bold
-            )
-        },
-        text = {
-            Column(
+    ChompassDialog(onDismissRequest = onDismiss) {
+        Text(
+            stringResource(R.string.what_if_title),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+        Column(
                 // Codeberg #17: cap the content height so the dialog fits small
                 // screens (M3 AlertDialog never scrolls) — the content scrolls
                 // internally when the AI text is long. 60% of the screen
@@ -1557,7 +1607,7 @@ internal fun WhatIfMealImpactDialog(
             ) {
                 Text(
                     stringResource(R.string.what_if_subtitle),
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = 19.sp
                 )
                 SheetPillCard {
@@ -1569,7 +1619,7 @@ internal fun WhatIfMealImpactDialog(
                         } ?: profile?.let {
                             "${LocaleFormat.integer(EnergyFormat.quantity(after.calories, LocalEnergyUnit.current))} / ${LocaleFormat.integer(EnergyFormat.quantity(it.effectiveCalories, LocalEnergyUnit.current))} ${energyUnitLabel()}"
                         } ?: energyText(after.calories),
-                        accentColor = AppColors.Calorie
+                        accentColor = MaterialTheme.colorScheme.primary
                     )
                     SheetHairline()
                     WhatIfImpactRow(
@@ -1611,7 +1661,7 @@ internal fun WhatIfMealImpactDialog(
                             stringResource(R.string.what_if_ai_suggestion),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Subtle)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         if (loading) {
                             Row(
@@ -1621,30 +1671,32 @@ internal fun WhatIfMealImpactDialog(
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(18.dp),
                                     strokeWidth = 2.dp,
-                                    color = AppColors.Calorie
+                                    color = MaterialTheme.colorScheme.primary
                                 )
                                 Text(
                                     stringResource(R.string.what_if_loading),
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary)
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         } else {
                             Text(
                                 suggestion ?: error ?: stringResource(R.string.what_if_no_suggestion),
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Emphasized),
+                                color = MaterialTheme.colorScheme.onSurface,
                                 lineHeight = 19.sp
                             )
                         }
                     }
                 }
             }
-        },
-        confirmButton = {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+        ) {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.action_done), color = AppColors.Calorie)
+                Text(stringResource(R.string.action_done), color = MaterialTheme.colorScheme.primary)
             }
         }
-    )
+    }
 }
 
 @Composable
@@ -1652,7 +1704,7 @@ private fun WhatIfImpactRow(
     label: String,
     added: String,
     total: String,
-    accentColor: Color = AppColors.Calorie,
+    accentColor: Color = MaterialTheme.colorScheme.primary,
 ) {
     Row(
         Modifier
@@ -1665,7 +1717,7 @@ private fun WhatIfImpactRow(
             Text(
                 added,
                 fontSize = 13.sp,
-                color = accentColor.copy(alpha = AppTextOpacity.Strong),
+                color = accentColor,
                 fontWeight = FontWeight.Medium
             )
         }
@@ -1673,7 +1725,7 @@ private fun WhatIfImpactRow(
             total,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary)
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

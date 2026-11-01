@@ -90,22 +90,22 @@ jobs:
             apk="$(find android/app/build/outputs/apk -type f -name '*release*.apk' | head -n 1)"
           fi
           test -n "$apk"
-          cp "$apk" dist/Chompass-5.11.10-universal.apk
+          cp "$apk" dist/Chompass-6.0.0-universal.apk
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Chompass-5.11.10-universal
-          path: dist/Chompass-5.11.10-universal.apk
+          name: Chompass-6.0.0-universal
+          path: dist/Chompass-6.0.0-universal.apk
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v5.11.10
-          name: Chompass 5.11.10
+          tag_name: v6.0.0
+          name: Chompass 6.0.0
           target_commitish: feature/chatgpt-plan-login
           body: |
-            ## Chompass 5.11.10
+            ## Chompass 6.0.0
 
             This release provides a signed Android build with stable update signing and the official Google Android AuthorizationClient flow for Drive app-data backup/sync.
 
@@ -121,4 +121,4 @@ jobs:
             - Restores the selected per-profile reasoning level after app restart and startup hydration.
 
             This APK is release-signed with the project keystore and is intended to update earlier Chompass builds signed with the same key.
-          files: dist/Chompass-5.11.10-universal.apk
+          files: dist/Chompass-6.0.0-universal.apk

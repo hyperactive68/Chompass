@@ -32,6 +32,8 @@ internal object Keys {
         val FIRST_LAUNCH_AT = longPreferencesKey("firstLaunchAt")
         /** Dismissed settings-suggestion ids ("water_tracking", "adaptive_goals", ...). */
         val DISMISSED_SUGGESTIONS = stringSetPreferencesKey("dismissedSuggestionIds")
+        /** Hidden saved-food identity keys — dropped from Add Food suggestions, diary history kept (Codeberg #142). */
+        val HIDDEN_FOOD_KEYS = stringSetPreferencesKey("hiddenFoodKeys")
         /** Epoch day the AI fill-missing Home banner was last shown (at most once per day). */
         val FILL_MISSING_BANNER_LAST_SHOWN_DAY = longPreferencesKey("fillMissingBannerLastShownDay")
         /** Dismissed fill-missing scan signatures (sticky per scan shape). */
@@ -175,8 +177,19 @@ internal object Keys {
          *  no data is sent to any LLM provider and AI entry points are hidden. */
         val AI_FEATURES_ENABLED = booleanPreferencesKey("aiFeaturesEnabled")
         val APP_THEME_COLOR = stringPreferencesKey("appThemeColor")
-        /** Ignored. Former iOS frosted-glass toggle; stored values are left unread. */
+        /** Frosted-glass blur behind floating panels (Morphe traits); default ON.
+         *  Key survives from the iOS era, so stored `true` simply means enabled. */
         val GLASS_BLUR_ENABLED = booleanPreferencesKey("glassBlurEnabled")
+        /** Ambient animated background behind every screen (Morphe traits); default ON. */
+        val AMBIENT_MOTION_ENABLED = booleanPreferencesKey("ambientMotionEnabled")
+        val AMBIENT_INTENSITY = stringPreferencesKey("ambientIntensity")
+        val AMBIENT_CONTRAST = stringPreferencesKey("ambientContrast")
+        val AMBIENT_SATURATION = stringPreferencesKey("ambientSaturation")
+        val AMBIENT_SPEED = stringPreferencesKey("ambientSpeed")
+        val AMBIENT_PALETTE = stringPreferencesKey("ambientPalette")
+        /** Gyro parallax on the ambient field; default ON. */
+        val AMBIENT_TILT_ENABLED = booleanPreferencesKey("ambientTiltEnabled")
+        val GLASS_STRENGTH = stringPreferencesKey("glassStrength")
         /** When ON the launcher icon stays the brand teal and never swaps activity aliases. */
         val FIXED_LAUNCHER_ICON = booleanPreferencesKey("fixedLauncherIcon")
         /** Codeberg #77: meal date/time uses the system pickers instead of wheels. */
@@ -312,6 +325,8 @@ internal object Keys {
         val DEBUG_DEMO_ANALYSIS_FAIL = booleanPreferencesKey("debugDemoAnalysisFail")
         /** Debug-only: first demo entry leg truncates, retry answers macros (#97 demo_ai_truncate extra). */
         val DEBUG_DEMO_ANALYSIS_TRUNCATE = booleanPreferencesKey("debugDemoAnalysisTruncate")
+        /** Debug-only: hold the demo analysis overlay this many ms (demo_ai_hold_ms; screenshot capture). */
+        val DEBUG_DEMO_ANALYSIS_HOLD_MS = intPreferencesKey("debugDemoAnalysisHoldMs")
         val BARCODE_CACHE = stringPreferencesKey("barcodeLookupCache")
         val ON_DEVICE_MODEL_DOWNLOADED_VERSION = stringPreferencesKey("onDeviceModelDownloadedVersion")
         val ON_DEVICE_DOWNLOAD_OVER_WIFI_ONLY = booleanPreferencesKey("onDeviceDownloadOverWifiOnly")
@@ -326,6 +341,14 @@ internal object Keys {
         val WEBDAV_ENABLED = booleanPreferencesKey("webDavEnabled")
         /** Local calendar day (yyyy-MM-dd) of the last auto-sync attempt. */
         val WEBDAV_AUTO_SYNC_DAY = stringPreferencesKey("webDavAutoSyncDay")
+        /** #122: opt-in meal-photo sync over WebDAV (bytes as siblings of the sync doc). */
+        val WEBDAV_PHOTOS_ENABLED = booleanPreferencesKey("webDavPhotosEnabled")
+        /** #122: photo upload/download only on unmetered networks. */
+        val WEBDAV_PHOTOS_WIFI_ONLY = booleanPreferencesKey("webDavPhotosWifiOnly")
+        /** #122: content-addressed refs known to be on the server (cache; unbounded but tiny). */
+        val WEBDAV_SYNCED_PHOTOS = stringSetPreferencesKey("webDavSyncedPhotos")
+        /** #122: normalized WebDAV URL the uploaded-ref cache belongs to. */
+        val WEBDAV_SYNCED_PHOTOS_URL = stringPreferencesKey("webDavSyncedPhotosUrl")
         val LAST_SYNC_AT = stringPreferencesKey("lastSyncAt")
         val LAST_SYNC_ETAG = stringPreferencesKey("lastSyncEtag")
         val GOOGLE_DRIVE_CONNECTED = booleanPreferencesKey("googleDriveConnected")

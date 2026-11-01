@@ -1,7 +1,10 @@
 package app.chompass.ui.home
 
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import app.chompass.ui.components.pressScale
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,7 +43,6 @@ import app.chompass.ui.components.ChompassTextField
 import app.chompass.ui.components.NumericWheelPicker
 import app.chompass.ui.components.energyUnitLabel
 import app.chompass.ui.navigation.LocalEnergyUnit
-import app.chompass.ui.theme.AppTextOpacity
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -78,7 +80,7 @@ fun ManualActiveSheet(
             Text(
                 stringResource(R.string.manual_active_subtitle),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(14.dp))
             ChompassTextField(
@@ -122,7 +124,7 @@ fun ManualActiveSheet(
                         EnergyFormat.quantity(todayEntries.sumOf { it.calories }, unit),
                         energyUnitLabel(),
                     ),
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Subtle),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 13.sp,
                 )
                 Spacer(Modifier.height(8.dp))
@@ -147,19 +149,21 @@ private fun ManualActiveHistoryRow(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
 ) {
+    val rowInteraction = remember { MutableInteractionSource() }
     Row(
         Modifier
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.medium)
+            .pressScale(rowInteraction)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f))
-            .clickable(onClick = onEdit)
+            .clickable(interactionSource = rowInteraction, indication = LocalIndication.current, onClick = onEdit)
             .padding(start = 14.dp, end = 4.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             Icons.AutoMirrored.Filled.DirectionsRun,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.tertiary.copy(alpha = AppTextOpacity.Strong),
+            tint = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier.size(18.dp),
         )
         Text(
@@ -180,7 +184,7 @@ private fun ManualActiveHistoryRow(
             Icon(
                 Icons.Filled.Delete,
                 contentDescription = stringResource(R.string.cd_delete_manual_active),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Subtle),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

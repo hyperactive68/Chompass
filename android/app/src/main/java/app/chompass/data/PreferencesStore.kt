@@ -4,6 +4,7 @@ import android.content.Context
 import app.chompass.models.AIProvider
 import app.chompass.models.AiProfile
 import app.chompass.models.BodyFatEntry
+import app.chompass.models.BodyCompositionEntry
 import app.chompass.models.BodyMeasurement
 import app.chompass.models.ChatMessage
 import app.chompass.models.DailyFoodTotals
@@ -135,6 +136,15 @@ class PreferencesStore(private val appContext: Context) : NutritionSyncStore {
             order = compareBy(BodyMeasurement::date),
         )
     }
+    internal val compositionBucketStore by lazy {
+        JsonBucketStore(
+            root = File(appContext.filesDir, "chompass-buckets/composition"),
+            json = json,
+            serializer = BodyCompositionEntry.serializer(),
+            idOf = { it.id },
+            order = compareBy(BodyCompositionEntry::date),
+        )
+    }
     internal val foodBucketStore by lazy {
         JsonBucketStore(
             root = File(appContext.filesDir, "chompass-buckets/food"),
@@ -179,6 +189,9 @@ class PreferencesStore(private val appContext: Context) : NutritionSyncStore {
     suspend fun readColdStartPrefs(): ColdStartPrefs = readColdStartPrefsImpl()
     val dismissedSuggestionIds: Flow<Set<String>> get() = dismissedSuggestionIdsImpl
     suspend fun setSuggestionDismissed(id: String, dismissed: Boolean = true) = setSuggestionDismissedImpl(id, dismissed)
+    /** Saved-food identity keys hidden from Add Food suggestions; diary history stays intact (Codeberg #142). */
+    val hiddenFoodKeys: Flow<Set<String>> get() = hiddenFoodKeysImpl
+    suspend fun setFoodHidden(favoriteKey: String, hidden: Boolean = true) = setFoodHiddenImpl(favoriteKey, hidden)
     /** AI fill-missing Home banner: last-shown epoch day + sticky scan-signature dismissals. */
     val fillMissingBannerLastShownDay: Flow<Long> get() = fillMissingBannerLastShownDayImpl
     suspend fun setFillMissingBannerShown(epochDay: Long) = setFillMissingBannerShownImpl(epochDay)
@@ -416,7 +429,25 @@ class PreferencesStore(private val appContext: Context) : NutritionSyncStore {
     val fixedLauncherIcon: Flow<Boolean> get() = fixedLauncherIconImpl
     suspend fun setFixedLauncherIcon(v: Boolean) = setFixedLauncherIconImpl(v)
     val useSystemDateTimePickers: Flow<Boolean> get() = useSystemDateTimePickersImpl
+    val glassBlurEnabled: Flow<Boolean> get() = glassBlurEnabledImpl
+    val ambientMotionEnabled: Flow<Boolean> get() = ambientMotionEnabledImpl
+    val ambientIntensity: Flow<String> get() = ambientIntensityImpl
+    val ambientContrast: Flow<String> get() = ambientContrastImpl
+    val ambientSaturation: Flow<String> get() = ambientSaturationImpl
+    val ambientSpeed: Flow<String> get() = ambientSpeedImpl
+    val ambientPalette: Flow<String> get() = ambientPaletteImpl
+    val ambientTiltEnabled: Flow<Boolean> get() = ambientTiltEnabledImpl
+    val glassStrength: Flow<String> get() = glassStrengthImpl
     suspend fun setUseSystemDateTimePickers(v: Boolean) = setUseSystemDateTimePickersImpl(v)
+    suspend fun setGlassBlurEnabled(v: Boolean) = setGlassBlurEnabledImpl(v)
+    suspend fun setAmbientMotionEnabled(v: Boolean) = setAmbientMotionEnabledImpl(v)
+    suspend fun setAmbientIntensity(v: String) = setAmbientIntensityImpl(v)
+    suspend fun setAmbientContrast(v: String) = setAmbientContrastImpl(v)
+    suspend fun setAmbientSaturation(v: String) = setAmbientSaturationImpl(v)
+    suspend fun setAmbientSpeed(v: String) = setAmbientSpeedImpl(v)
+    suspend fun setAmbientPalette(v: String) = setAmbientPaletteImpl(v)
+    suspend fun setAmbientTiltEnabled(v: Boolean) = setAmbientTiltEnabledImpl(v)
+    suspend fun setGlassStrength(v: String) = setGlassStrengthImpl(v)
     val weekStartsOnMonday: Flow<Boolean> get() = weekStartsOnMondayImpl
     suspend fun setWeekStartsOnMonday(v: Boolean) = setWeekStartsOnMondayImpl(v)
     val weekStartDay: Flow<app.chompass.models.WeekStartDay> get() = weekStartDayImpl
@@ -453,8 +484,8 @@ class PreferencesStore(private val appContext: Context) : NutritionSyncStore {
     suspend fun setHomeNutrientCardCount(v: Int) = setHomeNutrientCardCountImpl(v)
     val homeShowSteps: Flow<Boolean> get() = homeShowStepsImpl
     suspend fun setHomeShowSteps(v: Boolean) = setHomeShowStepsImpl(v)
-    val homeSlimFullNames: Flow<Boolean> get() = homeSlimFullNamesImpl
-    suspend fun setHomeSlimFullNames(v: Boolean) = setHomeSlimFullNamesImpl(v)
+    val homeSlimFullNames: Flow<Boolean> get() = fullNutrientNamesImpl
+    suspend fun setHomeFullNutrientNames(v: Boolean) = setHomeFullNutrientNamesImpl(v)
     val homeShowActiveCalories: Flow<Boolean> get() = homeShowActiveCaloriesImpl
     suspend fun setHomeShowActiveCalories(v: Boolean) = setHomeShowActiveCaloriesImpl(v)
     val homeStepGoal: Flow<Int> get() = homeStepGoalImpl
@@ -615,6 +646,13 @@ class PreferencesStore(private val appContext: Context) : NutritionSyncStore {
         upsertsByMonth: Map<YearMonth, List<BodyMeasurement>> = emptyMap(),
         removalIdsByMonth: Map<YearMonth, Set<UUID>> = emptyMap(),
     ) = applyMeasurementBucketChangesImpl(upsertsByMonth, removalIdsByMonth)
+    val bodyCompositions: Flow<List<BodyCompositionEntry>> get() = bodyCompositionsImpl
+    suspend fun setBodyCompositions(entries: List<BodyCompositionEntry>) = setBodyCompositionsImpl(entries)
+    /** Month-scoped composition write (one bucket file). */
+    suspend fun applyCompositionBucketChanges(
+        upsertsByMonth: Map<YearMonth, List<BodyCompositionEntry>> = emptyMap(),
+        removalIdsByMonth: Map<YearMonth, Set<UUID>> = emptyMap(),
+    ) = applyCompositionBucketChangesImpl(upsertsByMonth, removalIdsByMonth)
     val chatHistory: Flow<List<ChatMessage>> get() = chatHistoryImpl
     suspend fun setChatHistory(history: List<ChatMessage>) = setChatHistoryImpl(history)
     val widgetSnapshot: Flow<WidgetSnapshot?> get() = widgetSnapshotImpl
@@ -635,6 +673,8 @@ class PreferencesStore(private val appContext: Context) : NutritionSyncStore {
     suspend fun setDebugDemoAnalysisFail(enabled: Boolean) = setDebugDemoAnalysisFailImpl(enabled)
     val debugDemoAnalysisTruncate: Flow<Boolean> get() = debugDemoAnalysisTruncateImpl
     suspend fun setDebugDemoAnalysisTruncate(enabled: Boolean) = setDebugDemoAnalysisTruncateImpl(enabled)
+    val debugDemoAnalysisHoldMs: Flow<Int> get() = debugDemoAnalysisHoldMsImpl
+    suspend fun setDebugDemoAnalysisHoldMs(ms: Int) = setDebugDemoAnalysisHoldMsImpl(ms)
     val syncRevisions: Flow<Map<String, SyncRevision>> get() = syncRevisionsImpl
     suspend fun setSyncRevisions(revisions: Map<String, SyncRevision>) = setSyncRevisionsImpl(revisions)
     val webDavUrl: Flow<String> get() = webDavUrlImpl
@@ -647,6 +687,13 @@ class PreferencesStore(private val appContext: Context) : NutritionSyncStore {
     suspend fun setWebDavEnabled(enabled: Boolean) = setWebDavEnabledImpl(enabled)
     val webDavAutoSyncDay: Flow<String?> get() = webDavAutoSyncDayImpl
     suspend fun setWebDavAutoSyncDay(day: String?) = setWebDavAutoSyncDayImpl(day)
+    val webDavPhotosEnabled: Flow<Boolean> get() = webDavPhotosEnabledImpl
+    suspend fun setWebDavPhotosEnabled(enabled: Boolean) = setWebDavPhotosEnabledImpl(enabled)
+    val webDavPhotosWifiOnly: Flow<Boolean> get() = webDavPhotosWifiOnlyImpl
+    suspend fun setWebDavPhotosWifiOnly(wifiOnly: Boolean) = setWebDavPhotosWifiOnlyImpl(wifiOnly)
+    val webDavSyncedPhotos: Flow<Set<String>> get() = webDavSyncedPhotosImpl
+    val webDavSyncedPhotosUrl: Flow<String?> get() = webDavSyncedPhotosUrlImpl
+    suspend fun setWebDavSyncedPhotos(refs: Set<String>, ownerUrl: String) = setWebDavSyncedPhotosImpl(refs, ownerUrl)
     val lastSyncAt: Flow<String?> get() = lastSyncAtImpl
     suspend fun setLastSyncAt(iso: String?) = setLastSyncAtImpl(iso)
     val lastSyncEtag: Flow<String?> get() = lastSyncEtagImpl

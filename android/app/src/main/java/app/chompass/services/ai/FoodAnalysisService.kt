@@ -6,8 +6,9 @@ import app.chompass.data.AiCallConfig
 import app.chompass.data.OpenRouterReasoningEffort
 import app.chompass.data.GoalRecalcTierOverride
 import app.chompass.data.PreferencesStore
-import app.chompass.data.effectiveMaxResponseTokens
+import app.chompass.data.responseCapFor
 import app.chompass.data.effectiveReadTimeoutSeconds
+import app.chompass.services.ai.ProviderDirectory.Companion.findEntry
 import app.chompass.data.defaultAiProfileSnapshot
 import app.chompass.models.AIProvider
 import app.chompass.models.AiProfile
@@ -65,13 +66,13 @@ import okhttp3.Dns
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.dnsoverhttps.DnsOverHttps
 import java.net.InetAddress
-import java.io.IOException
 import java.net.UnknownHostException
+import java.util.concurrent.TimeUnit
+import java.io.IOException
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 import org.json.JSONObject
 import kotlin.math.abs
 import app.chompass.models.UnitFormat
@@ -138,8 +139,9 @@ private const val ENTRY_CONSTITUENTS_MICROS_RULE =
         "zinc, vitamins A/C/D/E/K/B12, folate, omega-3). Each constituent micronutrient " +
         "MUST sum to the matching meal total within ±20%."
 
-/** Response-token cap: the user cap verbatim on every provider; unset means the
- *  built-in default 4096 (PreferencesStore.DEFAULT_MAX_RESPONSE_TOKENS). */
+/** Response-token cap via [responseCapFor]: 16384 for requests that may think
+ *  (reasoning effort on for OpenAI-compatible providers, any Gemini — thinking
+ *  counts inside the cap), flat 4096 otherwise. Not user-settable. */
 
 /** Entry ops whose prompt embeds the constituents schema. */
 internal val ENTRY_CONSTITUENT_OPS = setOf("analyzeText", "analyzeAuto", "analyzeFood", "analyzeFoodMulti", "fillEntry", "reestimateEntry")
@@ -336,6 +338,7 @@ class FoodAnalysisService(
     internal val keyLookup: ((AiProfile) -> String?)? = null,
     /** OAuth bearer source for the official ChatGPT-plan Responses route. */
     private val chatGptAuth: ChatGptAuthManager? = null,
+    private val providerDirectory: () -> ProviderDirectory? = { null },
 ) {
     init {
         require((prefs != null && (keyStore != null || keyLookup != null)) || callAiDelegate != null) {
@@ -508,7 +511,12 @@ class FoodAnalysisService(
                 WeightGoal.GAIN -> "not set (default 0.5 kg/week gain)"
                 WeightGoal.MAINTAIN -> "not set (maintain)"
             }
-        val bmrMethod = if (profile.usesBodyFatForBMR) "Katch-McArdle (body fat known and enabled)" else "Mifflin-St Jeor"
+        val bmrMethod = when {
+            profile.usesMeasuredLeanMassForBMR ->
+                "Katch-McArdle on measured lean mass (fresh scale reading, enabled)"
+            profile.usesBodyFatForBMR -> "Katch-McArdle (body fat known and enabled)"
+            else -> "Mifflin-St Jeor"
+        }
         val signals = empiricalSignals(forecast, profile)
 
         // Energy Burn toggle: when on (and Health Connect has enough data) this measured
@@ -698,6 +706,11 @@ class FoodAnalysisService(
         val goalWeight = profile.goalWeightKg?.let { kg ->
             if (weightMetric) String.format(Locale.US, "%.1f kg", kg) else String.format(Locale.US, "%.1f lb", UnitFormat.kgToLbs(kg))
         } ?: "not set"
+        val leanMassLine = profile.validMeasuredLeanMassKg?.let { lean ->
+            val text = if (weightMetric) String.format(Locale.US, "%.1f kg", lean)
+                else String.format(Locale.US, "%.1f lb", UnitFormat.kgToLbs(lean))
+            "\n            - Measured lean mass: $text (scale reading, drives BMR + the protein cap)"
+        }.orEmpty()
         // #60 phase 4: with day types on, the response also carries a per-profile
         // array; the allowed-key list and the JSON shape must say so.
         val hasDayTypes = dayTypesSection.isNotEmpty()
@@ -716,9 +729,10 @@ class FoodAnalysisService(
             FORMULAS
             - BMR (Mifflin-St Jeor): base = 10*weightKg + 6.25*heightCm - 5*age - 161; if male add 166; female/other use base.
             - BMR (Katch-McArdle, used when body fat is known and enabled): 370 + 21.6 * (1 - bodyFatFraction) * weightKg. The Katch-McArdle path applies (only when body fat was logged within its freshness window — 90 days, or 365 for a DEXA scan); older readings fall back to Mifflin-St Jeor.
+            - BMR priority: ${GoalFormulaReference.measuredLeanMassBasisLine()}.
             - TDEE = BMR * activity multiplier. Multipliers: ${GoalFormulaReference.activityMultipliersLine()}.
             - Calorie target = TDEE + adjustment. adjustment = 0 for maintain; ${GoalFormulaReference.calorieAdjustmentLine()}.
-            - Protein: aim NEAR the formula protein value shown below. That value is the activity multiplier (${GoalFormulaReference.proteinPerKgLine()} g/kg; +0.2 if losing) applied to the user's full bodyweight, then ${GoalFormulaReference.proteinLbmCapLine()} when a valid body-fat reading exists. You may choose a value within about ±15% of it based on the weight goal and the observed history (lean toward the higher end during a calorie deficit to preserve muscle). Do NOT scale protein down just to fit a lower calorie target, except at the safety floor where protein may yield so 4*protein + 4*carbs + 9*fat stays near calories.
+            - Protein: aim NEAR the formula protein value shown below. That value is the activity multiplier (${GoalFormulaReference.proteinPerKgLine()} g/kg; +0.2 if losing) applied to the user's full bodyweight, then ${GoalFormulaReference.proteinLbmCapLine()} when a lean-mass basis exists (a fresh measured lean-mass reading wins over a body-fat reading). You may choose a value within about ±15% of it based on the weight goal and the observed history (lean toward the higher end during a calorie deficit to preserve muscle). Do NOT scale protein down just to fit a lower calorie target, except at the safety floor where protein may yield so 4*protein + 4*carbs + 9*fat stays near calories.
             - Fat: ${GoalFormulaReference.fatTargetLine()}.
             - Carbs: the calories remaining after protein (4 kcal/g) and fat (9 kcal/g), divided by 4. Keep 4*protein + 4*carbs + 9*fat approximately equal to calories.
             BMR method in effect for this user: $bmrMethod.
@@ -730,7 +744,7 @@ class FoodAnalysisService(
             - Age: ${profile.age}
             - Height: $height
             - Weight: $weight
-            - Body fat: $bodyFat$bodyFatTrustNote
+            - Body fat: $bodyFat$bodyFatTrustNote$leanMassLine
             - Activity level: ${profile.activityLevel.name.lowercase()}
             - Weight goal: ${profile.goal.name.lowercase()}
             - Weekly change preference: $weekly
@@ -1774,12 +1788,25 @@ class FoodAnalysisService(
             hasImages = imageBytesList.any { it.isNotEmpty() },
         )
         val primaryBaseUrl = ap.baseUrl?.takeIf { it.isNotEmpty() }?.let(AiHttp::normalizeCustomBaseUrl) ?: primary.baseUrl
-        val primaryKey = keyLookup?.invoke(ap)
-            ?: AiHttp.sanitizeApiKey(keyStore!!.profileApiKey(ap.id))
+        val primaryKey = if (primary == AIProvider.CHATGPT) {
+            chatGptAuth?.accessToken() ?: throw ChatGptAuthException("Connect your ChatGPT account in Settings first.")
+        } else {
+            keyLookup?.invoke(ap)
+                ?: AiHttp.sanitizeApiKey(keyStore!!.profileApiKey(ap.id))
+        }
         if (primary.requiresApiKey && primaryKey.isNullOrEmpty()) throw AiError.NoApiKey
-        val maxTokens = effectiveMaxResponseTokens(ap, prefs.maxResponseTokens.first())
+        val maxTokens = responseCapFor(
+            primary,
+            ap.reasoningEffort?.let(OpenRouterReasoningEffort::fromStorage)
+                ?: prefs.openRouterReasoningEffort.first(),
+        )
         val readTimeoutSeconds = effectiveReadTimeoutSeconds(ap, prefs.aiReadTimeoutSeconds.first())
-        val httpClient = AiHttp.clientForProvider(okHttp, primary, readTimeoutSeconds)
+        val httpClient = AiHttp.clientForProvider(
+            okHttp,
+            primary,
+            readTimeoutSeconds,
+            bundledDirectory = providerDirectory().findEntry(primaryBaseUrl) != null,
+        )
         val context = prefs.userContext.first()
         val languageLine = nonEnglishResponseLanguage()?.let {
             "Write human-readable meal/component names in $it when natural. Keep tool JSON keys and source_id values unchanged.\n\n"
@@ -1809,7 +1836,12 @@ class FoodAnalysisService(
             )
         } catch (primaryError: Throwable) {
             val fallback = currentFallbackConfig(primary, primaryModel, prefs!!.aiCallConfig()) ?: throw primaryError
-            val fallbackClient = AiHttp.clientForProvider(okHttp, fallback.provider, readTimeoutSeconds)
+            val fallbackClient = AiHttp.clientForProvider(
+                okHttp,
+                fallback.provider,
+                readTimeoutSeconds,
+                bundledDirectory = providerDirectory().findEntry(fallback.baseUrl) != null,
+            )
             val fallbackModel = resolveModelForRequest(
                 provider = fallback.provider,
                 selectedModel = fallback.model,
@@ -1952,7 +1984,10 @@ class FoodAnalysisService(
                 }
                 return DemoFoodAnalysis.runTruncate(onProgress, macrosLeg = kindOverride == EntryConstituentPromptKind.MACROS)
             }
-            val demoJson = DemoFoodAnalysis.run(onProgress)
+            val demoJson = DemoFoodAnalysis.run(
+                onProgress,
+                holdMs = prefs!!.debugDemoAnalysisHoldMs.first().toLong(),
+            )
             if (BuildConfig.DEBUG && prefs.debugDemoAnalysisFail.first()) {
                 throw IOException("demo failure (demo_ai_fail)")
             }
@@ -1993,8 +2028,7 @@ class FoodAnalysisService(
 
         val primaryBaseUrl = cfg.customBaseUrl?.takeIf { it.isNotEmpty() }?.let(AiHttp::normalizeCustomBaseUrl) ?: primary.baseUrl
         val primaryKey = if (primary == AIProvider.CHATGPT) {
-            chatGptAuth?.accessToken()
-                ?: throw ChatGptAuthException("Connect your ChatGPT account in Settings first.")
+            chatGptAuth?.accessToken() ?: throw ChatGptAuthException("Connect your ChatGPT account in Settings first.")
         } else {
             keyLookup?.invoke(cfg.profile)
                 ?: AiHttp.sanitizeApiKey(keyStore!!.profileApiKey(cfg.profile.id))
@@ -2033,9 +2067,19 @@ class FoodAnalysisService(
         // the fixed cold-start budget, local ones the settings seconds) —
         // the wall clock must never fire before a legit read gives up.
         val chainReadTimeoutSeconds = maxOf(
-            AiHttp.effectiveReadTimeoutSeconds(primary, readTimeoutSeconds),
+            AiHttp.effectiveReadTimeoutSeconds(
+                primary,
+                readTimeoutSeconds,
+                bundledDirectory = providerDirectory().findEntry(primaryBaseUrl) != null,
+            ),
             currentFallbackConfig(primary, primaryModel, cfg)
-                ?.let { AiHttp.effectiveReadTimeoutSeconds(it.provider, readTimeoutSeconds) }
+                ?.let {
+                    AiHttp.effectiveReadTimeoutSeconds(
+                        it.provider,
+                        readTimeoutSeconds,
+                        bundledDirectory = providerDirectory().findEntry(it.baseUrl) != null,
+                    )
+                }
                 ?: 0,
         )
         val timeoutMs = watchdogSecondsOverride?.times(1000L)
@@ -2302,7 +2346,12 @@ class FoodAnalysisService(
         AiHttp.assertCleartextAllowed(baseUrl, prefs?.allowInsecureHttp?.first() ?: false)
         val sanitizedKey = AiHttp.sanitizeApiKey(apiKey)
         if (provider.requiresApiKey && sanitizedKey.isNullOrEmpty()) throw AiError.NoApiKey
-        val httpClient = AiHttp.clientForProvider(okHttp, provider, readTimeoutSeconds)
+        val httpClient = AiHttp.clientForProvider(
+            okHttp,
+            provider,
+            readTimeoutSeconds,
+            bundledDirectory = providerDirectory().findEntry(baseUrl) != null,
+        )
         val enableGoogleSearch = provider.apiFormat == AIProvider.ApiFormat.GEMINI && geminiGoogleSearch
         if (!preferStreaming) {
             return when (provider.apiFormat) {
@@ -2317,11 +2366,7 @@ class FoodAnalysisService(
                         sanitizedKey!!,
                         effectivePrompt,
                         imageBytesList,
-                        reasoningEffort = OpenRouterReasoningEffort.sanitizeFor(
-                            provider,
-                            model,
-                            reasoningEffort,
-                        ),
+                        reasoningEffort = OpenRouterReasoningEffort.sanitizeFor(provider, model, reasoningEffort),
                     )
                 AIProvider.ApiFormat.OPENAI_COMPATIBLE ->
                     OpenAICompatibleClient.analyze(
@@ -2365,11 +2410,7 @@ class FoodAnalysisService(
                     effectivePrompt,
                     imageBytesList,
                     onDelta,
-                    reasoningEffort = OpenRouterReasoningEffort.sanitizeFor(
-                        provider,
-                        model,
-                        reasoningEffort,
-                    ),
+                    reasoningEffort = OpenRouterReasoningEffort.sanitizeFor(provider, model, reasoningEffort),
                 )
             AIProvider.ApiFormat.OPENAI_COMPATIBLE -> {
                 val streamed = OpenAICompatibleClient.analyzeStreaming(
@@ -2453,11 +2494,6 @@ class FoodAnalysisService(
             (maxOf(readTimeoutSeconds * 2, 120) * 1000L)
 
         internal val defaultClient: OkHttpClient by lazy {
-            // Some Android networks return an empty/failed system lookup for
-            // auth.openai.com while the system browser still resolves it. Use
-            // the same HTTPS-DNS fallback as the NutriLens client: system DNS
-            // first, then Cloudflare and Google over HTTPS. The fallback is
-            // only used when the device resolver returns no addresses.
             val bootstrapClient = OkHttpClient.Builder()
                 .retryOnConnectionFailure(true)
                 .connectTimeout(20, TimeUnit.SECONDS)
@@ -2485,8 +2521,8 @@ class FoodAnalysisService(
                     }
                 })
                 .connectTimeout(20, TimeUnit.SECONDS)
-                .readTimeout(60, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+                .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
                 .build()
         }
     }

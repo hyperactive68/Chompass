@@ -8,6 +8,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import app.chompass.ui.theme.AppMotion
 import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.gestures.snapping.snapFlingBehavior
@@ -29,7 +30,6 @@ import androidx.compose.material3.ripple
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Icon
@@ -65,8 +65,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.Locale
 import app.chompass.models.UnitFormat
-import app.chompass.ui.theme.AppRadii
-import app.chompass.ui.theme.AppTextOpacity
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -87,7 +85,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 
 import kotlin.math.roundToInt
 
-private val ITEM_HEIGHT = 44.dp
+private val ITEM_HEIGHT = 48.dp
 private const val VISIBLE_ITEMS = 5
 private val ROW_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS
 /** Unit wheels and other tiny ranges: kill ballistic fling so a flick is one row. */
@@ -375,7 +373,7 @@ fun DateWheelPicker(
 internal fun WheelSelectionHighlight(modifier: Modifier = Modifier) {
     // Material3 tonal indicator — same secondaryContainer band BottomNavBar
     // uses for its selected-tab pill, instead of a translucent glass capsule.
-    val shape = RoundedCornerShape(AppRadii.Field)
+    val shape = MaterialTheme.shapes.medium
     Box(
         modifier
             .fillMaxWidth()
@@ -485,7 +483,7 @@ fun FeetInchesWheelPicker(
 }
 
 /**
- * iOS-style split decimal picker — integer wheel + tenths wheel + unit label.
+ * Split decimal picker — integer wheel + tenths wheel + unit label.
  * e.g. 72 . 4 kg. Much nicer than a single 2000-row DecimalWheelPicker for weight.
  */
 @Composable
@@ -544,7 +542,7 @@ fun SplitDecimalWheelPicker(
             Text(
                 decimalSeparator.toString(),
                 style = MaterialTheme.typography.displaySmall,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = AppTextOpacity.Muted),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 4.dp)
             )
             WheelPicker(
@@ -891,7 +889,7 @@ fun ExpandableMacroPicker(
                 .fillMaxWidth()
                 .padding(horizontal = 18.dp, vertical = 12.dp)
                 .clickable { onExpandChange(!expanded) }
-                .background(Color.Transparent, RoundedCornerShape(AppRadii.Tile)),
+                .background(Color.Transparent, MaterialTheme.shapes.medium),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Label with accent color indicator
@@ -921,7 +919,7 @@ fun ExpandableMacroPicker(
             Spacer(Modifier.width(8.dp))
             val rotation by animateFloatAsState(
                 targetValue = if (expanded) 180f else 0f,
-                animationSpec = spring(dampingRatio = 0.75f)
+                animationSpec = AppMotion.spatialSpring()
             )
             Icon(
                 Icons.Filled.KeyboardArrowDown,
@@ -935,8 +933,8 @@ fun ExpandableMacroPicker(
         // Expanded wheel picker
         AnimatedVisibility(
             visible = expanded,
-            enter = expandVertically(animationSpec = spring(dampingRatio = 0.75f)),
-            exit = shrinkVertically(animationSpec = spring(dampingRatio = 0.75f))
+            enter = expandVertically(animationSpec = AppMotion.spatialSpring()),
+            exit = shrinkVertically(animationSpec = AppMotion.spatialSpring())
         ) {
             NumericWheelPicker(
                 value = value,
@@ -979,7 +977,7 @@ fun ExpandableDecimalMacroPicker(
                 .fillMaxWidth()
                 .padding(horizontal = 18.dp, vertical = 12.dp)
                 .clickable { onExpandChange(!expanded) }
-                .background(Color.Transparent, RoundedCornerShape(AppRadii.Tile)),
+                .background(Color.Transparent, MaterialTheme.shapes.medium),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1007,7 +1005,7 @@ fun ExpandableDecimalMacroPicker(
             Spacer(Modifier.width(8.dp))
             val rotation by animateFloatAsState(
                 targetValue = if (expanded) 180f else 0f,
-                animationSpec = spring(dampingRatio = 0.75f)
+                animationSpec = AppMotion.spatialSpring()
             )
             Icon(
                 Icons.Filled.KeyboardArrowDown,
@@ -1020,8 +1018,8 @@ fun ExpandableDecimalMacroPicker(
 
         AnimatedVisibility(
             visible = expanded,
-            enter = expandVertically(animationSpec = spring(dampingRatio = 0.75f)),
-            exit = shrinkVertically(animationSpec = spring(dampingRatio = 0.75f))
+            enter = expandVertically(animationSpec = AppMotion.spatialSpring()),
+            exit = shrinkVertically(animationSpec = AppMotion.spatialSpring())
         ) {
             SplitDecimalWheelPicker(
                 value = value,
@@ -1120,7 +1118,7 @@ fun SplitIntegerWheelPicker(
         Text(
             ",",
             style = MaterialTheme.typography.displaySmall,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = AppTextOpacity.Muted),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 4.dp)
         )
         WheelPicker(
@@ -1134,7 +1132,7 @@ fun SplitIntegerWheelPicker(
             Text(
                 unit,
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = AppTextOpacity.Muted),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.width(48.dp).padding(start = 4.dp)
             )
         }

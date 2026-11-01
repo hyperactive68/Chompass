@@ -98,6 +98,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.delay
@@ -1394,6 +1395,15 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
                 }
             }
             .launchIn(viewModelScope)
+
+        // Library mutations from any screen (hide / unhide / fix template /
+        // delete logged rows, Codeberg #142) invalidate the Add Food saved
+        // index the same way a diary change does.
+        viewModelScope.launch {
+            container.foodRepository.libraryVersion.drop(1).collect {
+                quickRelogEpoch++
+            }
+        }
 
         container.prefs.goalJournal
             .onEach { entries ->
@@ -2876,6 +2886,109 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
             } finally {
                 _ui.update { it.copy(saving = false) }
             }
+        }
+    }
+
+    /**
+     * Codeberg #142: fix the reviewed saved template in the library instead of
+     * logging a row. Builds the same entry [saveAnalysis] would, then writes
+     * it through [FoodRepository.updateSavedTemplate] — the repository pins
+     * the original's id + timestamp (single preservation point), so a favorite
+     * updates in place and a plain diary template edits its newest row. No
+     * addEntry, no Health mirror, no saved-index promotion: the
+     * libraryVersion bump invalidates the saved-index cache.
+     */
+    fun saveAnalysisToLibrary(
+        template: FoodEntry,
+        name: String? = null,
+        servingGrams: Double? = null,
+        scale: Double = 1.0,
+        mealType: String = MealType.currentMealId,
+        selectedServingUnit: String? = null,
+        selectedServingQuantity: Double? = null,
+        editedAnalysis: FoodAnalysis? = null,
+        logTime: LocalTime? = null,
+    ) {
+        val pendingAnalysis = _ui.value.pendingAnalysis
+        val analysis = editedAnalysis ?: pendingAnalysis ?: return
+        if (_ui.value.saving) return
+        viewModelScope.launch {
+            if (_ui.value.saving) return@launch
+            _ui.update { it.copy(saving = true) }
+            try {
+                withContext(Dispatchers.Default) {
+                    // Reuse the template's on-disk image so a library fix never
+                    // duplicates the JPEG.
+                    val filename = template.imageFilename
+                        ?: _ui.value.pendingDraftImageFilename
+                        ?: _ui.value.pendingImageBytes?.let { persistImage(it, UUID.randomUUID()) }
+                    // The sheet's editedAnalysis already carries the serving scale.
+                    val effectiveScale = if (editedAnalysis != null) 1.0 else scale
+                    fun s(v: Int) = (v * effectiveScale).roundToInt()
+                    fun macro(v: Double) = v * effectiveScale
+                    val resolvedName = name?.takeIf { it.isNotBlank() } ?: analysis.name
+                    if (resolvedName.isBlank()) return@withContext
+                    val constituents = if (effectiveScale == 1.0) {
+                        analysis.constituents
+                    } else {
+                        app.chompass.services.ai.ConstituentReconcile.scaleAll(
+                            analysis.constituents,
+                            effectiveScale,
+                        )
+                    }
+                    val built = analysis.toMicronutrients().scaled(effectiveScale, round1 = false).applyTo(
+                        FoodEntry(
+                            id = UUID.randomUUID(),
+                            name = resolvedName,
+                            calories = s(analysis.calories),
+                            protein = macro(analysis.protein),
+                            carbs = macro(analysis.carbs),
+                            fat = macro(analysis.fat),
+                            timestamp = timestampForLogging(
+                                _selectedDate.value,
+                                Instant.now(),
+                                ZoneId.systemDefault(),
+                                logTime ?: _ui.value.logTimeOverride,
+                            ),
+                            imageFilename = filename,
+                            emoji = analysis.emoji,
+                            source = template.source,
+                            mealType = mealType,
+                            servingSizeGrams = servingGrams ?: analysis.servingSizeGrams,
+                            servingUnitOptions = analysis.servingUnitOptions,
+                            selectedServingUnit = if (analysis.servingUnitOptions.isEmpty()) null else selectedServingUnit,
+                            selectedServingQuantity = if (analysis.servingUnitOptions.isEmpty()) null else selectedServingQuantity,
+                            customNote = analysis.customNote,
+                            grounding = analysis.grounding,
+                            constituents = constituents,
+                            productMetadata = analysis.productMetadata,
+                            microsCompositionSignature = app.chompass.models.microsCompositionSignature(constituents),
+                            planned = template.planned,
+                            recipeLogId = template.recipeLogId,
+                        )
+                    )
+                    container.foodRepository.updateSavedTemplate(template, built)
+                    container.prefs.setPendingFoodAnalysisDraft(null)
+                    _ui.update { it.copy(
+                        pendingAnalysis = null,
+                        pendingIdentityName = null,
+                        pendingImageBytes = null,
+                        pendingAnalysisImages = emptyList(),
+                        pendingFoodSource = null,
+                        pendingDraftImageFilename = null,
+                        pendingReviewSource = null,
+                    ) }
+                }
+            } finally {
+                _ui.update { it.copy(saving = false) }
+            }
+        }
+    }
+
+    /** Codeberg #142: hide a saved food from Add Food suggestions (Settings library can undo). */
+    fun hideSavedFood(favoriteKey: String) {
+        viewModelScope.launch {
+            container.foodRepository.hideFood(favoriteKey)
         }
     }
 

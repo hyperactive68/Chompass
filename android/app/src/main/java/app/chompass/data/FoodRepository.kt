@@ -11,6 +11,8 @@ import app.chompass.services.ReviewPrompter
 import app.chompass.services.health.HealthConnectManager
 import app.chompass.services.health.NutritionWriteGate
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.time.Instant
@@ -126,6 +128,20 @@ class FoodRepository(
      * the memo every favorite op paid 2-3 full snapshot reads.
      */
     private val favoritesMigrated = AtomicBoolean(false)
+
+    /**
+     * Bumped on every saved-foods library mutation — hide, unhide, template
+     * fix, delete-all-logged-rows (Codeberg #142). The Add Food index cache in
+     * HomeViewModel watches this on top of the diary/favorites combine so
+     * mutations from any screen invalidate it.
+     */
+    private val _libraryVersion = MutableStateFlow(0)
+    val libraryVersion: StateFlow<Int> get() = _libraryVersion
+
+    private fun bumpLibraryVersion() {
+        _libraryVersion.value += 1
+    }
+
     val entries: Flow<List<FoodEntry>> = prefs.foodEntries
 
     /**
@@ -156,6 +172,9 @@ class FoodRepository(
     val favoriteKeys: Flow<Set<String>> = prefs.favoriteFoodEntries.map { list ->
         list.map { it.favoriteKey }.toSet()
     }
+
+    /** Identity keys hidden from Add Food suggestions (diary history kept). */
+    val hiddenFoodKeys: Flow<Set<String>> get() = prefs.hiddenFoodKeys
 
     fun entriesForDate(date: LocalDate): Flow<List<FoodEntry>> =
         prefs.foodEntriesForMonth(YearMonth.from(date)).map { monthEntries ->
@@ -856,7 +875,11 @@ class FoodRepository(
      * every month bucket ever written. This runs on sheet open (and is cached by
      * the caller), never per keystroke.
      */
-    suspend fun savedFoodIndex(days: Long = 365, now: Instant = Instant.now()): List<SavedFoodIndexEntry> =
+    suspend fun savedFoodIndex(
+        days: Long = 365,
+        now: Instant = Instant.now(),
+        includeHidden: Boolean = false,
+    ): List<SavedFoodIndexEntry> =
         PerfLog.measure("hubOpen", "savedIndex", "days=$days") {
             val months = yearMonthsForSavedFoodIndex(now, days = days)
             val windowed = prefs.foodEntriesForMonths(months).first()
@@ -864,6 +887,7 @@ class FoodRepository(
             buildSavedFoodIndex(
                 entries = windowed.filter { !it.timestamp.isBefore(cutoff) },
                 favorites = migratedFavorites(),
+                hiddenKeys = if (includeHidden) emptySet() else prefs.hiddenFoodKeys.first(),
             )
         }
 
@@ -880,6 +904,138 @@ class FoodRepository(
                 perRow = perRow,
             )
         }
+
+    // -- Saved-foods library (Codeberg #142) -------------------------------
+
+    /**
+     * Hide a saved food from Add Food suggestions by identity key. Also
+     * unfavorites it (same removal branch as [toggleFavorite]: one atomic
+     * favorites write that keeps the legacy keys mirror in sync, tombstone,
+     * photo prune) so the food truly leaves every suggestion surface. Diary
+     * rows are untouched — hide is reversible via the Settings library.
+     */
+    suspend fun hideFood(favoriteKey: String) {
+        prefs.setFoodHidden(favoriteKey, true)
+        ensureFavoritesMigrated()
+        val current = prefs.favoriteFoodEntries.first().toMutableList()
+        val idx = current.indexOfFirst { it.favoriteKey == favoriteKey }
+        if (idx >= 0) {
+            val removed = current.removeAt(idx)
+            prefs.setFavoritesAtomic(current)
+            DebugTrace.event(
+                "op=favorite phase=remove key=${favoriteKey.replace(' ', '_')} count=${current.size}",
+            )
+            sync?.tombstone(removed.id, "favorite")
+            pruneOrphanedImages()
+        }
+        bumpLibraryVersion()
+    }
+
+    /** Un-hide a saved food; does not re-favorite. */
+    suspend fun unhideFood(favoriteKey: String) {
+        prefs.setFoodHidden(favoriteKey, false)
+        bumpLibraryVersion()
+    }
+
+    /**
+     * Fix a saved template in place: diary row and favorite share the edit —
+     * same id + timestamp either way ([updated] may be a freshly built entry;
+     * identity preservation happens exactly here). Favorites update the
+     * stored favorite, everything else updates the newest diary row.
+     */
+    suspend fun updateSavedTemplate(original: FoodEntry, updated: FoodEntry) {
+        val fixed = updated.copy(id = original.id, timestamp = original.timestamp)
+        if (isFavorite(original)) {
+            updateFavorite(original, fixed)
+        } else {
+            updateEntry(original, fixed)
+        }
+        bumpLibraryVersion()
+    }
+
+    /** All-time diary row count for one identity key (every month bucket). */
+    suspend fun loggedRowCount(favoriteKey: String): Int =
+        prefs.foodEntries.first().count { it.favoriteKey == favoriteKey }
+
+    /**
+     * Delete every diary row carrying [favoriteKey], across all month buckets.
+     * Mirrors [deleteEntry]'s ordering: Health retry queue keys dropped before
+     * the rows disappear, one atomic multi-bucket removal, then per-row sync
+     * tombstones and Health deletes. Other keys' rows are untouched.
+     *
+     * @return the number of rows removed.
+     */
+    suspend fun deleteLoggedRows(favoriteKey: String): Int {
+        val victims = prefs.foodEntries.first().filter { it.favoriteKey == favoriteKey }
+        if (victims.isEmpty()) return 0
+        victims.forEach { healthRetry.forget(it.id) }
+        prefs.applyFoodEntryBucketChanges(
+            removalIdsByMonth = victims.groupBy({ it.month() }, { it.id }).mapValues { it.value.toSet() },
+        )
+        victims.forEach {
+            sync?.tombstone(it.id, "food")
+            health?.deleteNutrition(it.id)
+        }
+        pruneOrphanedImages()
+        bumpLibraryVersion()
+        return victims.size
+    }
+
+    /**
+     * Merge identity [sourceKey] into [targetKey] (Codeberg #142 semantics 4).
+     * [FoodEntry.favoriteKey] is computed from the name, so the row-level
+     * identity update *is* the rename: every diary row carrying [sourceKey]
+     * is renamed to the target's exact name in one atomic write
+     * ([updateEntries] — batch sync touch, batched Health update, or stale
+     * HC-record cleanup when sync is off). Rows keep id and timestamp, so
+     * meal placement, history, and photos are untouched.
+     *
+     * Favorites: a source-only favorite is re-pointed onto the target
+     * (name changes, curated macros, id, order, and photo stay); when both
+     * identities are favorited the source favorite is removed outright
+     * (same removal branch as [hideFood]). The suggestion template needs no
+     * write either way — the newest-row-per-key collapse picks up the merged
+     * history, and [refreshFavoriteOnMerge] re-syncs a drifting favorite on
+     * the next re-log, same as before the merge.
+     *
+     * A [sourceKey] left in `hidden_food_keys` is cleared (its rows are gone;
+     * the target's hidden state is the user's call and stays untouched).
+     *
+     * @return the number of diary rows renamed, 0 when the target identity
+     *         no longer exists (already merged / deleted) or keys coincide.
+     */
+    suspend fun mergeFoodKey(sourceKey: String, targetKey: String): Int {
+        if (sourceKey == targetKey || sourceKey.isEmpty() || targetKey.isEmpty()) return 0
+        val diary = prefs.foodEntries.first()
+        val favorites = migratedFavorites()
+        // The rename must land rows exactly on the target identity, so the
+        // name is taken from a live target template (diary newest-first, then
+        // a never-logged favorite), never recomputed from the key string.
+        val targetName = (
+            diary.filter { it.favoriteKey == targetKey }.maxByOrNull { it.timestamp }
+                ?: favorites.firstOrNull { it.favoriteKey == targetKey }
+            )?.name ?: return 0
+        val rewritten = diary
+            .filter { it.favoriteKey == sourceKey }
+            .map { it.copy(name = targetName) }
+        updateEntries(rewritten)
+        val sourceFavorite = favorites.firstOrNull { it.favoriteKey == sourceKey }
+        if (sourceFavorite != null) {
+            val targetFavorite = favorites.firstOrNull { it.favoriteKey == targetKey }
+            if (targetFavorite != null) {
+                val current = favorites.toMutableList()
+                current.removeAll { it.favoriteKey == sourceKey }
+                prefs.setFavoritesAtomic(current)
+                sync?.tombstone(sourceFavorite.id, "favorite")
+                pruneOrphanedImages()
+            } else {
+                updateFavorite(sourceFavorite, sourceFavorite.copy(name = targetName))
+            }
+        }
+        prefs.setFoodHidden(sourceKey, false)
+        bumpLibraryVersion()
+        return rewritten.size
+    }
 }
 
 /**

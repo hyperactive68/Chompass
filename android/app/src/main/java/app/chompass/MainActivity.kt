@@ -21,9 +21,11 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import app.chompass.ui.components.glassDialogColor
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -32,7 +34,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.core.view.WindowCompat
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.lifecycle.Lifecycle
@@ -61,7 +65,13 @@ import app.chompass.ui.home.ImportSharedMealSheet
 import app.chompass.ui.navigation.ChompassNavHost
 import app.chompass.ui.navigation.ChompassRoutes
 import app.chompass.ui.theme.AppThemeColor
+import app.chompass.ui.theme.AmbientContrast
+import app.chompass.ui.theme.AmbientIntensity
+import app.chompass.ui.theme.AmbientPalette
+import app.chompass.ui.theme.AmbientSaturation
+import app.chompass.ui.theme.AmbientSpeed
 import app.chompass.ui.theme.ChompassTheme
+import app.chompass.ui.theme.GlassStrength
 import app.chompass.ui.theme.widgetAccentColors
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.Dispatchers
@@ -449,6 +459,15 @@ open class MainActivity : ComponentActivity() {
         setContent {
             val resolvedStartOnboarding = startOnboarding ?: return@setContent
             val appearance by container.prefs.appearanceMode.collectAsState(initial = initialAppearance)
+            val glassBlur by container.prefs.glassBlurEnabled.collectAsState(initial = true)
+            val ambientMotion by container.prefs.ambientMotionEnabled.collectAsState(initial = true)
+            val ambientIntensity by container.prefs.ambientIntensity.collectAsState(initial = "")
+            val ambientContrast by container.prefs.ambientContrast.collectAsState(initial = "")
+            val ambientSaturation by container.prefs.ambientSaturation.collectAsState(initial = "")
+            val ambientSpeed by container.prefs.ambientSpeed.collectAsState(initial = "")
+            val ambientPalette by container.prefs.ambientPalette.collectAsState(initial = "")
+            val ambientTiltEnabled by container.prefs.ambientTiltEnabled.collectAsState(initial = true)
+            val glassStrength by container.prefs.glassStrength.collectAsState(initial = "")
             val themeColorKey by container.prefs.appThemeColor.collectAsState(initial = initialThemeColorKey)
             val themeColor = AppThemeColor.fromKey(themeColorKey)
             val appLanguage by container.prefs.appLanguage.collectAsState(initial = appliedAppLanguage)
@@ -475,13 +494,32 @@ open class MainActivity : ComponentActivity() {
             // Codeberg #28: log the resolved theme inputs on every composition so
             // a device pass can tell a stale appearance value from a ROM that
             // delivers uiMode without recreating the activity.
-            Log.d("ChompassTheme", "appearance=$appearance systemDark=$systemDark darkTheme=$darkTheme oledTheme=$oledTheme themeColor=$themeColorKey")
+            Log.d("ChompassTheme", "appearance=$appearance systemDark=$systemDark darkTheme=$darkTheme oledTheme=$oledTheme themeColor=$themeColorKey glassBlur=$glassBlur ambientMotion=$ambientMotion")
+            // Edge-to-edge draws behind the system bars, so their icon color must
+            // follow the resolved app theme (not the launch-time system theme):
+            // dark icons on the light palette, light icons on dark/oled.
+            val view = LocalView.current
+            SideEffect {
+                WindowCompat.getInsetsController(this@MainActivity.window, view).apply {
+                    isAppearanceLightStatusBars = !darkTheme
+                    isAppearanceLightNavigationBars = !darkTheme
+                }
+            }
             val paletteEpoch = systemPaletteEpoch
             key(themeColorKey, paletteEpoch) {
                 ChompassTheme(
                     darkTheme = darkTheme,
                     oledTheme = oledTheme,
                     themeColor = themeColor,
+                    glassBlur = glassBlur,
+                    ambientMotion = ambientMotion,
+                    glassStrength = GlassStrength.fromStorage(glassStrength),
+                    ambientIntensity = AmbientIntensity.fromStorage(ambientIntensity),
+                    ambientContrast = AmbientContrast.fromStorage(ambientContrast),
+                    ambientSaturation = AmbientSaturation.fromStorage(ambientSaturation),
+                    ambientSpeed = AmbientSpeed.fromStorage(ambientSpeed),
+                    ambientPalette = AmbientPalette.fromStorage(ambientPalette),
+                    ambientTilt = ambientTiltEnabled,
                 ) {
                     Surface(
                         // Device passes (Maestro/uiautomator): expose Compose
@@ -515,6 +553,7 @@ open class MainActivity : ComponentActivity() {
                         if (pendingRestoredBackupNotice) {
                             AlertDialog(
                                 onDismissRequest = { dismissRestoredBackupNotice(container) },
+                                containerColor = glassDialogColor(MaterialTheme.colorScheme.surfaceContainerHigh),
                                 title = { Text(stringResource(R.string.restore_notice_title)) },
                                 text = { Text(stringResource(R.string.restore_notice_message)) },
                                 confirmButton = {
@@ -595,6 +634,14 @@ open class MainActivity : ComponentActivity() {
                 null
             }
             container.debugPersistentSnackbars = actions.debugSnackbarPersistent
+            // Release screenshot capture: pin appearance + brand palette before
+            // the first frame so published PNGs never pick up wallpaper dynamic
+            // color or the device's system theme.
+            if (actions.screenshotAppearance.isNotEmpty()) {
+                container.prefs.setAppearanceMode(actions.screenshotAppearance)
+                container.prefs.setAppThemeColor(AppThemeColor.TEAL.key)
+                DebugTrace.event("op=screenshot phase=appearance value=${actions.screenshotAppearance}")
+            }
             if (actions.debugBarcode.isNotBlank()) {
                 val normalized = BarcodeCodeNormalizer.normalize(actions.debugBarcode)
                 if (normalized != null) {
@@ -669,7 +716,28 @@ open class MainActivity : ComponentActivity() {
             actions.setShowRestingShade?.let { container.testDataSeeder.setShowRestingShade(it) }
             if (actions.seedOverGoal) container.testDataSeeder.seedOverGoal()
             if (actions.restoreRealData) container.testDataSeeder.restore()
-            if (actions.demoAi) container.prefs.setDebugDemoAnalysis(true)
+            // Release screenshot capture: keep the published Home on the core
+            // surfaces (after the seed, which enables these trackers).
+            if (actions.screenshotLean) {
+                container.prefs.setWaterTrackingEnabled(false)
+                container.prefs.setNicotineTrackingEnabled(false)
+                container.prefs.setCaffeineTrackingEnabled(false)
+                container.prefs.setDailyNotesEnabled(false)
+                // The seeded custom slot is fixture-named ("Seed Brunch"); the
+                // published medical-review frame would show it as the meal type.
+                val catalog = container.prefs.mealCatalog.first()
+                val relabeled = catalog.copy(
+                    meals = catalog.meals.map {
+                        if (it.label == "Seed Brunch") it.copy(label = "Brunch") else it
+                    },
+                )
+                if (relabeled != catalog) container.prefs.setMealCatalog(relabeled)
+                DebugTrace.event("op=screenshot phase=lean")
+            }
+            if (actions.demoAi) {
+                container.prefs.setDebugDemoAnalysis(true)
+                container.prefs.setDebugDemoAnalysisHoldMs(actions.demoAiHoldMs)
+            }
             if (actions.demoAiFail) {
                 // demo_ai_fail implies the scripted response: the failure must
                 // replay the demo progress stream, then throw. Without demo_ai

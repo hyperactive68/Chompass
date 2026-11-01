@@ -1,7 +1,6 @@
 package app.chompass.ui.components
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,8 +24,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import app.chompass.ui.theme.AppColors
-import app.chompass.ui.theme.AppTextOpacity
+import app.chompass.ui.theme.AppMotion
 import kotlinx.coroutines.delay
 import kotlin.math.cos
 import kotlin.math.min
@@ -41,7 +39,7 @@ fun ActivityRing(
     modifier: Modifier = Modifier,
     size: Dp = 160.dp,
     strokeWidth: Dp = 14.dp,
-    color: Color = AppColors.Calorie,
+    color: Color = MaterialTheme.colorScheme.primary,
     centerContent: @Composable () -> Unit = {}
 ) {
     val animated = remember { Animatable(0f) }
@@ -59,9 +57,9 @@ fun ActivityRing(
         animated.animateTo(
             targetValue = progress.coerceIn(0f, 1.5f),
             animationSpec = if (firstRun) {
-                spring(dampingRatio = 0.75f, stiffness = 30f) // response 1.2 ≈ stiffness 30
+                AppMotion.fillFirstRunSpring() // response 1.2 ≈ stiffness 30
             } else {
-                spring(dampingRatio = 0.85f, stiffness = 110f) // response 0.6 ≈ stiffness 110
+                AppMotion.ringUpdateSpring() // response 0.6 ≈ stiffness 110
             }
         )
     }
@@ -124,7 +122,7 @@ fun ActivityRing(
 @Composable
 fun RingCenterLabel(primary: String, secondary: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
+        AnimatedNumberText(
             primary,
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold
@@ -132,7 +130,7 @@ fun RingCenterLabel(primary: String, secondary: String) {
         Text(
             secondary,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

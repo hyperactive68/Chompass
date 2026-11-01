@@ -3,7 +3,10 @@
  * Serializer/validator for the sync-1.3 JSON document (1.2 adds the day-
  * granular `daily_notes` array, Codeberg #58a, and the optional per-day
  * `goal_journal` array, Codeberg #60; 1.3 adds per-constituent micros,
- * Codeberg #86). Compatible with
+ * Codeberg #86; 1.4 adds optional content-addressed food photo refs,
+ * Codeberg #122 — stamped only when refs are present; food rows also carry
+ * an additive `timestamp` UTC instant, authoritative for entry time, with
+ * date/time kept as the writer-zone rendering). Compatible with
  * android/.../export/SyncDocument.kt. Imports also accept 1.0/1.1/1.2.
  */
 import { goalJournalIdFor } from "./macro-plan.js";
@@ -11,7 +14,47 @@ import { microOrNull } from "./constituents.js";
 
 export const SYNC_FORMAT_VERSION = "1.3";
 export const SYNC_KIND = "sync";
-export const SYNC_IMPORT_VERSIONS = new Set(["1.0", "1.1", "1.2", "1.3"]);
+export const SYNC_IMPORT_VERSIONS = new Set(["1.0", "1.1", "1.2", "1.3", "1.4", "1.5"]);
+
+/** Sync 1.4 stamp: emitted iff any exported food/favorite row carries photo refs (Codeberg #122). */
+export const SYNC_PHOTOS_VERSION = "1.4";
+
+/** Sync 1.5 stamp: emitted iff the doc carries scale-composition rows (supersedes 1.4). */
+export const SYNC_COMPOSITION_VERSION = "1.5";
+
+/** @param {number} n */
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+
+/**
+ * #122: wall clock in the writer's zone → UTC instant string; null when
+ * undated. `Date` parses offset-less date-time strings in the local zone,
+ * mirroring Android's `atZone(device zone)` write-side rendering.
+ * @param {string} date
+ * @param {string} time
+ */
+function instantFromWallClock(date, time) {
+  if (!date || !time) return null;
+  const parsed = new Date(`${date}T${time}:00`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+}
+
+/**
+ * #122: UTC instant → wall clock in the reading device's zone; null when the
+ * field is absent or unparsable (legacy rows fall back to wire date/time).
+ * @param {unknown} raw
+ * @returns {{ date: string, time: string }|null}
+ */
+function wallClockFromInstant(raw) {
+  if (typeof raw !== "string" || !raw.trim()) return null;
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return {
+    date: `${parsed.getFullYear()}-${pad2(parsed.getMonth() + 1)}-${pad2(parsed.getDate())}`,
+    time: `${pad2(parsed.getHours())}:${pad2(parsed.getMinutes())}`,
+  };
+}
 
 /** @param {import('./models.js').Grounding|null|undefined} g */
 function groundingToWire(g) {
@@ -113,6 +156,21 @@ const MEASUREMENT_FIELDS = [
   ["calf_cm", "calfCm"],
   ["wrist_cm", "wristCm"],
 ];
+
+/** Scale-composition wire keys (sync 1.5). The rating is unitless, so it is not a mass. */
+const COMPOSITION_FIELDS = [
+  ["bone_mass_kg", "boneMassKg"],
+  ["total_body_water_kg", "totalBodyWaterKg"],
+  ["muscle_mass_kg", "muscleMassKg"],
+  ["lean_mass_kg", "leanMassKg"],
+  ["visceral_fat_rating", "visceralFatRating"],
+];
+
+/** @param {string} wireKey @param {number|null} value */
+function compositionWireValue(wireKey, value) {
+  if (value == null) return null;
+  return wireKey === "visceral_fat_rating" ? round1(value) : round2(value);
+}
 
 function round1(n) {
   if (n == null) return null;
@@ -236,6 +294,12 @@ export function foodEntryToSyncWire(item, updatedAt, deletedAt = null) {
     selected_serving_quantity: item.selectedServingQuantity != null ? round1(item.selectedServingQuantity) : null,
     constituents: constituentsToWire(item.constituents ?? []),
   };
+  // #122: additive UTC instant, authoritative for entry time; date/time stay
+  // for readers that predate it (omitted when undated).
+  const instant = instantFromWallClock(item.date, item.time);
+  if (instant) wire.timestamp = instant;
+  // Sync 1.4 photo refs: omitted when empty (photo-less rows stay byte-compatible with 1.3).
+  if (Array.isArray(item.photos) && item.photos.length) wire.photos = item.photos;
   for (const [wireKey, modelKey] of MICRO_FIELDS) {
     wire[wireKey] = round1(item[modelKey] ?? null);
   }
@@ -243,10 +307,24 @@ export function foodEntryToSyncWire(item, updatedAt, deletedAt = null) {
 }
 
 /**
+ * Sync 1.4 photo refs: content-addressed `photos/<16hex>.jpg` strings.
+ * @param {any} arr
+ */
+function photosFromWire(arr) {
+  if (!Array.isArray(arr)) return [];
+  return arr
+    .map((r) => String(r ?? "").trim())
+    .filter((r) => r.startsWith("photos/") && r.length > "photos/".length);
+}
+
+/**
  * @param {any} wire
  * @returns {import('./models.js').FoodEntry}
  */
 export function foodEntryFromSyncWire(wire) {
+  // #122: the timestamp instant wins; wire date/time are the legacy fallback
+  // (writer-zone wall clock, no offset), kept for 1.4-and-older docs.
+  const instant = wallClockFromInstant(wire.timestamp);
   /** @type {import('./models.js').FoodEntry} */
   const entry = {
     id: String(wire.id),
@@ -258,8 +336,8 @@ export function foodEntryFromSyncWire(wire) {
     carbsG: Number(wire.carbs_g) || 0,
     fatG: Number(wire.fat_g) || 0,
     mealType: wire.meal_type || "snack",
-    date: String(wire.date ?? ""),
-    time: String(wire.time ?? "12:00"),
+    date: instant?.date ?? String(wire.date ?? ""),
+    time: instant?.time ?? String(wire.time ?? "12:00"),
     source: WIRE_TO_SOURCE[wire.source] ?? "ai_estimated",
     note: wire.note ?? null,
     recipeLogId: wire.recipe_log_id ?? null,
@@ -268,6 +346,7 @@ export function foodEntryFromSyncWire(wire) {
     selectedServingUnit: wire.selected_serving_unit ?? null,
     selectedServingQuantity: wire.selected_serving_quantity != null ? Number(wire.selected_serving_quantity) : null,
     constituents: constituentsFromWire(wire.constituents),
+    photos: photosFromWire(wire.photos),
   };
   for (const [wireKey, modelKey] of MICRO_FIELDS) {
     entry[modelKey] = wire[wireKey] ?? null;
@@ -282,6 +361,7 @@ export function foodEntryFromSyncWire(wire) {
  *   weights?: import('./models.js').WeightEntry[],
  *   bodyFat?: import('./models.js').BodyFatEntry[],
  *   measurements?: import('./models.js').BodyMeasurement[],
+ *   bodyComposition?: import('./models.js').BodyCompositionEntry[],
  *   water?: import('./models.js').WaterEntry[],
  *   dailyNotes?: import('./models.js').DailyNote[],
  *   nicotine?: import('./models.js').NicotineEntry[],
@@ -328,7 +408,16 @@ export function exportSyncDocument(input) {
     export: {
       app: "Chompass",
       kind: SYNC_KIND,
-      format_version: SYNC_FORMAT_VERSION,
+      // 1.4 only when photo refs are actually in the doc — older clients accept
+      // at most 1.3, so a 1.4 stamp without photos would lock them out. 1.5 iff
+      // scale-composition rows ride along (it supersedes 1.4).
+      format_version:
+        (input.bodyComposition ?? []).length > 0
+          ? SYNC_COMPOSITION_VERSION
+          : (input.foodEntries ?? []).some((/** @type {any} */ e) => e.photos?.length) ||
+            (input.favorites ?? []).some((/** @type {any} */ e) => e.photos?.length)
+          ? SYNC_PHOTOS_VERSION
+          : SYNC_FORMAT_VERSION,
       generated_at: generatedAt,
     },
     food_entries: foodEntries,
@@ -364,6 +453,20 @@ export function exportSyncDocument(input) {
       };
       for (const [wireKey, modelKey] of MEASUREMENT_FIELDS) {
         wire[wireKey] = round1(m[modelKey] ?? null);
+      }
+      return wire;
+    }),
+    body_composition: (input.bodyComposition ?? []).map((c) => {
+      const meta = metaFor(c.id, c.date);
+      /** @type {Record<string, any>} */
+      const wire = {
+        id: c.id,
+        updated_at: meta.updated_at,
+        deleted_at: meta.deleted_at,
+        date: c.date,
+      };
+      for (const [wireKey, modelKey] of COMPOSITION_FIELDS) {
+        wire[wireKey] = compositionWireValue(wireKey, c[modelKey] ?? null);
       }
       return wire;
     }),
@@ -489,6 +592,7 @@ export function appendTombstones(doc, revisions) {
     weight: "weights",
     bodyfat: "body_fat",
     measure: "measurements",
+    composition: "body_composition",
     water: "water",
     daily_note: "daily_notes",
     nicotine: "nicotine_entries",
@@ -538,13 +642,16 @@ export function parseSyncDocument(doc) {
   // pre-1.2 remotes have no nicotine/caffeine/daily-notes arrays at all; each
   // must default to [] (Android's parser is lenient the same way). goal_journal
   // (#60) rides the same optional-array rule: old docs parse with [].
-  const OPTIONAL_ARRAYS = new Set(["nicotine_entries", "caffeine_entries", "daily_notes", "goal_journal"]);
+  const OPTIONAL_ARRAYS = new Set([
+    "nicotine_entries", "caffeine_entries", "daily_notes", "goal_journal", "body_composition",
+  ]);
   for (const key of [
     "food_entries",
     "favorites",
     "weights",
     "body_fat",
     "measurements",
+    "body_composition",
     "water",
     "daily_notes",
     "nicotine_entries",
@@ -615,6 +722,24 @@ export function liveMeasurementsFromSync(wires) {
         m[modelKey] = w[wireKey] ?? null;
       }
       return m;
+    });
+}
+
+/**
+ * @param {any[]} wires
+ * @returns {import('./models.js').BodyCompositionEntry[]}
+ */
+export function liveBodyCompositionFromSync(wires) {
+  return (wires ?? [])
+    .filter((w) => w && w.id && !w.deleted_at)
+    .map((w) => {
+      /** @type {import('./models.js').BodyCompositionEntry} */
+      const c = { id: String(w.id), date: String(w.date) };
+      for (const [wireKey, modelKey] of COMPOSITION_FIELDS) {
+        const value = w[wireKey];
+        c[modelKey] = typeof value === "number" && Number.isFinite(value) ? value : null;
+      }
+      return c;
     });
 }
 

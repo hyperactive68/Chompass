@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +19,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
@@ -33,6 +38,12 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -46,16 +57,13 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.chompass.R
-import app.chompass.ui.theme.AppColors
+import app.chompass.ui.theme.AppMotion
+
+/** Scrim alpha of the remove-photo X badge shown over image thumbnails. */
+const val PhotoRemoveBadgeScrimAlpha = 0.62f
 
 @Composable
 fun isDarkTheme(): Boolean = MaterialTheme.colorScheme.background.luminance() < 0.5f
-
-fun translucentFill(isDark: Boolean): Color =
-    if (isDark) AppColors.TranslucentSurfaceDark else AppColors.TranslucentSurfaceLight
-
-fun hairlineBorder(isDark: Boolean): Color =
-    if (isDark) AppColors.HairlineBorderDark else AppColors.HairlineBorderLight
 
 @Composable
 fun ChompassSurface(
@@ -178,19 +186,46 @@ fun ChompassDialog(
     modifier: Modifier = Modifier,
     /** Cap the dialog height to the window and scroll the content when it overflows. */
     scrollable: Boolean = false,
+    /**
+     * Window inset dispatch for dialogs whose content pads itself from the raw
+     * insets (e.g. [androidx.compose.foundation.layout.imePadding] so the Save
+     * row clears the keyboard). Floating dialog windows default to
+     * decor-fitting, which swallows the IME inset before Compose sees it.
+     */
+    decorFitsSystemWindows: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     BasicAlertDialog(
         onDismissRequest = onDismissRequest,
         modifier = modifier,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = decorFitsSystemWindows,
+        ),
     ) {
+        // Enter-only scale+fade on first composition (Morphe dialog spec).
+        // Exit keeps the platform window fade — window exits cannot be
+        // intercepted composable-side.
+        var shown by remember { mutableStateOf(false) }
+        LaunchedEffect(Unit) { shown = true }
+        AnimatedVisibility(
+            visible = shown,
+            enter = scaleIn(
+                tween(AppMotion.TweenDefaultMs, easing = AppMotion.EasingStandard),
+                initialScale = 0.95f,
+            ) + fadeIn(tween(AppMotion.TweenDefaultMs, easing = AppMotion.EasingStandard)),
+        ) {
+        // M3 AlertDialog recipe (AlertDialogContent in material3 1.4.0):
+        // extraLarge shape, surfaceContainerHigh ground, zero tonal
+        // elevation, 560dp dialog max width. The free-form content stays a
+        // ColumnScope so call sites keep composing title/body rows directly.
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
+                .widthIn(max = 560.dp)
                 .padding(horizontal = 24.dp),
             shape = MaterialTheme.shapes.extraLarge,
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            color = glassDialogColor(MaterialTheme.colorScheme.surfaceContainerHigh),
         ) {
             BoxWithConstraints(Modifier.fillMaxWidth()) {
                 Column(
@@ -210,6 +245,7 @@ fun ChompassDialog(
                 )
             }
         }
+        }
     }
 }
 
@@ -226,6 +262,7 @@ fun ChompassPrimaryButton(
 ) {
     val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
     val label = text ?: androidx.compose.ui.res.stringResource(R.string.action_save)
+    val src = remember { MutableInteractionSource() }
     Button(
         onClick = {
             if (flushDrafts) {
@@ -235,7 +272,10 @@ fun ChompassPrimaryButton(
             onClick()
         },
         enabled = enabled,
-        modifier = modifier.height(height),
+        modifier = modifier
+            .pressScale(src, enabled = enabled)
+            .height(height),
+        interactionSource = src,
         shape = MaterialTheme.shapes.medium,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,

@@ -77,7 +77,6 @@
     <string name="autobalance_fat">Lipides</string>
 
     <!-- AI Provider names -->
-    <string name="ai_provider_custom">Personnalisé (compatible OpenAI)</string>
 
     <!-- AI Provider API key placeholders -->
     <string name="api_key_placeholder">Collez votre clé API</string>
@@ -501,6 +500,8 @@
     <string name="settings_tap_to_edit">Touchez pour modifier</string>
     <string name="settings_custom_url_placeholder">https://votre-endpoint.com/v1</string>
     <string name="settings_custom_url_title">URL de base personnalisée</string>
+    <string name="settings_custom_directory_docs">Voir la documentation</string>
+    <string name="ai_model_accepts_images">Accepte les images (déclaré)</string>
     <string name="settings_ai_allow_insecure_http">Autoriser HTTP non sécurisé</string>
     <string name="settings_ai_allow_insecure_http_footer">Permet aux serveurs personnalisés et à Ollama d\'utiliser des URL http://, par exemple sur votre réseau local. Les fournisseurs cloud utilisent https. Laissez désactivé sauf si votre serveur n\'a pas de TLS.</string>
     <string name="settings_clear_key">Effacer la clé</string>
@@ -583,7 +584,7 @@
     <!-- About -->
     <string name="about_rate">Évaluer l\'app</string>
     <string name="about_share">Partager l\'app</string>
-    <string name="about_open_source">Open source (MIT)</string>
+    <string name="about_open_source">Open source (GPL v3)</string>
     <string name="about_report_issue">Signaler un problème</string>
     <string name="about_request_feature">Demander une fonctionnalité</string>
     <string name="about_privacy">Politique de confidentialité</string>
@@ -725,11 +726,7 @@
     <string name="ai_provider_subtitle_deepinfra">Modèles open source hébergés</string>
     <string name="ai_provider_subtitle_mistral">Modèles Mistral</string>
     <string name="ai_provider_subtitle_ollama">Votre ordinateur, pas de cloud</string>
-    <string name="ai_provider_subtitle_custom">LM Studio, vLLM, llama.cpp etc.</string>
-    <string name="ai_provider_group_recommended">Recommandé</string>
-    <string name="ai_provider_group_cloud">Fournisseurs cloud</string>
-    <string name="ai_provider_group_local">Local et auto-hébergé</string>
-    <string name="ai_provider_group_device">Sur l\'appareil</string>
+    <string name="ai_provider_subtitle_ollama_cloud">Modèles hébergés d\'Ollama</string>
     <string name="settings_section_ai_profile">Profil</string>
     <string name="settings_section_ai_connection">Connexion</string>
     <string name="settings_section_ai_advanced">Avancé</string>
@@ -738,7 +735,6 @@
     <string name="settings_ai_key_remove_title">Supprimer la clé API ?</string>
     <string name="settings_ai_key_remove_body">Enregistrer une clé vide efface la clé stockée de ce profil.</string>
     <string name="settings_ai_get_key">Obtenir une clé API</string>
-    <string name="settings_ai_value_default">%1$,d (par défaut)</string>
     <string name="settings_ai_timeout_default">%1$,ds (par défaut)</string>
     <string name="camera_scale_tip_message">Astuce : incluez une fourchette, une main ou une pièce à côté de votre repas. Cela aide à estimer la portion.</string>
     <string name="cd_relog_meal">Enregistrer %1$s à nouveau</string>
@@ -867,6 +863,24 @@
     <string name="action_show">Afficher</string>
     <string name="action_undo">Défaire</string>
     <string name="action_save_to_favorites">Enregistrer dans les favoris</string>
+    <string name="action_save_to_library">Enregistrer dans la bibliothèque</string>
+    <string name="action_hide_from_suggestions">Masquer des suggestions</string>
+    <string name="action_unhide">Afficher</string>
+    <string name="settings_saved_foods">Aliments enregistrés</string>
+    <string name="library_hidden_section">Masqués</string>
+    <string name="library_empty">Aucun aliment enregistré pour le moment</string>
+    <string name="library_never_logged">Jamais consigné</string>
+    <string name="library_row_summary">%1$d entrées · dernière %2$s</string>
+    <string name="library_delete_rows_title">Supprimer les entrées consignées ?</string>
+    <string name="library_delete_rows_message">Supprimer les %1$d lignes consignées de « %2$s » ? Les jours sont recalculés. L’aliment enregistré reste ici ; seul son historique du journal est supprimé.</string>
+    <string name="library_merge_section">Doublons possibles</string>
+    <string name="library_merge_title">Fusionner les doublons</string>
+    <string name="library_merge_intro">Il semble s’agir du même aliment. Choisissez le nom à conserver ; les autres y sont fusionnés.</string>
+    <string name="library_merge_rows_message">%1$d lignes consignées seront renommées en « %2$s ». Rien n’est supprimé ; les jours sont recalculés.</string>
+    <string name="library_merge_action">Fusionner</string>
+    <string name="library_sort_last_logged">Dernière consignation</string>
+    <string name="library_sort_name">Nom</string>
+    <string name="library_sort_logs">Entrées</string>
     <string name="saved_to_favorites">Enregistré dans les favoris</string>
     <string name="action_what_if">Et si…?</string>
     <string name="activity_active">Active</string>
@@ -880,8 +894,13 @@
     <string name="ai_error_image_conversion_failed">Impossible de traiter l\'image.</string>
     <string name="ai_error_invalid_response">Impossible de comprendre la réponse de l\'IA. Réessayez.</string>
     <string name="ai_error_invalid_url">URL d\'API invalide. Vérifiez les réglages de votre fournisseur.</string>
-    <string name="ai_error_insecure_http_blocked">HTTP non sécurisé bloqué. Activez « Autoriser HTTP non sécurisé » dans Réglages → IA et voix, ou utilisez une URL https://.</string>
     <string name="ai_error_key_rejected">Votre clé API a été rejetée. Ouvrez Réglages → Fournisseur d\'IA et collez une clé valide.</string>
+    <string name="ai_error_timeout">Le fournisseur d\'IA a mis trop de temps à répondre. Réessayez ; avec un point de terminaison auto-hébergé, augmentez le délai dans Réglages → Fournisseur d\'IA.</string>
+    <string name="ai_error_disabled">Les fonctions d\'IA sont désactivées dans Réglages → Fournisseur d\'IA.</string>
+    <string name="ai_error_insecure_http_blocked">Le HTTP non sécurisé est bloqué. Activez « Autoriser le HTTP non sécurisé » dans Réglages → Fournisseur d\'IA ou utilisez une URL https://.</string>
+    <string name="ai_error_truncated_twice">La réponse a atteint deux fois la limite de sortie du modèle — la réflexion compte. Réglez l\'Effort de raisonnement sur Faible ou Désactivé dans Réglages → Fournisseur d\'IA, ou posez une question plus courte.</string>
+    <string name="ai_error_truncated_twice_description">Le modèle a manqué de place en sortie avant de finir ; les jetons de réflexion comptent. Réglez l\'Effort de raisonnement sur Faible ou Désactivé dans Réglages → Fournisseur d\'IA, puis réessayez.</string>
+    <string name="ai_error_truncated">La réponse a atteint la limite de sortie du modèle avant de se terminer — la réflexion compte. Réglez l\'Effort de raisonnement sur Faible ou Désactivé dans Réglages → Fournisseur d\'IA, ou posez une question plus courte.</string>
     <string name="ai_error_location_unsupported">Gemini n\'est pas disponible depuis cet emplacement réseau (pays/IP). Si vous utilisez un VPN, désactivez-le ou passez à une sortie résidentielle. Les IP de datacenters ou de VPN non résidentiels sont souvent bloquées. Vous pouvez aussi activer la facturation sur votre projet Google AI Studio, essayer un autre réseau ou changer de fournisseur dans Réglages → Fournisseur d\'IA.</string>
     <string name="ai_error_model_unavailable">Votre fournisseur n\'a pas trouvé ce modèle. Il peut être payant uniquement dans l\'offre gratuite, restreint dans votre région, ou l\'endpoint peut être incorrect. Passez au modèle Flash par défaut dans Réglages → Fournisseur d\'IA, ou activez la facturation sur votre projet AI Studio.</string>
     <string name="ai_error_network_format">Erreur réseau : %1$s</string>
@@ -893,11 +912,6 @@
     <string name="ai_error_provider_error">Le fournisseur d\'IA a renvoyé une erreur.</string>
     <string name="ai_error_provider_overloaded">Le fournisseur d\'IA est surchargé pour le moment. Nous avons réessayé plusieurs fois. Réessayez dans une minute ou changez de fournisseur ou de modèle dans Réglages → Fournisseur d\'IA.</string>
     <string name="ai_error_rate_limit">Limite de débit atteinte sur votre clé API. Attendez une minute ou changez de fournisseur dans Réglages → Fournisseur d\'IA. Dans l\'offre gratuite, le modèle Flash-Lite a le quota le plus élevé.</string>
-    <string name="ai_error_timeout">Le fournisseur d\'IA a mis trop de temps à répondre. Réessayez ou augmentez le délai dans Réglages → IA et voix.</string>
-    <string name="ai_error_disabled">Les fonctions IA sont désactivées dans Réglages → IA et voix.</string>
-    <string name="ai_error_truncated">La réponse de l\'IA a été coupée à la limite de longueur de réponse. Augmentez la longueur maximale de réponse dans Réglages → IA et voix, ou posez une question plus courte.</string>
-    <string name="ai_error_truncated_twice">La réponse de l\'IA a été coupée deux fois à la limite de longueur de réponse. Augmentez la longueur maximale de réponse dans Réglages → IA et voix, ou posez une question plus courte.</string>
-    <string name="ai_error_truncated_twice_description">Le modèle a atteint la limite de longueur de réponse avant de finir, et le raisonnement compte dans cette limite. Augmentez la longueur maximale de réponse dans Réglages → IA et voix, ou limitez le raisonnement du modèle, puis réessayez.</string>
     <string name="ai_model_tier_paid">Modèle payant uniquement (l\'offre gratuite n\'inclut plus Pro)</string>
     <string name="ai_model_tier_varies">La disponibilité dans l\'offre gratuite varie selon le compte et la région</string>
     <string name="ai_provider_anthropic">Anthropic Claude</string>
@@ -908,6 +922,23 @@
     <string name="ai_provider_huggingface">Hugging Face</string>
     <string name="ai_provider_mistral">Mistral</string>
     <string name="ai_provider_ollama">Ollama (local)</string>
+    <string name="ai_provider_ollama_cloud">Ollama Cloud</string>
+    <string name="ai_provider_custom">Autre URL</string>
+    <string name="ai_provider_subtitle_custom">Saisir une URL de base</string>
+    <string name="ai_provider_search_hint">Chercher un nom ou un hôte</string>
+    <string name="ai_provider_section_shortcuts">Raccourcis</string>
+    <string name="ai_provider_section_phone">Sur ce téléphone</string>
+    <string name="ai_provider_section_server">Votre serveur</string>
+    <string name="ai_provider_section_cloud">Cloud</string>
+    <string name="ai_provider_chip_on_phone">Sur le téléphone</string>
+    <string name="ai_provider_chip_your_server">Votre serveur</string>
+    <string name="ai_provider_chip_native">Natif</string>
+    <string name="ai_provider_chip_cloud">Cloud</string>
+    <string name="ai_provider_row_gemini">Clé · bascule Google Search</string>
+    <string name="ai_provider_row_anthropic">Clé · API séparée</string>
+    <string name="ai_provider_row_ollama">Ce réseau · sans clé</string>
+    <string name="ai_provider_row_host_key">%1$s · clé</string>
+    <string name="ai_provider_directory_footer">Les hôtes listés arrivent avec cette version. La clé n\'est envoyée qu\'à l\'hôte choisi.</string>
     <string name="ai_provider_on_device">Sur l\'appareil (privé)</string>
     <string name="ai_provider_openai">OpenAI</string>
     <string name="ai_provider_openrouter">OpenRouter</string>
@@ -1057,6 +1088,12 @@
     <string name="export_format">Format</string>
     <string name="export_from">De</string>
     <string name="export_no_meals">Aucun repas enregistré dans la période sélectionnée.</string>
+    <string name="export_include_photos">Inclure les photos</string>
+    <string name="sync_photos">Synchroniser les photos</string>
+    <string name="sync_photos_caption">Une fois activé, les photos de repas sont envoyées vers votre serveur WebDAV</string>
+    <string name="sync_photos_wifi_only">Photos en Wi-Fi uniquement</string>
+    <string name="sync_photos_syncing">Synchronisation des photos…</string>
+    <string name="sync_photos_failed">Échec de la synchronisation des photos</string>
     <string name="export_range">Période</string>
     <string name="export_range_all">Tout</string>
     <string name="export_range_custom">Personnalisée</string>
@@ -1125,7 +1162,7 @@
     <string name="home_display_show_active_calories_desc">Affiche la dépense active du jour dans la jauge de calories.</string>
     <string name="home_display_show_steps">Afficher le compteur de pas sur l\'accueil</string>
     <string name="home_display_slim_full_names">Noms complets des nutriments</string>
-    <string name="home_display_slim_full_names_desc">Les cartes lignes fines affichent le nom complet au lieu du libellé court. Les noms longs peuvent être tronqués avec quatre cartes.</string>
+    <string name="home_display_slim_full_names_desc">Les cartes de nutriments affichent le nom complet au lieu du libellé court. Les noms longs peuvent être tronqués avec quatre cartes.</string>
     <string name="home_display_show_steps_desc">Carte facultative sous la jauge. Nécessite Health Connect.</string>
     <string name="home_display_step_goal">Objectif de pas quotidien</string>
     <string name="home_display_step_goal_hint">Ajuste par 500. 1 000–50 000.</string>
@@ -1164,6 +1201,7 @@
     <string name="import_body_metrics_empty">Ce fichier ne contient aucune entrée de poids ou de données corporelles à importer.</string>
     <string name="import_body_metrics_malformed">Impossible de lire le fichier : %1$s</string>
     <string name="import_body_metrics_success">%1$d entrées de poids, %2$d de masse grasse et %3$d de mesures importées.</string>
+    <string name="import_body_metrics_success_composition">%1$d mesures de balance également importées.</string>
     <string name="import_body_metrics_title">Importer le poids et les données corporelles</string>
     <string name="import_body_metrics_unsupported">Fichier non pris en charge. Pris en charge : JSON/CSV Chompass, CSV openScale ou CSV de poids générique.</string>
     <string name="import_diary_empty">Ce fichier ne contient aucune entrée de journal à importer.</string>
@@ -1251,6 +1289,7 @@
     <string name="nutrient_short_calories">Cal</string>
     <string name="nutrient_short_added_sugar">Sucres aj.</string>
     <string name="nutrient_short_sodium">Na</string>
+    <string name="nutrient_short_cholesterol">Chol.</string>
     <string name="nutrient_short_potassium">K</string>
     <string name="nutrient_short_trans_fat">Lip. trans</string>
     <string name="nutrient_short_calcium">Ca</string>
@@ -1454,7 +1493,7 @@
     <string name="settings_calc_intro">Vos objectifs quotidiens de calories et de macros sont définis par l\'IA. Quand vous touchez Recalculer les objectifs, ou automatiquement environ une fois par semaine si les Objectifs adaptatifs sont activés, Chompass envoie votre profil, les équations de référence ci-dessous, vos aliments récemment enregistrés et votre tendance de poids à votre fournisseur d\'IA. Il part de ces formules évaluées par les pairs, puis les ajuste à vos données pour estimer votre maintien et vos objectifs.</string>
     <string name="settings_calc_katch_formula" formatted="false">BMR = 370 + 21,6 × MM (kg)\nMM = poids × (1 − % de masse grasse)</string>
     <string name="settings_calc_katch_name">Équation de Katch-McArdle</string>
-    <string name="settings_calc_katch_used" formatted="false">Utilisée automatiquement quand vous avez saisi un % de masse grasse. Plus précise pour les utilisateurs minces et sportifs car elle dérive le BMR de la masse maigre au lieu du poids total. Les mesures de plus de 90 jours repassent à Mifflin-St Jeor.</string>
+    <string name="settings_calc_katch_used" formatted="false">Utilisée automatiquement quand vous avez saisi un % de masse grasse. Plus précise pour les utilisateurs minces et sportifs car elle dérive le BMR de la masse maigre au lieu du poids total. Les mesures de plus de 90 jours repassent à Mifflin-St Jeor. Une mesure récente de masse maigre par une balance sert au même calcul et prime sur la masse grasse.</string>
     <string name="settings_calc_macro_split">Répartition des macronutriments</string>
     <string name="settings_calc_maintenance">Maintien et ajustement de la cible</string>
     <string name="settings_calc_methods">Méthodes de calcul</string>
@@ -1492,6 +1531,18 @@
     <string name="settings_fixed_launcher_icon_subtitle">Garde l\'icône du lanceur en sarcelle. Elle ne suit plus la couleur du thème ni le fond d\'écran.</string>
     <string name="settings_system_date_time_pickers">Sélecteurs date et heure du système</string>
     <string name="settings_system_date_time_pickers_subtitle">Utiliser les dialogues date et heure du téléphone pour modifier un repas.</string>
+    <string name="settings_glass_blur">Verre dépoli</string>
+    <string name="settings_glass_blur_subtitle">Flouter le contenu derrière les panneaux flottants, comme l’en-tête des résultats d’ajout d’aliment.</string>
+    <string name="settings_ambient_motion">Fond ambiant</string>
+    <string name="settings_ambient_motion_subtitle">Champs de couleurs douces dérivant derrière chaque écran. Se met en pause en économiseur de batterie ou quand les animations sont réduites.</string>
+    <string name="settings_frost_strength">Intensité du givrage</string>
+    <string name="frost_strength_light">Légère</string>
+    <string name="frost_strength_medium">Moyenne</string>
+    <string name="frost_strength_strong">Forte</string>
+    <string name="settings_ambient_intensity">Intensité ambiante</string>
+    <string name="ambient_intensity_subtle">Discret</string>
+    <string name="ambient_intensity_balanced">Équilibré</string>
+    <string name="ambient_intensity_vivid">Vif</string>
     <string name="add_food_log_time">Heure du journal</string>
     <string name="add_food_log_time_now">Maintenant</string>
     <string name="cd_clear_log_time">Utiliser l\'heure actuelle</string>
@@ -1502,7 +1553,6 @@
     <string name="settings_food_section_photo">Analyse photo</string>
     <string name="settings_food_section_serving">Taille de portion</string>
     <string name="settings_gemini_google_search">Ancrage par recherche Google</string>
-    <string name="settings_glass_blur">Flou de verre</string>
     <string name="settings_goal_auto">Automatique</string>
     <string name="settings_goals_how_adaptive">Les Objectifs adaptatifs recalculent vos objectifs de calories et de macros environ une fois par semaine.</string>
     <string name="settings_goals_how_energy">« Énergie brûlée » ancre les objectifs sur votre dépense mesurée de Health Connect.</string>
@@ -1539,8 +1589,6 @@
     <string name="settings_macro_pinned_label_format">%1$s (épinglé)</string>
     <string name="settings_macro_unlocked">Déverrouillé</string>
     <string name="settings_manage_health_access">Gérer l\'accès à Health Connect</string>
-    <string name="settings_max_tokens">Longueur maximale de réponse</string>
-    <string name="settings_max_tokens_unit">tokens</string>
 
     <string name="settings_meal_constituents">Détail des ingrédients du repas</string>
     <string name="settings_meal_constituents_footer">Quand c\'est activé, l\'IA peut diviser les repas composites en ingrédients modifiables avec grammes et unités. Les micronutriments par ingrédient ne sont demandés qu\'aux modèles cloud puissants ; les modèles plus petits renvoient la liste des ingrédients avec les macros.</string>
@@ -2217,6 +2265,18 @@ macros rééquilibrées au nouveau total calorique</string>
     <string name="onboarding_goal_suggested_bmi">D’après un IMC de %1$.1f</string>
     <!-- Progress v2 : overlay corporel, combo calories, phases d\'objectif, assiduité. -->
     <string name="progress_body_section">Corps</string>
+    <string name="progress_scale_metrics">Mesures de balance</string>
+    <string name="progress_scale_metrics_bone_mass">Masse osseuse</string>
+    <string name="progress_scale_metrics_water">Eau corporelle totale</string>
+    <string name="progress_scale_metrics_muscle">Masse musculaire</string>
+    <string name="progress_scale_metrics_lean">Masse maigre</string>
+    <string name="progress_scale_metrics_visceral">Graisse viscérale</string>
+    <string name="progress_scale_metrics_note">Estimation d\'une balance grand public — la tendance est plus fiable que la valeur absolue</string>
+    <string name="progress_scale_metrics_tbw_percent">%1$.1f %% du poids corporel · plage habituelle 45–65 %%</string>
+    <string name="progress_log_scale_metrics">Mesures de balance</string>
+    <string name="progress_log_scale_metrics_title">Enregistrer les mesures de balance</string>
+    <string name="progress_estimated_smm">Muscle squelettique estimé (Lee)</string>
+    <string name="progress_estimated_smm_note">Estimation anthropométrique (bras, cuisse, mollet) · ± ~3 kg</string>
     <string name="progress_overlay_off">Désactivé</string>
     <string name="progress_no_entries_in_range">Aucune entrée sur cette période</string>
     <string name="progress_no_series_selected">Touchez une métrique ci-dessus pour l\'afficher ici</string>
@@ -2254,6 +2314,7 @@ macros rééquilibrées au nouveau total calorique</string>
     <string name="add_food_trackers_section">Suivis</string>
     <string name="body_fat_method_dexa">DEXA</string>
     <string name="cd_collapsed">Réduit</string>
+    <string name="cd_change_meal_type">Changer le type de repas</string>
     <string name="cd_decrease">Diminuer</string>
     <string name="cd_expanded">Développé</string>
     <string name="cd_import_mealie">Importer depuis Mealie</string>
@@ -2685,11 +2746,6 @@ macros rééquilibrées au nouveau total calorique</string>
         <item>téléchargement</item>
         <item>local</item>
         <item>hors ligne</item>
-    </string-array>
-    <string-array name="settings_search_kw_max_tokens">
-        <item>tokens</item>
-        <item>longueur</item>
-        <item>plafond</item>
     </string-array>
     <string-array name="settings_search_kw_ai_read_timeout">
         <item>délai</item>

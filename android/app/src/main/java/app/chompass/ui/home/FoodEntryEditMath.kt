@@ -4,6 +4,7 @@ import app.chompass.models.FoodConstituent
 import app.chompass.models.MicronutrientValues
 import app.chompass.services.ai.ConstituentReconcile
 import kotlin.math.roundToInt
+import java.util.Locale
 /**
  * Shared math for food entry edit sheets ([FoodResultSheet], [EditFoodEntrySheet]).
  *
@@ -32,10 +33,10 @@ class FoodEntryEditMath(
     fun scaledD(v: Double?) = v?.let { ((it * scale) * 10).roundToInt() / 10.0 }
 
     /** Format a scaled value for display; em dash when missing. */
-    fun displayD(v: Double?) = v?.let { String.format("%.1f", it) } ?: emDashText
+    fun displayD(v: Double?) = v?.let { String.format(Locale.US, "%.1f", it) } ?: emDashText
 
     /** Format a scaled value for an editable text field; empty when missing. */
-    fun editD(v: Double?) = v?.let { String.format("%.1f", it) }.orEmpty()
+    fun editD(v: Double?) = v?.let { String.format(Locale.US, "%.1f", it) }.orEmpty()
 
     /** Parse a decimal text field into a non-negative Double?, null when blank/invalid. */
     fun decimalValue(text: String): Double? = parseDecimalValue(text)

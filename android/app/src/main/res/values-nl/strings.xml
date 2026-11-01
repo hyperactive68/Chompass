@@ -73,7 +73,23 @@
 
     <!-- AI Provider names -->
     <string name="ai_provider_ollama">Ollama (lokaal)</string>
-    <string name="ai_provider_custom">Aangepast (OpenAI-compatibel)</string>
+    <string name="ai_provider_ollama_cloud">Ollama Cloud</string>
+    <string name="ai_provider_custom">Andere URL</string>
+    <string name="ai_provider_subtitle_custom">Typ een basis-URL</string>
+    <string name="ai_provider_search_hint">Zoek naam of host</string>
+    <string name="ai_provider_section_shortcuts">Snelkoppelingen</string>
+    <string name="ai_provider_section_phone">Op deze telefoon</string>
+    <string name="ai_provider_section_server">Jouw server</string>
+    <string name="ai_provider_section_cloud">Cloud</string>
+    <string name="ai_provider_chip_on_phone">Op telefoon</string>
+    <string name="ai_provider_chip_your_server">Jouw server</string>
+    <string name="ai_provider_chip_native">Natief</string>
+    <string name="ai_provider_chip_cloud">Cloud</string>
+    <string name="ai_provider_row_gemini">Sleutel · Google Search-schakelaar</string>
+    <string name="ai_provider_row_anthropic">Sleutel · aparte API</string>
+    <string name="ai_provider_row_ollama">Dit netwerk · geen sleutel</string>
+    <string name="ai_provider_row_host_key">%1$s · sleutel</string>
+    <string name="ai_provider_directory_footer">De vermelde hosts komen met deze versie mee. De sleutel gaat alleen naar de host die je kiest.</string>
 
     <!-- AI Provider API key placeholders -->
     <string name="api_key_placeholder">Plak je API-sleutel</string>
@@ -484,6 +500,8 @@
     <string name="settings_tap_to_edit">Tik om te bewerken</string>
     <string name="settings_custom_url_placeholder">https://jouw-endpoint.com/v1</string>
     <string name="settings_custom_url_title">Aangepaste basis-URL</string>
+    <string name="settings_custom_directory_docs">Documentatie</string>
+    <string name="ai_model_accepts_images">Accepteert afbeeldingen (opgegeven)</string>
     <string name="settings_ai_allow_insecure_http">Onveilige HTTP toestaan</string>
     <string name="settings_ai_allow_insecure_http_footer">Laat eigen en Ollama-eindpunten http://-URL\'s gebruiken, bijvoorbeeld op je thuisnetwerk. Cloudproviders gebruiken https. Laat uit, tenzij je server geen TLS heeft.</string>
     <string name="settings_clear_key">Sleutel wissen</string>
@@ -556,7 +574,7 @@
     <!-- About -->
     <string name="about_rate">Beoordeel de app</string>
     <string name="about_share">App delen</string>
-    <string name="about_open_source">Open source (MIT)</string>
+    <string name="about_open_source">Open source (GPL v3)</string>
     <string name="about_report_issue">Probleem melden</string>
     <string name="about_request_feature">Functie aanvragen</string>
     <string name="about_privacy">Privacybeleid</string>
@@ -666,11 +684,7 @@
     <string name="ai_provider_subtitle_deepinfra">Gehoste open modellen</string>
     <string name="ai_provider_subtitle_mistral">Mistral-modellen</string>
     <string name="ai_provider_subtitle_ollama">Je eigen computer, geen cloud</string>
-    <string name="ai_provider_subtitle_custom">LM Studio, vLLM, llama.cpp enz.</string>
-    <string name="ai_provider_group_recommended">Aanbevolen</string>
-    <string name="ai_provider_group_cloud">Cloudproviders</string>
-    <string name="ai_provider_group_local">Lokaal &amp; zelf gehost</string>
-    <string name="ai_provider_group_device">Op het apparaat</string>
+    <string name="ai_provider_subtitle_ollama_cloud">Ollama\'s gehoste modellen</string>
     <string name="settings_section_ai_profile">Profiel</string>
     <string name="settings_section_ai_connection">Verbinding</string>
     <string name="settings_section_ai_advanced">Geavanceerd</string>
@@ -679,7 +693,6 @@
     <string name="settings_ai_key_remove_title">API-sleutel verwijderen?</string>
     <string name="settings_ai_key_remove_body">Een lege sleutel opslaan wist de opgeslagen sleutel van dit profiel.</string>
     <string name="settings_ai_get_key">API-sleutel ophalen</string>
-    <string name="settings_ai_value_default">%1$,d (standaard)</string>
     <string name="settings_ai_timeout_default">%1$,ds (standaard)</string>
     <string name="camera_scale_tip_message">Tip: leg een vork, hand of munt naast je eten. Dat helpt de portiegrootte te schatten.</string>
     <string name="cd_relog_meal">%1$s opnieuw loggen</string>
@@ -802,19 +815,41 @@
     <string name="action_show">Toon</string>
     <string name="action_undo">Herstel</string>
     <string name="action_save_to_favorites">Opslaan in favorieten</string>
+    <string name="action_save_to_library">Opslaan in bibliotheek</string>
+    <string name="action_hide_from_suggestions">Verbergen in suggesties</string>
+    <string name="action_unhide">Tonen</string>
+    <string name="settings_saved_foods">Opgeslagen voedingsmiddelen</string>
+    <string name="library_hidden_section">Verborgen</string>
+    <string name="library_empty">Nog geen opgeslagen voedingsmiddelen</string>
+    <string name="library_never_logged">Nooit gelogd</string>
+    <string name="library_row_summary">%1$d logboekregels · laatst %2$s</string>
+    <string name="library_delete_rows_title">Logboekregels verwijderen?</string>
+    <string name="library_delete_rows_message">Alle %1$d logboekregels van ‘%2$s’ verwijderen? Dagen worden opnieuw berekend. Het opgeslagen voedingsmiddel blijft hier staan; alleen de dagboekgeschiedenis ervan wordt verwijderd.</string>
+    <string name="library_merge_section">Mogelijke duplicaten</string>
+    <string name="library_merge_title">Duplicaten samenvoegen</string>
+    <string name="library_merge_intro">Deze lijken hetzelfde voedingsmiddel. Kies de naam die blijft; de anderen worden daarin samengevoegd.</string>
+    <string name="library_merge_rows_message">%1$d logboekregels worden hernoemd naar ‘%2$s’. Er wordt niets verwijderd; dagen worden opnieuw berekend.</string>
+    <string name="library_merge_action">Samenvoegen</string>
+    <string name="library_sort_last_logged">Laatst gelogd</string>
+    <string name="library_sort_name">Naam</string>
+    <string name="library_sort_logs">Logboek</string>
     <string name="saved_to_favorites">Opgeslagen in favorieten</string>
     <string name="action_what_if">Wat als?</string>
     <string name="add_food_relog_kcal">%1$d %2$s</string>
     <string name="ai_error_coach_on_device">Coach is nog niet beschikbaar met de on-device provider. Schakel over naar een cloudprovider in Instellingen → AI-provider.</string>
     <string name="ai_error_coach_round_limit">Coach kon niet antwoorden. Probeer je vraag anders te formuleren.</string>
-    <string name="ai_error_disabled">AI-functies zijn uitgeschakeld in Instellingen → AI en spraak.</string>
     <string name="ai_error_grounded_on_device">De Grounded-modus is niet beschikbaar voor on-device modellen.</string>
     <string name="ai_error_grounded_requires_provider">De Grounded-modus vereist een actieve AI-provider.</string>
     <string name="ai_error_image_conversion_failed">Afbeelding verwerken mislukt.</string>
     <string name="ai_error_invalid_response">AI-antwoord niet begrepen. Probeer het opnieuw.</string>
     <string name="ai_error_invalid_url">Ongeldige API-URL. Controleer je providerinstellingen.</string>
-    <string name="ai_error_insecure_http_blocked">Onveilige HTTP is geblokkeerd. Zet «Onveilige HTTP toestaan» aan in Instellingen → AI en spraak, of gebruik een https://-URL.</string>
     <string name="ai_error_key_rejected">Je API-sleutel is afgewezen. Open Instellingen → AI-provider en plak opnieuw een geldige sleutel.</string>
+    <string name="ai_error_timeout">De AI-provider deed te lang over het antwoord. Probeer het opnieuw; bij een zelf gehost endpoint verhoog je de time-out in Instellingen → AI-provider.</string>
+    <string name="ai_error_disabled">AI-functies staan uit in Instellingen → AI-provider.</string>
+    <string name="ai_error_insecure_http_blocked">Onveilige HTTP is geblokkeerd. Zet “Onveilige HTTP toestaan” aan in Instellingen → AI-provider of gebruik een https://-URL.</string>
+    <string name="ai_error_truncated_twice">Het antwoord bereikte twee keer de uitvoerlimiet van het model — denken telt mee. Zet de Redeneerinspanning op Laag of Uit in Instellingen → AI-provider, of stel een kortere vraag.</string>
+    <string name="ai_error_truncated_twice_description">Het model raakte de uitvoerruimte kwijt voordat het klaar was; denktokens tellen mee. Zet de Redeneerinspanning op Laag of Uit in Instellingen → AI-provider en probeer het opnieuw.</string>
+    <string name="ai_error_truncated">Het antwoord bereikte de uitvoerlimiet van het model voordat het klaar was — denken telt mee. Zet de Redeneerinspanning op Laag of Uit in Instellingen → AI-provider, of stel een kortere vraag.</string>
     <string name="ai_error_location_unsupported">Gemini is niet beschikbaar vanaf deze netwerklocatie (land/IP). Gebruik je een VPN, zet die dan uit of kies een residentiële exit. Datacenter-/niet-residentiële VPN-IP\'s worden vaak geblokkeerd. Of schakel facturering in op het Google AI Studio-project, probeer een ander netwerk of wissel van provider in Instellingen → AI-provider.</string>
     <string name="ai_error_model_unavailable">Je provider kon dit model niet vinden. Het kan betaald zijn op de gratis laag, beperkt in jouw regio, of de endpoint kan onjuist zijn. Schakel naar het standaard Flash-model in Instellingen → AI-provider of schakel facturering in op je AI Studio-project.</string>
     <string name="ai_error_network_format">Netwerkfout: %1$s</string>
@@ -826,10 +861,6 @@
     <string name="ai_error_provider_error">De AI-provider gaf een fout terug.</string>
     <string name="ai_error_provider_overloaded">De AI-provider is nu overbelast. We hebben een paar keer opnieuw geprobeerd. Probeer het over een minuut nog eens of wissel van provider/model in Instellingen → AI-provider.</string>
     <string name="ai_error_rate_limit">Limiet bereikt voor je API-sleutel. Wacht een minuut of wissel van provider in Instellingen → AI-provider. Op de gratis laag heeft het Flash-Lite-model de hoogste quota.</string>
-    <string name="ai_error_timeout">De AI-provider deed te lang over het antwoord. Probeer het opnieuw of verhoog de timeout in Instellingen → AI en spraak.</string>
-    <string name="ai_error_truncated">Het AI-antwoord is afgekapt bij de limiet voor de antwoordlengte. Verhoog de maximale antwoordlengte in Instellingen → AI en spraak, of stel een kortere vraag.</string>
-    <string name="ai_error_truncated_twice">Het AI-antwoord is twee keer afgekapt bij de limiet voor de antwoordlengte. Verhoog de maximale antwoordlengte in Instellingen → AI en spraak, of stel een kortere vraag.</string>
-    <string name="ai_error_truncated_twice_description">Het model bereikte de limiet voor de antwoordlengte voordat het af was; denken telt daarin mee. Verhoog de maximale antwoordlengte in Instellingen → AI en spraak, of beperk het denken van het model, en probeer het daarna opnieuw.</string>
     <string name="ai_model_tier_paid">Alleen betaald model (gratis laag bevat Pro niet meer)</string>
     <string name="ai_model_tier_varies">Beschikbaarheid op de gratis laag verschilt per account en regio</string>
     <string name="ai_provider_on_device">Op apparaat (privé)</string>
@@ -973,6 +1004,12 @@
     <string name="export_format">Formaat</string>
     <string name="export_from">Van</string>
     <string name="export_no_meals">Geen maaltijden gelogd in het geselecteerde bereik.</string>
+    <string name="export_include_photos">Foto\'s opnemen</string>
+    <string name="sync_photos">Foto\'s synchroniseren</string>
+    <string name="sync_photos_caption">Indien ingeschakeld, worden maaltijdfoto\'s geüpload naar je WebDAV-server</string>
+    <string name="sync_photos_wifi_only">Foto\'s alleen via Wi-Fi</string>
+    <string name="sync_photos_syncing">Foto\'s synchroniseren…</string>
+    <string name="sync_photos_failed">Synchroniseren van foto\'s mislukt</string>
     <string name="export_range">Bereik</string>
     <string name="export_range_all">Altijd</string>
     <string name="export_range_custom">Aangepast</string>
@@ -1061,7 +1098,7 @@
     <string name="home_display_show_active_calories_desc">Toon het actieve verbruik van vandaag in de caloriemeter.</string>
     <string name="home_display_show_steps">Stappenteller op home tonen</string>
     <string name="home_display_slim_full_names">Volledige nutriëntnamen</string>
-    <string name="home_display_slim_full_names_desc">Slanke-lijnenkaarten tonen de volledige naam in plaats van het korte label. Lange namen kunnen afgekapt worden bij vier kaarten.</string>
+    <string name="home_display_slim_full_names_desc">Voedingsstofkaarten tonen de volledige naam in plaats van het korte label. Lange namen kunnen afgekapt worden bij vier kaarten.</string>
     <string name="home_display_show_steps_desc">Optionele kaart onder de meter. Vereist Health Connect.</string>
     <string name="home_display_step_goal">Dagelijks stappendoel</string>
     <string name="home_display_step_goal_hint">Stappen van 500. 1.000–50.000.</string>
@@ -1097,6 +1134,7 @@
     <string name="import_body_metrics_empty">Dit bestand bevat geen gewichts- of lichaamsgegevens om te importeren.</string>
     <string name="import_body_metrics_malformed">Bestand lezen mislukt: %1$s</string>
     <string name="import_body_metrics_success">%1$d gewichts-, %2$d vet- en %3$d meetitems geïmporteerd.</string>
+    <string name="import_body_metrics_success_composition">Ook %1$d waalmetingen geïmporteerd.</string>
     <string name="import_body_metrics_title">Gewicht en lichaamsgegevens importeren</string>
     <string name="import_body_metrics_unsupported">Niet-ondersteund bestand. Ondersteund: Chompass JSON/CSV, openScale CSV of een algemene gewichts-CSV.</string>
     <string name="import_diary_empty">Dit bestand bevat geen dagboekitems om te importeren.</string>
@@ -1193,6 +1231,7 @@
     <string name="nutrient_short_calories">Cal</string>
     <string name="nutrient_short_added_sugar">Toev. suik.</string>
     <string name="nutrient_short_sodium">Na</string>
+    <string name="nutrient_short_cholesterol">Chol.</string>
     <string name="nutrient_short_potassium">K</string>
     <string name="nutrient_short_trans_fat">Transvet</string>
     <string name="nutrient_short_calcium">Ca</string>
@@ -1390,7 +1429,7 @@
     <string name="settings_calc_intro">Je dagelijkse calorie- en macrodoelen worden door AI ingesteld. Wanneer je op «Doelen herberekenen» tikt, of automatisch ongeveer één keer per week als adaptieve doelen aan staan, stuurt Chompass je profiel, de referentieformules hieronder, je recent gelogde voedsel en je gewichtstrend naar je AI-provider. Het start vanuit deze peer-reviewed formules en past ze dan aan je gegevens aan om je onderhoud en doelen te schatten.</string>
     <string name="settings_calc_katch_formula">BMR = 370 + 21,6 × LBM(kg)\nLBM = gewicht × (1 − %lichaamsvet)</string>
     <string name="settings_calc_katch_name">Katch-McArdle-vergelijking</string>
-    <string name="settings_calc_katch_used">Automatisch gebruikt wanneer je een lichaamsvet-% hebt ingevoerd. Nauwkeuriger voor slanke en sportieve gebruikers omdat het BMR afleidt uit vetvrije massa in plaats van totaal gewicht. Metingen ouder dan 90 dagen vallen terug op Mifflin-St Jeor.</string>
+    <string name="settings_calc_katch_used">Automatisch gebruikt wanneer je een lichaamsvet-% hebt ingevoerd. Nauwkeuriger voor slanke en sportieve gebruikers omdat het BMR afleidt uit vetvrije massa in plaats van totaal gewicht. Metingen ouder dan 90 dagen vallen terug op Mifflin-St Jeor. Een recente meting van vetvrije massa van de weegschaal bepaalt de BMR op dezelfde manier en gaat voor op lichaamsvet.</string>
     <string name="settings_calc_macro_split">Macronutriëntenverdeling</string>
     <string name="settings_calc_maintenance">Onderhoud en doelaanpassing</string>
     <string name="settings_calc_methods">Berekeningsmethoden</string>
@@ -1427,6 +1466,18 @@
     <string name="settings_fixed_launcher_icon_subtitle">Houdt het app-pictogram teal. Het volgt de themakleur en achtergrond niet meer.</string>
     <string name="settings_system_date_time_pickers">Systeemdatum- en tijdkiezers</string>
     <string name="settings_system_date_time_pickers_subtitle">Gebruik de datum- en tijddialogen van de telefoon bij het bewerken van een maaltijd.</string>
+    <string name="settings_glass_blur">Matglas</string>
+    <string name="settings_glass_blur_subtitle">Vervaagt de inhoud achter zwevende panelen, zoals de resultaatkop bij eten toevoegen.</string>
+    <string name="settings_ambient_motion">Ambient-achtergrond</string>
+    <string name="settings_ambient_motion_subtitle">Zachte zwevende kleurvelden achter elk scherm. Pauzeert bij batterijbesparing of wanneer animaties zijn verminderd.</string>
+    <string name="settings_frost_strength">Matsterkte</string>
+    <string name="frost_strength_light">Licht</string>
+    <string name="frost_strength_medium">Middel</string>
+    <string name="frost_strength_strong">Sterk</string>
+    <string name="settings_ambient_intensity">Ambient-intensiteit</string>
+    <string name="ambient_intensity_subtle">Subtiel</string>
+    <string name="ambient_intensity_balanced">Gebalanceerd</string>
+    <string name="ambient_intensity_vivid">Levendig</string>
     <string name="add_food_log_time">Logtijd</string>
     <string name="add_food_log_time_now">Nu</string>
     <string name="cd_clear_log_time">Huidige tijd gebruiken</string>
@@ -1437,7 +1488,6 @@
     <string name="settings_food_section_photo">Foto-analyse</string>
     <string name="settings_food_section_serving">Portiegrootte</string>
     <string name="settings_gemini_google_search">Google Zoeken-verankering</string>
-    <string name="settings_glass_blur">Glasvervaging</string>
     <string name="settings_goal_auto">Auto</string>
     <string name="settings_goals_how_adaptive">Adaptieve doelen herberekenen je calorie- en macrodoelen ongeveer één keer per week.</string>
     <string name="settings_goals_how_energy">Energieverbruik verankert doelen op je gemeten verbruik uit Health Connect.</string>
@@ -1476,8 +1526,6 @@
     <string name="settings_macro_pinned_label_format">%1$s (vastgezet)</string>
     <string name="settings_macro_unlocked">Ontgrendeld</string>
     <string name="settings_manage_health_access">Health Connect-toegang beheren</string>
-    <string name="settings_max_tokens">Maximale antwoordlengte</string>
-    <string name="settings_max_tokens_unit">tokens</string>
     <string name="settings_meal_constituents">Maaltijd opdelen in ingrediënten</string>
     <string name="settings_meal_constituents_footer">Wanneer ingeschakeld kan AI samengestelde maaltijden splitsen in bewerkbare ingrediënten met grammen en eenheden. Micronutriënten per ingrediënt worden alleen aan sterkere cloudmodellen gevraagd; kleinere modellen geven alsnog de ingrediëntenlijst met macro\'s terug.</string>
     <string name="settings_meal_time_edit_format">%1$s</string>
@@ -2206,6 +2254,18 @@ macro\'s opnieuw verdeeld over het nieuwe calorieëntotaal</string>
     <string name="onboarding_goal_suggested_bmi">Op basis van een BMI van %1$.1f</string>
     <!-- Progress v2: lichaamsoverlay, caloriecombinatie, doelfases, naleving. -->
     <string name="progress_body_section">Lichaam</string>
+    <string name="progress_scale_metrics">Waalmetingen</string>
+    <string name="progress_scale_metrics_bone_mass">Botmassa</string>
+    <string name="progress_scale_metrics_water">Totaal lichaamswater</string>
+    <string name="progress_scale_metrics_muscle">Spiermassa</string>
+    <string name="progress_scale_metrics_lean">Vetvrije massa</string>
+    <string name="progress_scale_metrics_visceral">Visceraal vet</string>
+    <string name="progress_scale_metrics_note">Schatting van een huisweegschaal — de trend is betrouwbaarder dan de absolute waarde</string>
+    <string name="progress_scale_metrics_tbw_percent">%1$.1f %% van het lichaamsgewicht · gebruikelijk bereik 45–65 %%</string>
+    <string name="progress_log_scale_metrics">Waalmetingen</string>
+    <string name="progress_log_scale_metrics_title">Waalmetingen vastleggen</string>
+    <string name="progress_estimated_smm">Geschatte skeletspiermassa (Lee)</string>
+    <string name="progress_estimated_smm_note">Antropometrische schatting uit arm, dij en kuit · ± ~3 kg</string>
     <string name="progress_overlay_off">Uit</string>
     <string name="progress_no_entries_in_range">Geen registraties in deze periode</string>
     <string name="progress_no_series_selected">Tik hierboven op een meetwaarde om deze hier te tonen</string>
@@ -2247,6 +2307,7 @@ macro\'s opnieuw verdeeld over het nieuwe calorieëntotaal</string>
     <string name="body_fat_method_dexa">DEXA</string>
     <string name="body_fat_method_tape">Meetlint</string>
     <string name="cd_collapsed">Ingeklapt</string>
+    <string name="cd_change_meal_type">Maaltijdtype wijzigen</string>
     <string name="cd_decrease">Verlagen</string>
     <string name="cd_expanded">Uitgeklapt</string>
     <string name="cd_import_mealie">Importeren uit Mealie</string>
@@ -2688,11 +2749,6 @@ macro\'s opnieuw verdeeld over het nieuwe calorieëntotaal</string>
         <item>download</item>
         <item>lokaal</item>
         <item>offline</item>
-    </string-array>
-    <string-array name="settings_search_kw_max_tokens">
-        <item>tokens</item>
-        <item>lengte</item>
-        <item>limiet</item>
     </string-array>
     <string-array name="settings_search_kw_ai_read_timeout">
         <item>timeout</item>

@@ -49,13 +49,14 @@ import app.chompass.models.builtinCaffeineDefaultMg
 import app.chompass.models.MilkKind
 import app.chompass.models.caffeineKindLabelRes
 import app.chompass.ui.components.ChompassPinnedFooterSheet
+import app.chompass.ui.components.LocalPinnedToolbarHeight
 import app.chompass.ui.components.ChompassTextField
 import app.chompass.ui.components.NumericWheelPicker
 import app.chompass.ui.components.rememberChompassSheetState
+import app.chompass.ui.components.glassDialogColor
 import app.chompass.ui.home.SheetReviewToolbar
 import app.chompass.ui.home.formatMg
 import app.chompass.ui.home.CaffeineMilkSection
-import app.chompass.ui.theme.AppTextOpacity
 
 /**
  * Tracker preset manager pieces (custom / renamed caffeine + nicotine
@@ -104,7 +105,7 @@ internal fun TrackerPresetsSection(
             Text(
                 stringResource(helpRes),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(4.dp))
             catalog.presets.forEachIndexed { index, preset ->
@@ -215,6 +216,7 @@ internal fun TrackerPresetDeleteDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = glassDialogColor(MaterialTheme.colorScheme.surfaceContainerHigh),
         title = { Text(stringResource(R.string.settings_tracker_preset_delete_title)) },
         text = {
             Text(
@@ -281,6 +283,7 @@ internal fun CaffeinePresetEditorSheet(
                 Modifier
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
+                    .padding(top = LocalPinnedToolbarHeight.current)
                     .padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(18.dp),
             ) {
@@ -390,6 +393,7 @@ internal fun NicotinePresetEditorSheet(
                 Modifier
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
+                    .padding(top = LocalPinnedToolbarHeight.current)
                     .padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(18.dp),
             ) {

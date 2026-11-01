@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -29,15 +28,15 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.chompass.R
 import app.chompass.ui.components.ChompassIconBubble
+import app.chompass.ui.components.contentMaxWidth
 import app.chompass.ui.navigation.BottomNavScrollPadding
-import app.chompass.ui.theme.AppRadii
-import app.chompass.ui.theme.AppTextOpacity
 
 /**
  * Pinned bar for a pushed settings screen. [backContentDescription] is where
@@ -61,7 +60,7 @@ internal fun SettingsTopBar(
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = Color.Transparent,
         ),
     )
 }
@@ -80,13 +79,13 @@ fun SettingsSubScreen(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = Color.Transparent,
         snackbarHost = snackbarHost,
         topBar = { SettingsTopBar(title = title, onBack = onBack, backContentDescription = backLabel) },
     ) { padding ->
         Column(
             Modifier
-                .fillMaxSize()
+                .contentMaxWidth()
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
@@ -131,12 +130,12 @@ internal fun RelatedLinks(rows: List<RelatedLink>) {
         Text(
             stringResource(R.string.settings_related),
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = AppTextOpacity.Muted),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 4.dp, bottom = 6.dp)
         )
         app.chompass.ui.components.ChompassSurface(
             modifier = Modifier.fillMaxWidth(),
-            cornerRadius = AppRadii.Container,
+            cornerRadius = 16.dp,
             padding = 0.dp,
         ) {
             Column(Modifier.padding(vertical = 4.dp)) {
@@ -158,7 +157,7 @@ internal fun RelatedLinks(rows: List<RelatedLink>) {
                         Icon(
                             Icons.AutoMirrored.Filled.KeyboardArrowRight,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Disabled),
+                            tint = MaterialTheme.colorScheme.outline,
                         )
                     }
                 }
@@ -193,13 +192,13 @@ internal fun SettingsHubRow(
             Text(
                 summary,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         Icon(
             Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Disabled),
+            tint = MaterialTheme.colorScheme.outline,
         )
     }
 }

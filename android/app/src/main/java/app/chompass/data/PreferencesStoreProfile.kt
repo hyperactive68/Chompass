@@ -84,7 +84,7 @@ internal suspend fun PreferencesStore.setEnergyUnitImpl(v: String) { dataStore.e
 internal val PreferencesStore.preferGramsByDefaultImpl: Flow<Boolean> get() = dataStore.data.map { it[Keys.PREFER_GRAMS_BY_DEFAULT] ?: false }
 internal suspend fun PreferencesStore.setPreferGramsByDefaultImpl(v: Boolean) { dataStore.edit { it[Keys.PREFER_GRAMS_BY_DEFAULT] = v } }
 
-    /** "system" | "light" | "dark". Mirrors iOS @AppStorage("appearanceMode"). */
+    /** "system" | "light" | "dark". */
 internal val PreferencesStore.appearanceModeImpl: Flow<String> get() = dataStore.data.map { it[Keys.APPEARANCE_MODE] ?: "system" }
 internal suspend fun PreferencesStore.setAppearanceModeImpl(v: String) { dataStore.edit { it[Keys.APPEARANCE_MODE] = v } }
 
@@ -110,6 +110,62 @@ internal val PreferencesStore.useSystemDateTimePickersImpl: Flow<Boolean>
     get() = dataStore.data.map { it[Keys.USE_SYSTEM_DATE_TIME_PICKERS] ?: false }
 internal suspend fun PreferencesStore.setUseSystemDateTimePickersImpl(v: Boolean) {
     dataStore.edit { it[Keys.USE_SYSTEM_DATE_TIME_PICKERS] = v }
+}
+
+    /** Frosted glass behind floating panels (Morphe traits); default ON. */
+internal val PreferencesStore.glassBlurEnabledImpl: Flow<Boolean>
+    get() = dataStore.data.map { it[Keys.GLASS_BLUR_ENABLED] ?: true }
+internal suspend fun PreferencesStore.setGlassBlurEnabledImpl(v: Boolean) {
+    dataStore.edit { it[Keys.GLASS_BLUR_ENABLED] = v }
+}
+
+    /** Ambient animated background behind every screen (Morphe traits); default ON. */
+internal val PreferencesStore.ambientMotionEnabledImpl: Flow<Boolean>
+    get() = dataStore.data.map { it[Keys.AMBIENT_MOTION_ENABLED] ?: true }
+internal suspend fun PreferencesStore.setAmbientMotionEnabledImpl(v: Boolean) {
+    dataStore.edit { it[Keys.AMBIENT_MOTION_ENABLED] = v }
+}
+
+internal val PreferencesStore.ambientIntensityImpl: Flow<String>
+    get() = dataStore.data.map { it[Keys.AMBIENT_INTENSITY] ?: "" }
+internal suspend fun PreferencesStore.setAmbientIntensityImpl(v: String) {
+    dataStore.edit { it[Keys.AMBIENT_INTENSITY] = v }
+}
+
+internal val PreferencesStore.ambientContrastImpl: Flow<String>
+    get() = dataStore.data.map { it[Keys.AMBIENT_CONTRAST] ?: "" }
+internal suspend fun PreferencesStore.setAmbientContrastImpl(v: String) {
+    dataStore.edit { it[Keys.AMBIENT_CONTRAST] = v }
+}
+
+internal val PreferencesStore.ambientSaturationImpl: Flow<String>
+    get() = dataStore.data.map { it[Keys.AMBIENT_SATURATION] ?: "" }
+internal suspend fun PreferencesStore.setAmbientSaturationImpl(v: String) {
+    dataStore.edit { it[Keys.AMBIENT_SATURATION] = v }
+}
+
+internal val PreferencesStore.ambientSpeedImpl: Flow<String>
+    get() = dataStore.data.map { it[Keys.AMBIENT_SPEED] ?: "" }
+internal suspend fun PreferencesStore.setAmbientSpeedImpl(v: String) {
+    dataStore.edit { it[Keys.AMBIENT_SPEED] = v }
+}
+
+internal val PreferencesStore.ambientPaletteImpl: Flow<String>
+    get() = dataStore.data.map { it[Keys.AMBIENT_PALETTE] ?: "" }
+internal suspend fun PreferencesStore.setAmbientPaletteImpl(v: String) {
+    dataStore.edit { it[Keys.AMBIENT_PALETTE] = v }
+}
+
+internal val PreferencesStore.ambientTiltEnabledImpl: Flow<Boolean>
+    get() = dataStore.data.map { it[Keys.AMBIENT_TILT_ENABLED] ?: true }
+internal suspend fun PreferencesStore.setAmbientTiltEnabledImpl(v: Boolean) {
+    dataStore.edit { it[Keys.AMBIENT_TILT_ENABLED] = v }
+}
+
+internal val PreferencesStore.glassStrengthImpl: Flow<String>
+    get() = dataStore.data.map { it[Keys.GLASS_STRENGTH] ?: "" }
+internal suspend fun PreferencesStore.setGlassStrengthImpl(v: String) {
+    dataStore.edit { it[Keys.GLASS_STRENGTH] = v }
 }
 
     /** false = Sunday, true = Monday (default). Kept for backup/legacy; prefer [weekStartDayImpl]. */
@@ -217,7 +273,7 @@ internal suspend fun PreferencesStore.setProgressNutrientAveragesSelectionImpl(k
     }
 }
 
-    /** "RECENTS" | "FREQUENT" | "FAVORITES". Mirrors iOS @AppStorage("lastRecentsSegment"). */
+    /** "RECENTS" | "FREQUENT" | "FAVORITES". */
 internal val PreferencesStore.lastSavedMealsSegmentImpl: Flow<String> get() = dataStore.data.map { it[Keys.LAST_SAVED_MEALS_SEGMENT] ?: "RECENTS" }
 internal suspend fun PreferencesStore.setLastSavedMealsSegmentImpl(v: String) { dataStore.edit { it[Keys.LAST_SAVED_MEALS_SEGMENT] = v } }
 
@@ -225,7 +281,7 @@ internal suspend fun PreferencesStore.setLastSavedMealsSegmentImpl(v: String) { 
 internal val PreferencesStore.lastSavedMealsSortImpl: Flow<String> get() = dataStore.data.map { it[Keys.LAST_SAVED_MEALS_SORT] ?: "recent" }
 internal suspend fun PreferencesStore.setLastSavedMealsSortImpl(v: String) { dataStore.edit { it[Keys.LAST_SAVED_MEALS_SORT] = v } }
 
-    /** "standard" | "latestMealsFirst". Mirrors iOS @AppStorage("foodLogSortOrder"). */
+    /** "standard" | "latestMealsFirst". */
 internal val PreferencesStore.foodLogSortOrderImpl: Flow<String> get() = dataStore.data.map { it[Keys.FOOD_LOG_SORT_ORDER] ?: "standard" }
 internal suspend fun PreferencesStore.setFoodLogSortOrderImpl(v: String) { dataStore.edit { it[Keys.FOOD_LOG_SORT_ORDER] = v } }
 
@@ -255,8 +311,8 @@ internal suspend fun PreferencesStore.setHomeNutrientCardCountImpl(v: Int) {
 internal val PreferencesStore.homeShowStepsImpl: Flow<Boolean> get() = dataStore.data.map { it[Keys.HOME_SHOW_STEPS] ?: false }
 internal suspend fun PreferencesStore.setHomeShowStepsImpl(v: Boolean) { dataStore.edit { it[Keys.HOME_SHOW_STEPS] = v } }
 
-internal val PreferencesStore.homeSlimFullNamesImpl: Flow<Boolean> get() = dataStore.data.map { it[Keys.HOME_SLIM_FULL_NAMES] ?: false }
-internal suspend fun PreferencesStore.setHomeSlimFullNamesImpl(v: Boolean) { dataStore.edit { it[Keys.HOME_SLIM_FULL_NAMES] = v } }
+internal val PreferencesStore.fullNutrientNamesImpl: Flow<Boolean> get() = dataStore.data.map { it[Keys.HOME_SLIM_FULL_NAMES] ?: false }
+internal suspend fun PreferencesStore.setHomeFullNutrientNamesImpl(v: Boolean) { dataStore.edit { it[Keys.HOME_SLIM_FULL_NAMES] = v } }
 
 internal val PreferencesStore.homeShowActiveCaloriesImpl: Flow<Boolean> get() = dataStore.data.map { it[Keys.HOME_SHOW_ACTIVE_CALORIES] ?: false }
 internal suspend fun PreferencesStore.setHomeShowActiveCaloriesImpl(v: Boolean) { dataStore.edit { it[Keys.HOME_SHOW_ACTIVE_CALORIES] = v } }
@@ -340,7 +396,7 @@ internal val PreferencesStore.homeDisplayPreferencesImpl: Flow<HomeDisplayPrefer
             fullCreditActiveBurn = prefs[Keys.HOME_CALORIE_FULL_CREDIT] ?: false,
             calorieHeroLayout = HomeCalorieHeroLayout.fromStorage(prefs[Keys.HOME_CALORIE_HERO_LAYOUT]),
             macroCardLayout = HomeMacroCardLayout.fromStorage(prefs[Keys.HOME_MACRO_CARD_LAYOUT]),
-            slimCardFullNames = prefs[Keys.HOME_SLIM_FULL_NAMES] ?: false,
+            fullNutrientNames = prefs[Keys.HOME_SLIM_FULL_NAMES] ?: false,
             foodLogLayout = HomeFoodLogLayout.fromStorage(prefs[Keys.HOME_FOOD_LOG_LAYOUT]),
             foodLogMacroChips = FoodLogMacroChip.fromStorage(prefs[Keys.FOOD_LOG_MACRO_CHIPS]),
         )

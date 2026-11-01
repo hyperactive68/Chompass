@@ -1,10 +1,14 @@
 package app.chompass.ui.home
 
+import app.chompass.ui.components.AnimatedNumberText
 import app.chompass.ui.components.ChompassPrimaryButton
 import app.chompass.ui.components.rememberChompassSheetState
 import app.chompass.ui.components.ChompassBottomSheet
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import app.chompass.ui.components.pressScale
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,11 +45,9 @@ import androidx.compose.ui.unit.sp
 import app.chompass.R
 import app.chompass.models.WaterAmountFormat
 import app.chompass.models.WaterEntry
-import app.chompass.ui.theme.AppTextOpacity
 import app.chompass.ui.theme.water
 import app.chompass.ui.components.NumericWheelPicker
 import app.chompass.ui.util.clockTimePattern
-import app.chompass.ui.theme.AppRadii
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -77,11 +79,13 @@ fun WaterProgressRow(
     modifier: Modifier = Modifier,
 ) {
     val progress = if (goal > 0) (current.toFloat() / goal).coerceIn(0f, 1f) else 0f
+    val headerInteraction = remember { MutableInteractionSource() }
     val rowModifier = if (onClick != null) {
         modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(AppRadii.Tile))
-            .clickable(onClick = onClick)
+            .clip(MaterialTheme.shapes.medium)
+            .pressScale(headerInteraction)
+            .clickable(interactionSource = headerInteraction, indication = LocalIndication.current, onClick = onClick)
             .padding(vertical = 4.dp)
     } else {
         modifier
@@ -124,8 +128,8 @@ fun WaterProgressRow(
                 )
             }
             Spacer(Modifier.weight(1f))
-            Text(
-                waterProgressLabel(current, goal, useMetric),
+            AnimatedNumberText(
+                value = waterProgressLabel(current, goal, useMetric),
                 color = MaterialTheme.colorScheme.water,
                 fontSize = 12.sp,
             )
@@ -268,7 +272,7 @@ fun WaterHistorySheet(
                         dayLabel,
                         waterHistoryAmountLabel(total, useMetric),
                     ),
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Subtle),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 13.sp,
                 )
             }
@@ -277,7 +281,7 @@ fun WaterHistorySheet(
                 Text(
                     stringResource(R.string.water_no_entries),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Subtle),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(vertical = 16.dp),
                 )
             } else {
@@ -309,25 +313,27 @@ private fun WaterHistoryRow(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
 ) {
+    val rowInteraction = remember { MutableInteractionSource() }
     Row(
         Modifier
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.medium)
+            .pressScale(rowInteraction)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f))
-            .clickable(onClick = onEdit)
+            .clickable(interactionSource = rowInteraction, indication = LocalIndication.current, onClick = onEdit)
             .padding(start = 14.dp, end = 4.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             Icons.Filled.WaterDrop,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.water.copy(alpha = AppTextOpacity.Strong),
+            tint = MaterialTheme.colorScheme.water,
             modifier = Modifier.size(18.dp),
         )
         Text(
             timeFmt.format(entry.date),
             modifier = Modifier.padding(start = 10.dp),
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Subtle),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 13.sp,
         )
         Spacer(Modifier.weight(1f))
@@ -341,7 +347,7 @@ private fun WaterHistoryRow(
             Icon(
                 Icons.Filled.Delete,
                 contentDescription = stringResource(R.string.cd_delete_water),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Subtle),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -50,8 +49,6 @@ import app.chompass.ui.components.ChompassDialogActions
 import app.chompass.services.grounding.SuggestionKind
 import app.chompass.ui.components.energyText
 import app.chompass.ui.settings.SettingsSubScreen
-import app.chompass.ui.theme.AppRadii
-import app.chompass.ui.theme.AppTextOpacity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -262,7 +259,7 @@ internal fun PlanWeekScreen(
                     windowStart.plusDays(6).format(dateFmt),
                 ),
                 fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             )
@@ -285,7 +282,7 @@ internal fun PlanWeekScreen(
                 Text(
                     stringResource(R.string.plan_week_load_failed),
                     fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 TextButton(onClick = { vm.retry() }) {
                     Text(stringResource(R.string.action_retry))
@@ -349,7 +346,7 @@ private fun PlanWeekDaySection(
                 day.date.format(dateFmt).replaceFirstChar { it.uppercase(Locale.getDefault()) },
                 fontSize = 13.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
             )
             IconButton(onClick = onAdd, modifier = Modifier.minimumInteractiveComponentSize()) {
@@ -367,7 +364,7 @@ private fun PlanWeekDaySection(
                     else R.string.home_no_foods_logged
                 ),
                 fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Faint),
+                color = MaterialTheme.colorScheme.outline,
                 modifier = Modifier.padding(start = 8.dp, bottom = 6.dp),
             )
         } else {
@@ -388,7 +385,7 @@ private fun PlanWeekEntryChip(
     onTap: () -> Unit,
     onRemove: () -> Unit,
 ) {
-    val shape = RoundedCornerShape(AppRadii.Field)
+    val shape = MaterialTheme.shapes.medium
     Row(
         Modifier
             .fillMaxWidth()
@@ -415,7 +412,7 @@ private fun PlanWeekEntryChip(
         Text(
             "·",
             fontSize = 11.sp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Disabled),
+            color = MaterialTheme.colorScheme.outline,
         )
         Text(
             entry.name,
@@ -481,7 +478,7 @@ private fun PlanWeekPickerDialog(
                 item { Text(
                     stringResource(R.string.saved_meals_no_match),
                     fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 ) }
             }
         }

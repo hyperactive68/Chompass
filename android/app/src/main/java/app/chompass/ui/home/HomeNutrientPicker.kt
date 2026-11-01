@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
@@ -43,13 +42,10 @@ import app.chompass.models.HomeDisplayPreferences
 import app.chompass.models.HomeTopNutrient
 import app.chompass.ui.components.ChompassDialog
 import app.chompass.ui.components.ChompassDialogActions
-import app.chompass.ui.theme.AppColors
-import app.chompass.ui.theme.AppTextOpacity
 import app.chompass.ui.theme.nutrientAccentColor
 import androidx.compose.foundation.shape.CircleShape
 import app.chompass.models.MacroValueFormatter
 import app.chompass.ui.components.isDarkTheme
-import app.chompass.ui.theme.AppRadii
 
 @Composable
 fun HomeTopNutrientPickerDialog(
@@ -87,8 +83,8 @@ fun HomeTopNutrientPickerDialog(
             if (flashMax) stringResource(R.string.home_nutrients_pick_max, maxCards)
             else stringResource(R.string.home_nutrients_pick_count, maxCards),
             fontSize = 14.sp,
-            color = if (flashMax) AppColors.Calorie
-            else MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Subtle)
+            color = if (flashMax) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.onSurfaceVariant
         )
         LazyColumn(
             Modifier
@@ -144,7 +140,7 @@ fun FoodLogMacroChipPickerDialog(
         ) {
             items(FoodLogMacroChip.entries) { chip ->
                 val kind = chip.macroKind()
-                val accent = kind?.color() ?: AppColors.Calorie
+                val accent = kind?.color() ?: MaterialTheme.colorScheme.primary
                 NutrientPickerRow(
                     label = stringResource(chip.kindLabelRes()),
                     unit = stringResource(chip.glyphRes()),
@@ -174,7 +170,7 @@ private fun NutrientPickerRow(
     accentColor: Color,
     onClick: () -> Unit,
 ) {
-    val shape = RoundedCornerShape(AppRadii.Card)
+    val shape = MaterialTheme.shapes.large
     val isDark = isDarkTheme()
     Row(
         Modifier
@@ -182,13 +178,12 @@ private fun NutrientPickerRow(
             .clip(shape)
             .background(
                 if (checked) accentColor.copy(alpha = 0.14f)
-                else if (isDark) AppColors.TranslucentSurfaceDark
-                else AppColors.TranslucentSurfaceLight
+                else MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.92f)
             )
             .border(
                 0.5.dp,
                 if (checked) accentColor.copy(alpha = 0.28f)
-                else if (isDark) AppColors.HairlineBorderDark else AppColors.HairlineBorderLight,
+                else MaterialTheme.colorScheme.outlineVariant,
                 shape
             )
             .clickable(onClick = onClick)
@@ -198,13 +193,13 @@ private fun NutrientPickerRow(
         Box(
             Modifier
                 .size(28.dp)
-                .clip(RoundedCornerShape(AppRadii.Chip))
+                .clip(MaterialTheme.shapes.small)
                 .background(if (checked) accentColor else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f))
                 .border(
                     1.dp,
                     if (checked) accentColor.copy(alpha = 0.55f)
                     else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.24f),
-                    RoundedCornerShape(AppRadii.Chip)
+                    MaterialTheme.shapes.small
                 ),
             contentAlignment = Alignment.Center
         ) {
@@ -223,7 +218,7 @@ private fun NutrientPickerRow(
             Text(
                 unit,
                 fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -231,7 +226,7 @@ private fun NutrientPickerRow(
 
 @Composable
 fun FoodLogMacroChipView(chip: FoodLogMacroChip, value: Double, dense: Boolean = false) {
-    val color = chip.macroKind()?.color() ?: AppColors.Calorie
+    val color = chip.macroKind()?.color() ?: MaterialTheme.colorScheme.primary
     val glyph = stringResource(chip.glyphRes())
     val valueText = MacroValueFormatter.string(value)
     val unit = stringResource(R.string.unit_g)
@@ -249,7 +244,7 @@ fun FoodLogMacroChipView(chip: FoodLogMacroChip, value: Double, dense: Boolean =
                 append("$glyph $valueText")
                 if (dense) {
                     addStyle(
-                        SpanStyle(color = color.copy(alpha = AppTextOpacity.Muted)),
+                        SpanStyle(color = color.copy(alpha = 0.6f)),
                         "$glyph $valueText".length,
                         "$glyph $valueText$unit".length,
                     )

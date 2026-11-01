@@ -1,5 +1,6 @@
 package app.chompass.export
 
+import app.chompass.models.BodyCompositionEntry
 import app.chompass.models.DailyNote
 import app.chompass.models.FoodConstituent
 import app.chompass.models.FoodEntry
@@ -57,6 +58,79 @@ class SyncDocumentTest {
         assertEquals(1, parsed.weights.count { it.entry != null })
         assertEquals(1, parsed.water.count { it.entry != null })
         assertTrue(parsed.profile != null)
+        // Sync 1.4 (#122): refs parse into the model; ref-less rows stay empty.
+        assertEquals(listOf("photos/0123456789abcdef.jpg"), salad.photoFilenames)
+        assertTrue(coffee.photoFilenames.isEmpty())
+    }
+
+    @Test
+    fun buildJsonStamps14OnlyWithPhotoRefsAndRoundTrips() {
+        val zone = ZoneOffset.UTC
+        val plain = FoodEntry(
+            name = "Oats",
+            calories = 300,
+            protein = 10.0,
+            carbs = 50.0,
+            fat = 5.0,
+            timestamp = Instant.parse("2026-07-24T08:00:00Z"),
+            source = FoodSource.MANUAL,
+            mealType = MealType.BREAKFAST.id,
+        )
+        val withPhotos = plain.copy(photoFilenames = listOf("photos/0123456789abcdef.jpg"))
+
+        val photolessJson = SyncDocument.buildJson(
+            foodEntries = listOf(plain), favorites = emptyList(),
+            weights = emptyList(), bodyFats = emptyList(), measurements = emptyList(),
+            water = emptyList(), recipes = emptyList(), zone = zone,
+        )
+        val photolessRoot = Json.parseToJsonElement(photolessJson).jsonObject
+        assertEquals("1.3", photolessRoot["export"]!!.jsonObject["format_version"]!!.jsonPrimitive.content)
+        assertEquals(null, photolessRoot["food_entries"]!!.jsonArray.single().jsonObject["photos"])
+
+        val photoJson = SyncDocument.buildJson(
+            foodEntries = listOf(withPhotos), favorites = emptyList(),
+            weights = emptyList(), bodyFats = emptyList(), measurements = emptyList(),
+            water = emptyList(), recipes = emptyList(), zone = zone,
+        )
+        val photoRoot = Json.parseToJsonElement(photoJson).jsonObject
+        assertEquals("1.4", photoRoot["export"]!!.jsonObject["format_version"]!!.jsonPrimitive.content)
+        val photos = photoRoot["food_entries"]!!.jsonArray.single().jsonObject["photos"]!!.jsonArray
+        assertEquals(listOf("photos/0123456789abcdef.jpg"), photos.map { it.jsonPrimitive.content })
+
+        // Round-trip through parse.
+        val parsed = SyncDocument.parse(photoJson, zone) as SyncDocument.ParseResult.Success
+        assertEquals(
+            listOf("photos/0123456789abcdef.jpg"),
+            parsed.parsed.foodEntries.single().entry?.photoFilenames,
+        )
+        // Refs that fail the shape guard are dropped, not crash the parse.
+        val hostile = photoJson.replace("photos/0123456789abcdef.jpg", "  ../../evil  ")
+        val hostileParsed = SyncDocument.parse(hostile, zone) as SyncDocument.ParseResult.Success
+        assertTrue(hostileParsed.parsed.foodEntries.single().entry?.photoFilenames.isNullOrEmpty())
+    }
+
+    @Test
+    fun mergeRawDocumentsStamps14OnlyWhenMergedRowsCarryPhotos() {
+        val base = """{"app":"Chompass","kind":"sync","format_version":"%s"}"""
+        fun foodRow(id: String, photosJson: String = ""): String =
+            """{"id":"$id","updated_at":"2026-07-24T08:00:00Z","deleted_at":null,"name":"Oats","date":"2026-07-24","time":"08:00","meal_type":"breakfast","calories":300,"protein_g":10,"carbs_g":50,"fat_g":5$photosJson}"""
+        val photoRow = foodRow("f1", ""","photos":["photos/0123456789abcdef.jpg"]""")
+        val plainRow = foodRow("f2")
+        fun doc(version: String, row: String): String = """
+            {"export":${base.format(version)},
+             "food_entries":[$row],
+             "favorites":[],"weights":[],"body_fat":[],"measurements":[],"water":[],"recipes":[],"profile":null,"prefs":null}
+        """.trimIndent()
+
+        fun mergedVersion(local: String, remote: String): String {
+            val l = (SyncDocument.parse(local, ZoneOffset.UTC) as SyncDocument.ParseResult.Success).parsed.raw
+            val r = (SyncDocument.parse(remote, ZoneOffset.UTC) as SyncDocument.ParseResult.Success).parsed.raw
+            return SyncDocument.mergeRawDocuments(l, r)["export"]!!.jsonObject["format_version"]!!.jsonPrimitive.content
+        }
+
+        assertEquals("1.4", mergedVersion(doc("1.4", photoRow), doc("1.0", plainRow)))
+        assertEquals("1.4", mergedVersion(doc("1.0", plainRow), doc("1.4", photoRow)))
+        assertEquals("1.3", mergedVersion(doc("1.0", plainRow), doc("1.0", plainRow.replace("\"f2\"", "\"f3\""))))
     }
 
     @Test
@@ -152,6 +226,77 @@ class SyncDocumentTest {
         assertEquals("00:30", foodWire["time"]!!.jsonPrimitive.content)
         val waterWire = root["water"]!!.jsonArray.single().jsonObject
         assertEquals("2026-08-16", waterWire["date"]!!.jsonPrimitive.content)
+    }
+
+    @Test
+    fun buildWritesTimestampInstantBesideWallClock() {
+        // #122: food rows carry an additive UTC instant, authoritative for
+        // entry time; date/time stay as the writing device's zone rendering
+        // so older readers keep working unchanged.
+        val zone = ZoneId.of("Europe/Berlin")
+        val food = FoodEntry(
+            name = "Oats",
+            calories = 300,
+            protein = 10.0,
+            carbs = 50.0,
+            fat = 5.0,
+            timestamp = Instant.parse("2026-08-15T22:30:00Z"),
+            source = FoodSource.MANUAL,
+            mealType = MealType.BREAKFAST.id,
+        )
+        val json = SyncDocument.buildJson(
+            foodEntries = listOf(food),
+            favorites = emptyList(),
+            weights = emptyList(),
+            bodyFats = emptyList(),
+            measurements = emptyList(),
+            water = emptyList(),
+            recipes = emptyList(),
+            zone = zone,
+        )
+        val foodWire = Json.parseToJsonElement(json).jsonObject["food_entries"]!!.jsonArray.single().jsonObject
+        assertEquals("2026-08-15T22:30:00Z", foodWire["timestamp"]!!.jsonPrimitive.content)
+        assertEquals("2026-08-16", foodWire["date"]!!.jsonPrimitive.content)
+        assertEquals("00:30", foodWire["time"]!!.jsonPrimitive.content)
+    }
+
+    @Test
+    fun parsePrefersTimestampInstantOverWallClock() {
+        // #122: the instant wins even when date/time disagree, and entry
+        // placement never depends on the reading device's zone (the traveler
+        // case: rows synced abroad must not shift when read back home).
+        val hostile = """
+            {"export":{"app":"Chompass","kind":"sync","format_version":"1.4"},
+             "food_entries":[{"id":"22222222-2222-4222-8222-222222222222","updated_at":"2026-10-30T23:00:00Z",
+               "deleted_at":null,"name":"Hawaii lunch","date":"2026-10-30","time":"12:00",
+               "timestamp":"2026-10-31T00:00:00Z","meal_type":"lunch","calories":100,
+               "protein_g":1.0,"carbs_g":1.0,"fat_g":1.0,"source":"manual"}],
+             "favorites":[],"weights":[],"body_fat":[],"measurements":[],"water":[],"recipes":[]}
+        """.trimIndent()
+        val result = SyncDocument.parse(hostile, ZoneId.of("Asia/Tokyo"))
+        assertTrue("expected Success but was $result", result is SyncDocument.ParseResult.Success)
+        val entry = (result as SyncDocument.ParseResult.Success).parsed.foodEntries.single().entry
+        assertEquals(Instant.parse("2026-10-31T00:00:00Z"), entry!!.timestamp)
+    }
+
+    @Test
+    fun parseWithoutTimestampFallsBackToWallClockInReaderZone() {
+        // Rows written before the timestamp field keep their legacy
+        // semantics: date/time interpreted in the reading device's zone.
+        fun parseLegacy(zoneTag: String): Instant {
+            val doc = """
+                {"export":{"app":"Chompass","kind":"sync","format_version":"1.3"},
+                 "food_entries":[{"id":"33333333-3333-4333-8333-333333333333","updated_at":"2026-10-30T23:00:00Z",
+                   "deleted_at":null,"name":"Legacy lunch","date":"2026-10-30","time":"12:00","meal_type":"lunch",
+                   "calories":100,"protein_g":1.0,"carbs_g":1.0,"fat_g":1.0,"source":"manual"}],
+                 "favorites":[],"weights":[],"body_fat":[],"measurements":[],"water":[],"recipes":[]}
+            """.trimIndent()
+            val result = SyncDocument.parse(doc, ZoneId.of(zoneTag))
+            assertTrue("expected Success but was $result", result is SyncDocument.ParseResult.Success)
+            return (result as SyncDocument.ParseResult.Success).parsed.foodEntries.single().entry!!.timestamp
+        }
+        assertEquals(Instant.parse("2026-10-30T12:00:00Z"), parseLegacy("UTC"))
+        assertEquals(Instant.parse("2026-10-30T03:00:00Z"), parseLegacy("Asia/Tokyo"))
     }
 
     @Test
@@ -651,5 +796,73 @@ class SyncDocumentTest {
         val merged = SyncDocument.mergeRawDocuments(local, remoteRaw)
         val parsed = (SyncDocument.parse(merged.toString(), ZoneOffset.UTC) as SyncDocument.ParseResult.Success).parsed
         assertTrue(parsed.foodEntries.none { it.id == id.toString() && it.entry != null })
+    }
+
+    @Test
+    fun compositionRowsRoundTripAndStamp15() {
+        val t0 = Instant.parse("2026-07-20T07:10:00Z")
+        val entry = BodyCompositionEntry(
+            date = t0,
+            boneMassKg = 3.2,
+            totalBodyWaterKg = 45.6,
+            muscleMassKg = 30.1,
+            leanMassKg = 64.9,
+            visceralFatRating = 8.0,
+        )
+        val json = SyncDocument.buildJson(
+            foodEntries = emptyList(),
+            favorites = emptyList(),
+            weights = emptyList(),
+            bodyFats = emptyList(),
+            measurements = emptyList(),
+            compositions = listOf(entry),
+            water = emptyList(),
+            recipes = emptyList(),
+            zone = ZoneOffset.UTC,
+        )
+        assertTrue(
+            "expected a 1.5 stamp",
+            json.contains("\"format_version\": \"${SyncDocument.FORMAT_VERSION_COMPOSITION}\""),
+        )
+        val parsed = (SyncDocument.parse(json, ZoneOffset.UTC) as SyncDocument.ParseResult.Success).parsed
+        val row = parsed.compositions.single().entry!!
+        assertEquals(entry.id, row.id)
+        assertEquals(3.2, row.boneMassKg!!, 0.0001)
+        assertEquals(45.6, row.totalBodyWaterKg!!, 0.0001)
+        assertEquals(30.1, row.muscleMassKg!!, 0.0001)
+        assertEquals(64.9, row.leanMassKg!!, 0.0001)
+        assertEquals(8.0, row.visceralFatRating!!, 0.0001)
+    }
+
+    @Test
+    fun compositionFreeDocumentStaysAtBaseVersion() {
+        val json = SyncDocument.buildJson(
+            foodEntries = emptyList(),
+            favorites = emptyList(),
+            weights = emptyList(),
+            bodyFats = emptyList(),
+            measurements = emptyList(),
+            water = emptyList(),
+            recipes = emptyList(),
+            zone = ZoneOffset.UTC,
+        )
+        assertTrue(json.contains("\"format_version\": \"${SyncDocument.FORMAT_VERSION}\""))
+        // The array is always emitted (like every other sync list) but empty; older
+        // readers ignore the unknown key, and the stamp stays at the base version.
+        assertTrue(json.contains("\"body_composition\": []"))
+    }
+
+    @Test
+    fun compositionSampleFixtureParses() {
+        val json = ParityFixtures.readText("sync-composition-sample.json")
+        val result = SyncDocument.parse(json, ZoneOffset.UTC)
+        assertTrue("expected Success but was $result", result is SyncDocument.ParseResult.Success)
+        val parsed = (result as SyncDocument.ParseResult.Success).parsed
+        // Two live rows + one tombstone.
+        assertEquals(3, parsed.compositions.size)
+        assertEquals(2, parsed.compositions.count { it.entry != null })
+        val live = parsed.compositions.firstNotNullOf { row -> row.entry?.takeIf { it.leanMassKg != null } }
+        assertEquals(64.9, live.leanMassKg!!, 0.0001)
+        assertTrue(parsed.compositions.any { it.deletedAt != null })
     }
 }

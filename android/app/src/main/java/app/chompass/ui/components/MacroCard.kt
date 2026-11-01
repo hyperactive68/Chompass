@@ -1,7 +1,6 @@
 package app.chompass.ui.components
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,6 +40,7 @@ import app.chompass.models.HomeMacroCardLayout
 import app.chompass.models.MacroValueFormatter
 import app.chompass.ui.navigation.LocalEnergyUnit
 import app.chompass.ui.navigation.LocalLaunchFillEpoch
+import app.chompass.ui.theme.AppMotion
 
 /**
  * A single macro shown as a vertical fill bar (rounded tube that fills bottom-up toward the goal),
@@ -199,7 +199,7 @@ private fun ClassicMacroCard(input: MacroCardInput) {
                 maxLines = 1,
                 // Shrink to fit the card at max font scale: long values + long
                 // suffixes (ru "91,5g übrig") clipped at 1.3× without this.
-                autoSize = TextAutoSize.StepBased(minFontSize = 8.sp, maxFontSize = 11.sp, stepSize = 0.5.sp),
+                autoSize = TextAutoSize.StepBased(minFontSize = 11.sp, maxFontSize = 11.sp, stepSize = 0.5.sp),
             )
         }
     }
@@ -214,7 +214,7 @@ private fun rememberMacroAnimation(progress: Float, freezeProgress: Boolean): Fl
     val animatable = remember { Animatable(if (lastEpoch == epoch) progress else 0f) }
     LaunchedEffect(epoch, progress) {
         if (freezeProgress) return@LaunchedEffect
-        val spec = spring<Float>(dampingRatio = 0.85f, stiffness = 55f)
+        val spec = AppMotion.fillSpring<Float>()
         if (lastEpoch != epoch) {
             animatable.snapTo(0f)
             animatable.animateTo(progress, spec)
@@ -310,10 +310,14 @@ private fun CompactBarsMacroCard(input: MacroCardInput) {
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
+                    // Full-name mode can overflow the band row at 4 cards;
+                    // the name yields first (capped share), then the unit.
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
                 )
                 Text(
                     displayUnit,
-                    fontSize = 9.sp,
+                    fontSize = 11.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -330,8 +334,8 @@ private fun CompactBarsMacroCard(input: MacroCardInput) {
                 horizontalArrangement = Arrangement.spacedBy(3.dp),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text(
-                    formatted(current),
+                AnimatedNumberText(
+                    value = formatted(current),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = accentColor,
@@ -346,7 +350,7 @@ private fun CompactBarsMacroCard(input: MacroCardInput) {
                         status.text,
                         fontSize = 11.sp,
                         maxLines = 1,
-                        autoSize = TextAutoSize.StepBased(minFontSize = 8.sp, maxFontSize = 11.sp, stepSize = 0.5.sp),
+                        autoSize = TextAutoSize.StepBased(minFontSize = 11.sp, maxFontSize = 11.sp, stepSize = 0.5.sp),
                         color = when {
                             status.over -> accentColor
                             status.met -> accentColor
@@ -403,8 +407,8 @@ private fun SlimLineMacroCard(input: MacroCardInput) {
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f, fill = false),
                     )
-                    Text(
-                        formatted(current),
+                    AnimatedNumberText(
+                        value = formatted(current),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = accentColor,
@@ -413,7 +417,7 @@ private fun SlimLineMacroCard(input: MacroCardInput) {
                     )
                     Text(
                         displayUnit,
-                        fontSize = 9.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -424,7 +428,7 @@ private fun SlimLineMacroCard(input: MacroCardInput) {
                         status.text,
                         fontSize = 10.sp,
                         maxLines = 1,
-                        autoSize = TextAutoSize.StepBased(minFontSize = 8.sp, maxFontSize = 10.sp, stepSize = 0.5.sp),
+                        autoSize = TextAutoSize.StepBased(minFontSize = 11.sp, maxFontSize = 12.sp, stepSize = 0.5.sp),
                         color = when {
                             status.over -> accentColor
                             status.met -> accentColor

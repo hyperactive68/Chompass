@@ -28,8 +28,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import app.chompass.R
 import app.chompass.ui.components.ChompassIconBubble
-import app.chompass.ui.theme.AppColors
-import app.chompass.ui.theme.AppTextOpacity
 import app.chompass.models.LocaleFormat
 import java.time.Instant
 
@@ -39,6 +37,8 @@ internal fun SettingsSyncSection(
     webDavUsername: String,
     webDavPassword: String,
     webDavAutoSync: Boolean,
+    webDavPhotosEnabled: Boolean,
+    webDavPhotosWifiOnly: Boolean,
     googleDriveConnected: Boolean,
     googleDriveSyncOnFoodLog: Boolean,
     lastSyncAt: String?,
@@ -48,9 +48,11 @@ internal fun SettingsSyncSection(
     onWebDavPasswordChange: (String) -> Unit,
     onSaveWebDav: () -> Unit,
     onWebDavAutoSyncChange: (Boolean) -> Unit,
-    onExportSync: () -> Unit,
+    onWebDavPhotosEnabledChange: (Boolean) -> Unit,
+    onWebDavPhotosWifiOnlyChange: (Boolean) -> Unit,
     onGoogleDriveConnect: () -> Unit,
     onGoogleDriveSyncOnFoodLogChange: (Boolean) -> Unit,
+    onExportSync: () -> Unit,
     onImportSync: () -> Unit,
     onSyncNow: () -> Unit,
 ) {
@@ -59,7 +61,7 @@ internal fun SettingsSyncSection(
             Text(
                 stringResource(R.string.settings_sync_blurb),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 8.dp),
             )
             OutlinedTextField(
@@ -98,7 +100,7 @@ internal fun SettingsSyncSection(
                     .padding(vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                ChompassIconBubble(icon = Icons.Outlined.CloudSync, size = 22.dp, iconSize = 14.dp, tint = AppColors.Calorie)
+                ChompassIconBubble(icon = Icons.Outlined.CloudSync, size = 22.dp, iconSize = 14.dp, tint = MaterialTheme.colorScheme.primary)
                 Spacer(Modifier.width(14.dp))
                 Text(
                     stringResource(R.string.settings_webdav_save),
@@ -116,9 +118,29 @@ internal fun SettingsSyncSection(
         Text(
             stringResource(R.string.settings_webdav_auto_sync_desc),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
         )
+        HorizontalDivider()
+        ToggleRow(
+            label = stringResource(R.string.sync_photos),
+            checked = webDavPhotosEnabled,
+            onChange = onWebDavPhotosEnabledChange,
+        )
+        Text(
+            stringResource(R.string.sync_photos_caption),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
+        )
+        if (webDavPhotosEnabled) {
+            HorizontalDivider()
+            ToggleRow(
+                label = stringResource(R.string.sync_photos_wifi_only),
+                checked = webDavPhotosWifiOnly,
+                onChange = onWebDavPhotosWifiOnlyChange,
+            )
+        }
         HorizontalDivider()
         Row(
             Modifier
@@ -127,21 +149,18 @@ internal fun SettingsSyncSection(
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ChompassIconBubble(icon = Icons.Outlined.CloudUpload, size = 22.dp, iconSize = 14.dp, tint = AppColors.Calorie)
+            ChompassIconBubble(icon = Icons.Outlined.CloudUpload, size = 22.dp, iconSize = 14.dp, tint = MaterialTheme.colorScheme.primary)
             Spacer(Modifier.width(14.dp))
             Column {
                 Text(
-                    stringResource(
-                        if (googleDriveConnected) R.string.settings_google_drive_connected
-                        else R.string.settings_google_drive_connect,
-                    ),
+                    stringResource(if (googleDriveConnected) R.string.settings_google_drive_connected else R.string.settings_google_drive_connect),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                 )
                 Text(
                     stringResource(R.string.settings_google_drive_backup_desc),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -154,7 +173,7 @@ internal fun SettingsSyncSection(
         Text(
             stringResource(R.string.settings_google_drive_sync_on_food_log_desc),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
         )
         HorizontalDivider()
@@ -165,7 +184,7 @@ internal fun SettingsSyncSection(
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ChompassIconBubble(icon = Icons.Outlined.Upload, size = 22.dp, iconSize = 14.dp, tint = AppColors.Calorie)
+            ChompassIconBubble(icon = Icons.Outlined.Upload, size = 22.dp, iconSize = 14.dp, tint = MaterialTheme.colorScheme.primary)
             Spacer(Modifier.width(14.dp))
             Text(
                 stringResource(R.string.export_sync_title),
@@ -181,7 +200,7 @@ internal fun SettingsSyncSection(
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ChompassIconBubble(icon = Icons.Outlined.Download, size = 22.dp, iconSize = 14.dp, tint = AppColors.Calorie)
+            ChompassIconBubble(icon = Icons.Outlined.Download, size = 22.dp, iconSize = 14.dp, tint = MaterialTheme.colorScheme.primary)
             Spacer(Modifier.width(14.dp))
             Text(
                 stringResource(R.string.import_sync_title),
@@ -197,7 +216,7 @@ internal fun SettingsSyncSection(
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ChompassIconBubble(icon = Icons.Outlined.Sync, size = 22.dp, iconSize = 14.dp, tint = AppColors.Calorie)
+            ChompassIconBubble(icon = Icons.Outlined.Sync, size = 22.dp, iconSize = 14.dp, tint = MaterialTheme.colorScheme.primary)
             Spacer(Modifier.width(14.dp))
             Column {
                 Text(
@@ -216,7 +235,7 @@ internal fun SettingsSyncSection(
                 Text(
                     subtitle,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }

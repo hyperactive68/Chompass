@@ -79,7 +79,8 @@ import app.chompass.services.ai.AnthropicClient
 import app.chompass.services.ai.FoodAnalysisService
 import app.chompass.services.ai.GeminiClient
 import app.chompass.services.ai.OpenAiModelsClient
-import app.chompass.data.effectiveMaxResponseTokens
+import app.chompass.services.ai.ProviderDirectory.Companion.findEntry
+import app.chompass.services.ai.ProviderDirectoryEntry
 import app.chompass.data.effectiveReadTimeoutSeconds
 import app.chompass.services.health.HealthConnectManager
 import app.chompass.services.health.HealthSyncWorker
@@ -227,8 +228,14 @@ data class SettingsUiState(
     val customModels: List<String>? = null,
     val customModelsLoading: Boolean = false,
     val customModelsError: Boolean = false,
-    /** #107/#132: runtime lineup from the active provider's /models; null = no key, no fetch yet, or fetch failed (curated list shows). */
+    /** Codeberg #143: bundled directory entry matching the active custom endpoint;
+     *  null = hand-typed URL, non-custom provider, or asset missing. Re-derived
+     *  from the stored baseUrl on every state refresh — no DataStore field. */
+    val directoryEntry: ProviderDirectoryEntry? = null,
+    /** #107/#132: runtime lineup from the active provider's /models; null = not fetched or failed. */
     val runtimeModels: List<String>? = null,
+    /** Ollama Cloud sheet is empty until this clears; other providers keep their curated list. */
+    val runtimeModelsLoading: Boolean = false,
     val appearanceMode: String = "system",
     /** "" = system default, or locale tag like "de", "zh-CN". */
     val appLanguage: String = "",
@@ -243,6 +250,17 @@ data class SettingsUiState(
     val fixedLauncherIcon: Boolean = false,
     /** Codeberg #77: meal date/time uses the system pickers. */
     val useSystemDateTimePickers: Boolean = false,
+    /** Frosted glass behind floating panels (Morphe traits); default ON. */
+    val glassBlurEnabled: Boolean = true,
+    /** Ambient animated background behind every screen; default ON. */
+    val ambientMotionEnabled: Boolean = true,
+    val ambientIntensity: app.chompass.ui.theme.AmbientIntensity = app.chompass.ui.theme.AmbientIntensity.DEFAULT,
+    val ambientContrast: app.chompass.ui.theme.AmbientContrast = app.chompass.ui.theme.AmbientContrast.DEFAULT,
+    val ambientSaturation: app.chompass.ui.theme.AmbientSaturation = app.chompass.ui.theme.AmbientSaturation.DEFAULT,
+    val ambientSpeed: app.chompass.ui.theme.AmbientSpeed = app.chompass.ui.theme.AmbientSpeed.DEFAULT,
+    val ambientPalette: app.chompass.ui.theme.AmbientPalette = app.chompass.ui.theme.AmbientPalette.DEFAULT,
+    val ambientTiltEnabled: Boolean = true,
+    val glassStrength: app.chompass.ui.theme.GlassStrength = app.chompass.ui.theme.GlassStrength.DEFAULT,
     val foodLogSortOrder: FoodLogSortOrder = FoodLogSortOrder.STANDARD,
     val weekStartsOnMonday: Boolean = true,
     val weekStartDay: app.chompass.models.WeekStartDay = app.chompass.models.WeekStartDay.MONDAY,
@@ -330,21 +348,6 @@ private data class EarlyHydration(
     val onDeviceModels: List<String>,
 )
 
-private data class AiProfileSlice(
-    val profiles: List<AiProfile>,
-    val active: AiProfile?,
-    val fallbackProfileId: String?,
-    val globalReasoning: OpenRouterReasoningEffort,
-)
-
-/**
- * Resolves the reasoning level shown by Settings from the active profile.
- *
- * Reasoning is stored as a per-profile override, while the legacy DataStore
- * value is only the fallback for profiles that do not have an override. Keep
- * this resolution in one place so the startup hydration path cannot replace a
- * saved profile value with the global default (usually Auto).
- */
 internal fun resolveReasoningEffortForProfile(
     profile: AiProfile?,
     global: OpenRouterReasoningEffort,
@@ -387,10 +390,23 @@ internal fun commitSettingsHydrate(
         activeProfile = current.activeProfile ?: incoming.activeProfile,
         fallbackProfileId = current.fallbackProfileId ?: incoming.fallbackProfileId,
         apiKeyMasked = current.apiKeyMasked.ifEmpty { incoming.apiKeyMasked },
-        openRouterReasoningEffort = resolveReasoningEffortForProfile(
-            current.activeProfile ?: incoming.activeProfile,
-            incoming.openRouterReasoningEffort,
-        ),
+        maxResponseTokens = current.maxResponseTokens,
+        chatGptConnected = current.chatGptConnected,
+        chatGptEmail = current.chatGptEmail,
+        chatGptPlanUsageEnabled = current.chatGptPlanUsageEnabled,
+        chatGptAuthBusy = current.chatGptAuthBusy,
+        chatGptAuthError = current.chatGptAuthError,
+        openRouterReasoningEffort = if (
+            current.activeProfile?.id == incoming.activeProfile?.id &&
+                current.openRouterReasoningEffort == OpenRouterReasoningEffort.AUTO
+        ) {
+            resolveReasoningEffortForProfile(
+                incoming.activeProfile,
+                incoming.openRouterReasoningEffort,
+            )
+        } else {
+            current.openRouterReasoningEffort
+        },
     )
 }
 
@@ -443,23 +459,20 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
                 container.prefs.aiProfiles,
                 container.prefs.activeAiProfile,
                 container.prefs.fallbackAiProfileId,
-                container.prefs.openRouterReasoningEffort,
-            ) { profiles, active, fallbackId, globalReasoning ->
-                AiProfileSlice(profiles, active, fallbackId, globalReasoning)
-            }.collect { (profiles, active, fallbackId, globalReasoning) ->
-                val masked = runCatching {
-                    maskKey(active?.let { container.keyStore.profileApiKey(it.id) })
-                }.getOrDefault("")
-                _ui.update {
-                    it.copy(
-                        profiles = profiles,
-                        activeProfile = active,
-                        fallbackProfileId = fallbackId,
-                        apiKeyMasked = masked,
-                        openRouterReasoningEffort = resolveReasoningEffortForProfile(active, globalReasoning),
-                    )
+            ) { profiles, active, fallbackId -> Triple(profiles, active, fallbackId) }
+                .collect { (profiles, active, fallbackId) ->
+                    val masked = runCatching {
+                        maskKey(active?.let { container.keyStore.profileApiKey(it.id) })
+                    }.getOrDefault("")
+                    _ui.update {
+                        it.copy(
+                            profiles = profiles,
+                            activeProfile = active,
+                            fallbackProfileId = fallbackId,
+                            apiKeyMasked = masked,
+                        )
+                    }
                 }
-            }
         }
 
         viewModelScope.launch {
@@ -660,6 +673,15 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
                     appThemeColor = AppThemeColor.fromKey(snap.appThemeColorKey),
                     fixedLauncherIcon = snap.fixedLauncherIcon,
                     useSystemDateTimePickers = snap.useSystemDateTimePickers,
+                    glassBlurEnabled = snap.glassBlurEnabled,
+                    ambientMotionEnabled = snap.ambientMotionEnabled,
+                    ambientIntensity = app.chompass.ui.theme.AmbientIntensity.fromStorage(snap.ambientIntensityRaw),
+                    ambientContrast = app.chompass.ui.theme.AmbientContrast.fromStorage(snap.ambientContrastRaw),
+                    ambientSaturation = app.chompass.ui.theme.AmbientSaturation.fromStorage(snap.ambientSaturationRaw),
+                    ambientSpeed = app.chompass.ui.theme.AmbientSpeed.fromStorage(snap.ambientSpeedRaw),
+                    ambientPalette = app.chompass.ui.theme.AmbientPalette.fromStorage(snap.ambientPaletteRaw),
+                    ambientTiltEnabled = snap.ambientTiltEnabled,
+                    glassStrength = app.chompass.ui.theme.GlassStrength.fromStorage(snap.glassStrengthRaw),
                     foodLogSortOrder = FoodLogSortOrder.fromStorage(snap.foodLogSortOrderRaw),
                     weekStartsOnMonday = snap.weekStartDay == app.chompass.models.WeekStartDay.MONDAY,
                     weekStartDay = snap.weekStartDay,
@@ -671,10 +693,7 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
                     userContext = snap.userContext,
                     fallbackEnabled = snap.fallbackEnabled,
                     geminiGoogleSearchEnabled = snap.geminiGoogleSearchEnabled,
-                    openRouterReasoningEffort = resolveReasoningEffortForProfile(
-                        active,
-                        snap.openRouterReasoningEffort,
-                    ),
+                    openRouterReasoningEffort = resolveReasoningEffortForProfile(active, snap.openRouterReasoningEffort),
                     goalRecalcTier = snap.goalRecalcTier,
                     mealConstituentsEnabled = snap.mealConstituentsEnabled,
                     fillMissingRemindersEnabled = snap.fillMissingRemindersEnabled,
@@ -853,8 +872,8 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
         container.prefs.setHomeShowSteps(enabled)
     }
 
-    fun setHomeSlimFullNames(enabled: Boolean) = launchPref {
-        container.prefs.setHomeSlimFullNames(enabled)
+    fun setHomeFullNutrientNames(enabled: Boolean) = launchPref {
+        container.prefs.setHomeFullNutrientNames(enabled)
     }
 
     fun setHomeShowActiveCalories(enabled: Boolean) = launchPref {
@@ -941,18 +960,18 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
     )
 
     /** Advanced knobs write the ACTIVE PROFILE's override field; global prefs stay as fallback. */
-    fun setMaxResponseTokens(v: Int) {
-        val clamped = app.chompass.data.clampMaxResponseTokens(v)
-        viewModelScope.launch {
-            container.prefs.editActiveProfile { it.copy(maxResponseTokens = clamped) }
-            refreshAiState()
-        }
-    }
-
     fun setAiReadTimeoutSeconds(v: Int) {
         val clamped = app.chompass.data.clampAiReadTimeoutSeconds(v)
         viewModelScope.launch {
             container.prefs.editActiveProfile { it.copy(readTimeoutSeconds = clamped) }
+            refreshAiState()
+        }
+    }
+
+    fun setMaxResponseTokens(v: Int) {
+        val clamped = app.chompass.data.clampMaxResponseTokens(v)
+        viewModelScope.launch {
+            container.prefs.editActiveProfile { it.copy(maxResponseTokens = clamped) }
             refreshAiState()
         }
     }
@@ -971,12 +990,7 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
 
     fun setOpenRouterReasoningEffort(e: OpenRouterReasoningEffort) {
         viewModelScope.launch {
-            val active = _ui.value.activeProfile
-            val model = active?.let { it.provider.supportedModelOrDefault(it.model) }.orEmpty()
-            val selected = active?.provider?.let { provider ->
-                OpenRouterReasoningEffort.sanitizeFor(provider, model, e)
-            } ?: OpenRouterReasoningEffort.AUTO
-            container.prefs.editActiveProfile { it.copy(reasoningEffort = selected.storageKey) }
+            container.prefs.editActiveProfile { it.copy(reasoningEffort = e.storageKey) }
             refreshAiState()
         }
     }
@@ -1096,6 +1110,51 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
         { copy(useSystemDateTimePickers = enabled) },
     )
 
+    fun setGlassBlurEnabled(enabled: Boolean) = updateUiPref(
+        { container.prefs.setGlassBlurEnabled(enabled) },
+        { copy(glassBlurEnabled = enabled) },
+    )
+
+    fun setAmbientMotionEnabled(enabled: Boolean) = updateUiPref(
+        { container.prefs.setAmbientMotionEnabled(enabled) },
+        { copy(ambientMotionEnabled = enabled) },
+    )
+
+    fun setAmbientIntensity(intensity: app.chompass.ui.theme.AmbientIntensity) = updateUiPref(
+        { container.prefs.setAmbientIntensity(intensity.storage) },
+        { copy(ambientIntensity = intensity) },
+    )
+
+    fun setAmbientContrast(contrast: app.chompass.ui.theme.AmbientContrast) = updateUiPref(
+        { container.prefs.setAmbientContrast(contrast.storage) },
+        { copy(ambientContrast = contrast) },
+    )
+
+    fun setAmbientSaturation(saturation: app.chompass.ui.theme.AmbientSaturation) = updateUiPref(
+        { container.prefs.setAmbientSaturation(saturation.storage) },
+        { copy(ambientSaturation = saturation) },
+    )
+
+    fun setAmbientSpeed(speed: app.chompass.ui.theme.AmbientSpeed) = updateUiPref(
+        { container.prefs.setAmbientSpeed(speed.storage) },
+        { copy(ambientSpeed = speed) },
+    )
+
+    fun setAmbientPalette(palette: app.chompass.ui.theme.AmbientPalette) = updateUiPref(
+        { container.prefs.setAmbientPalette(palette.storage) },
+        { copy(ambientPalette = palette) },
+    )
+
+    fun setAmbientTiltEnabled(enabled: Boolean) = updateUiPref(
+        { container.prefs.setAmbientTiltEnabled(enabled) },
+        { copy(ambientTiltEnabled = enabled) },
+    )
+
+    fun setGlassStrength(strength: app.chompass.ui.theme.GlassStrength) = updateUiPref(
+        { container.prefs.setGlassStrength(strength.storage) },
+        { copy(glassStrength = strength) },
+    )
+
     fun setWeekStartsOnMonday(monday: Boolean) = setWeekStartDay(
         if (monday) app.chompass.models.WeekStartDay.MONDAY else app.chompass.models.WeekStartDay.SUNDAY,
     )
@@ -1153,9 +1212,9 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
     /** Re-reads profiles/active/fallback id + the active profile's masked key into [SettingsUiState]. */
     private suspend fun refreshAiState(onDeviceModels: List<String>? = null) {
         val active = container.prefs.activeAiProfile.first()
+        val chatGpt = container.chatGptAuth.session()
         val models = onDeviceModels
             ?: if (active?.provider == AIProvider.ON_DEVICE) supportedOnDeviceModels() else emptyList()
-        val chatGpt = container.chatGptAuth.session()
         _ui.value = _ui.value.copy(
             profiles = container.prefs.aiProfiles.first(),
             activeProfile = active,
@@ -1163,23 +1222,23 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
             apiKeyMasked = runCatching {
                 maskKey(active?.let { container.keyStore.profileApiKey(it.id) })
             }.getOrDefault(""),
+            maxResponseTokens = app.chompass.data.effectiveMaxResponseTokens(active, container.prefs.maxResponseTokens.first()),
             chatGptConnected = chatGpt != null,
             chatGptEmail = chatGpt?.email,
             chatGptPlanUsageEnabled = chatGpt?.planUsageEnabled == true,
             chatGptAuthBusy = false,
             chatGptAuthError = null,
-            maxResponseTokens = effectiveMaxResponseTokens(active, container.prefs.maxResponseTokens.first()),
             aiReadTimeoutSeconds = effectiveReadTimeoutSeconds(active, container.prefs.aiReadTimeoutSeconds.first()),
             geminiGoogleSearchEnabled = active?.geminiGoogleSearch
                 ?: container.prefs.geminiGoogleSearchEnabled.first(),
-            openRouterReasoningEffort = resolveReasoningEffortForProfile(
-                active,
-                container.prefs.openRouterReasoningEffort.first(),
-            ),
+            openRouterReasoningEffort = resolveReasoningEffortForProfile(active, container.prefs.openRouterReasoningEffort.first()),
             apiKeyTesting = false,
             apiKeyTestOk = null,
             apiKeyTestMessage = null,
             onDeviceModels = models,
+            directoryEntry = if (active?.provider == AIProvider.CUSTOM_OPENAI) {
+                container.providerDirectory.findEntry(active.baseUrl)
+            } else null,
             // Fetched lists belong to the endpoint they came from: drop them on every
             // profile/endpoint change so a second custom or Ollama profile never shows
             // the previous host's ids while its own fetch is pending.
@@ -1188,6 +1247,7 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
             ollamaModels = null,
             ollamaModelsError = false,
             runtimeModels = null,
+            runtimeModelsLoading = false,
         )
     }
 
@@ -1257,6 +1317,30 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
         }
     }
 
+    /**
+     * Selects an OpenAI-compatible URL (directory row or typed Other URL).
+     * Does not call [setProfileProvider]: that switch no-ops on the same enum
+     * and would wipe a directory URL when coming from another custom host.
+     * Does not rename the profile.
+     */
+    fun selectOpenAiEndpoint(rawUrl: String) {
+        viewModelScope.launch {
+            val active = _ui.value.activeProfile ?: return@launch
+            val write = planOpenAiEndpointWrite(active, rawUrl, container.providerDirectory)
+            if (!write.changed) return@launch
+            container.prefs.editActiveProfile {
+                it.copy(
+                    provider = write.provider,
+                    baseUrl = write.baseUrl,
+                    model = write.model,
+                    visionModel = if (write.clearVision) null else it.visionModel,
+                )
+            }
+            if (write.clearKey) container.keyStore.setProfileApiKey(active.id, null)
+            refreshAiState()
+        }
+    }
+
     fun setProfileModel(m: String) {
         viewModelScope.launch {
             val active = _ui.value.activeProfile ?: return@launch
@@ -1288,27 +1372,28 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
         if (_ui.value.chatGptAuthBusy) return
         viewModelScope.launch {
             _ui.value = _ui.value.copy(chatGptAuthBusy = true, chatGptAuthError = null)
-            val result = runCatching { container.chatGptAuth.signIn() }
-            result.onSuccess { session ->
-                val models = runCatching { container.chatGptAuth.listModels() }.getOrNull()
-                _ui.value = _ui.value.copy(
-                    chatGptConnected = true,
-                    chatGptEmail = session.email,
-                    chatGptPlanUsageEnabled = session.planUsageEnabled,
-                    chatGptAuthBusy = false,
-                    chatGptAuthError = null,
-                    runtimeModels = models,
-                )
-                val active = _ui.value.activeProfile
-                if (active?.provider == AIProvider.CHATGPT && !models.isNullOrEmpty() && active.model !in models) {
-                    setProfileModel(models.first())
+            runCatching { container.chatGptAuth.signIn() }
+                .onSuccess { session ->
+                    val models = runCatching { container.chatGptAuth.listModels() }.getOrNull()
+                    _ui.value = _ui.value.copy(
+                        chatGptConnected = true,
+                        chatGptEmail = session.email,
+                        chatGptPlanUsageEnabled = session.planUsageEnabled,
+                        chatGptAuthBusy = false,
+                        chatGptAuthError = null,
+                        runtimeModels = models,
+                    )
+                    val active = _ui.value.activeProfile
+                    if (active?.provider == AIProvider.CHATGPT && !models.isNullOrEmpty() && active.model !in models) {
+                        setProfileModel(models.first())
+                    }
                 }
-            }.onFailure { error ->
-                _ui.value = _ui.value.copy(
-                    chatGptAuthBusy = false,
-                    chatGptAuthError = error.message ?: "ChatGPT sign-in failed.",
-                )
-            }
+                .onFailure { error ->
+                    _ui.value = _ui.value.copy(
+                        chatGptAuthBusy = false,
+                        chatGptAuthError = error.message ?: "ChatGPT sign-in failed.",
+                    )
+                }
         }
     }
 
@@ -1510,17 +1595,27 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
         }
     }
 
-    /** #107/#132: refresh the active provider's lineup from its /models endpoint; silent fallback to the curated list. */
+    /**
+     * Refresh the active provider's lineup from its /models endpoint.
+     * Keyed providers skip the call until a key is saved and keep their curated
+     * list. Ollama Cloud's catalog is public, so it fetches with or without a
+     * key and the sheet shows that response only.
+     */
     fun fetchRuntimeModels() {
         val active = _ui.value.activeProfile ?: return
         val provider = active.provider
         if (!provider.supportsRuntimeLineup) return
         val key = container.keyStore.profileApiKey(active.id)
-        if (provider != AIProvider.CHATGPT && key.isNullOrBlank()) {
-            _ui.value = _ui.value.copy(runtimeModels = null)
+        val publicCatalog = provider == AIProvider.OLLAMA_CLOUD
+        if (key.isNullOrBlank() && provider != AIProvider.CHATGPT && !publicCatalog) {
+            _ui.value = _ui.value.copy(runtimeModels = null, runtimeModelsLoading = false)
             return
         }
+        val profileId = active.id
         viewModelScope.launch {
+            if (publicCatalog) {
+                _ui.value = _ui.value.copy(runtimeModelsLoading = true)
+            }
             val result = withContext(Dispatchers.IO) {
                 runCatching {
                     if (provider == AIProvider.CHATGPT) {
@@ -1544,8 +1639,12 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
                     }
                 }
             }
+            val stillActive = _ui.value.activeProfile?.id == profileId &&
+                _ui.value.activeProvider == provider
+            if (!stillActive) return@launch
             _ui.value = _ui.value.copy(
-                runtimeModels = result.fold(onSuccess = { it }, onFailure = { null }),
+                runtimeModels = result.getOrNull(),
+                runtimeModelsLoading = false,
             )
         }
     }

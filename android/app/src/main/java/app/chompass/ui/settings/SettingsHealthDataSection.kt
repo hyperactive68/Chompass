@@ -18,6 +18,7 @@ import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.MonitorWeight
+import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -31,8 +32,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.chompass.R
 import app.chompass.ui.components.ChompassIconBubble
-import app.chompass.ui.theme.AppColors
-import app.chompass.ui.theme.AppTextOpacity
 import app.chompass.ui.theme.warning
 
 /** Health Connect connection: toggle, manage access, background sync, safety notes. */
@@ -59,7 +58,7 @@ internal fun SettingsHealthConnectSection(
                     Text(
                         stringResource(R.string.settings_health_companions),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp)
                     )
                     if (backgroundSyncSupported) {
@@ -71,14 +70,14 @@ internal fun SettingsHealthConnectSection(
                         Text(
                             stringResource(R.string.settings_health_background_sync_desc),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp)
                         )
                     } else {
                         Text(
                             stringResource(R.string.settings_health_background_sync_unsupported),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp)
                         )
                     }
@@ -108,32 +107,32 @@ internal fun SettingsHealthConnectSection(
                         Text(
                             stringResource(R.string.settings_safety_body),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
                             stringResource(R.string.settings_safety_consult),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
                             stringResource(R.string.settings_safety_ed),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
                             stringResource(R.string.settings_safety_low_bf),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
                             stringResource(R.string.settings_safety_escalate),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
                             stringResource(R.string.settings_safety_water),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
                             stringResource(R.string.settings_accuracy_title),
@@ -144,7 +143,7 @@ internal fun SettingsHealthConnectSection(
                         Text(
                             stringResource(R.string.settings_accuracy_body),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -154,6 +153,7 @@ internal fun SettingsHealthConnectSection(
 /** Export / import / sync rows plus the visually separated danger zone. */
 @Composable
 internal fun SettingsDataTransferSection(
+    onOpenFoodLibrary: () -> Unit,
     onShowExportDiary: () -> Unit,
     onShowExportBodyMetrics: () -> Unit,
     onImportDiary: () -> Unit,
@@ -164,6 +164,30 @@ internal fun SettingsDataTransferSection(
     onShowDeleteDialog: () -> Unit,
 ) {
     SectionCard(title = stringResource(R.string.settings_group_data)) {
+                // Codeberg #142: the saved-foods library browser lives on its
+                // own sub-screen, same cross-link pattern as WebDAV sync.
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable { onOpenFoodLibrary() }
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ChompassIconBubble(icon = Icons.Outlined.Restaurant, size = 22.dp, iconSize = 14.dp, tint = MaterialTheme.colorScheme.primary)
+                    Spacer(Modifier.width(14.dp))
+                    Text(
+                        stringResource(R.string.settings_saved_foods),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Icon(
+                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.outline,
+                    )
+                }
+                HorizontalDivider()
                 Row(
                     Modifier
                         .fillMaxWidth()
@@ -171,7 +195,7 @@ internal fun SettingsDataTransferSection(
                         .padding(horizontal = 16.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    ChompassIconBubble(icon = Icons.Outlined.Share, size = 22.dp, iconSize = 14.dp, tint = AppColors.Calorie)
+                    ChompassIconBubble(icon = Icons.Outlined.Share, size = 22.dp, iconSize = 14.dp, tint = MaterialTheme.colorScheme.primary)
                     Spacer(Modifier.width(14.dp))
                     Text(
                         stringResource(R.string.export_diary_title),
@@ -187,7 +211,7 @@ internal fun SettingsDataTransferSection(
                         .padding(horizontal = 16.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    ChompassIconBubble(icon = Icons.Outlined.MonitorWeight, size = 22.dp, iconSize = 14.dp, tint = AppColors.Calorie)
+                    ChompassIconBubble(icon = Icons.Outlined.MonitorWeight, size = 22.dp, iconSize = 14.dp, tint = MaterialTheme.colorScheme.primary)
                     Spacer(Modifier.width(14.dp))
                     Text(
                         stringResource(R.string.export_body_metrics_title),
@@ -203,7 +227,7 @@ internal fun SettingsDataTransferSection(
                         .padding(horizontal = 16.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    ChompassIconBubble(icon = Icons.Outlined.Link, size = 22.dp, iconSize = 14.dp, tint = AppColors.Calorie)
+                    ChompassIconBubble(icon = Icons.Outlined.Link, size = 22.dp, iconSize = 14.dp, tint = MaterialTheme.colorScheme.primary)
                     Spacer(Modifier.width(14.dp))
                     Text(
                         stringResource(R.string.import_diary_title),
@@ -219,7 +243,7 @@ internal fun SettingsDataTransferSection(
                         .padding(horizontal = 16.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    ChompassIconBubble(icon = Icons.Outlined.MonitorWeight, size = 22.dp, iconSize = 14.dp, tint = AppColors.Calorie)
+                    ChompassIconBubble(icon = Icons.Outlined.MonitorWeight, size = 22.dp, iconSize = 14.dp, tint = MaterialTheme.colorScheme.primary)
                     Spacer(Modifier.width(14.dp))
                     Text(
                         stringResource(R.string.import_body_metrics_title),
@@ -236,7 +260,7 @@ internal fun SettingsDataTransferSection(
                         .padding(horizontal = 16.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    ChompassIconBubble(icon = Icons.Outlined.Sync, size = 22.dp, iconSize = 14.dp, tint = AppColors.Calorie)
+                    ChompassIconBubble(icon = Icons.Outlined.Sync, size = 22.dp, iconSize = 14.dp, tint = MaterialTheme.colorScheme.primary)
                     Spacer(Modifier.width(14.dp))
                     Column(Modifier.weight(1f)) {
                         Text(
@@ -248,14 +272,14 @@ internal fun SettingsDataTransferSection(
                             Text(
                                 syncSummary,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
                     Icon(
                         Icons.AutoMirrored.Filled.KeyboardArrowRight,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Disabled),
+                        tint = MaterialTheme.colorScheme.outline,
                     )
                 }
     }

@@ -77,7 +77,6 @@
     <string name="autobalance_fat">Grăsimi</string>
 
     <!-- AI Provider names -->
-    <string name="ai_provider_custom">Personalizat (compatibil OpenAI)</string>
 
     <!-- AI Provider API key placeholders -->
     <string name="api_key_placeholder">Lipește cheia API</string>
@@ -507,6 +506,8 @@
     <string name="settings_tap_to_edit">Atinge pentru a edita</string>
     <string name="settings_custom_url_placeholder">https://endpointul-tau.com/v1</string>
     <string name="settings_custom_url_title">URL de bază personalizat</string>
+    <string name="settings_custom_directory_docs">Documentație</string>
+    <string name="ai_model_accepts_images">Acceptă imagini (declarat)</string>
     <string name="settings_ai_allow_insecure_http">Permite HTTP nesigur</string>
     <string name="settings_ai_allow_insecure_http_footer">Permite endpointurilor personalizate și Ollama să folosească URL-uri http://, de exemplu în rețeaua de acasă. Furnizorii cloud folosesc https. Ține-l oprit dacă serverul tău are TLS.</string>
     <string name="settings_clear_key">Șterge cheia</string>
@@ -580,7 +581,7 @@
     <!-- About -->
     <string name="about_rate">Evaluează aplicația</string>
     <string name="about_share">Distribuie aplicația</string>
-    <string name="about_open_source">Sursă deschisă (MIT)</string>
+    <string name="about_open_source">Sursă deschisă (GPL v3)</string>
     <string name="about_report_issue">Raportează o problemă</string>
     <string name="about_request_feature">Solicită o funcție</string>
     <string name="about_privacy">Politica de confidențialitate</string>
@@ -690,11 +691,7 @@
     <string name="ai_provider_subtitle_deepinfra">Modele open găzduite</string>
     <string name="ai_provider_subtitle_mistral">Modele Mistral</string>
     <string name="ai_provider_subtitle_ollama">Calculatorul tău, fără cloud</string>
-    <string name="ai_provider_subtitle_custom">LM Studio, vLLM, llama.cpp etc.</string>
-    <string name="ai_provider_group_recommended">Recomandat</string>
-    <string name="ai_provider_group_cloud">Furnizori cloud</string>
-    <string name="ai_provider_group_local">Local și self-hosted</string>
-    <string name="ai_provider_group_device">Pe dispozitiv</string>
+    <string name="ai_provider_subtitle_ollama_cloud">Modelele în cloud ale Ollama</string>
     <string name="settings_section_ai_profile">Profil</string>
     <string name="settings_section_ai_connection">Conexiune</string>
     <string name="settings_section_ai_advanced">Avansat</string>
@@ -703,7 +700,6 @@
     <string name="settings_ai_key_remove_title">Elimini cheia API?</string>
     <string name="settings_ai_key_remove_body">Salvarea unei chei goale șterge cheia stocată pentru acest profil.</string>
     <string name="settings_ai_get_key">Obține cheie API</string>
-    <string name="settings_ai_value_default">%1$,d (implicit)</string>
     <string name="settings_ai_timeout_default">%1$,ds (implicit)</string>
     <string name="camera_scale_tip_message">Sfat: include o furculiță, mâna sau o monedă lângă mâncare. Ajută la estimarea porției.</string>
     <string name="cd_relog_meal">Înregistrează din nou %1$s</string>
@@ -825,19 +821,41 @@
     <string name="action_show">Arată</string>
     <string name="action_undo">Revocă</string>
     <string name="action_save_to_favorites">Salvează în favorite</string>
+    <string name="action_save_to_library">Salvează în bibliotecă</string>
+    <string name="action_hide_from_suggestions">Ascunde din sugestii</string>
+    <string name="action_unhide">Afișează</string>
+    <string name="settings_saved_foods">Alimente salvate</string>
+    <string name="library_hidden_section">Ascunse</string>
+    <string name="library_empty">Niciun aliment salvat încă</string>
+    <string name="library_never_logged">Niciodată înregistrat</string>
+    <string name="library_row_summary">%1$d înregistrări · ultima %2$s</string>
+    <string name="library_delete_rows_title">Ștergi înregistrările?</string>
+    <string name="library_delete_rows_message">Ștergi toate cele %1$d înregistrări ale lui „%2$s”? Zilele se recalculează. Alimentul salvat rămâne aici; se șterge doar istoricul din jurnal.</string>
+    <string name="library_merge_section">Duplicate posibile</string>
+    <string name="library_merge_title">Combină duplicatele</string>
+    <string name="library_merge_intro">Par a fi același aliment. Alege numele care rămâne; celelalte se combină în el.</string>
+    <string name="library_merge_rows_message">%1$d înregistrări vor fi redenumite în „%2$s”. Nu se șterge nimic; zilele se recalculează.</string>
+    <string name="library_merge_action">Combină</string>
+    <string name="library_sort_last_logged">Ultima înregistrare</string>
+    <string name="library_sort_name">Nume</string>
+    <string name="library_sort_logs">Înregistrări</string>
     <string name="saved_to_favorites">Salvat în favorite</string>
     <string name="action_what_if">Ce-ar fi?</string>
     <string name="add_food_relog_kcal">%1$d %2$s</string>
     <string name="ai_error_coach_on_device">Antrenorul nu este încă disponibil cu furnizorul local. Comută la un furnizor cloud în Setări → Furnizor IA.</string>
     <string name="ai_error_coach_round_limit">Antrenorul nu a putut răspunde. Încearcă să reformulezi întrebarea.</string>
-    <string name="ai_error_disabled">Funcțiile IA sunt dezactivate în Setări → IA și voce.</string>
     <string name="ai_error_grounded_on_device">Modul Grounded nu este disponibil pentru modelele locale.</string>
     <string name="ai_error_grounded_requires_provider">Modul Grounded necesită un furnizor IA activ.</string>
     <string name="ai_error_image_conversion_failed">Procesarea imaginii a eșuat.</string>
     <string name="ai_error_invalid_response">Nu am putut înțelege răspunsul IA. Încearcă din nou.</string>
     <string name="ai_error_invalid_url">URL API nevalid. Verifică setările furnizorului.</string>
-    <string name="ai_error_insecure_http_blocked">HTTP nesigur este blocat. Activează «Permite HTTP nesigur» în Setări → IA și voce sau folosește un URL https://.</string>
     <string name="ai_error_key_rejected">Cheia ta API a fost respinsă. Deschide Setări → Furnizor IA și lipește din nou o cheie validă.</string>
+    <string name="ai_error_timeout">Furnizorul IA a răspuns prea încet. Încearcă din nou; dacă folosești un endpoint găzduit de tine, mărește timpul de așteptare în Setări → Furnizor IA.</string>
+    <string name="ai_error_disabled">Funcțiile IA sunt dezactivate în Setări → Furnizor IA.</string>
+    <string name="ai_error_insecure_http_blocked">HTTP nesigur este blocat. Activează „Permite HTTP nesigur” în Setări → Furnizor IA sau folosește un URL https://.</string>
+    <string name="ai_error_truncated_twice">Răspunsul a atins de două ori limita de ieșire a modelului — raționamentul contează. Setează Efortul de raționare pe Scăzut sau Oprit în Setări → Furnizor IA, sau pune o întrebare mai scurtă.</string>
+    <string name="ai_error_truncated_twice_description">Modelului i s-a terminat spațiul de ieșire înainte să termine; tokenii de raționament contează la limită. Setează Efortul de raționare pe Scăzut sau Oprit în Setări → Furnizor IA, apoi încearcă din nou.</string>
+    <string name="ai_error_truncated">Răspunsul a atins limita de ieșire a modelului înainte să se termine — raționamentul contează. Setează Efortul de raționare pe Scăzut sau Oprit în Setări → Furnizor IA, sau pune o întrebare mai scurtă.</string>
     <string name="ai_error_location_unsupported">Gemini nu este disponibil din această locație de rețea (țară/IP). Dacă folosești VPN, dezactivează-l sau comută la o ieșire rezidențială. IP-urile de datacenter/nerezidențiale VPN sunt adesea blocate. Sau activează facturarea în proiectul Google AI Studio, încearcă altă rețea sau schimbă furnizorul în Setări → Furnizor IA.</string>
     <string name="ai_error_model_unavailable">Furnizorul tău nu a găsit acest model. Poate fi plătit pe planul gratuit, restricționat în regiunea ta sau endpoint-ul poate fi greșit. Comută la modelul Flash implicit în Setări → Furnizor IA sau activează facturarea în proiectul tău AI Studio.</string>
     <string name="ai_error_network_format">Eroare de rețea: %1$s</string>
@@ -849,13 +867,26 @@
     <string name="ai_error_provider_error">Furnizorul IA a returnat o eroare.</string>
     <string name="ai_error_provider_overloaded">Furnizorul IA este suprasolicitat acum. Am încercat de câteva ori. Încearcă din nou într-un minut sau schimbă furnizorul/modelul în Setări → Furnizor IA.</string>
     <string name="ai_error_rate_limit">Limită de cereri atinsă pentru cheia ta API. Așteaptă un minut sau schimbă furnizorul în Setări → Furnizor IA. Pe planul gratuit, modelul Flash-Lite are cea mai mare cotă.</string>
-    <string name="ai_error_timeout">Furnizorul IA a durat prea mult să răspundă. Încearcă din nou sau mărește timeout-ul în Setări → IA și voce.</string>
-    <string name="ai_error_truncated">Răspunsul IA a fost tăiat la limita de lungime a răspunsului. Mărește lungimea maximă a răspunsului în Setări → IA și voce, sau încearcă o întrebare mai scurtă.</string>
-    <string name="ai_error_truncated_twice">Răspunsul IA a fost tăiat de două ori la limita de lungime a răspunsului. Mărește lungimea maximă a răspunsului în Setări → IA și voce, sau încearcă o întrebare mai scurtă.</string>
-    <string name="ai_error_truncated_twice_description">Modelul a atins limita de lungime a răspunsului înainte să termine, iar raționamentul se numără la această limită. Mărește lungimea maximă a răspunsului în Setări → IA și voce, sau limitează raționamentul modelului, apoi încearcă din nou.</string>
     <string name="ai_model_tier_paid">Doar model plătit (planul gratuit nu mai include Pro)</string>
     <string name="ai_model_tier_varies">Disponibilitatea pe planul gratuit variază după cont și regiune</string>
     <string name="ai_provider_ollama">Ollama (local)</string>
+    <string name="ai_provider_ollama_cloud">Ollama Cloud</string>
+    <string name="ai_provider_custom">Alt URL</string>
+    <string name="ai_provider_subtitle_custom">Scrie un URL de bază</string>
+    <string name="ai_provider_search_hint">Caută nume sau host</string>
+    <string name="ai_provider_section_shortcuts">Comenzi rapide</string>
+    <string name="ai_provider_section_phone">Pe acest telefon</string>
+    <string name="ai_provider_section_server">Serverul tău</string>
+    <string name="ai_provider_section_cloud">Cloud</string>
+    <string name="ai_provider_chip_on_phone">Pe telefon</string>
+    <string name="ai_provider_chip_your_server">Serverul tău</string>
+    <string name="ai_provider_chip_native">Nativ</string>
+    <string name="ai_provider_chip_cloud">Cloud</string>
+    <string name="ai_provider_row_gemini">Cheie · comutator Google Search</string>
+    <string name="ai_provider_row_anthropic">Cheie · API separat</string>
+    <string name="ai_provider_row_ollama">Această rețea · fără cheie</string>
+    <string name="ai_provider_row_host_key">%1$s · cheie</string>
+    <string name="ai_provider_directory_footer">Hosturile listate vin cu această versiune. Cheia ajunge doar la hostul ales.</string>
     <string name="ai_provider_on_device">Pe dispozitiv (privat)</string>
     <string name="ai_reasoning_effort_auto">Auto</string>
     <string name="ai_reasoning_effort_high">Ridicat</string>
@@ -995,6 +1026,12 @@
     <string name="export_format">Format</string>
     <string name="export_from">De la</string>
     <string name="export_no_meals">Nicio masă înregistrată în intervalul selectat.</string>
+    <string name="export_include_photos">Include fotografiile</string>
+    <string name="sync_photos">Sincronizează fotografiile</string>
+    <string name="sync_photos_caption">Când este activat, fotografiile meselor se încarcă pe serverul tău WebDAV</string>
+    <string name="sync_photos_wifi_only">Fotografii doar prin Wi-Fi</string>
+    <string name="sync_photos_syncing">Se sincronizează fotografiile…</string>
+    <string name="sync_photos_failed">Sincronizarea fotografiilor a eșuat</string>
     <string name="export_range">Interval</string>
     <string name="export_range_all">Tot timpul</string>
     <string name="export_range_custom">Personalizat</string>
@@ -1083,7 +1120,7 @@
     <string name="home_display_show_active_calories_desc">Arată arderea activă de azi în contorul de calorii.</string>
     <string name="home_display_show_steps">Arată contorul de pași pe ecranul principal</string>
     <string name="home_display_slim_full_names">Nume complete de nutrienți</string>
-    <string name="home_display_slim_full_names_desc">Cardurile cu linii subțiri afișează numele complet în locul etichetei scurte. Numele lungi pot fi trunchiate la patru carduri.</string>
+    <string name="home_display_slim_full_names_desc">Cardurile de nutrienți afișează numele complet în locul etichetei scurte. Numele lungi pot fi trunchiate la patru carduri.</string>
     <string name="home_display_show_steps_desc">Card opțional sub contor. Necesită Health Connect.</string>
     <string name="home_display_step_goal">Obiectiv zilnic de pași</string>
     <string name="home_display_step_goal_hint">Ajustează cu 500. 1.000–50.000.</string>
@@ -1118,6 +1155,7 @@
     <string name="import_body_metrics_empty">Acest fișier nu are înregistrări de greutate sau date corporale de importat.</string>
     <string name="import_body_metrics_malformed">Fișierul nu a putut fi citit: %1$s</string>
     <string name="import_body_metrics_success">Importate %1$d înregistrări de greutate, %2$d de grăsime și %3$d măsurători.</string>
+    <string name="import_body_metrics_success_composition">S-au importat și %1$d înregistrări de măsurători de cântar.</string>
     <string name="import_body_metrics_title">Importă greutatea și datele corporale</string>
     <string name="import_body_metrics_unsupported">Fișier nesuportat. Suportate: JSON/CSV Chompass, CSV openScale sau un CSV generic de greutate.</string>
     <string name="import_diary_empty">Acest fișier nu are înregistrări de jurnal de importat.</string>
@@ -1392,7 +1430,7 @@
     <string name="settings_calc_intro">Obiectivele tale zilnice de calorii și macrouri sunt setate de IA. Când atingi «Recalculează obiectivele», sau automat cam o dată pe săptămână dacă obiectivele adaptive sunt active, Chompass trimite profilul tău, formulele de referință de mai jos, mâncarea înregistrată recent și tendința de greutate către furnizorul tău IA. Pornește de la aceste formule verificate, apoi le ajustează la datele tale pentru a estima menținerea și obiectivele.</string>
     <string name="settings_calc_katch_formula">BMR = 370 + 21,6 × LBM(kg)\nLBM = greutate × (1 − %grăsime)</string>
     <string name="settings_calc_katch_name">Ecuația Katch-McArdle</string>
-    <string name="settings_calc_katch_used">Folosită automat când ai introdus un % de grăsime corporală. Mai precisă pentru utilizatorii slabi și sportivi, deoarece derivă BMR din masa slabă în loc de greutatea totală. Măsurătorile mai vechi de 90 de zile trec la Mifflin-St Jeor.</string>
+    <string name="settings_calc_katch_used">Folosită automat când ai introdus un % de grăsime corporală. Mai precisă pentru utilizatorii slabi și sportivi, deoarece derivă BMR din masa slabă în loc de greutatea totală. Măsurătorile mai vechi de 90 de zile trec la Mifflin-St Jeor. O citire recentă a masei slabe de la cântar calculează BMR la fel și are prioritate față de grăsimea corporală.</string>
     <string name="settings_calc_macro_split">Împărțirea macronutrienților</string>
     <string name="settings_calc_maintenance">Menținere și ajustarea obiectivului</string>
     <string name="settings_calc_methods">Metode de calcul</string>
@@ -1429,6 +1467,18 @@
     <string name="settings_fixed_launcher_icon_subtitle">Păstrează pictograma aplicației turcoaz. Nu mai urmează culoarea temei și a fundalului.</string>
     <string name="settings_system_date_time_pickers">Selectoare de dată și oră ale sistemului</string>
     <string name="settings_system_date_time_pickers_subtitle">Folosește dialogurile de dată și oră ale telefonului la editarea unei mese.</string>
+    <string name="settings_glass_blur">Sticlă mată</string>
+    <string name="settings_glass_blur_subtitle">Estompează conținutul din spatele panourilor plutitoare, cum ar fi antetul rezultatelor la adăugarea mâncării.</string>
+    <string name="settings_ambient_motion">Fundal ambiental</string>
+    <string name="settings_ambient_motion_subtitle">Câmpuri de culoare blâne care plutesc în spatele fiecărui ecran. Se oprește la economizorul de baterie sau când animațiile sunt reduse.</string>
+    <string name="settings_frost_strength">Intensitate mată</string>
+    <string name="frost_strength_light">Ușoară</string>
+    <string name="frost_strength_medium">Medie</string>
+    <string name="frost_strength_strong">Puternică</string>
+    <string name="settings_ambient_intensity">Intensitate fundal</string>
+    <string name="ambient_intensity_subtle">Discret</string>
+    <string name="ambient_intensity_balanced">Echilibrat</string>
+    <string name="ambient_intensity_vivid">Viu</string>
     <string name="add_food_log_time">Ora înregistrării</string>
     <string name="add_food_log_time_now">Acum</string>
     <string name="cd_clear_log_time">Folosește ora actuală</string>
@@ -1439,7 +1489,6 @@
     <string name="settings_food_section_photo">Analiza fotografiilor</string>
     <string name="settings_food_section_serving">Mărimea porției</string>
     <string name="settings_gemini_google_search">Fundamentare Căutare Google</string>
-    <string name="settings_glass_blur">Estompare sticlă</string>
     <string name="settings_goal_auto">Auto</string>
     <string name="settings_goals_how_adaptive">Obiectivele adaptive recalculează obiectivele tale de calorii și macrouri cam o dată pe săptămână.</string>
     <string name="settings_goals_how_energy">Cheltuiala energetică ancorează obiectivele pe arderea măsurată din Health Connect.</string>
@@ -1480,8 +1529,6 @@
     <string name="settings_macro_pinned_label_format">%1$s (fixat)</string>
     <string name="settings_macro_unlocked">Deblocat</string>
     <string name="settings_manage_health_access">Gestionează accesul Health Connect</string>
-    <string name="settings_max_tokens">Lungimea maximă a răspunsului</string>
-    <string name="settings_max_tokens_unit">tokeni</string>
     <string name="settings_meal_constituents">Împărțirea mesei în ingrediente</string>
     <string name="settings_meal_constituents_footer">Când este activ, IA poate împărți mesele compuse în ingrediente editabile cu grame și unități. Micronutrienții per ingredient sunt ceruți doar modelelor cloud mai puternice; modelele mai mici returnează oricum lista ingredientelor cu macronutrienți.</string>
     <string name="settings_meal_time_edit_format">%1$s</string>
@@ -2201,6 +2248,18 @@ macro-urile reechilibrate la noul total caloric</string>
     <string name="onboarding_goal_suggested_bmi">Pe baza unui IMC de %1$.1f</string>
     <!-- Progress v2: suprapunere corporală, combinare calorii, faze de obiectiv, aderență. -->
     <string name="progress_body_section">Corp</string>
+    <string name="progress_scale_metrics">Măsurători de cântar</string>
+    <string name="progress_scale_metrics_bone_mass">Masă osoasă</string>
+    <string name="progress_scale_metrics_water">Apă corporală totală</string>
+    <string name="progress_scale_metrics_muscle">Masă musculară</string>
+    <string name="progress_scale_metrics_lean">Masă slabă</string>
+    <string name="progress_scale_metrics_visceral">Grăsime viscerală</string>
+    <string name="progress_scale_metrics_note">Estimare de cântar de uz casnic — tendința este mai fiabilă decât valoarea absolută</string>
+    <string name="progress_scale_metrics_tbw_percent">%1$.1f %% din greutatea corporală · interval tipic 45–65 %%</string>
+    <string name="progress_log_scale_metrics">Măsurători de cântar</string>
+    <string name="progress_log_scale_metrics_title">Înregistrează măsurători de cântar</string>
+    <string name="progress_estimated_smm">Masă musculară scheletică estimată (Lee)</string>
+    <string name="progress_estimated_smm_note">Estimare antropometrică din braț, coapsă și gambă · ± ~3 kg</string>
     <string name="progress_overlay_off">Dezactivat</string>
     <string name="progress_no_entries_in_range">Nicio înregistrare în această perioadă</string>
     <string name="progress_no_series_selected">Atinge o metrică de mai sus pentru a o afișa aici</string>
@@ -2242,6 +2301,7 @@ macro-urile reechilibrate la noul total caloric</string>
     <string name="body_fat_method_dexa">DEXA</string>
     <string name="body_fat_method_tape">Bandă</string>
     <string name="cd_collapsed">Restrâns</string>
+    <string name="cd_change_meal_type">Schimbă tipul mesei</string>
     <string name="cd_decrease">Micșorează</string>
     <string name="cd_expanded">Extins</string>
     <string name="cd_import_mealie">Importă din Mealie</string>
@@ -2687,11 +2747,6 @@ macro-urile reechilibrate la noul total caloric</string>
         <item>descărcare</item>
         <item>local</item>
         <item>offline</item>
-    </string-array>
-    <string-array name="settings_search_kw_max_tokens">
-        <item>tokeni</item>
-        <item>lungime</item>
-        <item>limită</item>
     </string-array>
     <string-array name="settings_search_kw_ai_read_timeout">
         <item>timeout</item>

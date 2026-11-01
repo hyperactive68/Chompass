@@ -78,7 +78,23 @@
 
     <!-- AI Provider names -->
     <string name="ai_provider_ollama">Ollama (ローカル)</string>
-    <string name="ai_provider_custom">カスタム (OpenAI互換)</string>
+    <string name="ai_provider_ollama_cloud">Ollama Cloud</string>
+    <string name="ai_provider_custom">別のURL</string>
+    <string name="ai_provider_subtitle_custom">ベースURLを入力</string>
+    <string name="ai_provider_search_hint">名前かホストを検索</string>
+    <string name="ai_provider_section_shortcuts">ショートカット</string>
+    <string name="ai_provider_section_phone">この端末</string>
+    <string name="ai_provider_section_server">自分のサーバー</string>
+    <string name="ai_provider_section_cloud">クラウド</string>
+    <string name="ai_provider_chip_on_phone">端末内</string>
+    <string name="ai_provider_chip_your_server">自分のサーバー</string>
+    <string name="ai_provider_chip_native">専用API</string>
+    <string name="ai_provider_chip_cloud">クラウド</string>
+    <string name="ai_provider_row_gemini">キー · Google検索の切替</string>
+    <string name="ai_provider_row_anthropic">キー · 別API</string>
+    <string name="ai_provider_row_ollama">このネットワーク · キー不要</string>
+    <string name="ai_provider_row_host_key">%1$s · キー</string>
+    <string name="ai_provider_directory_footer">掲載ホストはこの版に含まれます。キーは選んだホストにだけ送られます。</string>
 
     <!-- AI Provider API key placeholders -->
     <string name="api_key_placeholder">APIキーを貼り付け</string>
@@ -512,6 +528,8 @@
     <string name="settings_server_url">サーバーURL</string>
     <string name="settings_tap_to_edit">タップして編集</string>
     <string name="settings_custom_url_title">カスタム ベースURL</string>
+    <string name="settings_custom_directory_docs">ドキュメント</string>
+    <string name="ai_model_accepts_images">画像対応（宣言済み）</string>
     <string name="settings_ai_allow_insecure_http">安全でない HTTP を許可</string>
     <string name="settings_ai_allow_insecure_http_footer">カスタムおよび Ollama のエンドポイントで http:// URL を使えます。自宅ネットワークなど。クラウド提供元は https を使います。サーバーに TLS があるときはオフのままにしてください。</string>
     <string name="settings_clear_key">キーを消去</string>
@@ -587,7 +605,7 @@
     <!-- About -->
     <string name="about_rate">アプリを評価</string>
     <string name="about_share">アプリを共有</string>
-    <string name="about_open_source">オープンソース (MIT)</string>
+    <string name="about_open_source">オープンソース (GPL v3)</string>
     <string name="about_report_issue">問題を報告</string>
     <string name="about_request_feature">機能をリクエスト</string>
     <string name="about_privacy">プライバシーポリシー</string>
@@ -696,11 +714,7 @@
     <string name="ai_provider_subtitle_deepinfra">ホスト型オープンモデル</string>
     <string name="ai_provider_subtitle_mistral">Mistralモデル</string>
     <string name="ai_provider_subtitle_ollama">自分のPCで、クラウド不要</string>
-    <string name="ai_provider_subtitle_custom">LM Studio、vLLM、llama.cpp など</string>
-    <string name="ai_provider_group_recommended">おすすめ</string>
-    <string name="ai_provider_group_cloud">クラウドプロバイダ</string>
-    <string name="ai_provider_group_local">ローカル・セルフホスト</string>
-    <string name="ai_provider_group_device">端末上</string>
+    <string name="ai_provider_subtitle_ollama_cloud">Ollama のクラウドモデル</string>
     <string name="settings_section_ai_profile">プロファイル</string>
     <string name="settings_section_ai_connection">接続</string>
     <string name="settings_section_ai_advanced">詳細設定</string>
@@ -709,7 +723,6 @@
     <string name="settings_ai_key_remove_title">APIキーを削除しますか？</string>
     <string name="settings_ai_key_remove_body">空のキーを保存すると、このプロファイルの保存済みキーが削除されます。</string>
     <string name="settings_ai_get_key">APIキーを取得</string>
-    <string name="settings_ai_value_default">%1$,d（デフォルト）</string>
     <string name="settings_ai_timeout_default">%1$,ds（デフォルト）</string>
     <string name="camera_scale_tip_message">ヒント: フォーク、手、またはコインを食べ物の横に入れてください。分量の推定に役立ちます。</string>
     <string name="cd_relog_meal">%1$sを再ログ</string>
@@ -831,19 +844,41 @@
     <string name="action_show">表示</string>
     <string name="action_undo">戻す</string>
     <string name="action_save_to_favorites">お気に入りに保存</string>
+    <string name="action_save_to_library">ライブラリに保存</string>
+    <string name="action_hide_from_suggestions">提案から非表示</string>
+    <string name="action_unhide">表示に戻す</string>
+    <string name="settings_saved_foods">保存した食品</string>
+    <string name="library_hidden_section">非表示</string>
+    <string name="library_empty">保存した食品はまだありません</string>
+    <string name="library_never_logged">記録なし</string>
+    <string name="library_row_summary">%1$d回の記録 · 最終 %2$s</string>
+    <string name="library_delete_rows_title">記録を削除しますか？</string>
+    <string name="library_delete_rows_message">「%2$s」の記録%1$d件をすべて削除しますか？ 日ごとの合計は再計算されます。保存した食品はここに残り、日誌の履歴のみ削除されます。</string>
+    <string name="library_merge_section">重複の可能性</string>
+    <string name="library_merge_title">重複を統合</string>
+    <string name="library_merge_intro">同じ食品の可能性があります。残す名前を選ぶと、ほかはその名前に統合されます。</string>
+    <string name="library_merge_rows_message">記録%1$d件の名前が「%2$s」に変わります。削除はされず、日ごとの合計は再計算されます。</string>
+    <string name="library_merge_action">統合</string>
+    <string name="library_sort_last_logged">最終記録</string>
+    <string name="library_sort_name">名前</string>
+    <string name="library_sort_logs">記録数</string>
     <string name="saved_to_favorites">お気に入りに保存しました</string>
     <string name="action_what_if">どうなる？</string>
     <string name="add_food_relog_kcal">%1$d %2$s</string>
     <string name="ai_error_coach_on_device">コーチはまだオンデバイスプロバイダーに対応していません。設定 → AI プロバイダーでクラウドプロバイダーに切り替えてください。</string>
     <string name="ai_error_coach_round_limit">コーチは回答できませんでした。質問の言い方を変えてみてください。</string>
-    <string name="ai_error_disabled">AI 機能は設定 → AI と音声でオフになっています。</string>
     <string name="ai_error_grounded_on_device">Grounded モードはオンデバイスモデルでは利用できません。</string>
     <string name="ai_error_grounded_requires_provider">Grounded モードには有効な AI プロバイダーが必要です。</string>
     <string name="ai_error_image_conversion_failed">画像を処理できませんでした。</string>
     <string name="ai_error_invalid_response">AI の応答を理解できませんでした。もう一度お試しください。</string>
     <string name="ai_error_invalid_url">API URL が無効です。プロバイダー設定を確認してください。</string>
-    <string name="ai_error_insecure_http_blocked">安全でない HTTP はブロックされています。設定 → AI と音声で「安全でない HTTP を許可」をオンにするか、https:// URL を使ってください。</string>
     <string name="ai_error_key_rejected">API キーが拒否されました。設定 → AI プロバイダーを開き、有効なキーを貼り直してください。</string>
+    <string name="ai_error_timeout">AI プロバイダーの応答に時間がかかりすぎました。もう一度お試しください。セルフホストのエンドポイントをお使いの場合は、設定 → AI プロバイダーでタイムアウトを長くしてください。</string>
+    <string name="ai_error_disabled">AI 機能が設定 → AI プロバイダーでオフになっています。</string>
+    <string name="ai_error_insecure_http_blocked">安全でない HTTP はブロックされています。設定 → AI プロバイダーで「安全でない HTTP を許可」をオンにするか、https:// の URL をお使いください。</string>
+    <string name="ai_error_truncated_twice">返信が 2 回、モデルの出力上限に達しました — 思考も上限に含まれます。設定 → AI プロバイダーで推論の深さを「低」または「オフ」にするか、もっと短い質問をお試しください。</string>
+    <string name="ai_error_truncated_twice_description">モデルが完了前に出力枠を使い切りました。思考トークンも上限に含まれます。設定 → AI プロバイダーで推論の深さを「低」または「オフ」にしてから、もう一度お試しください。</string>
+    <string name="ai_error_truncated">返信が完了前にモデルの出力上限に達しました — 思考も上限に含まれます。設定 → AI プロバイダーで推論の深さを「低」または「オフ」にするか、もっと短い質問をお試しください。</string>
     <string name="ai_error_location_unsupported">Gemini はこのネットワーク環境（国/IP）では利用できません。VPN を使用している場合はオフにするか、住宅用出口に切り替えてください。データセンター/非住宅用 VPN IP はよくブロックされます。Google AI Studio プロジェクトで課金を有効にするか、別のネットワークを試すか、設定 → AI プロバイダーでプロバイダーを変更してください。</string>
     <string name="ai_error_model_unavailable">プロバイダーがこのモデルを見つけられませんでした。無料プランでは有料のみ、地域で制限されている、またはエンドポイントが間違っている可能性があります。設定 → AI プロバイダーでデフォルトの Flash モデルに切り替えるか、AI Studio プロジェクトで課金を有効にしてください。</string>
     <string name="ai_error_network_format">ネットワークエラー：%1$s</string>
@@ -855,10 +890,6 @@
     <string name="ai_error_provider_error">AI プロバイダーがエラーを返しました。</string>
     <string name="ai_error_provider_overloaded">AI プロバイダーが現在過負荷です。数回再試行しました。1分後に再度お試しいただくか、設定 → AI プロバイダーでプロバイダー/モデルを変更してください。</string>
     <string name="ai_error_rate_limit">API キーのリクエスト上限に達しました。1分待つか、設定 → AI プロバイダーで別のプロバイダーに切り替えてください。無料プランでは Flash-Lite モデルの割り当てが最も多いです。</string>
-    <string name="ai_error_timeout">AI プロバイダーの応答が遅すぎました。再試行するか、設定 → AI と音声でタイムアウトを延ばしてください。</string>
-    <string name="ai_error_truncated">AI の応答が応答長の上限で途切れました。設定 → AI と音声で最大応答長を増やすか、もっと短い質問を試してください。</string>
-    <string name="ai_error_truncated_twice">AI の応答が応答長の上限で2回途切れました。設定 → AI と音声で最大応答長を増やすか、もっと短い質問を試してください。</string>
-    <string name="ai_error_truncated_twice_description">モデルは回答を終える前に応答長の上限に達しました。思考もこの上限に含まれます。設定 → AI と音声で最大応答長を増やすか、モデルの思考を制限して、もう一度試してください。</string>
     <string name="ai_model_tier_paid">有料のみのモデル（無料プランには Pro は含まれなくなりました）</string>
     <string name="ai_model_tier_varies">無料プランでの利用可否はアカウントと地域によって異なります</string>
     <string name="ai_provider_on_device">オンデバイス（プライベート）</string>
@@ -999,6 +1030,12 @@
     <string name="export_format">形式</string>
     <string name="export_from">開始</string>
     <string name="export_no_meals">選択した期間に記録された食事がありません。</string>
+    <string name="export_include_photos">写真を含める</string>
+    <string name="sync_photos">写真を同期</string>
+    <string name="sync_photos_caption">有効にすると、食事の写真が WebDAV サーバーにアップロードされます</string>
+    <string name="sync_photos_wifi_only">Wi-Fi のみで写真を同期</string>
+    <string name="sync_photos_syncing">写真を同期しています…</string>
+    <string name="sync_photos_failed">写真の同期に失敗しました</string>
     <string name="export_range">期間</string>
     <string name="export_range_all">すべて</string>
     <string name="export_range_custom">カスタム</string>
@@ -1088,7 +1125,7 @@
     <string name="home_display_show_active_calories_desc">カロリーゲージに今日の活動消費を表示します。</string>
     <string name="home_display_show_steps">ホームに歩数計を表示</string>
     <string name="home_display_slim_full_names">栄養素の完全な名前</string>
-    <string name="home_display_slim_full_names_desc">スリムラインカードは短いラベルの代わりに完全な名前を表示します。4枚選択時は長い名前が切り詰められることがあります。</string>
+    <string name="home_display_slim_full_names_desc">栄養素カードは短いラベルの代わりに完全な名前を表示します。4枚選択時は長い名前が切り詰められることがあります。</string>
     <string name="home_display_show_steps_desc">ゲージ下の任意カード。Health Connect が必要です。</string>
     <string name="home_display_step_goal">1日の歩数目標</string>
     <string name="home_display_step_goal_hint">500ずつ調整。1,000～50,000。</string>
@@ -1123,6 +1160,7 @@
     <string name="import_body_metrics_empty">このファイルにはインポートできる体重・身体データの記録がありません。</string>
     <string name="import_body_metrics_malformed">ファイルを読み込めませんでした：%1$s</string>
     <string name="import_body_metrics_success">体重 %1$d 件、体脂肪 %2$d 件、測定 %3$d 件をインポートしました。</string>
+    <string name="import_body_metrics_success_composition">体重計の指標を %1$d 件追加でインポートしました。</string>
     <string name="import_body_metrics_title">体重と身体データをインポート</string>
     <string name="import_body_metrics_unsupported">サポートされていないファイルです。対応：Chompass JSON/CSV、openScale CSV、一般的な体重 CSV。</string>
     <string name="import_diary_empty">このファイルにはインポートできる日記の記録がありません。</string>
@@ -1393,7 +1431,7 @@
     <string name="settings_calc_intro">1日のカロリーとマクロの目標は AI が設定します。「目標を再計算」をタップするか、適応型目標オンの場合に週1回程度自動で、Chompass はプロフィール、下記の参照式、最近記録した食事、体重傾向を AI プロバイダーに送信します。査読済みの計算式から始め、データに合わせて調整して維持量と目標を推定します。</string>
     <string name="settings_calc_katch_formula">BMR = 370 + 21.6 × LBM(kg)\nLBM = 体重 × (1 − %体脂肪)</string>
     <string name="settings_calc_katch_name">Katch-McArdle 式</string>
-    <string name="settings_calc_katch_used">体脂肪率を入力すると自動で使用されます。総体重ではなく除脂肪体重から BMR を導出するため、痩せ型・アスリートに正確です。 90日より古い測定値はMifflin-St Jeorにフォールバックします。</string>
+    <string name="settings_calc_katch_used">体脂肪率を入力すると自動で使用されます。総体重ではなく除脂肪体重から BMR を導出するため、痩せ型・アスリートに正確です。 90日より古い測定値はMifflin-St Jeorにフォールバックします。 体重計の新しい除脂肪量の値も同じ式でBMRを計算し、体脂肪より優先されます。</string>
     <string name="settings_calc_macro_split">マクロ栄養素の配分</string>
     <string name="settings_calc_maintenance">維持量と目標調整</string>
     <string name="settings_calc_methods">計算方法</string>
@@ -1430,6 +1468,18 @@
     <string name="settings_fixed_launcher_icon_subtitle">ランチャーアイコンをティールに保ちます。テーマカラーと壁紙に追従しなくなります。</string>
     <string name="settings_system_date_time_pickers">システムの日付と時刻ピッカー</string>
     <string name="settings_system_date_time_pickers_subtitle">食事を編集するとき、端末の日付・時刻ダイアログを使う。</string>
+    <string name="settings_glass_blur">すりガラス効果</string>
+    <string name="settings_glass_blur_subtitle">食事を追加の結果ヘッダーなど、浮かぶパネルの背後のコンテンツをぼかします。</string>
+    <string name="settings_ambient_motion">アンビエント背景</string>
+    <string name="settings_ambient_motion_subtitle">すべての画面の背後で色がゆっくりと漂います。省電力モードやアニメーションが無効なときは一時停止します。</string>
+    <string name="settings_frost_strength">すりガラスの強さ</string>
+    <string name="frost_strength_light">弱め</string>
+    <string name="frost_strength_medium">標準</string>
+    <string name="frost_strength_strong">強め</string>
+    <string name="settings_ambient_intensity">背景の強さ</string>
+    <string name="ambient_intensity_subtle">控えめ</string>
+    <string name="ambient_intensity_balanced">バランス</string>
+    <string name="ambient_intensity_vivid">鮮やか</string>
     <string name="add_food_log_time">記録時刻</string>
     <string name="add_food_log_time_now">現在</string>
     <string name="cd_clear_log_time">現在時刻を使う</string>
@@ -1440,7 +1490,6 @@
     <string name="settings_food_section_photo">写真分析</string>
     <string name="settings_food_section_serving">分量サイズ</string>
     <string name="settings_gemini_google_search">Google 検索グラウンディング</string>
-    <string name="settings_glass_blur">ガラスブラー</string>
     <string name="settings_goal_auto">自動</string>
     <string name="settings_goals_how_adaptive">適応型目標は、カロリーとマクロの目標を週1回程度再計算します。</string>
     <string name="settings_goals_how_energy">エネルギー消費は、Health Connect の測定消費に目標を固定します。</string>
@@ -1478,8 +1527,6 @@
     <string name="settings_macro_pinned_label_format">%1$s（固定）</string>
     <string name="settings_macro_unlocked">固定解除</string>
     <string name="settings_manage_health_access">Health Connect アクセスを管理</string>
-    <string name="settings_max_tokens">最大応答長</string>
-    <string name="settings_max_tokens_unit">トークン</string>
     <string name="settings_meal_constituents">食事の材料内訳</string>
     <string name="settings_meal_constituents_footer">有効にすると、AI は複合的な食事を、グラムと単位付きの編集可能な材料に分割できます。食材ごとの微量栄養素はより強力なクラウドモデルにのみ要求され、小さなモデルでもマクロ付きの食材リストは返されます。</string>
     <string name="settings_meal_time_edit_format">%1$s</string>
@@ -2189,6 +2236,18 @@
     <string name="onboarding_goal_suggested_bmi">BMI %1$.1f に基づく</string>
     <!-- Progress v2: 体オーバーレイ、カロリー組み合わせ、目標フェーズ、達成度。 -->
     <string name="progress_body_section">体</string>
+    <string name="progress_scale_metrics">体重計の指標</string>
+    <string name="progress_scale_metrics_bone_mass">骨量</string>
+    <string name="progress_scale_metrics_water">体内総水分量</string>
+    <string name="progress_scale_metrics_muscle">筋肉量</string>
+    <string name="progress_scale_metrics_lean">除脂肪量</string>
+    <string name="progress_scale_metrics_visceral">内臓脂肪</string>
+    <string name="progress_scale_metrics_note">家庭用体重計の推定値 — 傾向のほうが絶対値より信頼できます</string>
+    <string name="progress_scale_metrics_tbw_percent">体重の %1$.1f %% · 一般的な範囲 45–65 %%</string>
+    <string name="progress_log_scale_metrics">体重計の指標</string>
+    <string name="progress_log_scale_metrics_title">体重計の指標を記録</string>
+    <string name="progress_estimated_smm">推定骨格筋量（Lee）</string>
+    <string name="progress_estimated_smm_note">上腕・大腿・下腿からの人体計測推定 · ± ~3 kg</string>
     <string name="progress_overlay_off">オフ</string>
     <string name="progress_no_entries_in_range">この期間の記録はありません</string>
     <string name="progress_no_series_selected">表示するには上の項目をタップしてください</string>
@@ -2230,6 +2289,7 @@
     <string name="body_fat_method_dexa">DEXA</string>
     <string name="body_fat_method_tape">メジャー</string>
     <string name="cd_collapsed">折りたたみ中</string>
+    <string name="cd_change_meal_type">食事タイプを変更</string>
     <string name="cd_decrease">減らす</string>
     <string name="cd_expanded">展開中</string>
     <string name="cd_import_mealie">Mealie からインポート</string>
@@ -2669,11 +2729,6 @@
         <item>ダウンロード</item>
         <item>ローカル</item>
         <item>オフライン</item>
-    </string-array>
-    <string-array name="settings_search_kw_max_tokens">
-        <item>トークン</item>
-        <item>長さ</item>
-        <item>上限</item>
     </string-array>
     <string-array name="settings_search_kw_ai_read_timeout">
         <item>タイムアウト</item>

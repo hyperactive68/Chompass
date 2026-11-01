@@ -1,5 +1,6 @@
 package app.chompass.ui.settings
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -28,6 +29,7 @@ import app.chompass.ui.navigation.ChompassRoutes
  * Sync Now. Extracted from Health & Data so the data screen stays short.
  */
 @OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun SyncSettingsScreen(
     container: AppContainer,
@@ -39,6 +41,8 @@ fun SyncSettingsScreen(
     var webDavUsername by remember { mutableStateOf("") }
     var webDavPassword by remember { mutableStateOf("") }
     var webDavAutoSync by remember { mutableStateOf(false) }
+    var webDavPhotosEnabled by remember { mutableStateOf(false) }
+    var webDavPhotosWifiOnly by remember { mutableStateOf(true) }
     var googleDriveConnected by remember { mutableStateOf(false) }
     var googleDriveSyncOnFoodLog by remember { mutableStateOf(false) }
     var lastSyncAt by remember { mutableStateOf<String?>(null) }
@@ -51,6 +55,8 @@ fun SyncSettingsScreen(
         webDavUsername = container.prefs.webDavUsername.first()
         webDavPassword = container.keyStore.webDavPassword().orEmpty()
         webDavAutoSync = container.prefs.webDavEnabled.first()
+        webDavPhotosEnabled = container.prefs.webDavPhotosEnabled.first()
+        webDavPhotosWifiOnly = container.prefs.webDavPhotosWifiOnly.first()
         googleDriveConnected = container.prefs.googleDriveConnected.first()
         googleDriveSyncOnFoodLog = container.prefs.googleDriveSyncOnFoodLog.first()
         lastSyncAt = container.prefs.lastSyncAt.first()
@@ -80,7 +86,7 @@ fun SyncSettingsScreen(
     }
 
     val googleDriveAuthLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartIntentSenderForResult(),
+        contract = androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult(),
     ) { result ->
         val data = result.data
         if (result.resultCode != Activity.RESULT_OK || data == null) {
@@ -100,9 +106,9 @@ fun SyncSettingsScreen(
             container.prefs.setGoogleDriveConnected(true)
             googleDriveConnected = true
             syncMessage = activityContext.getString(R.string.settings_google_drive_syncing)
-            when (val resultNow = container.googleDriveSync.syncNow()) {
-                is SyncRepository.SyncResult.Success -> syncMessage = resultNow.message
-                is SyncRepository.SyncResult.Failed -> syncMessage = resultNow.message
+            syncMessage = when (val r = container.googleDriveSync.syncNow()) {
+                is SyncRepository.SyncResult.Success -> r.message
+                is SyncRepository.SyncResult.Failed -> r.message
             }
         }
     }
@@ -117,6 +123,8 @@ fun SyncSettingsScreen(
             webDavUsername = webDavUsername,
             webDavPassword = webDavPassword,
             webDavAutoSync = webDavAutoSync,
+            webDavPhotosEnabled = webDavPhotosEnabled,
+            webDavPhotosWifiOnly = webDavPhotosWifiOnly,
             googleDriveConnected = googleDriveConnected,
             googleDriveSyncOnFoodLog = googleDriveSyncOnFoodLog,
             lastSyncAt = lastSyncAt,
@@ -138,6 +146,40 @@ fun SyncSettingsScreen(
                 webDavAutoSync = enabled
                 scope.launch { container.prefs.setWebDavEnabled(enabled) }
             },
+            onWebDavPhotosEnabledChange = { enabled ->
+                webDavPhotosEnabled = enabled
+                scope.launch { container.prefs.setWebDavPhotosEnabled(enabled) }
+            },
+            onWebDavPhotosWifiOnlyChange = { wifiOnly ->
+                webDavPhotosWifiOnly = wifiOnly
+                scope.launch { container.prefs.setWebDavPhotosWifiOnly(wifiOnly) }
+            },
+            onGoogleDriveConnect = {
+                scope.launch {
+                    val auth = runCatching { container.googleDriveSync.requestAuthorization() }.getOrNull()
+                    if (auth == null) {
+                        syncMessage = activityContext.getString(R.string.settings_google_drive_auth_failed)
+                    } else if (auth.hasResolution()) {
+                        auth.getPendingIntent()?.let { pending ->
+                            googleDriveAuthLauncher.launch(IntentSenderRequest.Builder(pending.intentSender).build())
+                        } ?: run { syncMessage = activityContext.getString(R.string.settings_google_drive_auth_failed) }
+                    } else if (container.googleDriveSync.acceptAuthorization(auth)) {
+                        container.prefs.setGoogleDriveConnected(true)
+                        googleDriveConnected = true
+                        syncMessage = activityContext.getString(R.string.settings_google_drive_syncing)
+                        syncMessage = when (val r = container.googleDriveSync.syncNow()) {
+                            is SyncRepository.SyncResult.Success -> r.message
+                            is SyncRepository.SyncResult.Failed -> r.message
+                        }
+                    } else {
+                        syncMessage = activityContext.getString(R.string.settings_google_drive_auth_failed)
+                    }
+                }
+            },
+            onGoogleDriveSyncOnFoodLogChange = { enabled ->
+                googleDriveSyncOnFoodLog = enabled
+                scope.launch { container.prefs.setGoogleDriveSyncOnFoodLog(enabled) }
+            },
             onExportSync = {
                 scope.launch {
                     runCatching {
@@ -157,42 +199,11 @@ fun SyncSettingsScreen(
                     }
                 }
             },
-            onGoogleDriveConnect = {
-                scope.launch {
-                    val auth = runCatching { container.googleDriveSync.requestAuthorization() }.getOrNull()
-                    if (auth == null) {
-                        syncMessage = activityContext.getString(R.string.settings_google_drive_auth_failed)
-                    } else if (auth.hasResolution()) {
-                        val pending = auth.getPendingIntent()
-                        if (pending != null) {
-                            googleDriveAuthLauncher.launch(
-                                IntentSenderRequest.Builder(pending.intentSender).build(),
-                            )
-                        } else {
-                            syncMessage = activityContext.getString(R.string.settings_google_drive_auth_failed)
-                        }
-                    } else if (container.googleDriveSync.acceptAuthorization(auth)) {
-                            container.prefs.setGoogleDriveConnected(true)
-                            googleDriveConnected = true
-                            syncMessage = activityContext.getString(R.string.settings_google_drive_syncing)
-                            when (val resultNow = container.googleDriveSync.syncNow()) {
-                                is SyncRepository.SyncResult.Success -> syncMessage = resultNow.message
-                                is SyncRepository.SyncResult.Failed -> syncMessage = resultNow.message
-                            }
-                    } else {
-                        syncMessage = activityContext.getString(R.string.settings_google_drive_auth_failed)
-                    }
-                }
-            },
-            onGoogleDriveSyncOnFoodLogChange = { enabled ->
-                googleDriveSyncOnFoodLog = enabled
-                scope.launch { container.prefs.setGoogleDriveSyncOnFoodLog(enabled) }
-            },
             onImportSync = { importSyncLauncher.launch(arrayOf("application/json", "text/plain")) },
             onSyncNow = {
                 scope.launch {
                     syncMessage = "…"
-                    when (val result = container.syncRepository.syncNow()) {
+                    when (val result = container.syncRepository.syncNow(onStatus = { syncMessage = it })) {
                         is SyncRepository.SyncResult.Success -> {
                             syncMessage = result.message
                             lastSyncAt = container.prefs.lastSyncAt.first()

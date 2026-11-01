@@ -79,7 +79,23 @@
 
     <!-- AI Provider names -->
     <string name="ai_provider_ollama">Ollama（本地）</string>
-    <string name="ai_provider_custom">自定义（兼容 OpenAI）</string>
+    <string name="ai_provider_ollama_cloud">Ollama Cloud</string>
+    <string name="ai_provider_custom">其他网址</string>
+    <string name="ai_provider_subtitle_custom">输入基础网址</string>
+    <string name="ai_provider_search_hint">搜索名称或主机</string>
+    <string name="ai_provider_section_shortcuts">快捷方式</string>
+    <string name="ai_provider_section_phone">在这台手机上</string>
+    <string name="ai_provider_section_server">你的服务器</string>
+    <string name="ai_provider_section_cloud">云</string>
+    <string name="ai_provider_chip_on_phone">手机上</string>
+    <string name="ai_provider_chip_your_server">你的服务器</string>
+    <string name="ai_provider_chip_native">原生</string>
+    <string name="ai_provider_chip_cloud">云</string>
+    <string name="ai_provider_row_gemini">密钥 · Google 搜索开关</string>
+    <string name="ai_provider_row_anthropic">密钥 · 独立 API</string>
+    <string name="ai_provider_row_ollama">此网络 · 无需密钥</string>
+    <string name="ai_provider_row_host_key">%1$s · 密钥</string>
+    <string name="ai_provider_directory_footer">列出的主机随此版本提供。密钥只发给你选的主机。</string>
 
     <!-- AI Provider API key placeholders -->
     <string name="api_key_placeholder">粘贴你的 API 密钥</string>
@@ -514,6 +530,8 @@
     <string name="settings_server_url">服务器 URL</string>
     <string name="settings_tap_to_edit">点按以编辑</string>
     <string name="settings_custom_url_title">自定义基础 URL</string>
+    <string name="settings_custom_directory_docs">文档</string>
+    <string name="ai_model_accepts_images">支持图片（已声明）</string>
     <string name="settings_ai_allow_insecure_http">允许不安全的 HTTP</string>
     <string name="settings_ai_allow_insecure_http_footer">允许自定义和 Ollama 端点使用 http:// 地址，例如在家庭网络上。云提供商使用 https。服务器有 TLS 时请保持关闭。</string>
     <string name="settings_clear_key">清除密钥</string>
@@ -590,7 +608,7 @@
     <!-- About -->
     <string name="about_rate">评价应用</string>
     <string name="about_share">分享应用</string>
-    <string name="about_open_source">开源 (MIT)</string>
+    <string name="about_open_source">开源 (GPL v3)</string>
     <string name="about_report_issue">报告问题</string>
     <string name="about_request_feature">请求功能</string>
     <string name="about_privacy">隐私政策</string>
@@ -699,11 +717,7 @@
     <string name="ai_provider_subtitle_deepinfra">托管的开源模型</string>
     <string name="ai_provider_subtitle_mistral">Mistral 模型</string>
     <string name="ai_provider_subtitle_ollama">你的电脑，无需云端</string>
-    <string name="ai_provider_subtitle_custom">LM Studio、vLLM、llama.cpp 等</string>
-    <string name="ai_provider_group_recommended">推荐</string>
-    <string name="ai_provider_group_cloud">云端提供商</string>
-    <string name="ai_provider_group_local">本地与自托管</string>
-    <string name="ai_provider_group_device">设备端</string>
+    <string name="ai_provider_subtitle_ollama_cloud">Ollama 云端模型</string>
     <string name="settings_section_ai_profile">配置文件</string>
     <string name="settings_section_ai_connection">连接</string>
     <string name="settings_section_ai_advanced">高级</string>
@@ -712,7 +726,6 @@
     <string name="settings_ai_key_remove_title">移除 API 密钥？</string>
     <string name="settings_ai_key_remove_body">保存空密钥将清除该配置文件已存储的密钥。</string>
     <string name="settings_ai_get_key">获取 API 密钥</string>
-    <string name="settings_ai_value_default">%1$,d（默认）</string>
     <string name="settings_ai_timeout_default">%1$,ds（默认）</string>
     <string name="camera_scale_tip_message">提示：在食物旁放入叉子、手或硬币。有助于估算份量。</string>
     <string name="cd_relog_meal">再次记录 %1$s</string>
@@ -833,19 +846,41 @@
     <string name="action_show">显示</string>
     <string name="action_undo">撤销</string>
     <string name="action_save_to_favorites">保存到收藏</string>
+    <string name="action_save_to_library">保存到库</string>
+    <string name="action_hide_from_suggestions">从建议中隐藏</string>
+    <string name="action_unhide">取消隐藏</string>
+    <string name="settings_saved_foods">已保存的食物</string>
+    <string name="library_hidden_section">已隐藏</string>
+    <string name="library_empty">还没有已保存的食物</string>
+    <string name="library_never_logged">从未记录</string>
+    <string name="library_row_summary">%1$d 条记录 · 最近 %2$s</string>
+    <string name="library_delete_rows_title">删除记录？</string>
+    <string name="library_delete_rows_message">删除“%2$s”的全部 %1$d 条记录？各天合计将重新计算。已保存的食物仍会保留，仅删除其日记历史。</string>
+    <string name="library_merge_section">可能的重复项</string>
+    <string name="library_merge_title">合并重复项</string>
+    <string name="library_merge_intro">这些似乎是同一种食物。选择要保留的名称，其余将合并到其中。</string>
+    <string name="library_merge_rows_message">%1$d 条记录将重命名为“%2$s”。不会删除任何内容；各天合计将重新计算。</string>
+    <string name="library_merge_action">合并</string>
+    <string name="library_sort_last_logged">最近记录</string>
+    <string name="library_sort_name">名称</string>
+    <string name="library_sort_logs">记录数</string>
     <string name="saved_to_favorites">已保存到收藏</string>
     <string name="action_what_if">会怎样？</string>
     <string name="add_food_relog_kcal">%1$d 千卡 %2$s</string>
     <string name="ai_error_coach_on_device">教练暂不支持端侧提供商，请在设置 → AI 提供商中切换到云端提供商。</string>
     <string name="ai_error_coach_round_limit">教练无法回答，请尝试换个说法。</string>
-    <string name="ai_error_disabled">AI 功能已在设置 → AI 与语音中关闭。</string>
     <string name="ai_error_grounded_on_device">端侧模型不支持 Grounded 模式。</string>
     <string name="ai_error_grounded_requires_provider">Grounded 模式需要可用的 AI 提供商。</string>
     <string name="ai_error_image_conversion_failed">图片处理失败。</string>
     <string name="ai_error_invalid_response">无法理解 AI 的回复，请重试。</string>
     <string name="ai_error_invalid_url">API 网址无效，请检查提供商设置。</string>
-    <string name="ai_error_insecure_http_blocked">不安全的 HTTP 已被阻止。请在设置 → AI 与语音中打开“允许不安全的 HTTP”，或使用 https:// 地址。</string>
     <string name="ai_error_key_rejected">API 密钥被拒绝。请打开设置 → AI 提供商，重新粘贴有效密钥。</string>
+    <string name="ai_error_timeout">AI 提供商响应超时。请重试；如果你使用自托管端点，请在设置 → AI 提供商中调大超时时间。</string>
+    <string name="ai_error_disabled">AI 功能已在设置 → AI 提供商中关闭。</string>
+    <string name="ai_error_insecure_http_blocked">不安全的 HTTP 已被拦截。请在设置 → AI 提供商中开启“允许不安全的 HTTP”，或改用 https:// 地址。</string>
+    <string name="ai_error_truncated_twice">回复两次触及模型输出上限 —— 思考内容也计入。请在设置 → AI 提供商中将推理力度设为“低”或“关闭”，或换个更短的问题。</string>
+    <string name="ai_error_truncated_twice_description">模型在完成前就耗尽了输出空间；思考 token 也计入上限。请在设置 → AI 提供商中将推理力度设为“低”或“关闭”，然后再试一次。</string>
+    <string name="ai_error_truncated">回复在完成前触及模型输出上限 —— 思考内容也计入。请在设置 → AI 提供商中将推理力度设为“低”或“关闭”，或换个更短的问题。</string>
     <string name="ai_error_location_unsupported">Gemini 在当前网络位置（国家/IP）不可用。如使用 VPN，请关闭或切换到住宅出口。数据中心/非住宅 VPN 的 IP 常被屏蔽。也可以在 Google AI Studio 项目中启用结算、换网络，或在设置 → AI 提供商中更换提供商。</string>
     <string name="ai_error_model_unavailable">提供商找不到此模型。它可能在免费层仅限付费、在你所在地区受限，或端点有误。请在设置 → AI 提供商切换到默认 Flash 模型，或在 AI Studio 项目中启用结算。</string>
     <string name="ai_error_network_format">网络错误：%1$s</string>
@@ -857,10 +892,6 @@
     <string name="ai_error_provider_error">AI 提供商返回错误。</string>
     <string name="ai_error_provider_overloaded">AI 提供商当前过载。我们已重试数次。请一分钟后重试，或在设置 → AI 提供商中更换提供商/模型。</string>
     <string name="ai_error_rate_limit">API 密钥已达请求上限。请等待一分钟，或在设置 → AI 提供商中更换提供商。免费层中 Flash-Lite 模型的配额最高。</string>
-    <string name="ai_error_timeout">AI 提供商响应超时。请重试，或在设置 → AI 与语音中调高超时时间。</string>
-    <string name="ai_error_truncated">AI 回复在回复长度上限处被截断。请在设置 → AI 与语音中调高最大回复长度，或尝试更短的问题。</string>
-    <string name="ai_error_truncated_twice">AI 回复两次在回复长度上限处被截断。请在设置 → AI 与语音中调高最大回复长度，或尝试更短的问题。</string>
-    <string name="ai_error_truncated_twice_description">模型在回答完成前达到了回复长度上限，思考也计入该上限。请在设置 → AI 与语音中调高最大回复长度，或限制模型的思考，然后重试。</string>
     <string name="ai_model_tier_paid">仅限付费模型（免费层不再包含 Pro）</string>
     <string name="ai_model_tier_varies">免费层可用性因账户和地区而异</string>
     <string name="ai_provider_on_device">设备端（私密）</string>
@@ -1001,6 +1032,12 @@
     <string name="export_format">格式</string>
     <string name="export_from">从</string>
     <string name="export_no_meals">所选范围内没有记录餐食。</string>
+    <string name="export_include_photos">包含照片</string>
+    <string name="sync_photos">同步照片</string>
+    <string name="sync_photos_caption">开启后，餐食照片将上传到您的 WebDAV 服务器</string>
+    <string name="sync_photos_wifi_only">仅通过 Wi-Fi 同步照片</string>
+    <string name="sync_photos_syncing">正在同步照片…</string>
+    <string name="sync_photos_failed">照片同步失败</string>
     <string name="export_range">范围</string>
     <string name="export_range_all">全部时间</string>
     <string name="export_range_custom">自定义</string>
@@ -1090,7 +1127,7 @@
     <string name="home_display_show_active_calories_desc">在热量表盘中显示今日主动消耗。</string>
     <string name="home_display_show_steps">主页显示步数计数</string>
     <string name="home_display_slim_full_names">完整营养素名称</string>
-    <string name="home_display_slim_full_names_desc">纤细线条卡片显示完整名称而非短标签。选择四张卡片时较长名称可能会被截断。</string>
+    <string name="home_display_slim_full_names_desc">营养素卡片显示完整名称而非短标签。选择四张卡片时较长名称可能会被截断。</string>
     <string name="home_display_show_steps_desc">表盘下方的可选卡片。需要 Health Connect。</string>
     <string name="home_display_step_goal">每日步数目标</string>
     <string name="home_display_step_goal_hint">以 500 为步长调整。范围 1,000–50,000。</string>
@@ -1125,6 +1162,7 @@
     <string name="import_body_metrics_empty">此文件没有可导入的体重或身体数据条目。</string>
     <string name="import_body_metrics_malformed">无法读取文件：%1$s</string>
     <string name="import_body_metrics_success">已导入 %1$d 条体重、%2$d 条体脂和 %3$d 条测量记录。</string>
+    <string name="import_body_metrics_success_composition">另导入了 %1$d 条体脂秤指标。</string>
     <string name="import_body_metrics_title">导入体重与身体数据</string>
     <string name="import_body_metrics_unsupported">不支持的文件。支持：Chompass JSON/CSV、openScale CSV 或通用体重 CSV。</string>
     <string name="import_diary_empty">此文件没有可导入的日记条目。</string>
@@ -1395,7 +1433,7 @@
     <string name="settings_calc_intro">你的每日热量和宏量目标由 AI 设定。当你点按“重新计算目标”，或在自适应目标开启时每周自动进行一次，Chompass 会把你的资料、下方参考公式、近期记录的食物和体重趋势发送给 AI 提供商。它从这些同行评审的公式出发，再根据你的数据调整，估算你的维持量和目标。</string>
     <string name="settings_calc_katch_formula">BMR = 370 + 21.6 × LBM(公斤)\nLBM = 体重 × (1 − %体脂)</string>
     <string name="settings_calc_katch_name">Katch-McArdle 公式</string>
-    <string name="settings_calc_katch_used">输入体脂百分比后自动使用。对偏瘦和运动型用户更准确，因为它从瘦体重而非总体重推导 BMR。 超过 90 天的测量值将改用 Mifflin-St Jeor。</string>
+    <string name="settings_calc_katch_used">输入体脂百分比后自动使用。对偏瘦和运动型用户更准确，因为它从瘦体重而非总体重推导 BMR。 超过 90 天的测量值将改用 Mifflin-St Jeor。 体脂秤的最新去脂体重同样用于计算 BMR，并优先于体脂率。</string>
     <string name="settings_calc_macro_split">宏量营养素分配</string>
     <string name="settings_calc_maintenance">维持量与目标调整</string>
     <string name="settings_calc_methods">计算方法</string>
@@ -1432,6 +1470,18 @@
     <string name="settings_fixed_launcher_icon_subtitle">保持启动器图标为青色，不再跟随主题色和壁纸。</string>
     <string name="settings_system_date_time_pickers">系统日期和时间选择器</string>
     <string name="settings_system_date_time_pickers_subtitle">编辑餐次时使用手机的日期和时间对话框。</string>
+    <string name="settings_glass_blur">磨砂玻璃</string>
+    <string name="settings_glass_blur_subtitle">模糊悬浮面板（如添加食物结果栏）背后的内容。</string>
+    <string name="settings_ambient_motion">环境背景</string>
+    <string name="settings_ambient_motion_subtitle">每个屏幕背后柔和漂移的色彩。在省电模式或系统动画关闭时暂停。</string>
+    <string name="settings_frost_strength">磨砂强度</string>
+    <string name="frost_strength_light">轻</string>
+    <string name="frost_strength_medium">中</string>
+    <string name="frost_strength_strong">强</string>
+    <string name="settings_ambient_intensity">背景强度</string>
+    <string name="ambient_intensity_subtle">柔和</string>
+    <string name="ambient_intensity_balanced">均衡</string>
+    <string name="ambient_intensity_vivid">鲜艳</string>
     <string name="add_food_log_time">记录时间</string>
     <string name="add_food_log_time_now">现在</string>
     <string name="cd_clear_log_time">使用当前时间</string>
@@ -1442,7 +1492,6 @@
     <string name="settings_food_section_photo">照片分析</string>
     <string name="settings_food_section_serving">份量大小</string>
     <string name="settings_gemini_google_search">Google 搜索接地</string>
-    <string name="settings_glass_blur">玻璃模糊</string>
     <string name="settings_goal_auto">自动</string>
     <string name="settings_goals_how_adaptive">自适应目标约每周重新计算一次你的热量和宏量目标。</string>
     <string name="settings_goals_how_energy">能量消耗把目标锚定在 Health Connect 实测消耗上。</string>
@@ -1480,8 +1529,6 @@
     <string name="settings_macro_pinned_label_format">%1$s（已固定）</string>
     <string name="settings_macro_unlocked">已解锁</string>
     <string name="settings_manage_health_access">管理 Health Connect 访问</string>
-    <string name="settings_max_tokens">最大回复长度</string>
-    <string name="settings_max_tokens_unit">令牌</string>
     <string name="settings_meal_constituents">餐食配料明细</string>
     <string name="settings_meal_constituents_footer">开启后，AI 可将复合餐食拆分为带克数和单位的可编辑配料。食材级微量营养素仅向更强的云端模型请求；较小的模型仍会返回含宏量营养的食材列表。</string>
     <string name="settings_meal_time_edit_format">%1$s</string>
@@ -2189,6 +2236,18 @@
     <string name="onboarding_goal_suggested_bmi">基于 BMI %1$.1f</string>
     <!-- Progress v2: 身体叠加图、卡路里组合、目标阶段、坚持度。 -->
     <string name="progress_body_section">身体</string>
+    <string name="progress_scale_metrics">体脂秤指标</string>
+    <string name="progress_scale_metrics_bone_mass">骨量</string>
+    <string name="progress_scale_metrics_water">体内总水分</string>
+    <string name="progress_scale_metrics_muscle">肌肉量</string>
+    <string name="progress_scale_metrics_lean">去脂体重</string>
+    <string name="progress_scale_metrics_visceral">内脏脂肪</string>
+    <string name="progress_scale_metrics_note">家用体脂秤估算 — 趋势比绝对值更可靠</string>
+    <string name="progress_scale_metrics_tbw_percent">体重的 %1$.1f %% · 常见范围 45–65 %%</string>
+    <string name="progress_log_scale_metrics">体脂秤指标</string>
+    <string name="progress_log_scale_metrics_title">记录体脂秤指标</string>
+    <string name="progress_estimated_smm">估算骨骼肌量（Lee）</string>
+    <string name="progress_estimated_smm_note">由上臂、大腿和小腿的围度估算 · ± ~3 公斤</string>
     <string name="progress_overlay_off">关闭</string>
     <string name="progress_no_entries_in_range">该时间段内暂无记录</string>
     <string name="progress_no_series_selected">点按上方的指标以在此显示</string>
@@ -2230,6 +2289,7 @@
     <string name="body_fat_method_dexa">DEXA</string>
     <string name="body_fat_method_tape">卷尺</string>
     <string name="cd_collapsed">已折叠</string>
+    <string name="cd_change_meal_type">更改餐次类型</string>
     <string name="cd_decrease">减少</string>
     <string name="cd_expanded">已展开</string>
     <string name="cd_import_mealie">从 Mealie 导入</string>
@@ -2669,11 +2729,6 @@
         <item>下载</item>
         <item>本地</item>
         <item>离线</item>
-    </string-array>
-    <string-array name="settings_search_kw_max_tokens">
-        <item>令牌</item>
-        <item>长度</item>
-        <item>上限</item>
     </string-array>
     <string-array name="settings_search_kw_ai_read_timeout">
         <item>超时</item>

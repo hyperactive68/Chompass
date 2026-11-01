@@ -24,6 +24,8 @@ import app.chompass.services.InputSanitizer
 import app.chompass.services.WeightAnalysisService
 import app.chompass.services.WeightForecast
 import app.chompass.data.FastingRepository
+import app.chompass.services.ai.ProviderDirectory.Companion.findEntry
+import app.chompass.services.ai.ChatGptAuthManager
 import kotlinx.coroutines.flow.first
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -64,6 +66,7 @@ class ChatService(
     private val fastingRepository: FastingRepository? = null,
     /** OAuth-backed ChatGPT plan session for the Responses tool loop. */
     private val chatGptAuth: ChatGptAuthManager? = null,
+    private val providerDirectory: () -> ProviderDirectory? = { null },
 ) {
     init {
         require(keyStore != null || keyLookup != null) {
@@ -139,21 +142,19 @@ class ChatService(
         val maxTokens = cfg.maxResponseTokens
         val geminiGoogleSearch = cfg.geminiGoogleSearch
         val readTimeoutSeconds = cfg.aiReadTimeoutSeconds
-        val httpClient = AiHttp.clientForProvider(okHttp, provider, readTimeoutSeconds)
+        val httpClient = AiHttp.clientForProvider(
+            okHttp,
+            provider,
+            readTimeoutSeconds,
+            bundledDirectory = providerDirectory().findEntry(baseUrl) != null,
+        )
 
         val reply = when (provider.apiFormat) {
             AIProvider.ApiFormat.GEMINI -> runGeminiToolLoop(httpClient, baseUrl, model, apiKey!!, systemPrompt, history, newUserMessage, tools, imageBytes, geminiGoogleSearch, maxTokens)
             AIProvider.ApiFormat.ANTHROPIC -> runAnthropicToolLoop(httpClient, baseUrl, model, apiKey!!, systemPrompt, history, newUserMessage, tools, imageBytes, maxTokens)
             AIProvider.ApiFormat.CHATGPT_RESPONSES -> runChatGptToolLoop(
-                httpClient,
-                model,
-                systemPrompt,
-                history,
-                newUserMessage,
-                tools,
-                imageBytes,
-                maxTokens,
-                cfg.reasoningEffort,
+                httpClient, model, systemPrompt, history, newUserMessage, tools, imageBytes,
+                maxTokens, cfg.reasoningEffort,
             )
             AIProvider.ApiFormat.OPENAI_COMPATIBLE -> runOpenAIToolLoop(httpClient, baseUrl, model, apiKey, systemPrompt, history, newUserMessage, provider, tools, imageBytes, maxTokens, cfg.reasoningEffort)
             AIProvider.ApiFormat.ON_DEVICE -> error("unreachable — guarded above")
@@ -187,12 +188,9 @@ class ChatService(
                 put("name", name)
                 put("description", CoachTools.TOOL_DESCRIPTIONS[name] ?: "")
                 put("parameters", parametersSchemaFor(name))
-                // Keep optional arguments non-strict; ChatGPT-plan Responses normalizes schemas otherwise.
                 put("strict", false)
             })
         }
-        // ChatGPT-plan Responses requires client functions to be grouped in a
-        // namespace (top-level programmatic_tool_calling is not supported).
         val chatGptTools = JSONArray().put(
             JSONObject()
                 .put("type", "namespace")
@@ -212,9 +210,7 @@ class ChatService(
             maxOutputTokens = maxTokens,
             executeTool = tools::execute,
             reasoningEffort = OpenRouterReasoningEffort.sanitizeFor(
-                AIProvider.CHATGPT,
-                model,
-                reasoningEffort,
+                AIProvider.CHATGPT, model, reasoningEffort,
             ),
         )
     }
@@ -947,4 +943,3 @@ private fun dayTypeScheduleEnglish(plan: app.chompass.models.MacroPlan): String 
         MacroPlanMode.CYCLE -> "repeating cycle " + plan.cyclePattern.map { nameOf(it) }.joinToString(" → ")
     }
 }
-

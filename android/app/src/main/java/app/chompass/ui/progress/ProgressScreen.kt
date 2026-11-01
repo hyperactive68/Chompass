@@ -1,12 +1,10 @@
 package app.chompass.ui.progress
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,7 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -43,9 +40,10 @@ import app.chompass.models.BodyMeasurement
 import app.chompass.services.health.DailyActivity
 import app.chompass.ui.components.ChompassDialog
 import app.chompass.ui.components.ChompassDialogActions
+import app.chompass.ui.components.LocalBackdropHaze
+import app.chompass.ui.components.contentMaxWidth
+import app.chompass.ui.components.hazeGlassFill
 import app.chompass.ui.navigation.BottomNavScrollPadding
-import app.chompass.ui.theme.AppColors
-import app.chompass.ui.theme.AppTextOpacity
 import app.chompass.ui.theme.dayTypeColor
 import androidx.compose.ui.graphics.Color
 
@@ -109,6 +107,16 @@ fun ProgressScreen(container: AppContainer, onOpenCustomize: (() -> Unit)? = nul
 
     var showAddDialog by remember { mutableStateOf(false) }
     var showAddBodyFatDialog by remember { mutableStateOf(false) }
+    var showAddCompositionDialog by remember { mutableStateOf(false) }
+    // Collected at screen level so the history sheets compose with data
+    // already present: collected inside the `if` they start empty, the sheet
+    // anchors to the header-only height, and the later emission never
+    // re-anchors it (maintainer finding M3 2026-10-08: sheet showed one
+    // entry, nothing to scroll). allWeights also feeds the composition card's
+    // ±12 h TBW% join, which may reach outside the selected range.
+    val allWeights by container.weightRepository.entries.collectAsState(initial = emptyList())
+    val allBodyFats by container.bodyFatRepository.entries.collectAsState(initial = emptyList())
+    val allMeasurements by container.bodyMeasurementRepository.entries.collectAsState(initial = emptyList())
     var editingMeasurementSite by remember { mutableStateOf<BodyMeasurement.Site?>(null) }
     var showAllWeights by remember { mutableStateOf(false) }
     var showAllBodyFats by remember { mutableStateOf(false) }
@@ -126,9 +134,9 @@ fun ProgressScreen(container: AppContainer, onOpenCustomize: (() -> Unit)? = nul
         { id: String -> dayTypeColor(plan?.profileById(id)?.colorKey, id) }
     }
 
-    Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
+    Scaffold(containerColor = Color.Transparent) { padding ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding),
+            modifier = Modifier.contentMaxWidth().padding(padding),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(
                 start = 16.dp,
                 top = 16.dp,
@@ -150,12 +158,15 @@ fun ProgressScreen(container: AppContainer, onOpenCustomize: (() -> Unit)? = nul
                     Box(Modifier.weight(1f)) {
                         TimeRangePicker(selected = ui.timeRange, onSelect = vm::setTimeRange)
                     }
-                    // Plain Box: ChompassSurface's inner Box is fillMaxWidth,
-                    // which in a Row eats all width and zeroes the chips.
+                    // Plain Box: a fillMaxWidth card wrapper in a Row eats all
+                    // width and zeroes the chips.
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                            .hazeGlassFill(
+                                MaterialTheme.colorScheme.surfaceContainerLow,
+                                RoundedCornerShape(16.dp),
+                                LocalBackdropHaze.current,
+                            )
                             .clickable(
                                 enabled = onOpenCustomize != null,
                                 role = Role.Button,
@@ -165,7 +176,7 @@ fun ProgressScreen(container: AppContainer, onOpenCustomize: (() -> Unit)? = nul
                         Icon(
                             Icons.Outlined.Tune,
                             contentDescription = stringResource(R.string.settings_customize_progress),
-                            tint = AppColors.Calorie,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(22.dp),
                         )
                     }
@@ -226,6 +237,24 @@ fun ProgressScreen(container: AppContainer, onOpenCustomize: (() -> Unit)? = nul
                             )
                         }
                     }
+            }
+
+            // Scale composition: renders nothing at all when the range holds no
+            // composition rows, so users without such a scale see no change.
+            if (heavySectionsReady && ui.filteredCompositions.isNotEmpty()) {
+                item {
+                    CompositionSection(
+                        compositions = ui.filteredCompositions,
+                        // All weigh-ins, not the range slice: the ±12 h TBW% join may
+                        // legitimately reach a weigh-in just outside the selected range.
+                        weights = allWeights,
+                        useMetric = weightMetric,
+                        dayTypeByDay = ui.dayTypeByDay,
+                        untrackedDays = ui.untrackedDays,
+                        typeColorOf = typeColorOf,
+                        onLog = { showAddCompositionDialog = true },
+                    )
+                }
             }
 
             if (heavySectionsReady) {
@@ -330,10 +359,8 @@ fun ProgressScreen(container: AppContainer, onOpenCustomize: (() -> Unit)? = nul
     // already present: collected inside the `if` they start empty, the sheet
     // anchors to the header-only height, and the later emission never
     // re-anchors it (maintainer finding M3 2026-10-08: sheet showed one
-    // entry, nothing to scroll).
-    val allWeights by container.weightRepository.entries.collectAsState(initial = emptyList())
-    val allBodyFats by container.bodyFatRepository.entries.collectAsState(initial = emptyList())
-    val allMeasurements by container.bodyMeasurementRepository.entries.collectAsState(initial = emptyList())
+    // entry, nothing to scroll). allWeights also feeds the composition card's
+    // ±12 h TBW% join, which may reach outside the selected range.
     editingMeasurementSite?.let { site ->
         val scope = rememberCoroutineScope()
         BodyMeasurementEntryDialog(
@@ -349,6 +376,15 @@ fun ProgressScreen(container: AppContainer, onOpenCustomize: (() -> Unit)? = nul
             },
             onDismiss = { editingMeasurementSite = null },
         )
+    }
+    if (showAddCompositionDialog) {
+        AddBodyCompositionDialog(
+            useMetric = weightMetric,
+            onDismiss = { showAddCompositionDialog = false },
+        ) { entry ->
+            vm.addBodyComposition(entry)
+            showAddCompositionDialog = false
+        }
     }
     if (showAllWeights) {
         AllWeightHistorySheet(
@@ -370,7 +406,7 @@ fun ProgressScreen(container: AppContainer, onOpenCustomize: (() -> Unit)? = nul
             Text(stringResource(R.string.progress_goal_reached_title), fontSize = 20.sp, fontWeight = FontWeight.Bold)
             Text(
                 stringResource(R.string.progress_goal_reached_message),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             ChompassDialogActions(
                 primaryText = stringResource(R.string.action_keep_going),
@@ -399,9 +435,9 @@ internal fun ProgressScreenPreviewContent(
         { id: String -> dayTypeColor(plan?.profileById(id)?.colorKey, id) }
     }
 
-    Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
+    Scaffold(containerColor = Color.Transparent) { padding ->
         LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding),
+            modifier = Modifier.contentMaxWidth().padding(padding),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(
                 start = 16.dp,
                 top = 16.dp,
@@ -458,6 +494,19 @@ internal fun ProgressScreenPreviewContent(
                         )
                     }
                 }
+            if (ui.filteredCompositions.isNotEmpty()) {
+                item {
+                    CompositionSection(
+                        compositions = ui.filteredCompositions,
+                        weights = ui.filteredWeights,
+                        useMetric = weightMetric,
+                        chartsImmediate = chartsImmediate,
+                        dayTypeByDay = ui.dayTypeByDay,
+                        untrackedDays = ui.untrackedDays,
+                        typeColorOf = typeColorOf,
+                    )
+                }
+            }
             item {
                 CardSection {
                     CalorieSection(

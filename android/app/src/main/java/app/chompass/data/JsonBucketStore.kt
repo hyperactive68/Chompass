@@ -224,7 +224,7 @@ internal class JsonBucketStore<T>(
         tmp.writeText(json.encodeToString(listSerializer, entries))
         // renameTo is an atomic rename(2) on Android and replaces the target;
         // a stale tmp from a crashed write is ignored by every reader.
-        if (!tmp.renameTo(target)) {
+        if (!replacePersistedFile(tmp, target)) {
             throw IOException("bucket write failed for $target")
         }
     }

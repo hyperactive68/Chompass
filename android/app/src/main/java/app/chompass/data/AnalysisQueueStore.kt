@@ -226,7 +226,7 @@ class AnalysisQueueStore internal constructor(private val filesDir: File) {
         tmp.writeText(json.encodeToString(listSerializer, entries))
         // renameTo is an atomic rename(2) on Android and replaces the target;
         // a stale tmp from a crashed write is ignored by every reader.
-        if (!tmp.renameTo(target)) {
+        if (!replacePersistedFile(tmp, target)) {
             throw IOException("analysis-queue write failed for $target")
         }
         _entries.value = entries.sortedByDescending { it.createdAt }

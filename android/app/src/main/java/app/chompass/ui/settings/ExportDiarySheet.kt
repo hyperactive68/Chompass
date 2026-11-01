@@ -9,13 +9,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -25,6 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
@@ -41,11 +43,12 @@ import app.chompass.models.MealType
 import app.chompass.models.UserProfile
 import app.chompass.ui.components.rememberChompassSheetState
 import app.chompass.ui.components.ChompassBottomSheet
-import app.chompass.ui.theme.AppColors
+import app.chompass.ui.components.glassDialogColor
 import kotlinx.coroutines.flow.first
-import app.chompass.ui.theme.AppRadii
-import app.chompass.ui.theme.AppTextOpacity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -65,6 +68,7 @@ fun ExportDiarySheet(
 
     var range by remember { mutableStateOf(DiaryRange.THIS_WEEK) }
     var format by remember { mutableStateOf(DiaryFormat.JSON) }
+    var includePhotos by remember { mutableStateOf(false) }
     var customStart by remember { mutableStateOf(LocalDate.now().minusDays(7)) }
     var customEnd by remember { mutableStateOf(LocalDate.now()) }
     var picking by remember { mutableStateOf<String?>(null) } // "start" | "end" | null
@@ -84,7 +88,7 @@ fun ExportDiarySheet(
             Text(stringResource(R.string.export_diary_title), fontSize = 22.sp, fontWeight = FontWeight.Bold)
 
             Text(stringResource(R.string.export_range), fontSize = 13.sp, fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted))
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 DiaryRange.values().forEach { r ->
                     FilterChip(
@@ -92,8 +96,8 @@ fun ExportDiarySheet(
                         onClick = { range = r },
                         label = { Text(stringResource(r.labelRes)) },
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = AppColors.Calorie.copy(alpha = 0.18f),
-                            selectedLabelColor = AppColors.Calorie,
+                            selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+                            selectedLabelColor = MaterialTheme.colorScheme.primary,
                         ),
                     )
                 }
@@ -105,13 +109,31 @@ fun ExportDiarySheet(
             }
 
             Text(stringResource(R.string.export_format), fontSize = 13.sp, fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted))
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
             ExportFormatChipRow(
                 options = DiaryFormat.values(),
                 selected = format,
                 label = { it.label },
                 onSelect = { format = it },
             )
+
+            // Photos ride only in the JSON ZIP export; CSV/Markdown stay photo-free.
+            if (format == DiaryFormat.JSON) {
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable { includePhotos = !includePhotos }
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        stringResource(R.string.export_include_photos),
+                        fontSize = 14.sp,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Switch(checked = includePhotos, onCheckedChange = { includePhotos = it })
+                }
+            }
 
             status?.let {
                 Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
@@ -126,29 +148,71 @@ fun ExportDiarySheet(
                     val untrackedIso = container.prefs.untrackedDays.first()
                     val untrackedKcalIso = container.prefs.untrackedKcalByDay.first()
                     val (lo, hi) = DiaryExporter.resolveRange(range, customStart, customEnd, entries)
-                    val result = DiaryExporter.build(
-                        entries = entries, start = lo, end = hi, format = format,
-                        profile = profile, mealDisplay = { mealNames[it] ?: it },
-                        notes = notes,
-                        goalJournal = goalJournal,
-                        untrackedDates = untrackedIso.mapNotNull { runCatching { java.time.LocalDate.parse(it) }.getOrNull() }.toSet(),
-                        untrackedKcalByDay = untrackedKcalIso.mapNotNull { (k, v) ->
-                            runCatching { java.time.LocalDate.parse(k) to v }.getOrNull()
-                        }.toMap(),
-                    )
-                    if (result == null) {
-                        status = context.getString(R.string.export_no_meals)
-                        return@launch
-                    }
-                    val (name, content) = result
+                    val untrackedDates = untrackedIso.mapNotNull { runCatching { java.time.LocalDate.parse(it) }.getOrNull() }.toSet()
+                    val untrackedKcalByDay = untrackedKcalIso.mapNotNull { (k, v) ->
+                        runCatching { java.time.LocalDate.parse(k) to v }.getOrNull()
+                    }.toMap()
+                    val chooserTitle = context.getString(R.string.export_diary_title)
                     try {
-                        shareExportedFile(
-                            context = context,
-                            fileName = name,
-                            content = content,
-                            mimeType = format.mime,
-                            chooserTitle = context.getString(R.string.export_diary_title),
-                        )
+                        if (includePhotos && format == DiaryFormat.JSON) {
+                            val photoFilesByEntryId = entries.mapNotNull { e ->
+                                val file = e.imageFilename
+                                    ?.let { container.imageStore.file(it) }
+                                    ?.takeIf { it.canRead() && it.length() > 0 }
+                                if (file == null) null else e.id.toString() to file
+                            }.toMap().mapValues { listOf(it.value) }
+                            val captureDir = File(context.cacheDir, "capture").apply { mkdirs() }
+                            val zipName = withContext(Dispatchers.IO) {
+                                val tmp = File.createTempFile("diary-", ".zip", captureDir)
+                                val name = DiaryExporter.buildZip(
+                                    output = tmp,
+                                    entries = entries, start = lo, end = hi, format = format,
+                                    profile = profile, mealDisplay = { mealNames[it] ?: it },
+                                    notes = notes, goalJournal = goalJournal,
+                                    untrackedDates = untrackedDates, untrackedKcalByDay = untrackedKcalByDay,
+                                    photoFilesByEntryId = photoFilesByEntryId,
+                                )
+                                if (name == null) {
+                                    tmp.delete()
+                                    null
+                                } else {
+                                    val final = File(captureDir, name)
+                                    if (!tmp.renameTo(final)) tmp.copyTo(final, overwrite = true)
+                                    name
+                                }
+                            }
+                            if (zipName == null) {
+                                status = context.getString(R.string.export_no_meals)
+                                return@launch
+                            }
+                            shareExportedFile(
+                                context = context,
+                                file = File(captureDir, zipName),
+                                mimeType = "application/zip",
+                                chooserTitle = chooserTitle,
+                            )
+                        } else {
+                            val result = DiaryExporter.build(
+                                entries = entries, start = lo, end = hi, format = format,
+                                profile = profile, mealDisplay = { mealNames[it] ?: it },
+                                notes = notes,
+                                goalJournal = goalJournal,
+                                untrackedDates = untrackedDates,
+                                untrackedKcalByDay = untrackedKcalByDay,
+                            )
+                            if (result == null) {
+                                status = context.getString(R.string.export_no_meals)
+                                return@launch
+                            }
+                            val (name, content) = result
+                            shareExportedFile(
+                                context = context,
+                                fileName = name,
+                                content = content,
+                                mimeType = format.mime,
+                                chooserTitle = chooserTitle,
+                            )
+                        }
                         onDismiss()
                     } catch (e: Exception) {
                         status = e.localizedMessage ?: context.getString(R.string.export_failed)
@@ -165,6 +229,9 @@ fun ExportDiarySheet(
         val dpState = rememberDatePickerState(initialSelectedDateMillis = initial)
         DatePickerDialog(
             onDismissRequest = { picking = null },
+            colors = DatePickerDefaults.colors(
+                containerColor = glassDialogColor(MaterialTheme.colorScheme.surfaceContainerHigh),
+            ),
             confirmButton = {
                 TextButton(onClick = {
                     dpState.selectedDateMillis?.let { millis ->
@@ -172,7 +239,7 @@ fun ExportDiarySheet(
                         if (editingStart) customStart = picked else customEnd = picked
                     }
                     picking = null
-                }) { Text(stringResource(R.string.action_ok), color = AppColors.Calorie) }
+                }) { Text(stringResource(R.string.action_ok), color = MaterialTheme.colorScheme.primary) }
             },
             dismissButton = { TextButton(onClick = { picking = null }) { Text(stringResource(R.string.action_cancel)) } },
         ) {
@@ -186,12 +253,12 @@ private fun DateRow(label: String, value: String, onClick: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(AppRadii.Field))
+            .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick)
             .padding(vertical = 10.dp),
     ) {
         Text(label, fontSize = 14.sp, modifier = Modifier.padding(end = 8.dp))
         Spacer(Modifier.weight(1f))
-        Text(value, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = AppColors.Calorie)
+        Text(value, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
     }
 }

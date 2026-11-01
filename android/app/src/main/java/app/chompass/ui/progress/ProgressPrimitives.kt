@@ -7,13 +7,17 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.remember
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,9 +38,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.chompass.BuildConfig
 import app.chompass.R
-import app.chompass.ui.components.ChompassSurface
-import app.chompass.ui.theme.AppColors
-import app.chompass.ui.theme.AppTextOpacity
+import app.chompass.ui.components.AnimatedNumberText
+import app.chompass.ui.components.LocalBackdropHaze
+import app.chompass.ui.components.hazeGlassFill
+import app.chompass.ui.components.pressScale
 
 /**
  * uiautomator reports every Compose FilterChip as selected="false". Debug
@@ -60,18 +65,20 @@ internal fun Modifier.chipAccessibility(label: String, selected: Boolean): Modif
 @Composable
 internal fun MeasurementAddButton(siteLabel: String, onClick: () -> Unit) {
     val description = stringResource(R.string.progress_log_measurement_format, siteLabel)
+    val addInteraction = remember { MutableInteractionSource() }
     Box(
         modifier = Modifier
             .size(32.dp)
             .clip(CircleShape)
-            .clickable(role = Role.Button, onClick = onClick)
+            .pressScale(addInteraction)
+            .clickable(interactionSource = addInteraction, indication = LocalIndication.current, role = Role.Button, onClick = onClick)
             .semantics { contentDescription = description },
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             Icons.Filled.AddCircle,
             contentDescription = null,
-            tint = AppColors.Calorie,
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(17.dp),
         )
     }
@@ -113,11 +120,20 @@ internal fun TimeRangePicker(selected: TimeRange, onSelect: (TimeRange) -> Unit)
 
 @Composable
 internal fun CardSection(content: @Composable () -> Unit) {
-    ChompassSurface(
-        modifier = Modifier.fillMaxWidth(),
-        cornerRadius = 16.dp,
-        padding = 16.dp,
-    ) { content() }
+    // Frosted over the ambient wax field; glass off (or no blur source)
+    // composites surfaceContainerLow over surfaceContainerLow — exactly the
+    // fill the old ChompassSurface card rendered.
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .hazeGlassFill(
+                MaterialTheme.colorScheme.surfaceContainerLow,
+                RoundedCornerShape(16.dp),
+                LocalBackdropHaze.current,
+            ),
+    ) {
+        Box(Modifier.fillMaxWidth().padding(16.dp)) { content() }
+    }
 }
 
 @Composable
@@ -143,13 +159,12 @@ internal fun StatBadge(label: String, value: String, modifier: Modifier = Modifi
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
-        Text(
-            value,
+        AnimatedNumberText(
+            value = value,
             modifier = Modifier.fillMaxWidth(),
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
+            color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
             autoSize = TextAutoSize.StepBased(minFontSize = 10.sp, maxFontSize = 15.sp, stepSize = 0.5.sp)
         )
@@ -157,7 +172,7 @@ internal fun StatBadge(label: String, value: String, modifier: Modifier = Modifi
             label,
             modifier = Modifier.fillMaxWidth(),
             fontSize = 11.sp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
@@ -188,7 +203,7 @@ internal fun CollapseChevron(expanded: Boolean) {
         if (expanded) Icons.Filled.KeyboardArrowDown
         else Icons.AutoMirrored.Filled.KeyboardArrowRight,
         contentDescription = null,
-        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.size(18.dp),
     )
 }

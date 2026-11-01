@@ -77,7 +77,23 @@
 
     <!-- AI Provider names -->
     <string name="ai_provider_ollama">Ollama (Lokal)</string>
-    <string name="ai_provider_custom">Fərdi (OpenAI uyğun)</string>
+    <string name="ai_provider_ollama_cloud">Ollama Cloud</string>
+    <string name="ai_provider_custom">Digər URL</string>
+    <string name="ai_provider_subtitle_custom">Əsas URL yazın</string>
+    <string name="ai_provider_search_hint">Ad və ya host axtarın</string>
+    <string name="ai_provider_section_shortcuts">Qısayollar</string>
+    <string name="ai_provider_section_phone">Bu telefonda</string>
+    <string name="ai_provider_section_server">Sizin server</string>
+    <string name="ai_provider_section_cloud">Bulud</string>
+    <string name="ai_provider_chip_on_phone">Telefonda</string>
+    <string name="ai_provider_chip_your_server">Sizin server</string>
+    <string name="ai_provider_chip_native">Doğma</string>
+    <string name="ai_provider_chip_cloud">Bulud</string>
+    <string name="ai_provider_row_gemini">Açar · Google Search açarı</string>
+    <string name="ai_provider_row_anthropic">Açar · ayrı API</string>
+    <string name="ai_provider_row_ollama">Bu şəbəkə · açarsız</string>
+    <string name="ai_provider_row_host_key">%1$s · açar</string>
+    <string name="ai_provider_directory_footer">Siyahıdakı hostlar bu buraxılışla gəlir. Açar yalnız seçdiyiniz hosta göndərilir.</string>
 
     <!-- AI Provider API key placeholders -->
     <string name="api_key_placeholder">API açarını yapışdırın</string>
@@ -505,6 +521,8 @@ bilirsən?</string>
     <string name="settings_base_url">Əsas URL</string>
     <string name="settings_tap_to_edit">Redaktə etmək üçün toxun</string>
     <string name="settings_custom_url_title">Fərdi əsas URL</string>
+    <string name="settings_custom_directory_docs">Sənədlər</string>
+    <string name="ai_model_accepts_images">Şəkilləri qəbul edir (bəyan olunub)</string>
     <string name="settings_ai_allow_insecure_http">Qorunmayan HTTP-yə icazə ver</string>
     <string name="settings_ai_allow_insecure_http_footer">Fərdi və Ollama ünvanlarının http:// URL-lərindən istifadəsinə icazə verir, məsələn ev şəbəkəndə. Bulud provayderləri https istifadə edir. Serverində TLS varsa, bağlı saxla.</string>
     <string name="settings_clear_key">Açarı təmizlə</string>
@@ -579,7 +597,7 @@ bilirsən?</string>
     <!-- About -->
     <string name="about_rate">Tətbiqi qiymətləndir</string>
     <string name="about_share">Tətbiqi Paylaş</string>
-    <string name="about_open_source">Açıq Mənbə (MIT)</string>
+    <string name="about_open_source">Açıq Mənbə (GPL v3)</string>
     <string name="about_report_issue">Problemi Bildir</string>
     <string name="about_request_feature">Funksiya Tələb Et</string>
     <string name="about_privacy">Məxfilik Siyasəti</string>
@@ -688,11 +706,7 @@ bilirsən?</string>
     <string name="ai_provider_subtitle_deepinfra">Hostinqdəki açıq modellər</string>
     <string name="ai_provider_subtitle_mistral">Mistral modelləri</string>
     <string name="ai_provider_subtitle_ollama">Kompüterin, bulud yoxdur</string>
-    <string name="ai_provider_subtitle_custom">LM Studio, vLLM, llama.cpp və s.</string>
-    <string name="ai_provider_group_recommended">Tövsiyə olunur</string>
-    <string name="ai_provider_group_cloud">Bulud təminatçıları</string>
-    <string name="ai_provider_group_local">Yerli və öz-özünə hostinq</string>
-    <string name="ai_provider_group_device">Cihazda</string>
+    <string name="ai_provider_subtitle_ollama_cloud">Ollamanın bulud modelləri</string>
     <string name="settings_section_ai_profile">Profil</string>
     <string name="settings_section_ai_connection">Bağlantı</string>
     <string name="settings_section_ai_advanced">Əlavə</string>
@@ -701,7 +715,6 @@ bilirsən?</string>
     <string name="settings_ai_key_remove_title">API açarı silinsin?</string>
     <string name="settings_ai_key_remove_body">Boş açar saxlanmaq bu profilin saxlanmış açarını silir.</string>
     <string name="settings_ai_get_key">API açarı alın</string>
-    <string name="settings_ai_value_default">%1$,d (standart)</string>
     <string name="settings_ai_timeout_default">%1$,ds (standart)</string>
     <string name="camera_scale_tip_message">Məsləhət: yeməyin yanına çəngəl, əl və ya sikkə qoy. Porsiya ölçüsünü təxmin etməyə kömək edir.</string>
     <string name="cd_relog_meal">%1$s yenidən qeyd et</string>
@@ -823,19 +836,41 @@ bilirsən?</string>
     <string name="action_show">Göstər</string>
     <string name="action_undo">Geri al</string>
     <string name="action_save_to_favorites">Sevimlilərə saxla</string>
+    <string name="action_save_to_library">Kitabxanaya saxla</string>
+    <string name="action_hide_from_suggestions">Təkliflərdən gizlət</string>
+    <string name="action_unhide">Göstər</string>
+    <string name="settings_saved_foods">Yadda saxlanmış qidalar</string>
+    <string name="library_hidden_section">Gizli</string>
+    <string name="library_empty">Hələ yadda saxlanmış qida yoxdur</string>
+    <string name="library_never_logged">Heç vaxt qeyd edilməyib</string>
+    <string name="library_row_summary">%1$d qeyd · son %2$s</string>
+    <string name="library_delete_rows_title">Qeydlər silinsin?</string>
+    <string name="library_delete_rows_message">“%2$s” üçün qeyd olunan %1$d sətirin hamısı silinsin? Günlər yenidən hesablanır. Yadda saxlanmış qida burada qalır, yalnız gündəlik tarixçəsi silinir.</string>
+    <string name="library_merge_section">Ehtimal olunan dublikatlar</string>
+    <string name="library_merge_title">Dublikatları birləşdir</string>
+    <string name="library_merge_intro">Bunlar eyni qida kimi görünür. Saxlanılacaq adı seçin — qalanları ona birləşəcək.</string>
+    <string name="library_merge_rows_message">Qeyd olunan %1$d sətrin adı “%2$s” olaraq dəyişdiriləcək. Heç nə silinmir; günlər yenidən hesablanır.</string>
+    <string name="library_merge_action">Birləşdir</string>
+    <string name="library_sort_last_logged">Son qeyd</string>
+    <string name="library_sort_name">Ad</string>
+    <string name="library_sort_logs">Qeydlər</string>
     <string name="saved_to_favorites">Sevimlilərə saxlanıldı</string>
     <string name="action_what_if">Nə olardı?</string>
     <string name="add_food_relog_kcal">%1$d %2$s</string>
     <string name="ai_error_coach_on_device">Məşqçi hələlik cihazdaxili provayderlə mövcud deyil. Parametrlər → AI Provayderi bölməsində bulud provayderinə keç.</string>
     <string name="ai_error_coach_round_limit">Məşqçi cavab verə bilmədi. Sualını yenidən ifadə etməyə çalış.</string>
-    <string name="ai_error_disabled">AI funksiyaları Parametrlər → AI və Nitq bölməsində söndürülüb.</string>
     <string name="ai_error_grounded_on_device">Əsaslı qeyd rejimi cihazdaxili modellər üçün mövcud deyil.</string>
     <string name="ai_error_grounded_requires_provider">Əsaslı qeyd rejimi aktiv AI provayderi tələb edir.</string>
     <string name="ai_error_image_conversion_failed">Şəklin işlənməsi alınmadı.</string>
     <string name="ai_error_invalid_response">AI cavabı başa düşülmədi. Yenidən cəhd et.</string>
     <string name="ai_error_invalid_url">Yanlış API URL. Provayder parametrlərini yoxla.</string>
-    <string name="ai_error_insecure_http_blocked">Qorunmayan HTTP bloklanıb. Parametrlər → AI və Nitq bölməsində «Qorunmayan HTTP-yə icazə ver»i aç, və ya https:// URL istifadə et.</string>
     <string name="ai_error_key_rejected">API açarın rədd edildi. Parametrlər → AI Provayderi açıb etibarlı açarı yenidən yapışdır.</string>
+    <string name="ai_error_timeout">AI provayderi cavab vermək üçün çox vaxt apardı. Yenidən cəhd et; özün yerləşdirilən uç nöqtəsi istifadə edirsənsə, Parametrlər → AI Provayderi bölməsində gözləmə müddətini artır.</string>
+    <string name="ai_error_disabled">AI funksiyaları Parametrlər → AI Provayderi bölməsində söndürülüb.</string>
+    <string name="ai_error_insecure_http_blocked">Təhlükəsiz olmayan HTTP bloklanıb. Parametrlər → AI Provayderi bölməsində «Təhlükəsiz olmayan HTTP-yə icazə ver» seçimini yandır və ya https:// ünvanı istifadə et.</string>
+    <string name="ai_error_truncated_twice">Cavab modelin çıxış həddinə iki dəfə çatdı — düşünmə də hesaba katılır. Parametrlər → AI Provayderi bölməsində Düşünmə səviyyəsini Aşağı və ya Bağlı elə, ya da daha qısa sual ver.</string>
+    <string name="ai_error_truncated_twice_description">Model cavabı bitirmədən çıxış yerini tükətdi; düşünmə tokenləri həddə daxildir. Parametrlər → AI Provayderi bölməsində Düşünmə səviyyəsini Aşağı və ya Bağlı elə, sonra yenidən cəhd et.</string>
+    <string name="ai_error_truncated">Cavab bitmədən modelin çıxış həddinə çatdı — düşünmə də hesaba katılır. Parametrlər → AI Provayderi bölməsində Düşünmə səviyyəsini Aşağı və ya Bağlı elə, ya da daha qısa sual ver.</string>
     <string name="ai_error_location_unsupported">Gemini bu şəbəkə yerindən (ölkə/IP) mövcud deyil. VPN işlədirsənsə, onu söndür və ya yaşayış çıxışına keç. Məlumat mərkəzi/qeyri-yaşayış VPN IP-ləri tez-tez bloklanır. Yaxud Google AI Studio layihəsində ödənişi aktivləşdir, başqa şəbəkə sına və ya Parametrlər → AI Provayderi bölməsində provayderi dəyiş.</string>
     <string name="ai_error_model_unavailable">Provayderin bu modeli tapa bilmədi. O, pulsuz planda yalnız ödənişli, regionunda məhdud və ya endpoint səhv ola bilər. Parametrlər → AI Provayderi bölməsində standart Flash modelinə keç və ya AI Studio layihəndə ödənişi aktivləşdir.</string>
     <string name="ai_error_network_format">Şəbəkə xətası: %1$s</string>
@@ -847,10 +882,6 @@ bilirsən?</string>
     <string name="ai_error_provider_error">AI provayderi xəta qaytardı.</string>
     <string name="ai_error_provider_overloaded">AI provayderi hazırda həddindən artıq yüklənib. Bir neçə dəfə cəhd etdik. Bir dəqiqədən sonra yenidən cəhd et və ya Parametrlər → AI Provayderi bölməsində provayderi/modeli dəyiş.</string>
     <string name="ai_error_rate_limit">API açarın üçün sorğu limiti dolub. Bir dəqiqə gözlə və ya Parametrlər → AI Provayderi bölməsində başqa provayderə keç. Pulsuz planda ən yüksək kvota Flash-Lite modelindədir.</string>
-    <string name="ai_error_timeout">AI provayderi cavab vermək üçün çox gecikdi. Yenidən cəhd et və ya Parametrlər → AI və Nitq bölməsində vaxt limitini artır.</string>
-    <string name="ai_error_truncated">AI cavabı cavab uzunluğu həddində qısaldıldı. Parametrlər → AI və Nitq bölməsində maksimum cavab uzunluğunu artır ya da daha qısa sual ver.</string>
-    <string name="ai_error_truncated_twice">AI cavabı cavab uzunluğu həddində iki dəfə qısaldıldı. Parametrlər → AI və Nitq bölməsində maksimum cavab uzunluğunu artır ya da daha qısa sual ver.</string>
-    <string name="ai_error_truncated_twice_description">Model cavabı bitirməzdən əvvəl cavab uzunluğu həddinə çatdı, düşüncə də bu həddə sayılır. Parametrlər → AI və Nitq bölməsində maksimum cavab uzunluğunu artır ya da modelin düşüncəsini məhdudlaşdır, sonra yenidən cəhd et.</string>
     <string name="ai_model_tier_paid">Yalnız ödənişli model (pulsuz plan artıq Pro daxil etmir)</string>
     <string name="ai_model_tier_varies">Pulsuz planda mövcudluq hesab və regiona görə dəyişir</string>
     <string name="ai_provider_on_device">Cihazda (özəl)</string>
@@ -992,6 +1023,12 @@ bilirsən?</string>
     <string name="export_format">Format</string>
     <string name="export_from">Başlanğıc</string>
     <string name="export_no_meals">Seçilmiş aralıqda qeyd olunmuş yemək yoxdur.</string>
+    <string name="export_include_photos">Şəkilləri daxil et</string>
+    <string name="sync_photos">Şəkilləri sinxronlaşdır</string>
+    <string name="sync_photos_caption">Aktiv edildikdə, yemək şəkilləri WebDAV serverinə yüklənir</string>
+    <string name="sync_photos_wifi_only">Şəkillər yalnız Wi-Fi ilə</string>
+    <string name="sync_photos_syncing">Şəkillər sinxronlaşdırılır…</string>
+    <string name="sync_photos_failed">Şəkil sinxronizasiyası alınmadı</string>
     <string name="export_range">Aralıq</string>
     <string name="export_range_all">Hər zaman</string>
     <string name="export_range_custom">Fərdi</string>
@@ -1081,7 +1118,7 @@ bilirsən?</string>
     <string name="home_display_show_active_calories_desc">Bugünkü aktiv yanmanı kalori göstəricisində göstər.</string>
     <string name="home_display_show_steps">Ana səhifədə addımölçəni göstər</string>
     <string name="home_display_slim_full_names">Tam qida adları</string>
-    <string name="home_display_slim_full_names_desc">İncə xətt kartları qısa etiket əvəzinə tam adı göstərir. Dört kart seçildikdə uzun adlar kəsilə bilər.</string>
+    <string name="home_display_slim_full_names_desc">Qida kartları qısa etiket əvəzinə tam adı göstərir. Dört kart seçildikdə uzun adlar kəsilə bilər.</string>
     <string name="home_display_show_steps_desc">Göstəricinin altında istəyə bağlı kart. Health Connect tələb olunur.</string>
     <string name="home_display_step_goal">Gündəlik addım məqsədi</string>
     <string name="home_display_step_goal_hint">Addım 500-dən dəyişir. 1,000–50,000.</string>
@@ -1117,6 +1154,7 @@ bilirsən?</string>
     <string name="import_body_metrics_empty">Bu faylda idxal üçün çəki və ya bədən məlumatı qeydi yoxdur.</string>
     <string name="import_body_metrics_malformed">Fayl oxuna bilmədi: %1$s</string>
     <string name="import_body_metrics_success">%1$d çəki, %2$d yağ və %3$d ölçü qeydi idxal edildi.</string>
+    <string name="import_body_metrics_success_composition">Həmçinin %1$d tərəzi göstəricisi idxal edildi.</string>
     <string name="import_body_metrics_title">Çəki və bədən məlumatlarını idxal et</string>
     <string name="import_body_metrics_unsupported">Dəstəklənməyən fayl. Dəstəklənənlər: Chompass JSON/CSV, openScale CSV və ya ümumi çəki CSV.</string>
     <string name="import_diary_empty">Bu faylda idxal üçün gündəlik qeydi yoxdur.</string>
@@ -1393,7 +1431,7 @@ bilirsən?</string>
     <string name="settings_calc_intro">Gündəlik kalori və makro məqsədlərin AI tərəfindən təyin edilir. «Məqsədləri yenidən hesabla» düyməsinə toxunduqda və ya adaptiv məqsədlər aktivdirsə həftədə təxminən bir dəfə avtomatik olaraq, Chompass profilini, aşağıdakı istinad tənliklərini, son qeyd olunmuş yeməklərini və çəki trendini AI provayderinə göndərir. Bu rəy keçirmiş düsturlardan başlayır, sonra onları məlumatlarına uyğunlaşdıraraq saxlanma və məqsədlərini təxmin edir.</string>
     <string name="settings_calc_katch_formula">BMR = 370 + 21,6 × LBM(kq)\nLBM = çəki × (1 − %yağ)</string>
     <string name="settings_calc_katch_name">Katch-McArdle tənliyi</string>
-    <string name="settings_calc_katch_used">Bədən yağı % daxil etdikdə avtomatik istifadə olunur. BMR-ni ümumi çəki əvəzinə arıq kütlədən törətdiyi üçün arıq və idmançı istifadəçilər üçün daha dəqiqdir. 90 gündən köhnə ölçmələr Mifflin-St Jeor\'a qayıdır.</string>
+    <string name="settings_calc_katch_used">Bədən yağı % daxil etdikdə avtomatik istifadə olunur. BMR-ni ümumi çəki əvəzinə arıq kütlədən törətdiyi üçün arıq və idmançı istifadəçilər üçün daha dəqiqdir. 90 gündən köhnə ölçmələr Mifflin-St Jeor\'a qayıdır. Tərəzidən yeni yağsız kütlə göstəricisi BMR-i eyni şəkildə hesablayır və bədən yağından üstün tutulur.</string>
     <string name="settings_calc_macro_split">Makronutrient bölgüsü</string>
     <string name="settings_calc_maintenance">Saxlanma və məqsəd tənzimləməsi</string>
     <string name="settings_calc_methods">Hesablama metodları</string>
@@ -1430,6 +1468,18 @@ bilirsən?</string>
     <string name="settings_fixed_launcher_icon_subtitle">Tətbiq ikonunu firuzəyi saxlayır. Tema rəngini və divar kağızını izləməyi dayandırır.</string>
     <string name="settings_system_date_time_pickers">Sistem tarix və saat seçiciləri</string>
     <string name="settings_system_date_time_pickers_subtitle">Yeməyi redaktə edərkən telefonun tarix və saat pəncərələrindən istifadə et.</string>
+    <string name="settings_glass_blur">Donuşdurulmuş şüşə</string>
+    <string name="settings_glass_blur_subtitle">Üzən panellərin arxasındakı məzmunu bulanıqlaşdırır (məsələn, yemək əlavə etmə nəticələri başlığı).</string>
+    <string name="settings_ambient_motion">Hərəkətli fon</string>
+    <string name="settings_ambient_motion_subtitle">Hər ekranın arxasında yumşaq sürüşən rəng sahələri. Batareyaya qənaət rejimində və animasiyalar azaldılanda dayanır.</string>
+    <string name="settings_frost_strength">Donuşdurma gücü</string>
+    <string name="frost_strength_light">Yüngül</string>
+    <string name="frost_strength_medium">Orta</string>
+    <string name="frost_strength_strong">Güclü</string>
+    <string name="settings_ambient_intensity">Fon intensivliyi</string>
+    <string name="ambient_intensity_subtle">Zərif</string>
+    <string name="ambient_intensity_balanced">Tarazlı</string>
+    <string name="ambient_intensity_vivid">Canlı</string>
     <string name="add_food_log_time">Qeyd vaxtı</string>
     <string name="add_food_log_time_now">İndi</string>
     <string name="cd_clear_log_time">Cari vaxtı istifadə et</string>
@@ -1440,7 +1490,6 @@ bilirsən?</string>
     <string name="settings_food_section_photo">Foto analizi</string>
     <string name="settings_food_section_serving">Porsiya ölçüsü</string>
     <string name="settings_gemini_google_search">Google Axtarış əsaslandırması</string>
-    <string name="settings_glass_blur">Şüşə bulanıqlığı</string>
     <string name="settings_goal_auto">Avto</string>
     <string name="settings_goals_how_adaptive">Adaptiv məqsədlər kalori və makro hədəflərini həftədə təxminən bir dəfə yenidən hesablayır.</string>
     <string name="settings_goals_how_energy">Enerji Xərci hədəfləri Health Connect-dən ölçülmüş yanmanına əsaslandırır.</string>
@@ -1478,8 +1527,6 @@ bilirsən?</string>
     <string name="settings_macro_pinned_label_format">%1$s (sabit)</string>
     <string name="settings_macro_unlocked">Kilidsiz</string>
     <string name="settings_manage_health_access">Health Connect girişini idarə et</string>
-    <string name="settings_max_tokens">Maksimum cavab uzunluğu</string>
-    <string name="settings_max_tokens_unit">token</string>
     <string name="settings_meal_constituents">Yeməyin inqrediyentlərə bölünməsi</string>
     <string name="settings_meal_constituents_footer">Aktiv olduqda AI mürəkkəb yeməkləri qram və vahidlərlə redaktə edilə bilən inqrediyentlərə bölə bilər. İnqrediyent başına mikronutrisientlər yalnız daha güclü bulud modellərindən istənilir; kiçik modellər makrolarla inqrediyent siyahısını qaytarır.</string>
     <string name="settings_meal_time_edit_format">%1$s</string>
@@ -2191,6 +2238,18 @@ makrolar yeni kalori cəminə uyğun yenidən tarazlaşdırılır</string>
     <string name="onboarding_goal_suggested_bmi">BMI %1$.1f əsasında</string>
     <!-- Progress v2: bədən örtüyü, kaloriya kombinasiyası, məqsəd fazaları, uyğunluq. -->
     <string name="progress_body_section">Bədən</string>
+    <string name="progress_scale_metrics">Tərəzi göstəriciləri</string>
+    <string name="progress_scale_metrics_bone_mass">Sümük kütləsi</string>
+    <string name="progress_scale_metrics_water">Bədəndəki ümumi su</string>
+    <string name="progress_scale_metrics_muscle">Əzələ kütləsi</string>
+    <string name="progress_scale_metrics_lean">Yağsız kütlə</string>
+    <string name="progress_scale_metrics_visceral">Daxili piy</string>
+    <string name="progress_scale_metrics_note">Ev tərəzisinin təxmini — tendensiya mütləq rəqəmdən daha etibarlıdır</string>
+    <string name="progress_scale_metrics_tbw_percent">bədən çəkisinin %1$.1f %%-i · adi aralıq 45–65 %%</string>
+    <string name="progress_log_scale_metrics">Tərəzi göstəriciləri</string>
+    <string name="progress_log_scale_metrics_title">Tərəzi göstəricilərini qeyd et</string>
+    <string name="progress_estimated_smm">Təxmini skelet əzələsi (Lee)</string>
+    <string name="progress_estimated_smm_note">Qol, bud və baldırdan antropometrik təxmin · ± ~3 kq</string>
     <string name="progress_overlay_off">Bağlı</string>
     <string name="progress_no_entries_in_range">Bu aralıqda qeyd yoxdur</string>
     <string name="progress_no_series_selected">Burada göstərmək üçün yuxarıda bir ölçüyə toxunun</string>
@@ -2232,6 +2291,7 @@ makrolar yeni kalori cəminə uyğun yenidən tarazlaşdırılır</string>
     <string name="body_fat_method_dexa">DEXA</string>
     <string name="body_fat_method_tape">Lent</string>
     <string name="cd_collapsed">Yığılmış</string>
+    <string name="cd_change_meal_type">Yemək növünü dəyiş</string>
     <string name="cd_decrease">Azalt</string>
     <string name="cd_expanded">Genişlənmiş</string>
     <string name="cd_import_mealie">Mealie-dən idxal et</string>
@@ -2672,11 +2732,6 @@ makrolar yeni kalori cəminə uyğun yenidən tarazlaşdırılır</string>
         <item>endir</item>
         <item>lokal</item>
         <item>oflayn</item>
-    </string-array>
-    <string-array name="settings_search_kw_max_tokens">
-        <item>token</item>
-        <item>uzunluq</item>
-        <item>limit</item>
     </string-array>
     <string-array name="settings_search_kw_ai_read_timeout">
         <item>vaxt limiti</item>

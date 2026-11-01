@@ -61,11 +61,10 @@ import app.chompass.ui.components.ChompassPrimaryButton
 import app.chompass.ui.components.DateWheelPicker
 import app.chompass.ui.components.NumericWheelPicker
 import app.chompass.ui.components.ChompassPinnedFooterSheet
+import app.chompass.ui.components.LocalPinnedToolbarHeight
 import app.chompass.ui.components.energyUnitLabel
 import app.chompass.ui.components.rememberChompassSheetState
 import app.chompass.ui.navigation.LocalEnergyUnit
-import app.chompass.ui.theme.AppColors
-import app.chompass.ui.theme.AppTextOpacity
 import app.chompass.ui.theme.success
 import java.time.LocalDate
 import java.time.ZoneId
@@ -110,14 +109,14 @@ fun GoalPhasesScreen(
         Text(
             stringResource(R.string.settings_goal_phases_intro),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         SectionCard(title = stringResource(R.string.settings_goal_phases_title)) {
             if (phases.isEmpty()) {
                 Text(
                     stringResource(R.string.settings_goal_phases_none),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(vertical = 8.dp),
                 )
             }
@@ -202,7 +201,7 @@ private fun PhaseRow(
             Text(
                 range,
                 fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             if (adherence != null && adherence.avgDelta != null) {
                 Text(
@@ -212,14 +211,14 @@ private fun PhaseRow(
                         UnitFormat.signedDelta(EnergyFormat.quantity(adherence.netKcal?.toInt() ?: 0, unit).toDouble()) + " " + energyUnitLabel(),
                     ) + " · " + stringResource(R.string.settings_goal_phases_overlap_days, adherence.overlapDays),
                     fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
         Icon(
             Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Disabled),
+            tint = MaterialTheme.colorScheme.outline,
             modifier = Modifier.width(18.dp),
         )
     }
@@ -238,7 +237,7 @@ private fun IntentChip(intent: PhaseIntent) {
     val scheme = MaterialTheme.colorScheme
     val (background, content) = when (intent) {
         PhaseIntent.CUT -> scheme.errorContainer to scheme.error
-        PhaseIntent.MAINTAIN -> scheme.surfaceContainerHigh to scheme.onSurface.copy(alpha = AppTextOpacity.Secondary)
+        PhaseIntent.MAINTAIN -> scheme.surfaceContainerHigh to scheme.onSurfaceVariant
         PhaseIntent.BULK -> scheme.success.copy(alpha = 0.16f) to scheme.success
     }
     Text(
@@ -247,7 +246,7 @@ private fun IntentChip(intent: PhaseIntent) {
         fontWeight = FontWeight.Medium,
         color = content,
         modifier = Modifier
-            .clip(RoundedCornerShape(999.dp))
+            .clip(RoundedCornerShape(percent = 50))
             .background(background)
             .padding(horizontal = 8.dp, vertical = 3.dp),
     )
@@ -314,6 +313,7 @@ internal fun GoalPhaseEditSheet(
                 Modifier
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
+                    .padding(top = LocalPinnedToolbarHeight.current)
                     .padding(horizontal = 18.dp)
                     .padding(top = 12.dp),
             ) {
@@ -349,7 +349,7 @@ internal fun GoalPhaseEditSheet(
                 Text(
                     stringResource(R.string.settings_goal_phases_start),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 DateWheelPicker(
                     selected = GoalJournal.parseDateOrNull(start) ?: today,
@@ -361,7 +361,7 @@ internal fun GoalPhaseEditSheet(
                 Text(
                     stringResource(R.string.settings_goal_phases_end),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 DateWheelPicker(
                     selected = GoalJournal.parseDateOrNull(end) ?: today.plusDays(13),
@@ -372,13 +372,13 @@ internal fun GoalPhaseEditSheet(
                 Text(
                     stringResource(R.string.settings_goal_phases_range_clip_hint, app.chompass.models.MacroPlan.ASSIGNMENT_KEEP_DAYS.toInt()),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Faint),
+                    color = MaterialTheme.colorScheme.outline,
                 )
                 Spacer(Modifier.height(12.dp))
                 Text(
                     stringResource(R.string.settings_goal_phases_targets),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.height(6.dp))
                 val unit = LocalEnergyUnit.current
@@ -395,7 +395,7 @@ internal fun GoalPhaseEditSheet(
                     Spacer(Modifier.height(4.dp))
                     Text(
                         stringResource(R.string.settings_day_types_floor_warning, EnergyFormat.quantity(calorieFloor, unit), energyUnitLabel()),
-                        color = AppColors.Calorie,
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 }
                 Spacer(Modifier.height(12.dp))
@@ -483,7 +483,7 @@ internal fun GoalPhaseEditSheet(
             )
             Text(
                 stringResource(R.string.settings_goal_phases_delete_message),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             ChompassDialogActions(
                 primaryText = stringResource(R.string.action_delete),

@@ -8,7 +8,12 @@ import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import app.chompass.ui.theme.AppMotion
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -22,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -50,8 +56,6 @@ import app.chompass.models.SpeechProvider
 import app.chompass.services.speech.AudioRecorder
 import app.chompass.services.speech.NativeSpeechRecognizer
 import app.chompass.services.speech.SttEvent
-import app.chompass.ui.theme.AppColors
-import app.chompass.ui.theme.AppTextOpacity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -271,13 +275,7 @@ fun CoachMicButton(controller: CoachVoiceController) {
     val holding = controller.phase == VoicePhase.Holding
     Box(
         modifier = Modifier
-            .size(34.dp)
-            .scale(if (holding) 1.18f else 1f)
-            .clip(CircleShape)
-            .background(
-                if (holding) AppColors.Calorie
-                else AppColors.Calorie.copy(alpha = 0.12f)
-            )
+            .minimumInteractiveComponentSize()
             .pointerInput(Unit) {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
@@ -312,12 +310,25 @@ fun CoachMicButton(controller: CoachVoiceController) {
             },
         contentAlignment = Alignment.Center
     ) {
-        Icon(
-            Icons.Filled.Mic,
-            contentDescription = stringResource(R.string.cd_hold_to_record),
-            tint = if (holding) Color.White else AppColors.Calorie,
-            modifier = Modifier.size(18.dp)
-        )
+        // 34dp visual circle inside the 48dp touch target.
+        Box(
+            modifier = Modifier
+                .size(34.dp)
+                .scale(if (holding) 1.18f else 1f)
+                .clip(CircleShape)
+                .background(
+                    if (holding) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                Icons.Filled.Mic,
+                contentDescription = stringResource(R.string.cd_hold_to_record),
+                tint = if (holding) Color.White else MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(18.dp)
+            )
+        }
     }
 }
 
@@ -328,7 +339,7 @@ fun CoachRecordingIndicator(controller: CoachVoiceController, modifier: Modifier
     val dotAlpha by pulse.animateFloat(
         initialValue = 1f,
         targetValue = 0.25f,
-        animationSpec = infiniteRepeatable(tween(700), RepeatMode.Reverse),
+        animationSpec = infiniteRepeatable(tween(AppMotion.TweenPulseMs), RepeatMode.Reverse),
         label = "dotAlpha"
     )
     Row(
@@ -339,13 +350,13 @@ fun CoachRecordingIndicator(controller: CoachVoiceController, modifier: Modifier
         if (controller.phase == VoicePhase.Transcribing) {
             CircularProgressIndicator(
                 modifier = Modifier.size(16.dp),
-                color = AppColors.Calorie,
+                color = MaterialTheme.colorScheme.primary,
                 strokeWidth = 2.dp
             )
             Text(
                 stringResource(R.string.voice_transcribing),
                 fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             return@Row
         }
@@ -366,19 +377,40 @@ fun CoachRecordingIndicator(controller: CoachVoiceController, modifier: Modifier
 
         val armed = controller.cancelArmed
         val live = controller.liveText
-        Text(
-            when {
+        if (controller.phase == VoicePhase.Holding || live.isBlank()) {
+            // Fixed phase hints crossfade on change; the live transcript streams
+            // as plain text below (animating every recognition chunk strobes).
+            val hint = when {
                 controller.phase == VoicePhase.Holding && armed -> stringResource(R.string.voice_release_to_cancel)
                 controller.phase == VoicePhase.Holding -> stringResource(R.string.voice_slide_to_cancel)
-                live.isNotBlank() -> live
                 else -> stringResource(R.string.voice_listening)
-            },
-            fontSize = 14.sp,
-            color = if (armed) MaterialTheme.colorScheme.error
-                    else MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Faint),
-            maxLines = 1,
-            modifier = Modifier.weight(1f, fill = false)
-        )
+            }
+            AnimatedContent(
+                targetState = hint,
+                transitionSpec = {
+                    (fadeIn(tween(AppMotion.TweenDefaultMs, easing = AppMotion.EasingStandard)))
+                        .togetherWith(fadeOut(tween(AppMotion.TweenFastMs, easing = AppMotion.EasingStandard)))
+                },
+                modifier = Modifier.weight(1f, fill = false),
+                label = "voicePhaseHint",
+            ) { text ->
+                Text(
+                    text,
+                    fontSize = 14.sp,
+                    color = if (armed) MaterialTheme.colorScheme.error
+                            else MaterialTheme.colorScheme.outline,
+                    maxLines = 1,
+                )
+            }
+        } else {
+            Text(
+                live,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.outline,
+                maxLines = 1,
+                modifier = Modifier.weight(1f, fill = false)
+            )
+        }
     }
 }
 
@@ -387,7 +419,6 @@ fun CoachRecordingIndicator(controller: CoachVoiceController, modifier: Modifier
 fun CoachVoiceCancelButton(onClick: () -> Unit) {
     FilledIconButton(
         onClick = onClick,
-        modifier = Modifier.size(34.dp),
         colors = IconButtonDefaults.filledIconButtonColors(
             containerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
             contentColor = MaterialTheme.colorScheme.error,

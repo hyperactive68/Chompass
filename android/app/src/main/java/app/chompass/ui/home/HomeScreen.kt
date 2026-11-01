@@ -111,6 +111,7 @@ import app.chompass.services.grounding.GroundedEntryFeature
 import app.chompass.ui.components.ChompassDialog
 import app.chompass.ui.components.ChompassDialogActions
 import app.chompass.ui.components.ChompassSnackbarHost
+import app.chompass.ui.components.contentMaxWidth
 import app.chompass.ui.settings.RecalcResultSheet
 import app.chompass.ui.components.ChompassSurface
 import app.chompass.ui.components.InAppCameraCaptureDialog
@@ -121,8 +122,6 @@ import app.chompass.ui.components.isDarkTheme
 import app.chompass.ui.util.formatClockMillis
 import app.chompass.ui.navigation.BottomNavScrollPadding
 import app.chompass.ui.navigation.BottomOverlayPadding
-import app.chompass.ui.theme.AppRadii
-import app.chompass.ui.theme.AppTextOpacity
 import app.chompass.ui.theme.dayTypeColor
 import app.chompass.ui.theme.nutrientAccentColor
 import kotlinx.coroutines.flow.first
@@ -516,7 +515,7 @@ fun HomeScreen(
     // No topBar: the empty TopAppBar used to act as the status-bar spacer, but the
     // ad strip above this screen (TabWithBanner) now owns that inset.
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = Color.Transparent,
         snackbarHost = {
             // Custom docked bottom nav overlays the Scaffold; lift the host so
             // snackbars (delete-undo, paste confirmation) are not hidden behind it.
@@ -529,7 +528,7 @@ fun HomeScreen(
         Box(Modifier.fillMaxSize().padding(padding)) {
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize(),
+                .contentMaxWidth(),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(
                 top = if (inSelectionMode) 72.dp else 8.dp,
                 bottom = BottomNavScrollPadding
@@ -559,7 +558,7 @@ fun HomeScreen(
                     Text(
                         text = stringResource(R.string.home_loading_sample_data),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     )
                 }
@@ -611,7 +610,7 @@ fun HomeScreen(
                         Text(
                             stringResource(R.string.home_today),
                             style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(horizontal = 16.dp),
                         )
                     } else {
@@ -744,7 +743,7 @@ fun HomeScreen(
                             MacroCard(
                                 label = stringResource(nutrient.displayNameRes),
                                 shortLabel = stringResource(
-                                    ui.homeDisplay.cardLabelRes(nutrient, ui.homeDisplay.macroCardLayout)
+                                    ui.homeDisplay.cardLabelRes(nutrient)
                                 ),
                                 current = current,
                                 goal = goal,
@@ -863,7 +862,7 @@ fun HomeScreen(
                                     else R.string.home_no_foods_logged,
                                 ),
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -1086,7 +1085,7 @@ fun HomeScreen(
                             .clickable {
                                 showFillGapsSheet = true
                             },
-                        cornerRadius = AppRadii.SectionCard,
+                        cornerRadius = 16.dp,
                         padding = 0.dp
                     ) {
                         Row(
@@ -1112,7 +1111,7 @@ fun HomeScreen(
                                 Icon(
                                     Icons.Filled.Close,
                                     contentDescription = stringResource(R.string.cd_dismiss_fill_gaps_banner),
-                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(18.dp)
                                 )
                             }
@@ -1124,7 +1123,7 @@ fun HomeScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable(onClick = vm::restoreRecoveredReview),
-                        cornerRadius = AppRadii.SectionCard,
+                        cornerRadius = 16.dp,
                         padding = 0.dp
                     ) {
                         Row(
@@ -1153,7 +1152,7 @@ fun HomeScreen(
                                 Icon(
                                     Icons.Filled.Close,
                                     contentDescription = stringResource(R.string.cd_discard_recovered_review),
-                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(18.dp)
                                 )
                             }
@@ -1166,7 +1165,7 @@ fun HomeScreen(
                             .fillMaxWidth()
                             .alpha(if (pasteBusy) 0.55f else 1f)
                             .clickable(enabled = !pasteBusy, onClick = paste),
-                        cornerRadius = AppRadii.SectionCard,
+                        cornerRadius = 16.dp,
                         padding = 0.dp
                     ) {
                         Row(
@@ -1195,7 +1194,7 @@ fun HomeScreen(
                                 Icon(
                                     Icons.Filled.Close,
                                     contentDescription = stringResource(R.string.cd_dismiss_paste),
-                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(18.dp)
                                 )
                             }
@@ -1879,6 +1878,7 @@ fun HomeScreen(
                 vm.dismissQueue()
                 returnToAddFoodGrid()
             },
+            providerDirectory = container.providerDirectory,
         )
     }
     if (showFillGapsSheet) {
@@ -2005,14 +2005,14 @@ fun HomeScreen(
         val uriHandler = LocalUriHandler.current
         ChompassDialog(onDismissRequest = { vm.clearError() }) {
             Text(stringResource(R.string.error_title), fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            Text(err, color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary))
+            Text(err, color = MaterialTheme.colorScheme.onSurfaceVariant)
             ui.errorDetail?.let { detail ->
                 SelectionContainer {
                     Text(
                         detail,
                         fontFamily = FontFamily.Monospace,
                         fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -2058,7 +2058,7 @@ fun HomeScreen(
                 Text(
                     stringResource(R.string.analysis_queue_saved_note),
                     fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 TextButton(
                     onClick = {
@@ -2164,11 +2164,40 @@ fun HomeScreen(
             } else {
                 null
             },
+            // Codeberg #142: a reviewed saved template can fix the library
+            // copy in place instead of logging a row; hide drops it from
+            // suggestions (reversible in Settings → Saved foods).
+            onSaveToLibrary = ui.pendingReviewSource?.let { template ->
+                { name, grams, scale, mealType, selectedServingUnit, selectedServingQuantity, editedAnalysis, logTime ->
+                    vm.saveAnalysisToLibrary(
+                        template = template,
+                        name = name,
+                        servingGrams = grams,
+                        scale = scale,
+                        mealType = mealType,
+                        selectedServingUnit = selectedServingUnit,
+                        selectedServingQuantity = selectedServingQuantity,
+                        editedAnalysis = editedAnalysis,
+                        logTime = logTime,
+                    )
+                }
+            },
+            onHideFromSuggestions = ui.pendingReviewSource?.let { template ->
+                { vm.hideSavedFood(template.favoriteKey); vm.dismissPending() }
+            },
             // Fresh barcode reviews give the text slot to Save to favorites;
             // with a progressive draft in progress "add next" keeps the slot.
+            // A saved-template review without an open draft gives the slot to
+            // Save to library instead (Codeberg #142) — "add next" only makes
+            // sense when there is a draft to add to.
             onAddToProgressiveMeal = if (
                 ui.pendingFoodSource == FoodSource.BARCODE &&
                 ui.pendingReviewSource == null &&
+                ui.progressiveMeal?.items?.isNotEmpty() != true
+            ) {
+                null
+            } else if (
+                ui.pendingReviewSource != null &&
                 ui.progressiveMeal?.items?.isNotEmpty() != true
             ) {
                 null
@@ -2275,7 +2304,7 @@ internal fun HomeScreenPreviewContent(
         foodLogMealGroups(ui.todayEntries, ui.foodLogSortOrder)
     }
 
-    Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
+    Scaffold(containerColor = Color.Transparent) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -2309,7 +2338,7 @@ internal fun HomeScreenPreviewContent(
                         Text(
                             stringResource(R.string.home_today),
                             style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(horizontal = 16.dp),
                         )
                         if (ui.homeDisplay.calorieHeroLayout != HomeCalorieHeroLayout.HIDDEN) {
@@ -2347,7 +2376,7 @@ internal fun HomeScreenPreviewContent(
                                 MacroCard(
                                     label = stringResource(nutrient.displayNameRes),
                                     shortLabel = stringResource(
-                                        ui.homeDisplay.cardLabelRes(nutrient, ui.homeDisplay.macroCardLayout)
+                                        ui.homeDisplay.cardLabelRes(nutrient)
                                     ),
                                     current = when (nutrient) {
                                         HomeTopNutrient.CALORIES -> ui.loggedCaloriesToday.toDouble()
@@ -2386,7 +2415,7 @@ internal fun HomeScreenPreviewContent(
                                 Text(
                                     stringResource(R.string.home_no_foods_logged),
                                     style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                         }
