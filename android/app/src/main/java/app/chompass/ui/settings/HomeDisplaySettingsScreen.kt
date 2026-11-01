@@ -59,12 +59,10 @@ import app.chompass.ui.navigation.BottomNavScrollPadding
 import app.chompass.ui.navigation.ChompassRoutes
 import app.chompass.ui.components.ChompassDialog
 import app.chompass.ui.components.MacroCard
+import app.chompass.ui.components.contentMaxWidth
 import app.chompass.ui.home.FoodLogMacroChipPickerDialog
 import app.chompass.ui.home.HomeLookPreview
 import app.chompass.ui.home.HomeTopNutrientPickerDialog
-import app.chompass.ui.theme.AppColors
-import app.chompass.ui.theme.AppRadii
-import app.chompass.ui.theme.AppTextOpacity
 
 @Composable
 fun HomeDisplaySettingsScreen(
@@ -82,7 +80,7 @@ fun HomeDisplaySettingsScreen(
     var showFoodLogLayoutPicker by remember { mutableStateOf(false) }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = Color.Transparent,
         topBar = {
             SettingsTopBar(
                 title = stringResource(R.string.home_display_title),
@@ -93,6 +91,7 @@ fun HomeDisplaySettingsScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .contentMaxWidth()
                 .padding(padding)
                 .padding(horizontal = 16.dp),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(
@@ -182,8 +181,8 @@ fun HomeDisplaySettingsScreen(
                     HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
                     ToggleRow(
                         label = stringResource(R.string.home_display_slim_full_names),
-                        checked = display.slimCardFullNames,
-                        onChange = vm::setHomeSlimFullNames,
+                        checked = display.fullNutrientNames,
+                        onChange = vm::setHomeFullNutrientNames,
                     )
                     SettingNote(stringResource(R.string.home_display_slim_full_names_desc))
                 }
@@ -261,7 +260,7 @@ private fun SettingNote(text: String) {
     Text(
         text,
         fontSize = 13.sp,
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
     )
 }
@@ -309,8 +308,8 @@ private fun FoodLogLayoutOption(
 ) {
     Column(
         modifier
-            .clip(RoundedCornerShape(AppRadii.Field))
-            .background(if (selected) AppColors.Calorie.copy(alpha = 0.10f) else Color.Transparent)
+            .clip(MaterialTheme.shapes.medium)
+            .background(if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.10f) else Color.Transparent)
             .clickable(onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -325,7 +324,7 @@ private fun FoodLogLayoutOption(
         Text(
             label,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-            color = if (selected) AppColors.Calorie else MaterialTheme.colorScheme.onSurface,
+            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
         )
     }
@@ -489,8 +488,8 @@ private fun SettingOptionRow(
     Row(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(AppRadii.Field))
-            .background(if (selected) AppColors.Calorie.copy(alpha = 0.10f) else Color.Transparent)
+            .clip(MaterialTheme.shapes.medium)
+            .background(if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.10f) else Color.Transparent)
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -500,7 +499,7 @@ private fun SettingOptionRow(
             label,
             modifier = Modifier.padding(start = 12.dp),
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-            color = if (selected) AppColors.Calorie else MaterialTheme.colorScheme.onSurface,
+            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
         )
     }
 }
@@ -629,7 +628,7 @@ private fun BowlWire(modifier: Modifier, stroke: Dp) {
 }
 
 @Composable
-private fun WireAccent(alpha: Float = 0.55f): Color = AppColors.Calorie.copy(alpha = alpha)
+private fun WireAccent(alpha: Float = 0.55f): Color = MaterialTheme.colorScheme.primary.copy(alpha = alpha)
 
 /** A bar standing in for a piece of text. */
 @Composable

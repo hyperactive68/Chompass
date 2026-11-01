@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.DirectionsRun
 import androidx.compose.material.icons.automirrored.outlined.DirectionsWalk
@@ -54,10 +53,7 @@ import app.chompass.ui.components.SplitDecimalWheelPicker
 import app.chompass.ui.components.UnitToggle
 import app.chompass.ui.components.energyUnitLabel
 import app.chompass.ui.navigation.LocalEnergyUnit
-import app.chompass.ui.theme.AppColors
 import app.chompass.models.UnitFormat
-import app.chompass.ui.theme.AppRadii
-import app.chompass.ui.theme.AppTextOpacity
 
 @Composable
 internal fun ActivityStep(selected: ActivityLevel, onSelect: (ActivityLevel) -> Unit) {
@@ -182,7 +178,7 @@ internal fun DietModeStep(
                 Text(
                     stringResource(R.string.keto_carb_manual_hint),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = AppTextOpacity.Muted)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -264,7 +260,7 @@ internal fun GoalSpeedStep(
                 Icon(
                     imageVector = Icons.Filled.CheckCircle,
                     contentDescription = null,
-                    tint = AppColors.Calorie,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(56.dp)
                 )
                 Spacer(Modifier.height(12.dp))
@@ -277,7 +273,7 @@ internal fun GoalSpeedStep(
                 Text(
                     stringResource(R.string.onboarding_pace_balanced_subtitle),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = AppTextOpacity.Muted),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
             }
@@ -304,7 +300,7 @@ internal fun GoalSpeedStep(
                 Text(
                     stringResource(R.string.onboarding_pace_per_week),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = AppTextOpacity.Muted)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Spacer(Modifier.height(20.dp))
@@ -326,8 +322,8 @@ internal fun GoalSpeedStep(
                 valueRange = 0f..2f,
                 steps = 1,
                 colors = androidx.compose.material3.SliderDefaults.colors(
-                    thumbColor = AppColors.Calorie,
-                    activeTrackColor = AppColors.Calorie,
+                    thumbColor = MaterialTheme.colorScheme.primary,
+                    activeTrackColor = MaterialTheme.colorScheme.primary,
                     inactiveTrackColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.15f)
                 ),
                 modifier = Modifier.padding(horizontal = 16.dp)
@@ -335,7 +331,7 @@ internal fun GoalSpeedStep(
             Spacer(Modifier.height(16.dp))
             // Estimated days card
             Card(
-                shape = RoundedCornerShape(AppRadii.Field),
+                shape = MaterialTheme.shapes.medium,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -353,7 +349,7 @@ internal fun GoalSpeedStep(
                         Text(
                             buildAnnotatedString {
                                 append(reachPrefix)
-                                withStyle(SpanStyle(fontWeight = FontWeight.Bold, color = AppColors.Calorie)) {
+                                withStyle(SpanStyle(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)) {
                                     append(reachDays)
                                 }
                             },
@@ -371,7 +367,7 @@ internal fun GoalSpeedStep(
                             else -> stringResource(R.string.onboarding_pace_caption_recommended)
                         },
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = AppTextOpacity.Muted)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -386,8 +382,8 @@ private fun PaceIcon(icon: ImageVector, label: String, selected: Boolean) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = if (selected) AppColors.Calorie
-                   else MaterialTheme.colorScheme.onBackground.copy(alpha = AppTextOpacity.Disabled),
+            tint = if (selected) MaterialTheme.colorScheme.primary
+                   else MaterialTheme.colorScheme.outline,
             modifier = Modifier.size(28.dp)
         )
         Spacer(Modifier.height(4.dp))
@@ -395,8 +391,8 @@ private fun PaceIcon(icon: ImageVector, label: String, selected: Boolean) {
             label,
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Medium,
-            color = if (selected) AppColors.Calorie
-                    else MaterialTheme.colorScheme.onBackground.copy(alpha = AppTextOpacity.Muted)
+            color = if (selected) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

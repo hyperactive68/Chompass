@@ -24,6 +24,8 @@ import app.chompass.services.InputSanitizer
 import app.chompass.services.WeightAnalysisService
 import app.chompass.services.WeightForecast
 import app.chompass.data.FastingRepository
+import app.chompass.services.ai.ProviderDirectory.Companion.findEntry
+import app.chompass.services.ai.ChatGptAuthManager
 import kotlinx.coroutines.flow.first
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -62,6 +64,9 @@ class ChatService(
      *  when set and fasting is enabled, the coach prompt carries a fasting
      *  snapshot so "should I eat now?" answers differ at hour 2 vs hour 15. */
     private val fastingRepository: FastingRepository? = null,
+    /** OAuth-backed ChatGPT plan session for the Responses tool loop. */
+    private val chatGptAuth: ChatGptAuthManager? = null,
+    private val providerDirectory: () -> ProviderDirectory? = { null },
 ) {
     init {
         require(keyStore != null || keyLookup != null) {
@@ -137,11 +142,20 @@ class ChatService(
         val maxTokens = cfg.maxResponseTokens
         val geminiGoogleSearch = cfg.geminiGoogleSearch
         val readTimeoutSeconds = cfg.aiReadTimeoutSeconds
-        val httpClient = AiHttp.clientForProvider(okHttp, provider, readTimeoutSeconds)
+        val httpClient = AiHttp.clientForProvider(
+            okHttp,
+            provider,
+            readTimeoutSeconds,
+            bundledDirectory = providerDirectory().findEntry(baseUrl) != null,
+        )
 
         val reply = when (provider.apiFormat) {
             AIProvider.ApiFormat.GEMINI -> runGeminiToolLoop(httpClient, baseUrl, model, apiKey!!, systemPrompt, history, newUserMessage, tools, imageBytes, geminiGoogleSearch, maxTokens)
             AIProvider.ApiFormat.ANTHROPIC -> runAnthropicToolLoop(httpClient, baseUrl, model, apiKey!!, systemPrompt, history, newUserMessage, tools, imageBytes, maxTokens)
+            AIProvider.ApiFormat.CHATGPT_RESPONSES -> runChatGptToolLoop(
+                httpClient, model, systemPrompt, history, newUserMessage, tools, imageBytes,
+                maxTokens, cfg.reasoningEffort,
+            )
             AIProvider.ApiFormat.OPENAI_COMPATIBLE -> runOpenAIToolLoop(httpClient, baseUrl, model, apiKey, systemPrompt, history, newUserMessage, provider, tools, imageBytes, maxTokens, cfg.reasoningEffort)
             AIProvider.ApiFormat.ON_DEVICE -> error("unreachable — guarded above")
         }
@@ -150,6 +164,54 @@ class ChatService(
             proposedFood = (tools.lastProposal as? CoachProposal.Food)?.entry,
             proposedWeight = (tools.lastProposal as? CoachProposal.Weight)?.entry,
             proposedWater = (tools.lastProposal as? CoachProposal.Water)?.entry,
+        )
+    }
+
+    // MARK: - ChatGPT-plan Responses tool loop
+
+    private suspend fun runChatGptToolLoop(
+        client: OkHttpClient,
+        model: String,
+        systemPrompt: String,
+        history: List<ChatMessage>,
+        newUserMessage: String,
+        tools: CoachTools,
+        imageBytes: ByteArray?,
+        maxTokens: Int,
+        reasoningEffort: OpenRouterReasoningEffort,
+    ): String {
+        val auth = chatGptAuth ?: throw ChatGptAuthException("Connect your ChatGPT account in Settings first.")
+        val declarations = JSONArray()
+        for (name in CoachTools.TOOL_NAMES) {
+            declarations.put(JSONObject().apply {
+                put("type", "function")
+                put("name", name)
+                put("description", CoachTools.TOOL_DESCRIPTIONS[name] ?: "")
+                put("parameters", parametersSchemaFor(name))
+                put("strict", false)
+            })
+        }
+        val chatGptTools = JSONArray().put(
+            JSONObject()
+                .put("type", "namespace")
+                .put("name", "chompass")
+                .put("description", "Local nutrition data and user-confirmed logging tools for Chompass Coach.")
+                .put("tools", declarations),
+        )
+        return ChatGptResponsesClient.coach(
+            client = client,
+            model = model,
+            accessToken = auth.accessToken(),
+            systemPrompt = systemPrompt,
+            history = history,
+            newUserMessage = newUserMessage,
+            imageBytes = imageBytes,
+            tools = chatGptTools,
+            maxOutputTokens = maxTokens,
+            executeTool = tools::execute,
+            reasoningEffort = OpenRouterReasoningEffort.sanitizeFor(
+                AIProvider.CHATGPT, model, reasoningEffort,
+            ),
         )
     }
 

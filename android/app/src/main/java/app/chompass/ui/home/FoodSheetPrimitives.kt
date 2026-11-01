@@ -3,7 +3,6 @@ package app.chompass.ui.home
 import androidx.compose.foundation.LocalOverscrollFactory
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.OverscrollEffect
@@ -14,6 +13,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,6 +49,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.draw.clip
@@ -84,11 +88,11 @@ import app.chompass.R
 import app.chompass.models.CurrentMealCatalog
 import app.chompass.models.MealType
 import app.chompass.models.ServingUnitOption
-import app.chompass.ui.theme.AppColors
 import app.chompass.ui.components.isDarkTheme
+import app.chompass.ui.components.glassSheetColor
+import app.chompass.ui.components.pressScale
+import app.chompass.ui.theme.AppMotion
 import app.chompass.ui.components.MagnitudeDrafts
-import app.chompass.ui.theme.AppRadii
-import app.chompass.ui.theme.AppTextOpacity
 import app.chompass.models.MacroValueFormatter
 import app.chompass.ui.components.SplitDecimalWheelPicker
 import app.chompass.ui.components.UnitWheelPicker
@@ -185,7 +189,7 @@ internal fun StaleCompositionNote(
         Text(
             stringResource(R.string.nutrition_stale_composition),
             fontSize = 13.sp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             lineHeight = 18.sp,
         )
         if (onReestimate != null) {
@@ -219,7 +223,7 @@ internal fun MissingValuesNote(
         Text(
             pluralStringResource(R.plurals.edit_ai_missing_values, missingCount, missingCount),
             fontSize = 13.sp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             lineHeight = 18.sp,
         )
         if (onFill != null) {
@@ -248,7 +252,7 @@ internal fun SheetStickyPrimaryBar(
     textActionEnabled: Boolean = true,
 ) {
     val isDark = isDarkTheme()
-    val hairline = if (isDark) AppColors.HairlineBorderDark else AppColors.HairlineBorderLight
+    val hairline = MaterialTheme.colorScheme.outlineVariant
     Column(
         Modifier
             .fillMaxWidth()
@@ -281,17 +285,24 @@ internal fun SheetStickyPrimaryBar(
                     Text(textActionLabel, fontWeight = FontWeight.Medium)
                 }
             }
-            val shape = RoundedCornerShape(AppRadii.Sheet)
+            val shape = MaterialTheme.shapes.extraLarge
+            val primaryInteraction = remember { MutableInteractionSource() }
             Box(
                 Modifier
                     .fillMaxWidth()
                     .clip(shape)
+                    .pressScale(primaryInteraction, enabled = primaryEnabled)
                     .background(MaterialTheme.colorScheme.primary)
                     .alpha(if (primaryEnabled) 1f else 0.45f)
-                    .clickable(enabled = primaryEnabled, onClick = {
-                        MagnitudeDrafts.commitAll()
-                        onPrimary()
-                    })
+                    .clickable(
+                        interactionSource = primaryInteraction,
+                        indication = LocalIndication.current,
+                        enabled = primaryEnabled,
+                        onClick = {
+                            MagnitudeDrafts.commitAll()
+                            onPrimary()
+                        },
+                    )
                     .padding(vertical = 14.dp),
                 contentAlignment = Alignment.Center,
             ) {
@@ -331,18 +342,20 @@ internal fun SheetToolbarPill(
     } else {
         Modifier
             .clip(shape)
-            .background(if (isDark) AppColors.TranslucentSurfaceDark else AppColors.TranslucentSurfaceLight)
-            .border(0.5.dp, if (isDark) AppColors.HairlineBorderDark else AppColors.HairlineBorderLight, shape)
+            .background(MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.92f))
+            .border(0.5.dp, MaterialTheme.colorScheme.outlineVariant, shape)
     }).alpha(if (enabled) 1f else 0.45f)
+    val pillInteraction = remember { MutableInteractionSource() }
     Box(
         modifier
+            .pressScale(pillInteraction, enabled = enabled)
             .then(pillContainer)
-            .clickable(enabled = enabled, onClick = onClick)
+            .clickable(interactionSource = pillInteraction, indication = LocalIndication.current, enabled = enabled, onClick = onClick)
             .padding(horizontal = horizontalPadding, vertical = 8.dp)
     ) {
         Text(
             label,
-            color = if (bold) MaterialTheme.colorScheme.onPrimary else AppColors.Calorie,
+            color = if (bold) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
             fontSize = if (compact) 14.sp else 16.sp,
             fontWeight = if (bold) FontWeight.SemiBold else FontWeight.Medium,
             maxLines = maxLines,
@@ -360,7 +373,7 @@ internal fun SheetSectionHeader(title: String) {
         title,
         fontSize = 14.sp,
         fontWeight = FontWeight.SemiBold,
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(start = 18.dp, top = 8.dp, bottom = 4.dp)
     )
 }
@@ -368,22 +381,30 @@ internal fun SheetSectionHeader(title: String) {
 @Composable
 internal fun SheetPillRow(
     onClick: (() -> Unit)? = null,
+    /** TalkBack action label, e.g. "Change meal type". */
+    onClickLabel: String? = null,
+    /** Announced control state, e.g. Expanded/Collapsed for menu triggers. */
+    stateDescription: String? = null,
     content: @Composable RowScope.() -> Unit
 ) {
-    val shape = RoundedCornerShape(AppRadii.PillCard)
-    val isDark = isDarkTheme()
-    val rowFill = if (isDark) {
-        AppColors.TranslucentSurfaceDark
-    } else {
-        AppColors.TranslucentSurfaceLight
-    }
-    val rowBorder = if (isDark) AppColors.HairlineBorderDark else AppColors.HairlineBorderLight
-    val base = Modifier
+    val shape = RoundedCornerShape(percent = 50)
+    val rowFill = MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.92f)
+    val rowBorder = MaterialTheme.colorScheme.outlineVariant
+    val rowInteraction = remember { MutableInteractionSource() }
+    var base = Modifier
         .fillMaxWidth()
+        .pressScale(rowInteraction, enabled = onClick != null)
         .clip(shape)
         .background(rowFill)
         .border(0.5.dp, rowBorder, shape)
-    val withClick = if (onClick != null) base.clickable(onClick = onClick) else base
+    if (stateDescription != null) {
+        base = base.semantics { this.stateDescription = stateDescription }
+    }
+    val withClick = if (onClick != null) {
+        base.clickable(interactionSource = rowInteraction, indication = LocalIndication.current, onClickLabel = onClickLabel, role = Role.Button, onClick = onClick)
+    } else {
+        base
+    }
     Row(
         withClick.padding(horizontal = 18.dp, vertical = 15.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -393,14 +414,14 @@ internal fun SheetPillRow(
 
 @Composable
 internal fun SheetPillCard(content: @Composable ColumnScope.() -> Unit) {
-    val shape = RoundedCornerShape(AppRadii.PillCard)
-    val isDark = isDarkTheme()
-    val cardFill = if (isDark) {
-        AppColors.TranslucentSurfaceDark
-    } else {
-        AppColors.TranslucentSurfaceLight
-    }
-    val cardBorder = if (isDark) AppColors.HairlineBorderDark else AppColors.HairlineBorderLight
+    // Grouped-list card: fixed 16dp radius (M3 large slot, same mapping as the
+    // other Home surfaces). percent = 50 scales each corner with the card's
+    // smaller side, so multi-row cards (macros, micros, expanded serving or
+    // micro wheel) grew 100-180dp circular corners that clipped the kcal label
+    // and number on the top rows (6.0.0 beta device pass 2026-10-31).
+    val shape = MaterialTheme.shapes.large
+    val cardFill = MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.92f)
+    val cardBorder = MaterialTheme.colorScheme.outlineVariant
     Column(
         Modifier
             .fillMaxWidth()
@@ -544,7 +565,7 @@ internal fun ServingQuantityCard(
         }
         val rotation by animateFloatAsState(
             targetValue = if (expanded) 180f else 0f,
-            animationSpec = spring(dampingRatio = 0.75f),
+            animationSpec = AppMotion.pressSpring(),
         )
 
         Row(
@@ -568,7 +589,7 @@ internal fun ServingQuantityCard(
             )
             if (isLoadingUnits && unitOptions.isEmpty()) {
                 CircularProgressIndicator(
-                    color = AppColors.Calorie,
+                    color = MaterialTheme.colorScheme.primary,
                     strokeWidth = 2.dp,
                     modifier = Modifier.size(18.dp),
                 )
@@ -578,7 +599,7 @@ internal fun ServingQuantityCard(
                     summaryValue,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = AppColors.Calorie,
+                    color = MaterialTheme.colorScheme.primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -588,7 +609,7 @@ internal fun ServingQuantityCard(
                 Icon(
                     Icons.Filled.Edit,
                     contentDescription = stringResource(R.string.cd_edit_serving),
-                    tint = AppColors.Calorie,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .minimumInteractiveComponentSize()
                         .size(18.dp)
@@ -610,8 +631,8 @@ internal fun ServingQuantityCard(
 
         AnimatedVisibility(
             visible = expanded,
-            enter = expandVertically(animationSpec = spring(dampingRatio = 0.75f)),
-            exit = shrinkVertically(animationSpec = spring(dampingRatio = 0.75f)),
+            enter = expandVertically(animationSpec = AppMotion.spatialSpring()),
+            exit = shrinkVertically(animationSpec = AppMotion.spatialSpring()),
         ) {
             Column {
                 Box(
@@ -661,14 +682,14 @@ internal fun ServingQuantityCard(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
                         CircularProgressIndicator(
-                            color = AppColors.Calorie,
+                            color = MaterialTheme.colorScheme.primary,
                             strokeWidth = 2.dp,
                             modifier = Modifier.size(18.dp),
                         )
                         Text(
                             stringResource(R.string.entry_analysis_inferring_units),
                             fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -685,7 +706,7 @@ internal fun ServingQuantityCard(
                             Text(
                                 stringResource(R.string.sheet_serving_custom_name),
                                 fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.width(92.dp)
                             )
                             BasicTextField(
@@ -696,7 +717,7 @@ internal fun ServingQuantityCard(
                                     color = MaterialTheme.colorScheme.onSurface,
                                     fontSize = 16.sp,
                                 ),
-                                cursorBrush = SolidColor(AppColors.Calorie),
+                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                                 modifier = Modifier.weight(1f)
                             )
                         }
@@ -704,7 +725,7 @@ internal fun ServingQuantityCard(
                             Text(
                                 stringResource(R.string.sheet_serving_custom_grams),
                                 fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.width(92.dp)
                             )
                             BasicTextField(
@@ -718,20 +739,20 @@ internal fun ServingQuantityCard(
                                     color = MaterialTheme.colorScheme.onSurface,
                                     fontSize = 16.sp,
                                 ),
-                                cursorBrush = SolidColor(AppColors.Calorie),
+                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                                 modifier = Modifier.weight(1f)
                             )
                             Spacer(Modifier.width(6.dp))
                             Text(
                                 stringResource(R.string.unit_g),
                                 fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Spacer(Modifier.width(10.dp))
                             Icon(
                                 Icons.Filled.Check,
                                 contentDescription = stringResource(R.string.cd_apply_serving_edit),
-                                tint = AppColors.Calorie,
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier
                                     .minimumInteractiveComponentSize()
                                     .size(20.dp)
@@ -746,7 +767,7 @@ internal fun ServingQuantityCard(
                                 Icon(
                                     Icons.Filled.Delete,
                                     contentDescription = stringResource(R.string.cd_remove_serving_unit),
-                                    tint = AppColors.Calorie,
+                                    tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier
                                         .minimumInteractiveComponentSize()
                                         .size(20.dp)
@@ -776,7 +797,7 @@ internal fun ServingQuantityCard(
                         Text(
                             "~${MacroValueFormatter.string(servingSizeGrams)} $gramUnit",
                             fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -794,9 +815,9 @@ internal fun SheetNutritionRow(
     accentColor: Color? = null,
 ) {
     val labelColor = accentColor?.let {
-        if (dim) it.copy(alpha = AppTextOpacity.Secondary) else it
+        if (dim) it.copy(alpha = 0.7f) else it
     } ?: if (dim) {
-        MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+        MaterialTheme.colorScheme.onSurfaceVariant
     } else {
         MaterialTheme.colorScheme.onSurface
     }
@@ -821,7 +842,7 @@ internal fun SheetNutritionRow(
         Text(
             unit,
             fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.width(36.dp)
         )
     }
@@ -848,11 +869,11 @@ internal fun SheetGlassDropdownMenu(
     offset: DpOffset = DpOffset(0.dp, 0.dp),
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val shape = RoundedCornerShape(AppRadii.Container)
+    val shape = MaterialTheme.shapes.large
     val sizedModifier = if (menuWidth != null) modifier.width(menuWidth) else modifier
     val isDark = isDarkTheme()
-    val menuContainer = if (isDark) AppColors.TranslucentSurfaceDark else AppColors.TranslucentSurfaceLight
-    val borderColor = if (isDark) AppColors.HairlineBorderDark else AppColors.HairlineBorderLight
+    val menuContainer = glassSheetColor(MaterialTheme.colorScheme.surfaceContainerLow)
+    val borderColor = MaterialTheme.colorScheme.outlineVariant
 
     DropdownMenu(
         expanded = expanded,
@@ -878,13 +899,15 @@ internal fun SheetGlassDropdownMenuItem(
     onClick: () -> Unit
 ) {
     val isDark = isDarkTheme()
-    val checkTint = if (isDark) Color.White else AppColors.Calorie
+    val checkTint = if (isDark) Color.White else MaterialTheme.colorScheme.primary
+    val itemInteraction = remember { MutableInteractionSource() }
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 7.dp, vertical = 1.dp)
-            .clip(RoundedCornerShape(AppRadii.Field))
-            .clickable(onClick = onClick)
+            .clip(MaterialTheme.shapes.medium)
+            .pressScale(itemInteraction)
+            .clickable(interactionSource = itemInteraction, indication = LocalIndication.current, onClick = onClick)
             // ~48dp tap target per row (Material menu guidance), matching the
             // roomier iOS add-menu rows instead of the old cramped ~36dp.
             .padding(horizontal = 10.dp, vertical = 12.dp),
@@ -895,7 +918,7 @@ internal fun SheetGlassDropdownMenuItem(
                 Icon(
                     leadingIcon,
                     contentDescription = null,
-                    tint = AppColors.Calorie,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(19.dp)
                 )
                 Spacer(Modifier.width(10.dp))
@@ -919,7 +942,7 @@ internal fun SheetGlassDropdownMenuItem(
             label,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.NearFull),
+            color = MaterialTheme.colorScheme.onSurface,
             lineHeight = 19.sp,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,

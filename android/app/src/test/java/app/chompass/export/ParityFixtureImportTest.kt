@@ -4,6 +4,7 @@ import app.chompass.parity.ParityFixtures
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.Instant
 import java.time.ZoneOffset
 
 /**
@@ -75,6 +76,11 @@ class ParityFixtureImportTest {
         val coffee = foods.first { it.name == "Black coffee" }
         assertTrue(coffee.constituents.isEmpty())
         assertEquals("cup", coffee.selectedServingUnit)
+        // Sync 1.4 (#122): photo refs ride the food row; rows without refs stay empty.
+        assertEquals(listOf("photos/0123456789abcdef.jpg"), salad.photoFilenames)
+        assertTrue(coffee.photoFilenames.isEmpty())
+        // #122: the additive UTC instant is authoritative for entry time.
+        assertEquals(Instant.parse("2026-07-24T12:30:00Z"), salad.timestamp)
     }
 
     @Test

@@ -76,6 +76,39 @@ internal suspend fun PreferencesStore.setWebDavAutoSyncDayImpl(day: String?) {
     }
 }
 
+internal val PreferencesStore.webDavPhotosEnabledImpl: Flow<Boolean>
+    get() = dataStore.data.map { it[Keys.WEBDAV_PHOTOS_ENABLED] ?: false }
+
+internal suspend fun PreferencesStore.setWebDavPhotosEnabledImpl(enabled: Boolean) {
+    dataStore.edit { it[Keys.WEBDAV_PHOTOS_ENABLED] = enabled }
+}
+
+internal val PreferencesStore.webDavPhotosWifiOnlyImpl: Flow<Boolean>
+    get() = dataStore.data.map { it[Keys.WEBDAV_PHOTOS_WIFI_ONLY] ?: true }
+
+internal suspend fun PreferencesStore.setWebDavPhotosWifiOnlyImpl(wifiOnly: Boolean) {
+    dataStore.edit { it[Keys.WEBDAV_PHOTOS_WIFI_ONLY] = wifiOnly }
+}
+
+internal val PreferencesStore.webDavSyncedPhotosImpl: Flow<Set<String>>
+    get() = dataStore.data.map { it[Keys.WEBDAV_SYNCED_PHOTOS] ?: emptySet() }
+
+internal val PreferencesStore.webDavSyncedPhotosUrlImpl: Flow<String?>
+    get() = dataStore.data.map { it[Keys.WEBDAV_SYNCED_PHOTOS_URL] }
+
+/** Refs and their owner URL are written together so a URL switch invalidates the cache atomically. */
+internal suspend fun PreferencesStore.setWebDavSyncedPhotosImpl(refs: Set<String>, ownerUrl: String) {
+    dataStore.edit {
+        if (refs.isEmpty()) {
+            it.remove(Keys.WEBDAV_SYNCED_PHOTOS)
+            it.remove(Keys.WEBDAV_SYNCED_PHOTOS_URL)
+        } else {
+            it[Keys.WEBDAV_SYNCED_PHOTOS] = refs
+            it[Keys.WEBDAV_SYNCED_PHOTOS_URL] = ownerUrl
+        }
+    }
+}
+
 internal val PreferencesStore.lastSyncAtImpl: Flow<String?>
     get() = dataStore.data.map { it[Keys.LAST_SYNC_AT] }
 
@@ -93,5 +126,29 @@ internal suspend fun PreferencesStore.setLastSyncEtagImpl(etag: String?) {
     dataStore.edit {
         if (etag.isNullOrBlank()) it.remove(Keys.LAST_SYNC_ETAG)
         else it[Keys.LAST_SYNC_ETAG] = etag
+    }
+}
+
+internal val PreferencesStore.googleDriveConnectedImpl: Flow<Boolean>
+    get() = dataStore.data.map { it[Keys.GOOGLE_DRIVE_CONNECTED] ?: false }
+
+internal suspend fun PreferencesStore.setGoogleDriveConnectedImpl(connected: Boolean) {
+    dataStore.edit { it[Keys.GOOGLE_DRIVE_CONNECTED] = connected }
+}
+
+internal val PreferencesStore.googleDriveSyncOnFoodLogImpl: Flow<Boolean>
+    get() = dataStore.data.map { it[Keys.GOOGLE_DRIVE_SYNC_ON_FOOD_LOG] ?: false }
+
+internal suspend fun PreferencesStore.setGoogleDriveSyncOnFoodLogImpl(enabled: Boolean) {
+    dataStore.edit { it[Keys.GOOGLE_DRIVE_SYNC_ON_FOOD_LOG] = enabled }
+}
+
+internal val PreferencesStore.googleDriveLastSyncAtImpl: Flow<String?>
+    get() = dataStore.data.map { it[Keys.GOOGLE_DRIVE_LAST_SYNC_AT] }
+
+internal suspend fun PreferencesStore.setGoogleDriveLastSyncAtImpl(iso: String?) {
+    dataStore.edit {
+        if (iso.isNullOrBlank()) it.remove(Keys.GOOGLE_DRIVE_LAST_SYNC_AT)
+        else it[Keys.GOOGLE_DRIVE_LAST_SYNC_AT] = iso
     }
 }

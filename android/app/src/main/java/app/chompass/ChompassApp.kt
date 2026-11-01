@@ -5,6 +5,7 @@ import android.os.Build
 import android.util.Log
 import app.chompass.data.AnalysisQueueStore
 import app.chompass.data.BodyFatRepository
+import app.chompass.data.BodyCompositionRepository
 import app.chompass.data.BodyMeasurementRepository
 import app.chompass.data.ChatRepository
 import app.chompass.data.FastingRepository
@@ -41,7 +42,9 @@ import app.chompass.services.TestDataSeeder
 import app.chompass.services.WaterReminderPlanner
 import app.chompass.services.WidgetSnapshotWriter
 import app.chompass.services.ai.ChatService
+import app.chompass.services.ai.ChatGptAuthManager
 import app.chompass.services.ai.FoodAnalysisService
+import app.chompass.services.ai.ProviderDirectory
 import app.chompass.services.grounding.FoodDatabaseSearch
 import app.chompass.services.grounding.GroundedFoodEntryService
 import app.chompass.services.grounding.GroundedEntryFeature
@@ -52,6 +55,7 @@ import app.chompass.services.health.HealthConnectReadSync
 import app.chompass.services.health.HealthSyncWorker
 import app.chompass.services.health.HomeActivityReader
 import app.chompass.sync.SyncRepository
+import app.chompass.sync.GoogleDriveSyncService
 import app.chompass.utils.LocaleHelper
 import app.chompass.services.ondevice.ModelCatalog
 import app.chompass.services.ondevice.ModelDownloadManager
@@ -250,14 +254,22 @@ class AppContainer(app: ChompassApp) {
     val health = HealthConnectManager(app)
     val homeActivityReader = HomeActivityReader(health, prefs)
 
-    val syncRepository = SyncRepository(prefs, keyStore, appContext = appContext)
+    val syncRepository = SyncRepository(prefs, keyStore, appContext = appContext, imageStore = imageStore)
+    val googleDriveSync = GoogleDriveSyncService(appContext, syncRepository, prefs)
     val profileRepository = ProfileRepository(prefs)
     val goalJournalService = GoalJournalService(prefs, profileRepository)
-    val foodRepository = FoodRepository(prefs, health, imageStore, syncRepository)
+    val foodRepository = FoodRepository(
+        prefs,
+        health,
+        imageStore,
+        syncRepository,
+        onFoodChanged = { googleDriveSync.scheduleSyncAfterFoodChange() },
+    )
     val recipeRepository = RecipeRepository(prefs, foodRepository, syncRepository)
     val weightRepository = WeightRepository(prefs, profileRepository, health, syncRepository)
     val bodyFatRepository = BodyFatRepository(prefs, profileRepository, health, syncRepository)
     val bodyMeasurementRepository = BodyMeasurementRepository(prefs, syncRepository)
+    val bodyCompositionRepository = BodyCompositionRepository(prefs, profileRepository, health, syncRepository)
     val chatRepository = ChatRepository(prefs)
     val waterRepository = WaterRepository(prefs, health, syncRepository).apply {
         // Re-arm the adaptive reminder chain after every water entry so the next
@@ -288,6 +300,7 @@ class AppContainer(app: ChompassApp) {
     val openMeteo = OpenMeteoClient(FoodAnalysisService.defaultClient)
     val weatherRepository = WeatherRepository(prefs, openMeteo)
 
+    val chatGptAuth = ChatGptAuthManager(appContext, keyStore, FoodAnalysisService.defaultClient)
     val onDeviceLlmGateway = OnDeviceLlmGateway(appContext, prefs)
     val onDeviceModelDownloadManager = ModelDownloadManager(appContext)
     val foodAnalysis = FoodAnalysisService(
@@ -297,6 +310,8 @@ class AppContainer(app: ChompassApp) {
         onDeviceModelDownloaded = { modelId ->
             onDeviceModelDownloadManager.isDownloaded(ModelCatalog.forModelId(modelId))
         },
+        chatGptAuth = chatGptAuth,
+        providerDirectory = { providerDirectory },
     )
     /** AI fill-missing scan / banner / mass-fill session (Batch 2). */
     val fillGapsEngine = FillGapsEngine(foodRepository, prefs, foodAnalysis, appContext)
@@ -332,8 +347,24 @@ class AppContainer(app: ChompassApp) {
             usdaIndex = usdaFoodIndex,
         )
     }
-    val chatService = ChatService(prefs, keyStore, foodAnalysis, fastingRepository = fastingRepository)
+    val chatService = ChatService(
+        prefs,
+        keyStore,
+        foodAnalysis,
+        fastingRepository = fastingRepository,
+        chatGptAuth = chatGptAuth,
+        providerDirectory = { providerDirectory },
+    )
     val speechService = SpeechService(prefs, keyStore)
+
+    /**
+     * Bundled OpenAI-compatible endpoint directory (Codeberg #143); null when
+     * the asset is missing or corrupt. The picker then has no directory rows,
+     * and every custom host stays on the user-entered timeout and user-CA path.
+     */
+    val providerDirectory: ProviderDirectory? by lazy(LazyThreadSafetyMode.NONE) {
+        ProviderDirectory.load(appContext)
+    }
 
     val widgetSnapshotWriter = WidgetSnapshotWriter(app, prefs, foodRepository, profileRepository, homeActivityReader, waterRepository, weatherRepository, caffeineRepository)
     val testDataSeeder = TestDataSeeder(this)
@@ -344,6 +375,7 @@ class AppContainer(app: ChompassApp) {
         foodRepository = foodRepository,
         weightRepository = weightRepository,
         bodyFatRepository = bodyFatRepository,
+        bodyCompositionRepository = bodyCompositionRepository,
         waterRepository = waterRepository,
     )
     private val adaptiveGoals = AdaptiveGoalsService(

@@ -167,7 +167,23 @@
     <string name="ai_provider_deepinfra">DeepInfra</string>
     <string name="ai_provider_mistral">Mistral</string>
     <string name="ai_provider_ollama">Ollama (Yerel)</string>
-    <string name="ai_provider_custom">Özel (OpenAI uyumlu)</string>
+    <string name="ai_provider_ollama_cloud">Ollama Cloud</string>
+    <string name="ai_provider_custom">Başka URL</string>
+    <string name="ai_provider_subtitle_custom">Bir temel URL yaz</string>
+    <string name="ai_provider_search_hint">Ad veya host ara</string>
+    <string name="ai_provider_section_shortcuts">Kısayollar</string>
+    <string name="ai_provider_section_phone">Bu telefonda</string>
+    <string name="ai_provider_section_server">Senin sunucun</string>
+    <string name="ai_provider_section_cloud">Bulut</string>
+    <string name="ai_provider_chip_on_phone">Telefonda</string>
+    <string name="ai_provider_chip_your_server">Senin sunucun</string>
+    <string name="ai_provider_chip_native">Doğrudan</string>
+    <string name="ai_provider_chip_cloud">Bulut</string>
+    <string name="ai_provider_row_gemini">Anahtar · Google Search anahtarı</string>
+    <string name="ai_provider_row_anthropic">Anahtar · ayrı API</string>
+    <string name="ai_provider_row_ollama">Bu ağ · anahtarsız</string>
+    <string name="ai_provider_row_host_key">%1$s · anahtar</string>
+    <string name="ai_provider_directory_footer">Listelenen hostlar bu sürümle gelir. Anahtar yalnız seçtiğin hosta gider.</string>
     <string name="ai_provider_on_device">Cihazda (Gizli)</string>
     <string name="ai_provider_on_device_subtitle">Gizli ve çevrimdışı. Bulut AI\'dan daha az doğru; ~2 ila 4 GB indirme</string>
     <string name="ai_provider_subtitle_gemini">Ücretsiz API anahtarı · hemen çalışır</string>
@@ -182,11 +198,7 @@
     <string name="ai_provider_subtitle_deepinfra">Barındırılan açık modeller</string>
     <string name="ai_provider_subtitle_mistral">Mistral modelleri</string>
     <string name="ai_provider_subtitle_ollama">Bilgisayarın, bulut yok</string>
-    <string name="ai_provider_subtitle_custom">LM Studio, vLLM, llama.cpp vb.</string>
-    <string name="ai_provider_group_recommended">Önerilen</string>
-    <string name="ai_provider_group_cloud">Bulut sağlayıcıları</string>
-    <string name="ai_provider_group_local">Yerel ve kendi sunucun</string>
-    <string name="ai_provider_group_device">Cihazda</string>
+    <string name="ai_provider_subtitle_ollama_cloud">Ollama bulut modelleri</string>
     <string name="settings_section_ai_profile">Profil</string>
     <string name="settings_section_ai_connection">Bağlantı</string>
     <string name="settings_section_ai_advanced">Gelişmiş</string>
@@ -195,7 +207,6 @@
     <string name="settings_ai_key_remove_title">API anahtarı kaldırılsın mı?</string>
     <string name="settings_ai_key_remove_body">Boş anahtar kaydetmek, bu profilin kayıtlı anahtarını siler.</string>
     <string name="settings_ai_get_key">API anahtarı al</string>
-    <string name="settings_ai_value_default">%1$,d (varsayılan)</string>
     <string name="settings_ai_timeout_default">%1$,ds (varsayılan)</string>
 
     <!-- AI Provider API key placeholders -->
@@ -474,6 +485,24 @@
     <string name="home_day_type_switched">Gün türü değiştirildi</string>
     <string name="action_undo">Geri al</string>
     <string name="action_save_to_favorites">Favorilere kaydet</string>
+    <string name="action_save_to_library">Kitaplığa kaydet</string>
+    <string name="action_hide_from_suggestions">Önerilerden gizle</string>
+    <string name="action_unhide">Göster</string>
+    <string name="settings_saved_foods">Kaydedilen yiyecekler</string>
+    <string name="library_hidden_section">Gizli</string>
+    <string name="library_empty">Henüz kaydedilmiş yiyecek yok</string>
+    <string name="library_never_logged">Hiç kaydedilmedi</string>
+    <string name="library_row_summary">%1$d kayıt · son %2$s</string>
+    <string name="library_delete_rows_title">Kayıtlar silinsin mi?</string>
+    <string name="library_delete_rows_message">“%2$s” için kaydedilen %1$d satırın tümü silinsin mi? Günler yeniden hesaplanır. Kaydedilen yiyecek burada kalır; yalnızca günlük geçmişi kaldırılır.</string>
+    <string name="library_merge_section">Olası yinelenenler</string>
+    <string name="library_merge_title">Yinelenenleri birleştir</string>
+    <string name="library_merge_intro">Bunlar aynı yiyeceğe benziyor. Kalacak adı seçin — diğerleri onunla birleşir.</string>
+    <string name="library_merge_rows_message">Kaydedilen %1$d satır “%2$s” olarak yeniden adlandırılacak. Hiçbir şey silinmez; günler yeniden hesaplanır.</string>
+    <string name="library_merge_action">Birleştir</string>
+    <string name="library_sort_last_logged">Son kayıt</string>
+    <string name="library_sort_name">Ad</string>
+    <string name="library_sort_logs">Kayıtlar</string>
     <string name="saved_to_favorites">Favorilere kaydedildi</string>
     <string name="add_food_photo_source_title">Fotoğraf ekle</string>
     <string name="add_food_photo_camera">Fotoğraf Çek</string>
@@ -960,6 +989,18 @@
     <string name="settings_fixed_launcher_icon_subtitle">Başlatıcı simgesini turkuaz tutar. Tema rengini ve duvar kâğıdını takip etmeyi bırakır.</string>
     <string name="settings_system_date_time_pickers">Sistem tarih ve saat seçicileri</string>
     <string name="settings_system_date_time_pickers_subtitle">Öğün düzenlerken telefonun tarih ve saat pencerelerini kullan.</string>
+    <string name="settings_glass_blur">Buzlu cam</string>
+    <string name="settings_glass_blur_subtitle">Yemek ekleme sonuç başlığı gibi yüzen panellerin arkasındaki içeriği bulanıklaştırır.</string>
+    <string name="settings_ambient_motion">Ortam arka planı</string>
+    <string name="settings_ambient_motion_subtitle">Her ekranın arkasında yumuşakça süzülen renk alanları. Pil tasarrufu modunda veya animasyonlar azaltıldığında durur.</string>
+    <string name="settings_frost_strength">Buz yoğunluğu</string>
+    <string name="frost_strength_light">Hafif</string>
+    <string name="frost_strength_medium">Orta</string>
+    <string name="frost_strength_strong">Güçlü</string>
+    <string name="settings_ambient_intensity">Ortam yoğunluğu</string>
+    <string name="ambient_intensity_subtle">Zarif</string>
+    <string name="ambient_intensity_balanced">Dengeli</string>
+    <string name="ambient_intensity_vivid">Canlı</string>
     <string name="add_food_log_time">Kayıt saati</string>
     <string name="add_food_log_time_now">Şimdi</string>
     <string name="cd_clear_log_time">Şu anki saati kullan</string>
@@ -1039,7 +1080,6 @@
     <string name="settings_water_restore_default_plan">Varsayılanları geri yükle (08:00 ile 21:00, 300 ml)</string>
     <string name="settings_water_reminder_window_too_short">İçme aralığı en az 15 dakika olmalıdır.</string>
     <string name="unit_celsius">°C</string>
-    <string name="settings_glass_blur">Cam bulanıklığı</string>
     <string name="settings_food_log_sort">Yiyecek kaydı sıralaması</string>
     <string name="settings_week_starts">Hafta Başlangıcı</string>
     <string name="settings_week_monday">Pazartesi</string>
@@ -1090,6 +1130,8 @@
     <string name="settings_tap_to_edit">Düzenlemek için dokun</string>
     <string name="settings_custom_url_placeholder">https://uç-noktan.com/v1</string>
     <string name="settings_custom_url_title">Özel temel URL</string>
+    <string name="settings_custom_directory_docs">Belgeler</string>
+    <string name="ai_model_accepts_images">Görüntüleri kabul eder (bildirilmiş)</string>
     <string name="settings_ai_allow_insecure_http">Güvensiz HTTP\'ye izin ver</string>
     <string name="settings_ai_allow_insecure_http_footer">Özel ve Ollama uç noktalarının http:// adreslerini kullanmasına izin verir, örneğin ev ağında. Bulut sağlayıcıları https kullanır. Sunucunda TLS varsa kapalı tut.</string>
     <string name="settings_clear_key">Anahtarı temizle</string>
@@ -1311,7 +1353,7 @@
     <string name="about_version_format">Sürüm %1$s</string>
     <string name="about_rate">Uygulamayı Değerlendir</string>
     <string name="about_share">Uygulamayı Paylaş</string>
-    <string name="about_open_source">Kaynak Kodu (MIT)</string>
+    <string name="about_open_source">Kaynak Kodu (GPL v3)</string>
     <string name="about_asset_credits">Açık Kaynak ve Varlıklar</string>
     <string name="about_upstream">Fud AI (upstream) tabanlı</string>
     <string name="about_report_issue">Sorun Bildir</string>
@@ -1374,24 +1416,24 @@
     <string name="ai_error_image_conversion_failed">Görüntü işlenemedi.</string>
     <string name="ai_error_network_format">Ağ hatası: %1$s</string>
     <string name="ai_error_invalid_response">AI yanıtı anlaşılamadı. Lütfen tekrar dene.</string>
-    <string name="ai_error_timeout">AI sağlayıcısı yanıtlamak için çok uzun sürdü. Tekrar dene veya Ayarlar → AI ve Ses bölümünden zaman aşımını artır.</string>
-    <string name="ai_error_disabled">AI özellikleri Ayarlar → AI ve Ses bölümünde kapatılmış.</string>
     <string name="ai_error_invalid_url">Geçersiz API URL\'si. Sağlayıcı ayarlarını kontrol et.</string>
-    <string name="ai_error_insecure_http_blocked">Güvensiz HTTP engellendi. Ayarlar → AI ve Ses bölümünde «Güvensiz HTTP\'ye izin ver»i aç veya https:// adresi kullan.</string>
     <string name="ai_error_on_device_model_not_downloaded">Cihazdaki model henüz indirilmedi. İndirmek için Ayarlar → AI Sağlayıcısı → Model bölümünü aç.</string>
     <string name="ai_error_on_device_unsupported_device">Bu cihaz, cihazdaki AI gereksinimlerini karşılamıyor. Ayarlar → AI Sağlayıcısı bölümünden bir bulut sağlayıcısı seç.</string>
     <string name="ai_error_on_device_low_memory">Şu anda cihazdaki yapay zekâ için yeterli boş bellek yok. Daha küçük E2B modelini dene, diğer uygulamaları kapat veya Ayarlar → AI Sağlayıcısı bölümünden sağlayıcı değiştir.</string>
     <string name="ai_error_on_device_engine_init">Cihazda model motoru başlatılamadı. Yeniden deneyin, Ayarlar → AI Sağlayıcısı → Model bölümünden modeli kaldırın veya bulut sağlayıcısına geçin.</string>
     <string name="ai_error_key_rejected">API anahtarın reddedildi. Ayarlar → AI Sağlayıcısı bölümünü aç ve geçerli bir anahtarı yeniden yapıştır.</string>
+    <string name="ai_error_timeout">Yapay zekâ sağlayıcısı yanıt vermek için çok uzun bekledi. Tekrar dene; kendi sunucunu barındırıyorsan Ayarlar → AI Sağlayıcısı bölümünden zaman aşımını yükselt.</string>
+    <string name="ai_error_disabled">Yapay zekâ özellikleri Ayarlar → AI Sağlayıcısı bölümünde kapalı.</string>
+    <string name="ai_error_insecure_http_blocked">Güvenli olmayan HTTP engellendi. Ayarlar → AI Sağlayıcısı bölümünde “Güvenli olmayan HTTP’ye izin ver” seçimini aç ya da https:// bağlantısı kullan.</string>
+    <string name="ai_error_truncated_twice">Yanıt modelin çıktı sınırına iki kez takıldı — düşünme de sayılıyor. Ayarlar → AI Sağlayıcısı bölümünden Akıl yürütme çabasını Düşük ya da Kapalı yap ya da daha kısa bir soru dene.</string>
+    <string name="ai_error_truncated_twice_description">Model, bitirmeden önce çıktı alanını tüketti; düşünme jetonları da sınıra dahil. Ayarlar → AI Sağlayıcısı bölümünden Akıl yürütme çabasını Düşük ya da Kapalı yapıp tekrar dene.</string>
+    <string name="ai_error_truncated">Yanıt bitmeden modelin çıktı sınırına takıldı — düşünme de sınıra dahil. Ayarlar → AI Sağlayıcısı bölümünden Akıl yürütme çabasını Düşük ya da Kapalı yap ya da daha kısa bir soru dene.</string>
     <string name="ai_error_location_unsupported">Gemini bu ağ konumundan (ülke/IP) kullanılamıyor. VPN kullanıyorsan kapat veya konut çıkışına geç. Veri merkezi/konut dışı VPN IP\'leri genellikle engellenir. Veya Google AI Studio projesinde faturalandırmayı etkinleştir, başka bir ağ dene ya da Ayarlar → AI Sağlayıcısı bölümünden sağlayıcıyı değiştir.</string>
     <string name="ai_error_provider_overloaded">AI sağlayıcısı şu anda aşırı yüklü. Birkaç kez denedik. Bir dakika içinde tekrar dene veya Ayarlar → AI Sağlayıcısı bölümünden farklı bir sağlayıcıya/model geç.</string>
     <string name="ai_error_rate_limit">API anahtarında hız sınırına ulaşıldı. Bir dakika bekle veya Ayarlar → AI Sağlayıcısı bölümünden başka bir sağlayıcıya geç. Ücretsiz katmanda Flash-Lite modeli en yüksek kotaya sahiptir.</string>
     <string name="ai_error_model_unavailable">Sağlayıcın bu modeli bulamadı. Ücretsiz katmanda yalnızca ücretli olabilir, bölgende kısıtlı olabilir veya uç nokta yanlış olabilir. Ayarlar → AI Sağlayıcısı bölümünden varsayılan Flash modeline geç veya AI Studio projende faturalandırmayı etkinleştir.</string>
     <string name="ai_error_coach_on_device">Koç, cihazdaki sağlayıcıyla henüz kullanılamıyor. Ayarlar → AI Sağlayıcısı bölümünden bir bulut sağlayıcısına geç.</string>
     <string name="ai_error_coach_round_limit">Koç yanıtlayamadı. Sorunu farklı şekilde ifade etmeyi dene.</string>
-    <string name="ai_error_truncated_twice">AI yanıtı yanıt uzunluğu sınırında iki kez kesildi. Ayarlar → AI ve Ses bölümünden maksimum yanıt uzunluğunu artır ya da daha kısa bir soru dene.</string>
-    <string name="ai_error_truncated_twice_description">Model cevabı bitirmeden yanıt uzunluğu sınırına ulaştı ve düşünme de bu sınıra dahil. Ayarlar → AI ve Ses bölümünden maksimum yanıt uzunluğunu artır ya da modelin düşünmesini sınırla, sonra tekrar dene.</string>
-    <string name="ai_error_truncated">AI yanıtı yanıt uzunluğu sınırında kesildi. Ayarlar → AI ve Ses bölümünden maksimum yanıt uzunluğunu artır ya da daha kısa bir soru dene.</string>
     <string name="ai_error_provider_error">AI sağlayıcısı bir hata döndürdü.</string>
     <string name="ai_error_grounded_requires_provider">Doğrulanmış araç döngüsü canlı bir AI sağlayıcısı gerektirir.</string>
     <string name="ai_error_grounded_on_device">Doğrulanmış araç döngüsü cihazdaki modeller için kullanılamaz.</string>
@@ -1425,6 +1467,7 @@
     <string name="export_body_metrics_format">Biçim</string>
     <string name="import_body_metrics_title">Kilo ve Vücut Verilerini İçe Aktar</string>
     <string name="import_body_metrics_success">%1$d kilo, %2$d vücut yağı ve %3$d ölçüm kaydı içe aktarıldı.</string>
+    <string name="import_body_metrics_success_composition">Ayrıca %1$d tartı ölçümü içe aktarıldı.</string>
     <string name="import_body_metrics_empty">Bu dosyada içe aktarılacak kilo veya vücut verisi yok.</string>
     <string name="import_body_metrics_unsupported">Desteklenmeyen dosya. Desteklenenler: Chompass JSON/CSV, openScale CSV veya genel kilo CSV\'si.</string>
     <string name="import_body_metrics_malformed">Dosya okunamadı: %1$s</string>
@@ -1468,7 +1511,7 @@
     <string name="home_display_nutrient_cards">Besin kartları</string>
     <string name="home_display_show_steps">Ana ekranda adım sayacını göster</string>
     <string name="home_display_slim_full_names">Tam besin adları</string>
-    <string name="home_display_slim_full_names_desc">İnce çizgi kartları kısa etiket yerine tam adı gösterir. Dört kart seçiliyken uzun adlar kesilebilir.</string>
+    <string name="home_display_slim_full_names_desc">Besin kartları kısa etiket yerine tam adı gösterir. Dört kart seçiliyken uzun adlar kesilebilir.</string>
     <string name="home_display_show_steps_desc">Göstergenin altında isteğe bağlı kart. Health Connect gerektirir.</string>
     <string name="home_display_step_goal">Günlük adım hedefi</string>
     <string name="home_display_step_goal_hint">500\'er ayarlanır. 1.000–50.000.</string>
@@ -1644,11 +1687,15 @@
     <string name="export_from">Başlangıç</string>
     <string name="export_to">Bitiş</string>
     <string name="export_no_meals">Seçilen aralıkta kaydedilmiş öğün yok.</string>
+    <string name="export_include_photos">Fotoğrafları dahil et</string>
+    <string name="sync_photos">Fotoğrafları senkronize et</string>
+    <string name="sync_photos_caption">Etkinleştirildiğinde, yemek fotoğrafları WebDAV sunucunuza yüklenir</string>
+    <string name="sync_photos_wifi_only">Fotoğraflar yalnızca Wi-Fi ile</string>
+    <string name="sync_photos_syncing">Fotoğraflar senkronize ediliyor…</string>
+    <string name="sync_photos_failed">Fotoğraf senkronizasyonu başarısız oldu</string>
     <string name="export_failed">Dışa aktarma başarısız.</string>
     <string name="settings_tap_to_update">Güncellemek için dokun</string>
     <string name="settings_calc_methods">Hesaplama Yöntemleri</string>
-    <string name="settings_max_tokens">Maksimum yanıt uzunluğu</string>
-    <string name="settings_max_tokens_unit">token</string>
     <string name="settings_ai_read_timeout">AI okuma zaman aşımı</string>
     <string name="settings_ai_read_timeout_unit">s</string>
     <string name="settings_ai_read_timeout_value">%1$d s</string>
@@ -1801,7 +1848,7 @@
     <string name="settings_calc_mifflin_used">Dinlenme metabolizması için varsayılan formül. Vücut yağı yüzdesi girmediğinde kullanılır.</string>
     <string name="settings_calc_mifflin_formula">Erkekler: 10×kilo(kg) + 6.25×boy(cm) − 5×yaş + 5\nKadınlar: 10×kilo(kg) + 6.25×boy(cm) − 5×yaş − 161</string>
     <string name="settings_calc_katch_name">Katch-McArdle denklemi</string>
-    <string name="settings_calc_katch_used">Vücut yağı yüzdesi girdiğinde otomatik kullanılır. BMR\'yi toplam kilo yerine yağsız vücut kütlesinden türettiği için zayıf ve atletik kullanıcılar için daha doğrudur. 90 günden eski ölçümler Mifflin-St Jeor\'a döner.</string>
+    <string name="settings_calc_katch_used">Vücut yağı yüzdesi girdiğinde otomatik kullanılır. BMR\'yi toplam kilo yerine yağsız vücut kütlesinden türettiği için zayıf ve atletik kullanıcılar için daha doğrudur. 90 günden eski ölçümler Mifflin-St Jeor\'a döner. Tartıdan alınan güncel yağsız kütle de BMR\'yi aynı şekilde hesaplar ve vücut yağından önce gelir.</string>
     <string name="settings_calc_katch_formula">BMR = 370 + 21.6 × LBM(kg)\nLBM = kilo × (1 − bodyFat%)</string>
     <string name="settings_calc_tdee_name">Aktivite çarpanı yöntemi</string>
     <string name="settings_calc_tdee_used">TDEE = BMR × aktivite çarpanı. Çarpan, seçtiğin aktivite seviyesine karşılık gelir. Orta, haftada birkaç kez egzersiz yapan masa başı aktif kullanıcılar için 1.465 kullanır (FAO/WHO hafif 1.375 ile orta 1.55 arası). Bu, AI\'nın başladığı bakım taban çizgisidir (Enerji Yakımı ölçülen bir değer sağlamadıkça).</string>
@@ -2210,6 +2257,18 @@ makrolar yeni kalori toplamına göre yeniden dengelenir</string>
     <string name="onboarding_goal_suggested_bmi">BMI %1$.1f temel alınarak</string>
     <!-- Progress v2: vücut katmanı, kalori birleşimi, hedef fazları, uyum. -->
     <string name="progress_body_section">Vücut</string>
+    <string name="progress_scale_metrics">Tartı ölçümleri</string>
+    <string name="progress_scale_metrics_bone_mass">Kemik kütlesi</string>
+    <string name="progress_scale_metrics_water">Toplam vücut suyu</string>
+    <string name="progress_scale_metrics_muscle">Kas kütlesi</string>
+    <string name="progress_scale_metrics_lean">Yağsız kütle</string>
+    <string name="progress_scale_metrics_visceral">İç organ yağı</string>
+    <string name="progress_scale_metrics_note">Evdeki tartı tahmini — eğilim mutlak değerden daha güvenilir</string>
+    <string name="progress_scale_metrics_tbw_percent">vücut ağırlığının %1$.1f %%-i · tipik aralık 45–65 %%</string>
+    <string name="progress_log_scale_metrics">Tartı ölçümleri</string>
+    <string name="progress_log_scale_metrics_title">Tartı ölçümlerini kaydet</string>
+    <string name="progress_estimated_smm">Tahmini iskelet kası (Lee)</string>
+    <string name="progress_estimated_smm_note">Kol, uyluk ve baldırdan antropometrik tahmin · ± ~3 kg</string>
     <string name="progress_overlay_off">Kapalı</string>
     <string name="progress_no_entries_in_range">Bu aralıkta kayıt yok</string>
     <string name="progress_no_series_selected">Burada göstermek için yukarıdaki bir metriğe dokunun</string>
@@ -2251,6 +2310,7 @@ makrolar yeni kalori toplamına göre yeniden dengelenir</string>
     <string name="body_fat_method_dexa">DEXA</string>
     <string name="body_fat_method_tape">Mezura</string>
     <string name="cd_collapsed">Daraltılmış</string>
+    <string name="cd_change_meal_type">Öğün türünü değiştir</string>
     <string name="cd_decrease">Azalt</string>
     <string name="cd_expanded">Genişletilmiş</string>
     <string name="cd_import_mealie">Mealie\'den içe aktar</string>
@@ -2691,11 +2751,6 @@ makrolar yeni kalori toplamına göre yeniden dengelenir</string>
         <item>yerel</item>
         <item>çevrimdışı</item>
     </string-array>
-    <string-array name="settings_search_kw_max_tokens">
-        <item>token</item>
-        <item>uzunluk</item>
-        <item>sınır</item>
-    </string-array>
     <string-array name="settings_search_kw_ai_read_timeout">
         <item>zaman aşımı</item>
         <item>saniye</item>
@@ -2785,4 +2840,15 @@ makrolar yeni kalori toplamına göre yeniden dengelenir</string>
         <item>sıfırla</item>
         <item>fabrika ayarları</item>
     </string-array>
+    <string name="ai_provider_chatgpt">ChatGPT planı</string>
+    <string name="ai_provider_subtitle_chatgpt">Uygun bir ChatGPT Plus veya Pro planı kullanın</string>
+    <string name="settings_chatgpt_account">ChatGPT hesabı</string>
+    <string name="settings_chatgpt_continue">ChatGPT ile devam et</string>
+    <string name="settings_chatgpt_connecting">Bağlanıyor…</string>
+    <string name="settings_chatgpt_plan_enabled">Yemek analizi için ChatGPT planı kullanımı etkin. Kullanım, ChatGPT planınızla paylaşılır.</string>
+    <string name="settings_chatgpt_plan_footer">Yemek analizi için uygun bir ChatGPT Plus veya Pro planını kullanmak üzere oturum açın. API anahtarı gerekmez.</string>
+    <string name="settings_chatgpt_plan_disabled">Oturum açıldı ancak ChatGPT planı kullanımı etkin değil. Yetki vermek için hesap satırına dokunun.</string>
+    <string name="settings_chatgpt_revoke_unconfirmed">Yerel olarak bağlantı kesildi. Uzaktan iptal doğrulanamadı; Chompass’ı ChatGPT ayarlarından da kaldırabilirsiniz.</string>
+    <string name="settings_chatgpt_manage_usage">ChatGPT kullanımını yönet</string>
+    <string name="settings_chatgpt_disconnect">ChatGPT bağlantısını kes</string>
 </resources>

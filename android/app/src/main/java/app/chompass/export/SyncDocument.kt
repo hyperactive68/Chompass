@@ -14,6 +14,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
 import app.chompass.services.InputSanitizer
 import app.chompass.models.BodyFatEntry
+import app.chompass.models.BodyCompositionEntry
 import app.chompass.models.BodyMeasurement
 import app.chompass.models.DailyNote
 import app.chompass.models.FoodConstituent
@@ -46,13 +47,24 @@ import java.util.UUID
  * #60 goal-journal phase, the optional `goal_journal` array (per-day frozen
  * targets; old docs parse with an empty array — daily_notes precedent).
  * 1.3 adds per-constituent micronutrients (#86).
- * Photos and API keys are intentionally excluded. Imports also accept 1.0-1.2.
+ * 1.4 adds optional content-addressed food photo refs (`photos`, #122); the
+ * 1.4 stamp is emitted iff any emitted food/favorite row carries refs, because
+ * clients that only accept ≤1.3 would otherwise be locked out. The bytes live
+ * as sibling `photos/` files on the WebDAV server (opt-in); API keys stay
+ * excluded. Imports also accept 1.0-1.3.
  */
 object SyncDocument {
     const val APP_NAME = "Chompass"
     const val KIND = "sync"
     const val FORMAT_VERSION = "1.3"
-    private val SUPPORTED_IMPORT_VERSIONS = setOf("1.0", "1.1", "1.2", "1.3")
+
+    /** Stamped instead of [FORMAT_VERSION] iff the doc carries photo refs (#122). */
+    const val FORMAT_VERSION_PHOTOS = "1.4"
+
+    /** Stamped iff the doc carries scale-composition rows. Supersedes 1.4: a doc with
+     *  both photos and composition rows is a 1.5. */
+    const val FORMAT_VERSION_COMPOSITION = "1.5"
+    private val SUPPORTED_IMPORT_VERSIONS = setOf("1.0", "1.1", "1.2", "1.3", "1.4", "1.5")
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -70,6 +82,7 @@ object SyncDocument {
         val weights: List<WeightWire>,
         val bodyFats: List<BodyFatWire>,
         val measurements: List<MeasurementWire>,
+        val compositions: List<CompositionWire>,
         val water: List<WaterWire>,
         val dailyNotes: List<DailyNoteWire>,
         val nicotine: List<NicotineWire>,
@@ -107,6 +120,13 @@ object SyncDocument {
         val updatedAt: String,
         val deletedAt: String?,
         val entry: BodyMeasurement?,
+    )
+
+    data class CompositionWire(
+        val id: String,
+        val updatedAt: String,
+        val deletedAt: String?,
+        val entry: BodyCompositionEntry?,
     )
 
     data class WaterWire(
@@ -181,6 +201,7 @@ object SyncDocument {
                     weights = arr("weights").mapNotNull { parseWeightWire(it) },
                     bodyFats = arr("body_fat").mapNotNull { parseBodyFatWire(it) },
                     measurements = arr("measurements").mapNotNull { parseMeasurementWire(it) },
+                    compositions = arr("body_composition").mapNotNull { parseCompositionWire(it) },
                     water = arr("water").mapNotNull { parseWaterWire(it) },
                     dailyNotes = arr("daily_notes").mapNotNull { parseDailyNoteWire(it) },
                     nicotine = arr("nicotine_entries").mapNotNull { parseNicotineWire(it) },
@@ -203,6 +224,7 @@ object SyncDocument {
         weights: List<WeightEntry>,
         bodyFats: List<BodyFatEntry>,
         measurements: List<BodyMeasurement>,
+        compositions: List<BodyCompositionEntry> = emptyList(),
         water: List<WaterEntry>,
         dailyNotes: List<DailyNote> = emptyList(),
         nicotine: List<NicotineEntry> = emptyList(),
@@ -215,13 +237,23 @@ object SyncDocument {
         generatedAt: Instant = Instant.now(),
         zone: ZoneId = ZoneId.systemDefault(),
     ): String {
+        // 1.4 iff the doc actually carries photo refs; photo-less docs stay
+        // 1.3 so clients that accept at most 1.3 keep working (#122). A doc with
+        // scale-composition rows stamps 1.5, which supersedes 1.4.
+        val anyPhotos = foodEntries.any { it.photoFilenames.isNotEmpty() } ||
+            favorites.any { it.photoFilenames.isNotEmpty() }
+        val version = when {
+            compositions.isNotEmpty() -> FORMAT_VERSION_COMPOSITION
+            anyPhotos -> FORMAT_VERSION_PHOTOS
+            else -> FORMAT_VERSION
+        }
         val root = buildJsonObject {
             put(
                 "export",
                 buildJsonObject {
                     put("app", APP_NAME)
                     put("kind", KIND)
-                    put("format_version", FORMAT_VERSION)
+                    put("format_version", version)
                     put("generated_at", generatedAt.toString())
                 },
             )
@@ -286,6 +318,28 @@ object SyncDocument {
                         )
                     }
                     appendTombstones(revisions, "measure", measurements.map { it.id.toString() }.toSet())
+                },
+            )
+            put(
+                "body_composition",
+                buildJsonArray {
+                    for (c in compositions) {
+                        val meta = metaFor(c.id.toString(), revisions, c.date.toString())
+                        add(
+                            buildJsonObject {
+                                put("id", c.id.toString())
+                                put("updated_at", meta.updatedAt)
+                                putNullable("deleted_at", meta.deletedAt)
+                                put("date", c.date.toString())
+                                putNullableNumber("bone_mass_kg", c.boneMassKg)
+                                putNullableNumber("total_body_water_kg", c.totalBodyWaterKg)
+                                putNullableNumber("muscle_mass_kg", c.muscleMassKg)
+                                putNullableNumber("lean_mass_kg", c.leanMassKg)
+                                putNullableNumber("visceral_fat_rating", c.visceralFatRating)
+                            },
+                        )
+                    }
+                    appendTombstones(revisions, "composition", compositions.map { it.id.toString() }.toSet())
                 },
             )
             put(
@@ -521,24 +575,41 @@ object SyncDocument {
             return winner ?: JsonNull
         }
 
+        val mergedFood = mergeList("food_entries")
+        val mergedFavorites = mergeList("favorites")
+        val mergedCompositions = mergeList("body_composition")
+        // Same rule as buildJson (#122): 1.4 iff the merged doc carries refs; 1.5
+        // iff it carries scale-composition rows (which supersedes 1.4).
+        val anyPhotos = (mergedFood + mergedFavorites).any { row ->
+            (row as? JsonObject)?.get("photos")?.let { it is JsonArray && it.isNotEmpty() } == true
+        }
+        val mergedVersion = when {
+            mergedCompositions.isNotEmpty() -> FORMAT_VERSION_COMPOSITION
+            anyPhotos -> FORMAT_VERSION_PHOTOS
+            else -> FORMAT_VERSION
+        }
         return buildJsonObject {
             put(
                 "export",
                 buildJsonObject {
                     put("app", APP_NAME)
                     put("kind", KIND)
-                    put("format_version", FORMAT_VERSION)
+                    put("format_version", mergedVersion)
                     val generated = remote["export"]?.asObjectOrNull()?.get("generated_at")?.asString()
                         ?: local["export"]?.asObjectOrNull()?.get("generated_at")?.asString()
                         ?: Instant.now().toString()
                     put("generated_at", generated)
                 },
             )
+            put("food_entries", mergedFood)
+            put("favorites", mergedFavorites)
             for (key in listOf(
-                "food_entries", "favorites", "body_fat", "measurements", "water", "daily_notes", "nicotine_entries", "caffeine_entries", "recipes", "goal_journal",
+                "body_fat", "measurements", "water", "daily_notes",
+                "nicotine_entries", "caffeine_entries", "recipes", "goal_journal",
             )) {
                 put(key, mergeList(key))
             }
+            put("body_composition", mergedCompositions)
             put("weights", mergeWeights())
             put("profile", mergeSingle("profile"))
             put("prefs", mergeSingle("prefs"))
@@ -577,6 +648,10 @@ object SyncDocument {
             putNullable("emoji", e.emoji)
             put("date", localDate.toString())
             put("time", String.format("%02d:%02d", localTime.hour, localTime.minute))
+            // #122: additive UTC instant, authoritative for entry time; date/time
+            // are its rendering in the writing device's zone. Older readers that
+            // only know date/time keep working unchanged.
+            put("timestamp", e.timestamp.toString())
             put("meal_type", e.mealType)
             putNullableNumber("quantity_g", e.servingSizeGrams)
             put("calories", e.calories)
@@ -636,6 +711,11 @@ object SyncDocument {
             val g = e.grounding
             if (g == null) put("grounding", JsonNull)
             else put("grounding", groundingToWire(g))
+            // Sync 1.4 (#122): omitted when empty — photo-less rows stay
+            // byte-compatible with 1.3 emission.
+            if (e.photoFilenames.isNotEmpty()) {
+                put("photos", buildJsonArray { for (ref in e.photoFilenames) add(JsonPrimitive(ref)) })
+            }
         }
     }
 
@@ -698,8 +778,12 @@ object SyncDocument {
         }
         val name = o["name"]?.asString()?.trim().orEmpty()
         if (name.isEmpty()) return FoodWire(id, updatedAt, null, null)
+        // #122: the additive timestamp instant wins; date/time are a legacy
+        // fallback interpreted in the reading device's zone, so rows written
+        // by 1.4-and-older writers keep their wall-clock placement.
+        val wireTimestamp = parseInstant(o["timestamp"]?.asString())
         val date = o["date"]?.asString()?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-            ?: return FoodWire(id, updatedAt, null, null)
+        if (wireTimestamp == null && date == null) return FoodWire(id, updatedAt, null, null)
         val time = o["time"]?.asString()?.let { runCatching { LocalTime.parse(it) }.getOrNull() }
             ?: LocalTime.NOON
         val entry = FoodEntry(
@@ -710,7 +794,7 @@ object SyncDocument {
             protein = o["protein_g"]?.asDouble() ?: 0.0,
             carbs = o["carbs_g"]?.asDouble() ?: 0.0,
             fat = o["fat_g"]?.asDouble() ?: 0.0,
-            timestamp = date.atTime(time).atZone(zone).toInstant(),
+            timestamp = wireTimestamp ?: date!!.atTime(time).atZone(zone).toInstant(),
             source = parseSource(o["source"]?.asString()),
             mealType = parseMealType(o["meal_type"]?.asString()),
             sugar = o["sugar_g"]?.asDouble(),
@@ -746,6 +830,9 @@ object SyncDocument {
             },
             grounding = parseGrounding(o["grounding"]?.asObjectOrNull()),
             constituents = parseConstituents(o["constituents"]?.asArrayOrNull()),
+            photoFilenames = o["photos"]?.asArrayOrNull()?.mapNotNull { el ->
+                el.asString()?.trim()?.takeIf { it.startsWith("photos/") && it.length > "photos/".length }
+            }.orEmpty(),
         )
         return FoodWire(id, updatedAt, null, entry)
     }
@@ -866,6 +953,25 @@ object SyncDocument {
             wristCm = o["wrist_cm"]?.asDouble(),
         )
         return MeasurementWire(id, updatedAt, null, entry)
+    }
+
+    private fun parseCompositionWire(el: JsonElement): CompositionWire? {
+        val o = el.asObjectOrNull() ?: return null
+        val id = o["id"]?.asString()?.takeIf { it.isNotBlank() } ?: return null
+        val updatedAt = o["updated_at"]?.asString() ?: return null
+        val deletedAt = o["deleted_at"]?.asString()
+        if (!deletedAt.isNullOrBlank()) return CompositionWire(id, updatedAt, deletedAt, null)
+        val date = parseInstant(o["date"]?.asString()) ?: return CompositionWire(id, updatedAt, null, null)
+        val entry = BodyCompositionEntry(
+            id = runCatching { UUID.fromString(id) }.getOrElse { UUID.nameUUIDFromBytes(id.toByteArray()) },
+            date = date,
+            boneMassKg = o["bone_mass_kg"]?.asDouble(),
+            totalBodyWaterKg = o["total_body_water_kg"]?.asDouble(),
+            muscleMassKg = o["muscle_mass_kg"]?.asDouble(),
+            leanMassKg = o["lean_mass_kg"]?.asDouble(),
+            visceralFatRating = o["visceral_fat_rating"]?.asDouble(),
+        )
+        return CompositionWire(id, updatedAt, null, entry)
     }
 
     private fun parseWaterWire(el: JsonElement): WaterWire? {

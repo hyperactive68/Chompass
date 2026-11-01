@@ -2,6 +2,7 @@ package app.chompass.ui.settings
 
 import app.chompass.models.AIProvider
 import app.chompass.models.AiProfile
+import app.chompass.data.OpenRouterReasoningEffort
 import java.time.Instant
 import java.util.UUID
 import org.junit.Assert.assertEquals
@@ -74,5 +75,31 @@ class SettingsHydrateCommitTest {
         val merged = commitSettingsHydrate(current, incoming, writeGenAtStart = 0, writeGenNow = 1)
         assertEquals(custom, merged.activeProfile)
         assertEquals("sk-f...flow", merged.apiKeyMasked)
+    }
+
+    @Test
+    fun hydrateRestoresActiveProfileReasoningOverride() {
+        val chatGpt = AiProfile(
+            id = UUID.randomUUID(),
+            name = "ChatGPT",
+            provider = AIProvider.CHATGPT,
+            model = "gpt-5.6-sol",
+            createdAt = Instant.ofEpochMilli(1_700_000_000_000),
+            reasoningEffort = OpenRouterReasoningEffort.MAX.storageKey,
+        )
+        val current = SettingsUiState(
+            activeProfile = chatGpt,
+            openRouterReasoningEffort = OpenRouterReasoningEffort.AUTO,
+        )
+        // The legacy/global preference remains Auto; the active profile must
+        // win when the slow startup hydration commits its snapshot.
+        val incoming = SettingsUiState(
+            activeProfile = chatGpt,
+            openRouterReasoningEffort = OpenRouterReasoningEffort.AUTO,
+        )
+
+        val result = commitSettingsHydrate(current, incoming, writeGenAtStart = 0, writeGenNow = 0)
+
+        assertEquals(OpenRouterReasoningEffort.MAX, result.openRouterReasoningEffort)
     }
 }

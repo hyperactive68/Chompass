@@ -24,6 +24,7 @@ import app.chompass.AppContainer
 import app.chompass.R
 import app.chompass.export.BodyMetricsImportResult
 import app.chompass.export.BodyMetricsImporter
+import app.chompass.export.DiaryArchiveReader
 import app.chompass.export.DiaryImportResult
 import app.chompass.export.DiaryImporter
 import app.chompass.ui.components.ChompassDialog
@@ -31,7 +32,6 @@ import app.chompass.ui.components.ChompassDialogActions
 import app.chompass.ui.navigation.ChompassRoutes
 import app.chompass.models.CurrentMealCatalog
 import app.chompass.models.LocaleFormat
-import app.chompass.ui.theme.AppTextOpacity
 import java.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,8 +65,20 @@ fun DataSettingsScreen(
         if (uri == null) return@rememberLauncherForActivityResult
         scope.launch {
             runCatching {
-                val text = activityContext.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
-                if (text.isNullOrBlank()) {
+                val bytes = activityContext.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                if (bytes == null || bytes.isEmpty()) {
+                    importDiaryMessage = activityContext.getString(R.string.import_diary_empty)
+                    return@runCatching
+                }
+                // Photo ZIP exports (1.7) are sniffed by magic; everything else is plain JSON text.
+                val archive = if (bytes.size >= 4 && bytes.copyOfRange(0, 4)
+                        .contentEquals(byteArrayOf(0x50, 0x4B, 0x03, 0x04))
+                ) {
+                    DiaryArchiveReader.read(bytes)
+                        ?: throw IllegalStateException("Not a Chompass diary ZIP")
+                } else null
+                val text = archive?.first ?: bytes.toString(Charsets.UTF_8)
+                if (text.isBlank()) {
                     importDiaryMessage = activityContext.getString(R.string.import_diary_empty)
                     return@runCatching
                 }
@@ -78,8 +90,21 @@ fun DataSettingsScreen(
                             container.prefs.setMealCatalog(merged)
                             CurrentMealCatalog.value = merged
                         }
-                        val imported = if (result.entries.isEmpty()) 0
-                            else container.foodRepository.importEntries(result.entries)
+                        // Restore archived photo bytes before persisting; refs missing
+                        // from the ZIP import without a photo.
+                        val entriesToImport = if (archive != null && result.photosByEntryId.isNotEmpty()) {
+                            val photoBytes = archive.second
+                            result.entries.map { entry ->
+                                val bytesForRef = result.photosByEntryId[entry.id.toString()]
+                                    ?.firstNotNullOfOrNull { ref -> photoBytes[ref] }
+                                if (bytesForRef == null) entry
+                                else container.imageStore.storeBytes(bytesForRef, entry.id)
+                                    ?.let { fn -> entry.copy(imageFilename = fn) }
+                                    ?: entry
+                            }
+                        } else result.entries
+                        val imported = if (entriesToImport.isEmpty()) 0
+                            else container.foodRepository.importEntries(entriesToImport)
                         if (result.untrackedDates.isNotEmpty()) {
                             val existing = container.prefs.untrackedDays.first().toMutableSet()
                             val kcal = container.prefs.untrackedKcalByDay.first().toMutableMap()
@@ -141,13 +166,21 @@ fun DataSettingsScreen(
                         val w = container.weightRepository.importFromFile(result.weights)
                         val f = container.bodyFatRepository.importFromFile(result.bodyFats)
                         val m = container.bodyMeasurementRepository.importFromFile(result.measurements)
-                        if (w + f + m <= 0) {
+                        val c = container.bodyCompositionRepository.importFromFile(result.compositions)
+                        if (w + f + m + c <= 0) {
                             importBodyMetricsMessage = activityContext.getString(R.string.import_body_metrics_empty)
                             return@runCatching
                         }
-                        importBodyMetricsMessage = activityContext.getString(
+                        val base = activityContext.getString(
                             R.string.import_body_metrics_success, w, f, m
                         )
+                        importBodyMetricsMessage = if (c > 0) {
+                            base + " " + activityContext.getString(
+                                R.string.import_body_metrics_success_composition, c
+                            )
+                        } else {
+                            base
+                        }
                     }
                     BodyMetricsImportResult.EmptyPayload -> {
                         importBodyMetricsMessage = activityContext.getString(R.string.import_body_metrics_empty)
@@ -175,9 +208,10 @@ fun DataSettingsScreen(
         onBack = onBack,
     ) {
         SettingsDataTransferSection(
+            onOpenFoodLibrary = { nav.navigate(ChompassRoutes.SETTINGS_FOOD_LIBRARY) },
             onShowExportDiary = { showExportSheet = true },
             onShowExportBodyMetrics = { showBodyMetricsExportSheet = true },
-            onImportDiary = { importDiaryLauncher.launch(arrayOf("application/json", "text/plain")) },
+            onImportDiary = { importDiaryLauncher.launch(arrayOf("application/json", "text/plain", "application/zip")) },
             onImportBodyMetrics = {
                 importBodyMetricsLauncher.launch(
                     arrayOf(
@@ -217,7 +251,7 @@ fun DataSettingsScreen(
             Text(stringResource(R.string.settings_clear_food_title), fontSize = 20.sp, fontWeight = FontWeight.Bold)
             Text(
                 stringResource(R.string.settings_clear_food_message),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             ChompassDialogActions(
                 primaryText = stringResource(R.string.action_clear),
@@ -238,7 +272,7 @@ fun DataSettingsScreen(
             Text(stringResource(R.string.settings_delete_all_title), fontSize = 20.sp, fontWeight = FontWeight.Bold)
             Text(
                 stringResource(R.string.settings_delete_all_message),
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             ChompassDialogActions(
                 primaryText = stringResource(R.string.action_delete),
@@ -258,7 +292,7 @@ fun DataSettingsScreen(
     importDiaryMessage?.let { msg ->
         ChompassDialog(onDismissRequest = { importDiaryMessage = null }) {
             Text(stringResource(R.string.import_diary_title), fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            Text(msg, color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary))
+            Text(msg, color = MaterialTheme.colorScheme.onSurfaceVariant)
             ChompassDialogActions(
                 primaryText = stringResource(R.string.action_ok),
                 onPrimary = { importDiaryMessage = null }
@@ -269,7 +303,7 @@ fun DataSettingsScreen(
     importBodyMetricsMessage?.let { msg ->
         ChompassDialog(onDismissRequest = { importBodyMetricsMessage = null }) {
             Text(stringResource(R.string.import_body_metrics_title), fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            Text(msg, color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary))
+            Text(msg, color = MaterialTheme.colorScheme.onSurfaceVariant)
             ChompassDialogActions(
                 primaryText = stringResource(R.string.action_ok),
                 onPrimary = { importBodyMetricsMessage = null }

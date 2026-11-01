@@ -14,7 +14,8 @@ sealed class AiError(
     message: String,
     @StringRes val messageRes: Int = 0,
     val formatArgs: Array<out Any> = emptyArray(),
-) : Exception(message) {
+    cause: Throwable? = null,
+) : Exception(message, cause) {
     object NoApiKey : AiError("No API key configured. Add your key in Settings → AI Provider.", messageRes = R.string.ai_error_no_api_key)
     /** Codeberg #20 phase 2: the master AI-features switch is off; no data may leave. */
     object Disabled : AiError("AI features are turned off in Settings → AI & Speech.", messageRes = R.string.ai_error_disabled)
@@ -26,12 +27,13 @@ sealed class AiError(
         // the localized generic network message.
         messageRes = if (connectionFailureHint(cause) != null) 0 else R.string.ai_error_network_format,
         formatArgs = arrayOf(cause.localizedMessage.orEmpty()),
+        cause = cause,
     )
     object InvalidResponse : AiError("Could not understand the AI response. Please try again.", messageRes = R.string.ai_error_invalid_response)
     /** Reply arrived but was cut short at the provider (finishReason MAX_TOKENS and kin). */
-    object ResponseTruncated : AiError("The AI response was truncated. Try a shorter question or a different model.", messageRes = R.string.ai_error_truncated)
+    object ResponseTruncated : AiError("The reply hit the model's output limit before it finished — thinking counts toward the limit. Set Reasoning effort to Low or Off in Settings → AI Provider, or try a shorter question.", messageRes = R.string.ai_error_truncated)
     object Timeout : AiError(
-        "The AI provider took too long to answer. Try again, or raise the timeout in Settings → AI & Speech.",
+        "The AI provider took too long to answer. Try again; if you use a self-hosted endpoint, raise the timeout in Settings → AI Provider.",
         messageRes = R.string.ai_error_timeout,
     )
     /**
@@ -58,6 +60,7 @@ sealed class AiError(
     class OnDeviceEngineInit(cause: Throwable) : AiError(
         "The on-device model engine failed to start on this device. Try again, unload the model in Settings → AI Provider → Model, or switch to a cloud provider.",
         messageRes = R.string.ai_error_on_device_engine_init,
+        cause = cause,
     )
 }
 

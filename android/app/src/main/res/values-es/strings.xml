@@ -78,7 +78,23 @@
 
     <!-- AI Provider names -->
     <string name="ai_provider_ollama">Ollama (local)</string>
-    <string name="ai_provider_custom">Personalizado (compatible con OpenAI)</string>
+    <string name="ai_provider_ollama_cloud">Ollama Cloud</string>
+    <string name="ai_provider_custom">Otra URL</string>
+    <string name="ai_provider_subtitle_custom">Escribe una URL base</string>
+    <string name="ai_provider_search_hint">Buscar nombre o host</string>
+    <string name="ai_provider_section_shortcuts">Accesos directos</string>
+    <string name="ai_provider_section_phone">En este teléfono</string>
+    <string name="ai_provider_section_server">Tu servidor</string>
+    <string name="ai_provider_section_cloud">Nube</string>
+    <string name="ai_provider_chip_on_phone">En el teléfono</string>
+    <string name="ai_provider_chip_your_server">Tu servidor</string>
+    <string name="ai_provider_chip_native">Nativo</string>
+    <string name="ai_provider_chip_cloud">Nube</string>
+    <string name="ai_provider_row_gemini">Clave · interruptor de Google Search</string>
+    <string name="ai_provider_row_anthropic">Clave · API aparte</string>
+    <string name="ai_provider_row_ollama">Esta red · sin clave</string>
+    <string name="ai_provider_row_host_key">%1$s · clave</string>
+    <string name="ai_provider_directory_footer">Los hosts listados vienen con esta versión. La clave solo se envía al host que eliges.</string>
 
     <!-- AI Provider API key placeholders -->
     <string name="api_key_placeholder">Pega tu clave de API</string>
@@ -509,6 +525,8 @@
     <string name="settings_tap_to_edit">Toca para editar</string>
     <string name="settings_custom_url_placeholder">https://tu-endpoint.com/v1</string>
     <string name="settings_custom_url_title">URL base personalizada</string>
+    <string name="settings_custom_directory_docs">Documentación</string>
+    <string name="ai_model_accepts_images">Acepta imágenes (declarado)</string>
     <string name="settings_ai_allow_insecure_http">Permitir HTTP inseguro</string>
     <string name="settings_ai_allow_insecure_http_footer">Permite que los endpoints personalizados y de Ollama usen URLs http://, por ejemplo en tu red local. Los proveedores en la nube usan https. Déjalo apagado salvo que tu servidor no tenga TLS.</string>
     <string name="settings_clear_key">Borrar clave</string>
@@ -591,7 +609,7 @@
     <!-- About -->
     <string name="about_rate">Valorar la app</string>
     <string name="about_share">Compartir la app</string>
-    <string name="about_open_source">Código abierto (MIT)</string>
+    <string name="about_open_source">Código abierto (GPL v3)</string>
     <string name="about_report_issue">Informar de un problema</string>
     <string name="about_request_feature">Solicitar una función</string>
     <string name="about_privacy">Política de privacidad</string>
@@ -733,11 +751,7 @@
     <string name="ai_provider_subtitle_deepinfra">Modelos abiertos alojados</string>
     <string name="ai_provider_subtitle_mistral">Modelos Mistral</string>
     <string name="ai_provider_subtitle_ollama">Tu ordenador, sin nube</string>
-    <string name="ai_provider_subtitle_custom">LM Studio, vLLM, llama.cpp, etc.</string>
-    <string name="ai_provider_group_recommended">Recomendado</string>
-    <string name="ai_provider_group_cloud">Proveedores en la nube</string>
-    <string name="ai_provider_group_local">Local y autoalojado</string>
-    <string name="ai_provider_group_device">En el dispositivo</string>
+    <string name="ai_provider_subtitle_ollama_cloud">Modelos alojados de Ollama</string>
     <string name="settings_section_ai_profile">Perfil</string>
     <string name="settings_section_ai_connection">Conexión</string>
     <string name="settings_section_ai_advanced">Avanzado</string>
@@ -746,7 +760,6 @@
     <string name="settings_ai_key_remove_title">¿Eliminar la clave API?</string>
     <string name="settings_ai_key_remove_body">Guardar una clave vacía borra la clave almacenada de este perfil.</string>
     <string name="settings_ai_get_key">Obtener clave API</string>
-    <string name="settings_ai_value_default">%1$,d (predeterminado)</string>
     <string name="settings_ai_timeout_default">%1$,ds (predeterminado)</string>
     <string name="camera_scale_tip_message">Consejo: incluye un tenedor, la mano o una moneda junto a la comida. Ayuda a estimar el tamaño de la porción.</string>
     <string name="cd_relog_meal">Registrar %1$s de nuevo</string>
@@ -874,6 +887,24 @@
     <string name="action_show">Mostrar</string>
     <string name="action_undo">Deshacer</string>
     <string name="action_save_to_favorites">Guardar en favoritos</string>
+    <string name="action_save_to_library">Guardar en la biblioteca</string>
+    <string name="action_hide_from_suggestions">Ocultar de las sugerencias</string>
+    <string name="action_unhide">Mostrar</string>
+    <string name="settings_saved_foods">Alimentos guardados</string>
+    <string name="library_hidden_section">Ocultos</string>
+    <string name="library_empty">Aún no hay alimentos guardados</string>
+    <string name="library_never_logged">Nunca registrado</string>
+    <string name="library_row_summary">%1$d registros · último %2$s</string>
+    <string name="library_delete_rows_title">¿Eliminar los registros?</string>
+    <string name="library_delete_rows_message">¿Eliminar las %1$d filas registradas de «%2$s»? Los días se recalculan. El alimento guardado sigue aquí; solo se elimina su historial del diario.</string>
+    <string name="library_merge_section">Posibles duplicados</string>
+    <string name="library_merge_title">Combinar duplicados</string>
+    <string name="library_merge_intro">Parece que son el mismo alimento. Elige el nombre que se conservará; los demás se combinan en él.</string>
+    <string name="library_merge_rows_message">Se renombrarán %1$d filas registradas como «%2$s». No se elimina nada; los días se recalculan.</string>
+    <string name="library_merge_action">Combinar</string>
+    <string name="library_sort_last_logged">Último registro</string>
+    <string name="library_sort_name">Nombre</string>
+    <string name="library_sort_logs">Registros</string>
     <string name="saved_to_favorites">Guardado en favoritos</string>
     <string name="action_what_if">¿Y si…?</string>
     <string name="add_food_relog_kcal">%1$d %2$s</string>
@@ -884,8 +915,13 @@
     <string name="ai_error_image_conversion_failed">No se pudo procesar la imagen.</string>
     <string name="ai_error_invalid_response">No se pudo entender la respuesta de la IA. Inténtalo de nuevo.</string>
     <string name="ai_error_invalid_url">URL de API no válida. Revisa la configuración de tu proveedor.</string>
-    <string name="ai_error_insecure_http_blocked">HTTP inseguro bloqueado. Activa «Permitir HTTP inseguro» en Ajustes → IA y voz, o usa una URL https://.</string>
     <string name="ai_error_key_rejected">Tu clave API fue rechazada. Abre Ajustes → Proveedor de IA y pega una clave válida.</string>
+    <string name="ai_error_timeout">El proveedor de IA tardó demasiado en responder. Inténtalo de nuevo; si usas un punto de acceso propio, sube el tiempo de espera en Ajustes → Proveedor de IA.</string>
+    <string name="ai_error_disabled">Las funciones de IA están desactivadas en Ajustes → Proveedor de IA.</string>
+    <string name="ai_error_insecure_http_blocked">El HTTP inseguro está bloqueado. Activa «Permitir HTTP inseguro» en Ajustes → Proveedor de IA o usa una URL https://.</string>
+    <string name="ai_error_truncated_twice">La respuesta alcanzó dos veces el límite de salida del modelo — el razonamiento cuenta. Fija el Esfuerzo de razonamiento en Bajo o Desactivado en Ajustes → Proveedor de IA, o prueba con una pregunta más corta.</string>
+    <string name="ai_error_truncated_twice_description">El modelo se quedó sin espacio de salida antes de terminar; los tokens de razonamiento cuentan. Fija el Esfuerzo de razonamiento en Bajo o Desactivado en Ajustes → Proveedor de IA y vuelve a intentarlo.</string>
+    <string name="ai_error_truncated">La respuesta alcanzó el límite de salida del modelo antes de terminar — el razonamiento cuenta. Fija el Esfuerzo de razonamiento en Bajo o Desactivado en Ajustes → Proveedor de IA, o prueba con una pregunta más corta.</string>
     <string name="ai_error_location_unsupported">Gemini no está disponible desde esta ubicación de red (país/IP). Si usas una VPN, desactívala o cambia a una salida residencial. Las IP de centros de datos o VPN no residenciales suelen estar bloqueadas. También puedes activar la facturación en tu proyecto de Google AI Studio, probar otra red o cambiar de proveedor en Ajustes → Proveedor de IA.</string>
     <string name="ai_error_model_unavailable">Tu proveedor no encontró este modelo. Puede ser solo de pago en el plan gratuito, estar restringido en tu región o el endpoint puede ser incorrecto. Cambia al modelo Flash predeterminado en Ajustes → Proveedor de IA, o activa la facturación en tu proyecto de AI Studio.</string>
     <string name="ai_error_network_format">Error de red: %1$s</string>
@@ -897,11 +933,6 @@
     <string name="ai_error_provider_error">El proveedor de IA devolvió un error.</string>
     <string name="ai_error_provider_overloaded">El proveedor de IA está sobrecargado ahora mismo. Lo hemos reintentado varias veces. Inténtalo de nuevo en un minuto o cambia de proveedor o modelo en Ajustes → Proveedor de IA.</string>
     <string name="ai_error_rate_limit">Se alcanzó el límite de uso de tu clave API. Espera un minuto o cambia a otro proveedor en Ajustes → Proveedor de IA. En el plan gratuito, el modelo Flash-Lite tiene la cuota más alta.</string>
-    <string name="ai_error_timeout">El proveedor de IA tardó demasiado en responder. Inténtalo de nuevo o aumenta el tiempo de espera en Ajustes → IA y voz.</string>
-    <string name="ai_error_disabled">Las funciones de IA están desactivadas en Ajustes → IA y voz.</string>
-    <string name="ai_error_truncated">La respuesta de la IA se cortó en el límite de longitud de respuesta. Sube la longitud máxima de respuesta en Ajustes → IA y voz, o prueba con una pregunta más corta.</string>
-    <string name="ai_error_truncated_twice">La respuesta de la IA se cortó dos veces en el límite de longitud de respuesta. Sube la longitud máxima de respuesta en Ajustes → IA y voz, o prueba con una pregunta más corta.</string>
-    <string name="ai_error_truncated_twice_description">El modelo alcanzó el límite de longitud de respuesta antes de terminar, y el razonamiento cuenta en ese límite. Sube la longitud máxima de respuesta en Ajustes → IA y voz, o limita el razonamiento del modelo, y vuelve a intentarlo.</string>
     <string name="ai_model_tier_paid">Modelo solo de pago (el plan gratuito ya no incluye Pro)</string>
     <string name="ai_model_tier_varies">La disponibilidad en el plan gratuito varía según la cuenta y la región</string>
     <string name="ai_provider_anthropic">Anthropic Claude</string>
@@ -1060,6 +1091,12 @@
     <string name="export_format">Formato</string>
     <string name="export_from">Desde</string>
     <string name="export_no_meals">No hay comidas registradas en el rango seleccionado.</string>
+    <string name="export_include_photos">Incluir fotos</string>
+    <string name="sync_photos">Sincronizar fotos</string>
+    <string name="sync_photos_caption">Cuando se activa, las fotos de comidas se suben a tu servidor WebDAV</string>
+    <string name="sync_photos_wifi_only">Fotos solo con Wi-Fi</string>
+    <string name="sync_photos_syncing">Sincronizando fotos…</string>
+    <string name="sync_photos_failed">Error al sincronizar fotos</string>
     <string name="export_range">Rango</string>
     <string name="export_range_all">Todo el tiempo</string>
     <string name="export_range_custom">Personalizado</string>
@@ -1131,7 +1168,7 @@
     <string name="home_display_show_active_calories_desc">Muestra el gasto activo de hoy en el medidor de calorías.</string>
     <string name="home_display_show_steps">Mostrar contador de pasos en Inicio</string>
     <string name="home_display_slim_full_names">Nombres completos de nutrientes</string>
-    <string name="home_display_slim_full_names_desc">Las tarjetas de líneas finas muestran el nombre completo en lugar de la etiqueta corta. Los nombres largos pueden truncarse con cuatro tarjetas.</string>
+    <string name="home_display_slim_full_names_desc">Las tarjetas de nutrientes muestran el nombre completo en lugar de la etiqueta corta. Los nombres largos pueden truncarse con cuatro tarjetas.</string>
     <string name="home_display_show_steps_desc">Tarjeta opcional debajo del medidor. Requiere Health Connect.</string>
     <string name="home_display_step_goal">Objetivo diario de pasos</string>
     <string name="home_display_step_goal_hint">Ajusta de 500 en 500. 1.000–50.000.</string>
@@ -1171,6 +1208,7 @@
     <string name="import_body_metrics_empty">Este archivo no tiene entradas de peso o datos corporales para importar.</string>
     <string name="import_body_metrics_malformed">No se pudo leer el archivo: %1$s</string>
     <string name="import_body_metrics_success">Se importaron %1$d entradas de peso, %2$d de grasa corporal y %3$d de medidas.</string>
+    <string name="import_body_metrics_success_composition">También se importaron %1$d registros de métricas de báscula.</string>
     <string name="import_body_metrics_title">Importar peso y datos corporales</string>
     <string name="import_body_metrics_unsupported">Archivo no compatible. Compatibles: JSON/CSV de Chompass, CSV de openScale o un CSV genérico de peso.</string>
     <string name="import_diary_empty">Este archivo no tiene entradas de diario para importar.</string>
@@ -1459,7 +1497,7 @@
     <string name="settings_calc_intro">Tus objetivos diarios de calorías y macros los define la IA. Cuando tocas Recalcular objetivos, o automáticamente una vez por semana si los Objetivos adaptativos están activados, Chompass envía tu perfil, las ecuaciones de referencia de abajo, tu comida registrada recientemente y tu tendencia de peso a tu proveedor de IA. Parte de estas fórmulas revisadas por pares y luego las ajusta a tus datos para estimar tu mantenimiento y tus objetivos.</string>
     <string name="settings_calc_katch_formula" formatted="false">BMR = 370 + 21,6 × MLG (kg)\nMLG = peso × (1 − % de grasa corporal)</string>
     <string name="settings_calc_katch_name">Ecuación de Katch-McArdle</string>
-    <string name="settings_calc_katch_used" formatted="false">Se usa automáticamente cuando has introducido un % de grasa corporal. Más preciso para usuarios delgados y deportistas, porque deriva el BMR de la masa magra en lugar del peso total. Las mediciones de más de 90 días vuelven a Mifflin-St Jeor.</string>
+    <string name="settings_calc_katch_used" formatted="false">Se usa automáticamente cuando has introducido un % de grasa corporal. Más preciso para usuarios delgados y deportistas, porque deriva el BMR de la masa magra en lugar del peso total. Las mediciones de más de 90 días vuelven a Mifflin-St Jeor. Una lectura reciente de masa magra de una báscula calcula el BMR igual y tiene prioridad sobre la grasa corporal.</string>
     <string name="settings_calc_macro_split">Reparto de macronutrientes</string>
     <string name="settings_calc_maintenance">Mantenimiento y ajuste de la meta</string>
     <string name="settings_calc_methods">Métodos de cálculo</string>
@@ -1496,6 +1534,18 @@
     <string name="settings_fixed_launcher_icon_subtitle">Mantiene el icono de inicio en turquesa. Deja de seguir el color del tema y el fondo de pantalla.</string>
     <string name="settings_system_date_time_pickers">Selectores de fecha y hora del sistema</string>
     <string name="settings_system_date_time_pickers_subtitle">Usa los diálogos de fecha y hora del teléfono al editar una comida.</string>
+    <string name="settings_glass_blur">Vidrio esmerilado</string>
+    <string name="settings_glass_blur_subtitle">Desenfoca el contenido detrás de los paneles flotantes, como el encabezado de resultados al añadir comida.</string>
+    <string name="settings_ambient_motion">Fondo ambiental</string>
+    <string name="settings_ambient_motion_subtitle">Campos de color suaves que flotan detrás de cada pantalla. Se pausa con el ahorro de batería o cuando las animaciones están reducidas.</string>
+    <string name="settings_frost_strength">Intensidad del esmerilado</string>
+    <string name="frost_strength_light">Suave</string>
+    <string name="frost_strength_medium">Media</string>
+    <string name="frost_strength_strong">Fuerte</string>
+    <string name="settings_ambient_intensity">Intensidad ambiental</string>
+    <string name="ambient_intensity_subtle">Sutil</string>
+    <string name="ambient_intensity_balanced">Equilibrado</string>
+    <string name="ambient_intensity_vivid">Vívido</string>
     <string name="add_food_log_time">Hora del registro</string>
     <string name="add_food_log_time_now">Ahora</string>
     <string name="cd_clear_log_time">Usar la hora actual</string>
@@ -1506,7 +1556,6 @@
     <string name="settings_food_section_photo">Análisis de fotos</string>
     <string name="settings_food_section_serving">Tamaño de porción</string>
     <string name="settings_gemini_google_search">Búsqueda de Google como base</string>
-    <string name="settings_glass_blur">Desenfoque de cristal</string>
     <string name="settings_goal_auto">Automático</string>
     <string name="settings_goals_how_adaptive">Los Objetivos adaptativos recalculan tus objetivos de calorías y macros aproximadamente una vez por semana.</string>
     <string name="settings_goals_how_energy">«Quema de energía» ancla los objetivos a tu gasto medido de Health Connect.</string>
@@ -1544,8 +1593,6 @@
     <string name="settings_macro_pinned_label_format">%1$s (fijado)</string>
     <string name="settings_macro_unlocked">Desfijado</string>
     <string name="settings_manage_health_access">Gestionar acceso a Health Connect</string>
-    <string name="settings_max_tokens">Longitud máxima de respuesta</string>
-    <string name="settings_max_tokens_unit">tokens</string>
 
     <string name="settings_meal_constituents">Desglose de ingredientes de la comida</string>
     <string name="settings_meal_constituents_footer">Cuando está activado, la IA puede dividir comidas compuestas en ingredientes editables con gramos y unidades. Los micronutrientes por ingrediente solo se piden a modelos en la nube potentes; los modelos pequeños siguen devolviendo la lista de ingredientes con macros.</string>
@@ -2216,6 +2263,18 @@ macros reequilibradas al nuevo total calórico</string>
     <string name="onboarding_goal_suggested_bmi">Según un IMC de %1$.1f</string>
     <!-- Progress v2: overlay corporal, combo de calorías, fases de objetivo, adherencia. -->
     <string name="progress_body_section">Cuerpo</string>
+    <string name="progress_scale_metrics">Métricas de báscula</string>
+    <string name="progress_scale_metrics_bone_mass">Masa ósea</string>
+    <string name="progress_scale_metrics_water">Agua corporal total</string>
+    <string name="progress_scale_metrics_muscle">Masa muscular</string>
+    <string name="progress_scale_metrics_lean">Masa magra</string>
+    <string name="progress_scale_metrics_visceral">Grasa visceral</string>
+    <string name="progress_scale_metrics_note">Estimación de báscula doméstica: la tendencia es más fiable que el valor absoluto</string>
+    <string name="progress_scale_metrics_tbw_percent">%1$.1f %% del peso corporal · rango habitual 45–65 %%</string>
+    <string name="progress_log_scale_metrics">Métricas de báscula</string>
+    <string name="progress_log_scale_metrics_title">Registrar métricas de báscula</string>
+    <string name="progress_estimated_smm">Músculo esquelético estimado (Lee)</string>
+    <string name="progress_estimated_smm_note">Estimación antropométrica con brazo, muslo y pantorrilla · ± ~3 kg</string>
     <string name="progress_overlay_off">Apagado</string>
     <string name="progress_no_entries_in_range">No hay registros en este periodo</string>
     <string name="progress_no_series_selected">Toca una métrica arriba para mostrarla aquí</string>
@@ -2253,6 +2312,7 @@ macros reequilibradas al nuevo total calórico</string>
     <string name="add_food_trackers_section">Seguimiento</string>
     <string name="body_fat_method_dexa">DEXA</string>
     <string name="cd_collapsed">Contraído</string>
+    <string name="cd_change_meal_type">Cambiar tipo de comida</string>
     <string name="cd_decrease">Disminuir</string>
     <string name="cd_expanded">Expandido</string>
     <string name="cd_import_mealie">Importar desde Mealie</string>
@@ -2686,11 +2746,6 @@ macros reequilibradas al nuevo total calórico</string>
         <item>local</item>
         <item>sin conexión</item>
     </string-array>
-    <string-array name="settings_search_kw_max_tokens">
-        <item>tokens</item>
-        <item>longitud</item>
-        <item>límite</item>
-    </string-array>
     <string-array name="settings_search_kw_ai_read_timeout">
         <item>tiempo de espera</item>
         <item>segundos</item>
@@ -2780,4 +2835,15 @@ macros reequilibradas al nuevo total calórico</string>
         <item>restablecer</item>
         <item>fábrica</item>
     </string-array>
+    <string name="ai_provider_chatgpt">Plan de ChatGPT</string>
+    <string name="ai_provider_subtitle_chatgpt">Usa un plan de ChatGPT Plus o Pro compatible</string>
+    <string name="settings_chatgpt_account">Cuenta de ChatGPT</string>
+    <string name="settings_chatgpt_continue">Continuar con ChatGPT</string>
+    <string name="settings_chatgpt_connecting">Conectando…</string>
+    <string name="settings_chatgpt_plan_enabled">El uso del plan de ChatGPT está activado para el análisis de alimentos. El uso se comparte con tu plan de ChatGPT.</string>
+    <string name="settings_chatgpt_plan_footer">Inicia sesión para usar un plan de ChatGPT Plus o Pro compatible para el análisis de alimentos. No se necesita una clave de API.</string>
+    <string name="settings_chatgpt_plan_disabled">Has iniciado sesión, pero el uso del plan de ChatGPT no está activado. Toca la fila de la cuenta para autorizarlo.</string>
+    <string name="settings_chatgpt_revoke_unconfirmed">Se desconectó localmente. No se pudo confirmar la revocación remota; también puedes eliminar Chompass en los ajustes de ChatGPT.</string>
+    <string name="settings_chatgpt_manage_usage">Gestionar el uso de ChatGPT</string>
+    <string name="settings_chatgpt_disconnect">Desconectar ChatGPT</string>
 </resources>

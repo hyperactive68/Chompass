@@ -143,7 +143,23 @@
 
 
     <string name="ai_provider_ollama">Ollama (локально)</string>
-    <string name="ai_provider_custom">Пользовательский (OpenAI-совместимый)</string>
+    <string name="ai_provider_ollama_cloud">Ollama Cloud</string>
+    <string name="ai_provider_custom">Другой URL</string>
+    <string name="ai_provider_subtitle_custom">Введите базовый URL</string>
+    <string name="ai_provider_search_hint">Имя или хост</string>
+    <string name="ai_provider_section_shortcuts">Ярлыки</string>
+    <string name="ai_provider_section_phone">На этом телефоне</string>
+    <string name="ai_provider_section_server">Твой сервер</string>
+    <string name="ai_provider_section_cloud">Облако</string>
+    <string name="ai_provider_chip_on_phone">На телефоне</string>
+    <string name="ai_provider_chip_your_server">Твой сервер</string>
+    <string name="ai_provider_chip_native">Нативный</string>
+    <string name="ai_provider_chip_cloud">Облако</string>
+    <string name="ai_provider_row_gemini">Ключ · переключатель Google Search</string>
+    <string name="ai_provider_row_anthropic">Ключ · отдельный API</string>
+    <string name="ai_provider_row_ollama">Эта сеть · без ключа</string>
+    <string name="ai_provider_row_host_key">%1$s · ключ</string>
+    <string name="ai_provider_directory_footer">Хосты из списка идут с этой версией. Ключ уходит только на выбранный хост.</string>
 
     
 
@@ -614,6 +630,8 @@
     <string name="settings_tap_to_edit">Коснись, чтобы изменить</string>
 
     <string name="settings_custom_url_title">Свой базовый URL</string>
+    <string name="settings_custom_directory_docs">Документация</string>
+    <string name="ai_model_accepts_images">Поддерживает изображения (заявлено)</string>
     <string name="settings_ai_allow_insecure_http">Разрешить незащищённый HTTP</string>
     <string name="settings_ai_allow_insecure_http_footer">Свои и Ollama-адреса смогут использовать http://, например в домашней сети. Облачные провайдеры используют https. Держи выключенным, если на сервере есть TLS.</string>
     <string name="settings_clear_key">Очистить ключ</string>
@@ -691,7 +709,7 @@
     
     <string name="about_rate">Оценить приложение</string>
     <string name="about_share">Поделиться приложением</string>
-    <string name="about_open_source">Открытый код (MIT)</string>
+    <string name="about_open_source">Открытый код (GPL v3)</string>
     <string name="about_report_issue">Сообщить о проблеме</string>
     <string name="about_request_feature">Предложить функцию</string>
     <string name="about_privacy">Политика конфиденциальности</string>
@@ -943,10 +961,15 @@
     <string name="export_from">С</string>
     <string name="export_to">По</string>
     <string name="export_no_meals">Нет записей за выбранный период.</string>
+    <string name="export_include_photos">Включить фотографии</string>
+    <string name="sync_photos">Синхронизировать фото</string>
+    <string name="sync_photos_caption">Когда включено, фото приёмов пищи загружаются на ваш сервер WebDAV</string>
+    <string name="sync_photos_wifi_only">Фото только по Wi-Fi</string>
+    <string name="sync_photos_syncing">Синхронизация фото…</string>
+    <string name="sync_photos_failed">Не удалось синхронизировать фото</string>
     <string name="export_failed">Не удалось экспортировать.</string>
     <string name="settings_tap_to_update">Нажми, чтобы изменить</string>
     <string name="settings_calc_methods">Методы расчёта</string>
-    <string name="settings_max_tokens">Макс. токенов ответа</string>
     <string name="settings_notification_types">Типы уведомлений</string>
     <string name="settings_notif_food_reminders">Напоминания о еде</string>
     <string name="settings_notif_daily_summary">Итоги дня</string>
@@ -1061,7 +1084,7 @@
     <string name="settings_calc_mifflin_used">Формула по умолчанию для базового метаболизма. Используется, если не указан процент жира.</string>
     <string name="settings_calc_mifflin_formula">Мужчины: 10×вес(кг) + 6,25×рост(см) − 5×возраст + 5\nЖенщины: 10×вес(кг) + 6,25×рост(см) − 5×возраст − 161</string>
     <string name="settings_calc_katch_name">Уравнение Кэтча-МакАрдла</string>
-    <string name="settings_calc_katch_used">Применяется автоматически, если указан процент жира. Точнее для худощавых и спортивных пользователей, так как рассчитывает BMR от безжировой массы, а не от общего веса. Замеры старше 90 дней переключаются на Миффлина—Сан-Жеора.</string>
+    <string name="settings_calc_katch_used">Применяется автоматически, если указан процент жира. Точнее для худощавых и спортивных пользователей, так как рассчитывает BMR от безжировой массы, а не от общего веса. Замеры старше 90 дней переключаются на Миффлина—Сан-Жеора. Свежее значение тощей массы с весов рассчитывает BMR так же и имеет приоритет над процентом жира.</string>
     <string name="settings_calc_katch_formula">BMR = 370 + 21,6 × БМТ(кг)\nБМТ = вес × (1 − %жира)</string>
     <string name="settings_calc_tdee_name">Метод множителя активности</string>
     <string name="settings_calc_tdee_used">TDEE = BMR × множитель активности. Множитель соответствует выбранному уровню активности. Умеренный использует 1,465 (между FAO/WHO лёгким 1,375 и умеренным 1,55) для офисных пользователей, тренирующихся несколько раз в неделю. Это базовый уровень поддержания, от которого отталкивается ИИ (если расход энергии не даёт измеренное значение).</string>
@@ -1201,7 +1224,7 @@
     <string name="home_display_nutrient_cards">Карточки питательных веществ</string>
     <string name="home_display_show_steps">Показывать счётчик шагов на главной</string>
     <string name="home_display_slim_full_names">Полные названия нутриентов</string>
-    <string name="home_display_slim_full_names_desc">Карточки тонких линий показывают полное название вместо короткой метки. Длинные названия могут обрезаться при четырёх карточках.</string>
+    <string name="home_display_slim_full_names_desc">Карточки нутриентов показывают полное название вместо короткой метки. Длинные названия могут обрезаться при четырёх карточках.</string>
     <string name="home_display_show_steps_desc">Необязательная карточка под шкалой. Требуется Health Connect или тестовые данные.</string>
     <string name="home_display_step_goal">Дневная цель шагов</string>
     <string name="home_display_step_goal_hint">Шаг изменения: 500. Диапазон: 1 000–50 000.</string>
@@ -1216,6 +1239,7 @@
     <string name="import_body_metrics_empty">В этом файле нет записей о весе или данных тела для импорта.</string>
     <string name="import_body_metrics_malformed">Не удалось прочитать файл: %1$s</string>
     <string name="import_body_metrics_success">Импортировано: вес %1$d, жир %2$d, измерений %3$d.</string>
+    <string name="import_body_metrics_success_composition">Также импортировано записей весов: %1$d.</string>
     <string name="import_body_metrics_title">Импорт веса и данных тела</string>
     <string name="import_body_metrics_unsupported">Неподдерживаемый файл. Поддерживаются: JSON/CSV Chompass, CSV openScale или обычный CSV веса.</string>
     <string name="import_diary_empty">В этом файле нет записей дневника для импорта.</string>
@@ -1284,7 +1308,6 @@
     <string name="settings_calc_sec_home_gauge">Шкала калорий на главной</string>
     <string name="settings_dinner_starts">Начало ужина</string>
     <string name="settings_food_log_sort">Сортировка журнала еды</string>
-    <string name="settings_glass_blur">Стеклянное размытие</string>
     <string name="settings_health_background_sync">Фоновая синхронизация</string>
     <string name="settings_health_background_sync_desc">Проверяет Health Connect на новые данные каждые несколько часов, даже когда Chompass закрыт. По умолчанию выключено. Требуется разрешение на фоновое чтение, если его поддерживает твой модуль Health Connect.</string>
     <string name="settings_health_companions">Синхронизируется со всем, что говорит на языке Health Connect: Gadgetbridge (Huawei, Honor, Amazfit, Mi Band и другие носимые устройства), openScale (Bluetooth-весы), Samsung Health, Fitbit и другие. Вес и процент жира подтягиваются автоматически; записанные приёмы пищи и вода отправляются наружу, а приёмы пищи из других приложений поступают внутрь. Сон, пульс в покое и гидратация появляются на вкладке «Прогресс».</string>
@@ -1366,11 +1389,7 @@
     <string name="ai_provider_subtitle_deepinfra">Хостинговые открытые модели</string>
     <string name="ai_provider_subtitle_mistral">Модели Mistral</string>
     <string name="ai_provider_subtitle_ollama">Твой компьютер, без облака</string>
-    <string name="ai_provider_subtitle_custom">LM Studio, vLLM, llama.cpp и др.</string>
-    <string name="ai_provider_group_recommended">Рекомендуемый</string>
-    <string name="ai_provider_group_cloud">Облачные провайдеры</string>
-    <string name="ai_provider_group_local">Локальные и self-hosted</string>
-    <string name="ai_provider_group_device">На устройстве</string>
+    <string name="ai_provider_subtitle_ollama_cloud">Облачные модели Ollama</string>
     <string name="settings_section_ai_profile">Профиль</string>
     <string name="settings_section_ai_connection">Подключение</string>
     <string name="settings_section_ai_advanced">Дополнительно</string>
@@ -1379,7 +1398,6 @@
     <string name="settings_ai_key_remove_title">Удалить ключ API?</string>
     <string name="settings_ai_key_remove_body">Сохранение пустого ключа удалит сохранённый ключ этого профиля.</string>
     <string name="settings_ai_get_key">Получить ключ API</string>
-    <string name="settings_ai_value_default">%1$,d (по умолчанию)</string>
     <string name="settings_ai_timeout_default">%1$,ds (по умолчанию)</string>
     <string name="camera_scale_tip_message">Совет: положи рядом с едой вилку, руку или монету. Это помогает оценить размер порции.</string>
     <string name="cd_relog_meal">Записать %1$s снова</string>
@@ -1457,17 +1475,39 @@
     <string name="action_close">Закрыть</string>
     <string name="action_undo">Отменить</string>
     <string name="action_save_to_favorites">Сохранить в избранное</string>
+    <string name="action_save_to_library">Сохранить в библиотеку</string>
+    <string name="action_hide_from_suggestions">Скрыть из предложений</string>
+    <string name="action_unhide">Показать</string>
+    <string name="settings_saved_foods">Сохранённые продукты</string>
+    <string name="library_hidden_section">Скрытые</string>
+    <string name="library_empty">Пока нет сохранённых продуктов</string>
+    <string name="library_never_logged">Не записывался</string>
+    <string name="library_row_summary">записей: %1$d · последняя %2$s</string>
+    <string name="library_delete_rows_title">Удалить записи из дневника?</string>
+    <string name="library_delete_rows_message">Удалить все записи (%1$d) для «%2$s»? Дни будут пересчитаны. Сохранённый продукт останется в списке; удалится только его история дневника.</string>
+    <string name="library_merge_section">Возможные дубликаты</string>
+    <string name="library_merge_title">Объединить дубликаты</string>
+    <string name="library_merge_intro">Похоже, это один и тот же продукт. Выберите имя, которое останется; остальные объединятся в него.</string>
+    <string name="library_merge_rows_message">%1$d записей будут переименованы в «%2$s». Ничего не удаляется; дни будут пересчитаны.</string>
+    <string name="library_merge_action">Объединить</string>
+    <string name="library_sort_last_logged">По последней записи</string>
+    <string name="library_sort_name">Название</string>
+    <string name="library_sort_logs">Записи</string>
     <string name="saved_to_favorites">Сохранено в избранное</string>
     <string name="ai_error_coach_on_device">Тренер пока недоступен с локальным провайдером. Переключись на облачного провайдера в Настройки → ИИ-провайдер.</string>
     <string name="ai_error_coach_round_limit">Тренер не смог ответить. Попробуй переформулировать вопрос.</string>
-    <string name="ai_error_disabled">ИИ-функции отключены в Настройки → ИИ и речь.</string>
     <string name="ai_error_grounded_on_device">Режим «Grounded» недоступен для локальных моделей.</string>
     <string name="ai_error_grounded_requires_provider">Режиму «Grounded» нужен активный ИИ-провайдер.</string>
     <string name="ai_error_image_conversion_failed">Не удалось обработать изображение.</string>
     <string name="ai_error_invalid_response">Не удалось понять ответ ИИ. Попробуй ещё раз.</string>
     <string name="ai_error_invalid_url">Неверный URL API. Проверь настройки провайдера.</string>
-    <string name="ai_error_insecure_http_blocked">Незащищённый HTTP заблокирован. Включи «Разрешить незащищённый HTTP» в Настройки → ИИ и речь или используй URL https://.</string>
     <string name="ai_error_key_rejected">API-ключ отклонён. Открой Настройки → ИИ-провайдер и вставь действующий ключ заново.</string>
+    <string name="ai_error_timeout">ИИ-провайдер отвечал слишком долго. Попробуй ещё раз; для собственного сервера увеличь тайм-аут в Настройки → ИИ-провайдер.</string>
+    <string name="ai_error_disabled">Функции ИИ отключены в Настройки → ИИ-провайдер.</string>
+    <string name="ai_error_insecure_http_blocked">Незащищённый HTTP заблокирован. Включи «Разрешить незащищённый HTTP» в Настройки → ИИ-провайдер или используй адрес https://.</string>
+    <string name="ai_error_truncated_twice">Ответ дважды упёрся в лимит вывода модели — размышления тоже считаются. Поставь Уровень рассуждений на Низкий или Выкл. в Настройки → ИИ-провайдер или задай вопрос короче.</string>
+    <string name="ai_error_truncated_twice_description">У модели кончилось место для вывода до завершения; токены размышлений входят в лимит. Поставь Уровень рассуждений на Низкий или Выкл. в Настройки → ИИ-провайдер и попробуй снова.</string>
+    <string name="ai_error_truncated">Ответ упёрся в лимит вывода модели, не успев завершиться, — размышления тоже считаются. Поставь Уровень рассуждений на Низкий или Выкл. в Настройки → ИИ-провайдер или задай вопрос короче.</string>
     <string name="ai_error_location_unsupported">Gemini недоступен из этого региона (страна/IP). Если используешь VPN, отключи его или выбери выход из жилого диапазона. IP дата-центров часто блокируются. Либо включи биллинг в проекте Google AI Studio, попробуй другую сеть или смени провайдера в Настройки → ИИ-провайдер.</string>
     <string name="ai_error_model_unavailable">Провайдер не нашёл эту модель. Она может быть платной на бесплатном тарифе, недоступна в твоём регионе или указан неверный endpoint. Переключись на стандартную модель Flash в Настройки → ИИ-провайдер или включи биллинг в проекте AI Studio.</string>
     <string name="ai_error_network_format">Ошибка сети: %1$s</string>
@@ -1479,10 +1519,6 @@
     <string name="ai_error_provider_error">ИИ-провайдер вернул ошибку.</string>
     <string name="ai_error_provider_overloaded">ИИ-провайдер сейчас перегружен. Мы повторили несколько раз. Попробуй через минуту или смени провайдера/модель в Настройки → ИИ-провайдер.</string>
     <string name="ai_error_rate_limit">Достигнут лимит запросов по твоему API-ключу. Подожди минуту или смени провайдера в Настройки → ИИ-провайдер. На бесплатном тарифе самая большая квота у модели Flash-Lite.</string>
-    <string name="ai_error_timeout">ИИ-провайдер отвечал слишком долго. Попробуй ещё раз или увеличь таймаут в Настройки → ИИ и речь.</string>
-    <string name="ai_error_truncated">Ответ ИИ обрезан на лимите длины ответа. Увеличь «Макс. токенов ответа» в Настройки → ИИ и речь или попробуй более короткий вопрос.</string>
-    <string name="ai_error_truncated_twice">Ответ ИИ дважды обрезан на лимите длины ответа. Увеличь «Макс. токенов ответа» в Настройки → ИИ и речь или попробуй более короткий вопрос.</string>
-    <string name="ai_error_truncated_twice_description">Модель достигла лимита длины ответа, не закончив его, и размышления тоже входят в этот лимит. Увеличь «Макс. токенов ответа» в Настройки → ИИ и речь или ограничь размышления модели, затем попробуй ещё раз.</string>
     <string name="ai_model_tier_paid">Только платная модель (бесплатный тариф больше не включает Pro)</string>
     <string name="ai_model_tier_varies">Доступность на бесплатном тарифе зависит от аккаунта и региона</string>
     <string name="ai_provider_on_device">На устройстве (приватно)</string>
@@ -1732,6 +1768,18 @@
     <string name="settings_fixed_launcher_icon_subtitle">Значок остаётся бирюзовым и не меняется под цвет темы и обоев.</string>
     <string name="settings_system_date_time_pickers">Системный выбор даты и времени</string>
     <string name="settings_system_date_time_pickers_subtitle">При правке приёма пищи использовать системные окна даты и времени.</string>
+    <string name="settings_glass_blur">Матированное стекло</string>
+    <string name="settings_glass_blur_subtitle">Размывает содержимое за плавающими панелями, например над списком результатов добавления еды.</string>
+    <string name="settings_ambient_motion">Атмосферный фон</string>
+    <string name="settings_ambient_motion_subtitle">Мягкие переливы цвета за каждым экраном. Ставится на паузу в режиме энергосбережения или при уменьшенных анимациях.</string>
+    <string name="settings_frost_strength">Сила матирования</string>
+    <string name="frost_strength_light">Слабая</string>
+    <string name="frost_strength_medium">Средняя</string>
+    <string name="frost_strength_strong">Сильная</string>
+    <string name="settings_ambient_intensity">Интенсивность фона</string>
+    <string name="ambient_intensity_subtle">Ненавязчиво</string>
+    <string name="ambient_intensity_balanced">Сбалансированно</string>
+    <string name="ambient_intensity_vivid">Ярко</string>
     <string name="add_food_log_time">Время записи</string>
     <string name="add_food_log_time_now">Сейчас</string>
     <string name="cd_clear_log_time">Использовать текущее время</string>
@@ -1759,7 +1807,6 @@
     <string name="settings_health_update_required">Health Connect требует системное обновление. Установи обновление Google Play (или аналог твоей ROM), затем нажми переключатель ещё раз. На Android 14+ отдельное приложение Health Connect не нужно.</string>
     <string name="settings_health_update_required_apk">Health Connect требует обновления. Обнови его из Play Store и нажми переключатель ещё раз.</string>
     <string name="settings_last_sync">Последняя синхронизация: %1$s</string>
-    <string name="settings_max_tokens_unit">токенов</string>
     <string name="settings_meal_constituents">Разбивка приёма пищи на ингредиенты</string>
     <string name="settings_meal_constituents_footer">Когда включено, ИИ может разделять составные блюда на редактируемые ингредиенты с граммами и единицами. Микронутриенты по ингредиентам запрашиваются только у более сильных облачных моделей; меньшие модели всё равно возвращают список ингредиентов с макросами.</string>
     <string name="settings_needs_water_tracking">Требуется отслеживание воды</string>
@@ -2285,6 +2332,18 @@
     <string name="onboarding_goal_suggested_bmi">При ИМТ %1$.1f</string>
     <!-- Progress v2: оверлей тела, комбо калорий, фазы целей, приверженность. -->
     <string name="progress_body_section">Тело</string>
+    <string name="progress_scale_metrics">Данные весов</string>
+    <string name="progress_scale_metrics_bone_mass">Костная масса</string>
+    <string name="progress_scale_metrics_water">Общая вода в организме</string>
+    <string name="progress_scale_metrics_muscle">Мышечная масса</string>
+    <string name="progress_scale_metrics_lean">Тощая масса</string>
+    <string name="progress_scale_metrics_visceral">Висцеральный жир</string>
+    <string name="progress_scale_metrics_note">Оценка бытовых весов — тенденция надёжнее абсолютного значения</string>
+    <string name="progress_scale_metrics_tbw_percent">%1$.1f %% от массы тела · обычный диапазон 45–65 %%</string>
+    <string name="progress_log_scale_metrics">Данные весов</string>
+    <string name="progress_log_scale_metrics_title">Записать данные весов</string>
+    <string name="progress_estimated_smm">Оценка скелетных мышц (Lee)</string>
+    <string name="progress_estimated_smm_note">Антропометрическая оценка по плечу, бедру и голени · ± ~3 кг</string>
     <string name="progress_overlay_off">Выкл.</string>
     <string name="progress_no_entries_in_range">Нет записей за этот период</string>
     <string name="progress_no_series_selected">Нажмите на показатель выше, чтобы отобразить его здесь</string>
@@ -2326,6 +2385,7 @@
     <string name="body_fat_method_dexa">DEXA</string>
     <string name="body_fat_method_tape">Лента</string>
     <string name="cd_collapsed">Свёрнуто</string>
+    <string name="cd_change_meal_type">Изменить тип приёма пищи</string>
     <string name="cd_decrease">Уменьшить</string>
     <string name="cd_expanded">Развёрнуто</string>
     <string name="cd_import_mealie">Импорт из Mealie</string>
@@ -2767,11 +2827,6 @@
         <item>локальный</item>
         <item>офлайн</item>
     </string-array>
-    <string-array name="settings_search_kw_max_tokens">
-        <item>токены</item>
-        <item>длина</item>
-        <item>лимит</item>
-    </string-array>
     <string-array name="settings_search_kw_ai_read_timeout">
         <item>таймаут</item>
         <item>секунды</item>
@@ -2861,4 +2916,15 @@
         <item>сброс</item>
         <item>заводские</item>
     </string-array>
+    <string name="ai_provider_chatgpt">Тариф ChatGPT</string>
+    <string name="ai_provider_subtitle_chatgpt">Использовать подходящий тариф ChatGPT Plus или Pro</string>
+    <string name="settings_chatgpt_account">Аккаунт ChatGPT</string>
+    <string name="settings_chatgpt_continue">Продолжить с ChatGPT</string>
+    <string name="settings_chatgpt_connecting">Подключение…</string>
+    <string name="settings_chatgpt_plan_enabled">Использование тарифа ChatGPT включено для анализа еды. Лимит использования общий с вашим тарифом ChatGPT.</string>
+    <string name="settings_chatgpt_plan_footer">Войдите, чтобы использовать подходящий тариф ChatGPT Plus или Pro для анализа еды. Ключ API не требуется.</string>
+    <string name="settings_chatgpt_plan_disabled">Вы вошли, но использование тарифа ChatGPT не включено. Нажмите на строку аккаунта, чтобы разрешить его.</string>
+    <string name="settings_chatgpt_revoke_unconfirmed">Локальное подключение отключено. Удалённый отзыв не подтверждён; Chompass также можно удалить в настройках ChatGPT.</string>
+    <string name="settings_chatgpt_manage_usage">Управлять использованием ChatGPT</string>
+    <string name="settings_chatgpt_disconnect">Отключить ChatGPT</string>
 </resources>

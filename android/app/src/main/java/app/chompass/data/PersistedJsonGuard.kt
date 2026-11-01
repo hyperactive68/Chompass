@@ -5,6 +5,30 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+
+/** Replaces [target] with [tmp] on desktop JVMs and Android. */
+internal fun replacePersistedFile(tmp: File, target: File): Boolean {
+    return runCatching {
+        Files.move(
+            tmp.toPath(),
+            target.toPath(),
+            StandardCopyOption.ATOMIC_MOVE,
+            StandardCopyOption.REPLACE_EXISTING,
+        )
+        true
+    }.getOrElse {
+        runCatching {
+            Files.move(
+                tmp.toPath(),
+                target.toPath(),
+                StandardCopyOption.REPLACE_EXISTING,
+            )
+            true
+        }.getOrDefault(false)
+    }
+}
 
 /**
  * Outcome of decoding a persisted JSON list.
@@ -84,7 +108,7 @@ class CorruptBlobArchive(private val directory: File) {
         target.parentFile?.mkdirs()
         val tmp = File(target.parentFile, target.name + ".tmp")
         tmp.writeText(raw)
-        if (!tmp.renameTo(target)) {
+        if (!replacePersistedFile(tmp, target)) {
             target.writeText(raw)
             tmp.delete()
         }

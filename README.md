@@ -6,7 +6,7 @@
 
 **Private calorie tracking for Android and the browser**
 
-Bring your own AI key. On Android you can also run Gemma 4 on-device. No ads, no analytics, no account.
+Bring your own AI key, connect an eligible ChatGPT plan on Android, or run Gemma 4 on-device. No ads, no analytics, no account.
 
 [Website](https://chompass.app/) · [Download](https://chompass.app/download/) · [Web app](https://chompass.app/app/) · [Privacy](docs/PRIVACY.md)
 
@@ -14,7 +14,7 @@ Bring your own AI key. On Android you can also run Gemma 4 on-device. No ads, no
 [![F-Droid](https://img.shields.io/f-droid/v/app.chompass?style=flat-square&label=F-Droid&logo=F-Droid&logoColor=white&color=127059)](https://f-droid.org/packages/app.chompass/)
 [![PWA](https://img.shields.io/badge/Platform-PWA-127059?style=flat-square&logo=pwa&logoColor=white)](https://chompass.app/app/)
 [![Android](https://img.shields.io/badge/Platform-Android-3DDC84?style=flat-square&logo=android&logoColor=white)](https://codeberg.org/fitguy/chompass)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue?style=flat-square)](LICENSE)
 [![Privacy](https://img.shields.io/badge/Tracking-None-blue?style=flat-square)](docs/PRIVACY.md)
 
 </div>
@@ -33,7 +33,7 @@ Step-by-step install: [Download → How to install](https://chompass.app/downloa
 
 ### Android app
 
-Not on the Play Store. Install from **F-Droid**, Obtainium, or Codeberg Releases.
+Install from **F-Droid**, Obtainium, or Codeberg Releases.
 
 <div align="center">
 
@@ -45,55 +45,43 @@ Not on the Play Store. Install from **F-Droid**, Obtainium, or Codeberg Releases
 
 - **F-Droid**: [app.chompass](https://f-droid.org/packages/app.chompass/). Install and auto-update from the F-Droid client.
 - **Obtainium**: tap the badge above, then confirm. Or paste `https://codeberg.org/fitguy/chompass` into **Add App**.
-- **Beta channel**: tap the orange **Obtainium Beta** badge for the prerelease track (`v<version>-beta.N` tags, `Chompass-beta-*.apk`). It coexists with the stable entry: the beta entry never offers stable releases, and the stable entry never offers betas. Betas use the same package ID and versionCode as the stable they precede.
-
-Release package ID: `app.chompass`. Debug (from source): `app.chompass.debug`.
+- **Beta channel**: tap the orange **Obtainium Beta** badge for the prerelease track or enable prerelease in Obtainium.
 
 ## Screenshots
 
-Material 3 dark theme (light theme also available). Images are in [`docs/screenshots/`](docs/screenshots/).
+Material 3 dark theme (light theme also available). Full captures live in [`docs/screenshots/`](docs/screenshots/).
+
+<p align="center">
+  <img src="docs/screenshots/features/hero.png" width="620" alt="Chompass Home, Add Food and Progress on three phones" />
+</p>
 
 <table>
   <tr>
     <td align="center" width="33%">
-      <img src="docs/screenshots/home.png" width="180" alt="Home screen in dark theme" /><br />
-      <sub><b>Home</b>: calorie ring, macros, meals</sub>
+      <img src="docs/screenshots/features/ai-analysis.png" width="200" alt="AI analysis streaming nutrition fields" /><br />
+      <sub><b>AI food logging</b>: photo, voice, text or barcode; fields stream in, you review before saving</sub>
     </td>
     <td align="center" width="33%">
-      <img src="docs/screenshots/add-food.png" width="180" alt="Add food sheet in dark theme" /><br />
-      <sub><b>Add food</b>: photo, voice, barcode, AI</sub>
+      <img src="docs/screenshots/features/meal-components.png" width="200" alt="Meal components editing" /><br />
+      <sub><b>Every ingredient, editable</b>: grams, servings and per-item detail</sub>
     </td>
     <td align="center" width="33%">
-      <img src="docs/screenshots/meal-components.png" width="180" alt="Meal components sheet in dark theme" /><br />
-      <sub><b>Meal components</b>: edit ingredients and grams</sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="33%">
-      <img src="docs/screenshots/recipes.png" width="180" alt="Recipes tab in dark theme" /><br />
-      <sub><b>Recipes</b>: multi-ingredient saved meals</sub>
-    </td>
-    <td align="center" width="33%">
-      <img src="docs/screenshots/ai-analysis.png" width="180" alt="AI analysis progress overlay" /><br />
-      <sub><b>AI analysis</b>: progress steps and streaming fields</sub>
-    </td>
-    <td align="center" width="33%">
-      <img src="docs/screenshots/progress.png" width="180" alt="Progress screen in dark theme" /><br />
-      <sub><b>Progress</b>: weight, steps, goals</sub>
+      <img src="docs/screenshots/features/recipes.png" width="200" alt="Recipes and saved meals" /><br />
+      <sub><b>Recipes and saved meals</b>: log the whole plate in one tap</sub>
     </td>
   </tr>
   <tr>
     <td align="center" width="33%">
-      <img src="docs/screenshots/progress-plots.png" width="180" alt="Body measurement trend plots in dark theme" /><br />
-      <sub><b>Progress plots</b>: optional per-site body measurement trends</sub>
+      <img src="docs/screenshots/features/progress-plots.png" width="200" alt="Body measurement trend plots" /><br />
+      <sub><b>Trends for everything</b>: weight, body fat, measurements and scale metrics</sub>
     </td>
     <td align="center" width="33%">
-      <img src="docs/screenshots/coach.png" width="180" alt="AI Coach chat in dark theme" /><br />
-      <sub><b>Coach</b>: chat with your own key</sub>
+      <img src="docs/screenshots/features/coach.png" width="200" alt="AI Coach chat" /><br />
+      <sub><b>Coach</b>: chat that knows your day, on your own key</sub>
     </td>
     <td align="center" width="33%">
-      <img src="docs/screenshots/settings.png" width="180" alt="Settings hub in dark theme" /><br />
-      <sub><b>Settings</b>: providers, goals, data</sub>
+      <img src="docs/screenshots/features/settings.png" width="200" alt="Settings hub" /><br />
+      <sub><b>Your keys, your data</b>: bring any AI provider, stored on device only</sub>
     </td>
   </tr>
 </table>
@@ -110,13 +98,13 @@ On both the [PWA](https://chompass.app/app/) and the Android app unless noted:
 
 ### AI
 
-- **AI**: your own cloud key (a free [Google AI Studio](https://aistudio.google.com/apikey) key is enough for casual use). Progress steps and a live field preview. Coach chat on both clients. You can turn all AI features off; barcode, search, and manual logging stay on.
-- **On-device AI** (Android): optional **On-Device (Private)** Gemma 4. See below.
+- **AI**: your own cloud key (a free [Google AI Studio](https://aistudio.google.com/apikey) key is enough for casual use). On Android, food analysis can instead use an eligible ChatGPT Plus or Pro plan through OpenAI's official Sign in with ChatGPT flow; Coach remains on the existing cloud-key providers. Progress steps and a live field preview. Coach chat on both clients. You can turn all AI features off; barcode, search, and manual logging stay on.
+- **On-device AI** (Android): optional Gemma 4. See below.
 
 ### Progress and trackers
 
 - **Progress**: weight, body fat, measurements, forecast. Keto and other diet modes. Water tracking.
-- **Optional trackers**: water, nicotine, caffeine, fasting timer, and daily notes. Each is off until you turn it on. Fasting stays on the device and is never exported or synced.
+- **Optional trackers**: water, nicotine, caffeine, fasting timer, and daily notes.
 
 ### Data, export and sync
 
@@ -124,11 +112,11 @@ On both the [PWA](https://chompass.app/app/) and the Android app unless noted:
 
 ### Languages and platforms
 
-- **Languages**: 18. The PWA covers core screens.
+- **Languages**: 18.
 
 ### Android only
 
-- **Live calorie budget**: in Add Active mode the home ring grows the daily goal with the day's burn (Health Connect, a manual entry, or an estimate from your history). Widgets use the same budget.
+- **Live calorie budget**: in Add Active mode the home ring grows the daily goal with the day's burn (Health Connect, a manual entry, or an estimate from your history).
 - **Health Connect**: steps, exercise, sleep, heart rate, hydration. Two-way with Gadgetbridge, openScale, and other Health Connect apps.
 - **Widgets and notifications**
 - **Size**: ~17 MiB arm64 / ~29 MiB universal. No ads, analytics, or workout library.
@@ -164,7 +152,7 @@ Android. No vendor SDKs and no extra account. Apps that write to Health Connect 
 
 Optional **background sync** (Settings → Health & Data, off by default) reads Health Connect every few hours while the app is closed, on devices that support it.
 
-On Android 14 and later, Health Connect is a system module. Some de-Googled builds show it in Settings but apps cannot use it. Use file export/import or WebDAV in that case. Huawei Health Kit is not supported; pair the wearable with [Gadgetbridge](https://gadgetbridge.org/) instead.
+On Android 14 and later, Health Connect is a system module. Some de-Googled builds show it in Settings but apps cannot use it. Use file export/import or WebDAV in that case. Huawei Health Kit is not supported; pair the wearable with [Gadgetbridge](https://gadgetbridge.org/) instead or use a Health Sync.
 
 ## How accurate is the AI?
 
@@ -222,7 +210,7 @@ Chompass is free, ad-free, and open source. If you'd like to say thanks, you can
 
 Chompass is based on [Fud AI](https://github.com/apoorvdarshan/fud-ai).
 
-- Copyright (c) 2026 Apoorv Darshan - [MIT License](LICENSE)
-- Modifications Copyright (c) 2026 fitguy - MIT License
+- Copyright (c) 2026 Apoorv Darshan — upstream portions, previously MIT (see [NOTICE](docs/NOTICE.md))
+- Modifications Copyright (c) 2026 fitguy — [GPL-3.0-or-later](LICENSE)
 
 See also [NOTICE](docs/NOTICE.md) and [ASSET_CREDITS.md](docs/ASSET_CREDITS.md).

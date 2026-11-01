@@ -1,29 +1,17 @@
 package app.chompass.ui.navigation
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
-import androidx.annotation.StringRes
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.chompass.R
 
@@ -40,63 +28,18 @@ val BottomTabs = listOf(
 fun bottomTabs(showCoachTab: Boolean = true): List<BottomTab> =
     if (showCoachTab) BottomTabs else BottomTabs.filter { it.route != ChompassRoutes.COACH }
 
-/** Content padding above the standard M3 navigation bar. */
-val BottomNavScrollPadding = 80.dp
+/**
+ * Content padding above the floating bottom pill: nav inset + 16 + 64 dp. The
+ * pill takes the navigation-bar inset itself, so this must repeat it — a plain
+ * constant left the last scroll item sitting `inset` low, its bottom corners
+ * hidden behind the pill and its straight edges cut at the screen bottom.
+ */
+val BottomNavScrollPadding: Dp
+    @Composable get() = 80.dp + with(LocalDensity.current) {
+        WindowInsets.navigationBars.getBottom(this).toDp()
+    }
 
 val BottomNavDockedControlPadding = 72.dp
 
-/** Docked overlays (FAB, chips, snackbar) sit this far above the nav bar. */
+/** Docked overlays (FAB, chips, snackbar) sit this far above the bottom pill. */
 val BottomOverlayPadding = BottomNavDockedControlPadding + 16.dp
-
-@Composable
-fun ChompassBottomNavBar(
-    currentRoute: String?,
-    showAboutBadge: Boolean = false,
-    showCoachTab: Boolean = true,
-    onTap: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val tabs = bottomTabs(showCoachTab)
-    NavigationBar(
-        modifier = modifier
-            .fillMaxWidth()
-            .navigationBarsPadding(),
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        tonalElevation = 0.dp,
-    ) {
-        tabs.forEach { tab ->
-            val selected = tab.route == currentRoute
-            val label = stringResource(tab.labelRes)
-            NavigationBarItem(
-                selected = selected,
-                onClick = { onTap(tab.route) },
-                icon = {
-                    if (showAboutBadge && tab.route == ChompassRoutes.SETTINGS) {
-                        BadgedBox(
-                            badge = {
-                                Badge(
-                                    modifier = Modifier
-                                        .offset(x = (-4).dp, y = 4.dp)
-                                        .size(8.dp)
-                                        .clip(CircleShape),
-                                )
-                            },
-                        ) {
-                            Icon(tab.icon, contentDescription = label)
-                        }
-                    } else {
-                        Icon(tab.icon, contentDescription = label)
-                    }
-                },
-                label = { Text(label) },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    selectedTextColor = MaterialTheme.colorScheme.onSurface,
-                    indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                ),
-            )
-        }
-    }
-}

@@ -51,7 +51,7 @@
   scripts.site-serve.exec = "hugo server -D -s website --baseURL http://localhost:1313/Chompass/ -d /tmp/chompass-hugo-public";
   scripts.site-build.exec = "hugo --minify -s website";
   scripts.site-deploy.exec = "./scripts/deploy_pages.sh";
-  scripts.pwa-test.exec = "cd web && node --test app/src/lib/chompass-core/__tests__/*.test.js app/src/lib/__tests__/*.test.js";
+  scripts.pwa-test.exec = "cd web && TZ=UTC node --test app/src/lib/chompass-core/__tests__/*.test.js app/src/lib/__tests__/*.test.js";
   scripts.pwa-typecheck.exec = "cd web && tsc --checkJs --noEmit -p tsconfig.json";
   scripts.pwa-serve.exec = "node web/serve.mjs";
   # Rule scope lives in android/.editorconfig. `kotlin-lint-fix` autocorrects.
@@ -119,7 +119,17 @@
 
   tasks."release:screenshots" = {
     exec = "./scripts/export_release_screenshots.sh";
-    description = "Render JVM screenshot previews; export to release-screenshots/ and docs/screenshots/";
+    description = "Capture real-device screenshots (release-screenshots/ + docs/screenshots/) and update JVM preview refs";
+  };
+
+  tasks."release:screenshots:check" = {
+    exec = "./scripts/check_ui_screenshot_staleness.sh";
+    description = "Fail when UI changes are newer than the committed published screenshots";
+  };
+
+  tasks."device:screenshots" = {
+    exec = "./scripts/capture_device_screenshots.sh";
+    description = "Capture real-device screenshots only (no JVM preview refs)";
   };
 
   tasks."release:assets-list" = {

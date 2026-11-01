@@ -1,5 +1,10 @@
 package app.chompass.ui.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
@@ -14,13 +19,17 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.flow.first
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -30,6 +39,12 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import app.chompass.AppContainer
 import app.chompass.models.EnergyUnit
+import app.chompass.ui.components.AmbientBackground
+import app.chompass.ui.components.AmbientTouchState
+import app.chompass.ui.components.ambientTouchObserver
+import app.chompass.ui.components.LocalBackdropHaze
+import app.chompass.ui.components.LocalBottomBarHaze
+import app.chompass.ui.components.bottomBarHazeSource
 import app.chompass.services.update.AndroidUpdateChecker
 import app.chompass.services.update.AndroidUpdateState
 import app.chompass.ui.about.AboutSettingsScreen
@@ -57,6 +72,7 @@ import app.chompass.ui.settings.NutritionTargetsSettingsScreen
 import app.chompass.ui.settings.NotificationsSettingsScreen
 import app.chompass.ui.settings.OptionalNutrientGoalsScreen
 import app.chompass.ui.settings.PersonalSettingsScreen
+import app.chompass.ui.settings.SavedFoodsScreen
 import app.chompass.ui.settings.SettingsScreen
 import app.chompass.ui.settings.SpeechSettingsScreen
 import app.chompass.ui.settings.SyncSettingsScreen
@@ -66,6 +82,8 @@ import app.chompass.ui.settings.CaffeineSettingsScreen
 import app.chompass.ui.settings.NicotineSettingsScreen
 import app.chompass.ui.settings.NotesSettingsScreen
 import app.chompass.ui.settings.FastingSettingsScreen
+import app.chompass.ui.theme.AppMotion
+import app.chompass.ui.theme.ChompassNavTransitions
 
 /**
  * Increments each time the app is opened: 1 on cold launch, then +1 on every
@@ -76,6 +94,21 @@ import app.chompass.ui.settings.FastingSettingsScreen
 val LocalLaunchFillEpoch = compositionLocalOf { 1 }
 
 val LocalEnergyUnit = compositionLocalOf { EnergyUnit.KCAL }
+
+/** Signed ordinal distance between the tab the transition starts on and the tab it lands on;
+ *  null when either end is not a bottom tab (keep the fade-through fallback then). */
+private fun AnimatedContentTransitionScope<NavBackStackEntry>.tabDelta(): Int? {
+    val initial = ChompassRoutes.bottomTabs.indexOfFirst { it == initialState.destination.route }
+    val target = ChompassRoutes.bottomTabs.indexOfFirst { it == targetState.destination.route }
+    return if (initial >= 0 && target >= 0) target - initial else null
+}
+
+private val tabEnter: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
+    tabDelta()?.let { ChompassNavTransitions.tabEnter(it) } ?: ChompassNavTransitions.tabEnter()
+}
+private val tabExit: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
+    tabDelta()?.let { ChompassNavTransitions.tabExit(it) } ?: ChompassNavTransitions.tabExit()
+}
 
 @Composable
 fun ChompassNavHost(
@@ -184,9 +217,33 @@ fun ChompassNavHost(
     }
 
     val energyUnitRaw by container.prefs.energyUnit.collectAsState(initial = "kcal")
+    val bottomBarHaze = rememberHazeState()
+    // Passive touch feed for the wax field. Recorded on the root container in the
+    // Initial pass and never consumed, so content keeps every gesture.
+    val ambientTouch = remember { AmbientTouchState() }
+    // Source for the content panes' frost: the ambient wax field (see AmbientBackground
+    // below). Panes are separate subtrees, so they never blur themselves.
+    val backdropHaze = rememberHazeState()
+    // Wax-field parallax: every bottom tab rests the ambient lamp at its own camera
+    // position, so tab switches pan the field over the same 300 ms as the content slide
+    // but a fraction of the distance — depth without changing the look. The sign puts the
+    // leftmost tab's camera rightmost so the field sweeps the same way the pages do.
+    // Routes outside the tabs (pushed screens, onboarding) hold the last tab's camera.
+    val tabCamera = remember { mutableStateOf(0) }
+    val cameraIndex = ChompassRoutes.bottomTabs.indexOfFirst { it == currentRoute }
+    if (cameraIndex >= 0) tabCamera.value = cameraIndex
+    val waxPanFraction by animateFloatAsState(
+        targetValue =
+            (ChompassRoutes.bottomTabs.lastIndex / 2f - tabCamera.value) *
+                ChompassNavTransitions.TabParallaxStepFraction,
+        animationSpec = tween(AppMotion.TweenNavMs, easing = AppMotion.EasingDecelerate),
+        label = "waxParallax",
+    )
     CompositionLocalProvider(
         LocalLaunchFillEpoch provides launchFillEpoch,
         LocalEnergyUnit provides EnergyUnit.fromStorage(energyUnitRaw),
+        LocalBottomBarHaze provides bottomBarHaze,
+        LocalBackdropHaze provides backdropHaze,
     ) {
     // Codeberg #20: phase 1 hides the coach tab (View-only); phase 2's master
     // AI-off switch hides it too — with AI off the coach has nothing to say.
@@ -196,35 +253,67 @@ fun ChompassNavHost(
     Scaffold(
         bottomBar = {
             if (showTabs) {
-                ChompassBottomNavBar(
-                    currentRoute = currentRoute,
-                    showAboutBadge = updateAvailable,
-                    showCoachTab = showCoachTab,
-                    onTap = { target ->
-                        if (target == currentRoute) return@ChompassBottomNavBar
-                        // Tapping HOME (the start destination) needs popBackStack
-                        // — `navigate(HOME) { popUpTo(HOME); launchSingleTop = true }`
-                        // is a no-op because NavController sees HOME at the top of
-                        // the stack and skips re-emitting currentBackStackEntry, so
-                        // the bar stays selected on the previous tab.
-                        if (target == ChompassRoutes.HOME) {
-                            nav.popBackStack(ChompassRoutes.HOME, inclusive = false)
-                        } else {
-                            nav.navigate(target) {
-                                popUpTo(ChompassRoutes.HOME) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    }
+                ChompassFloatingPillBar(
+                    items = bottomTabs(showCoachTab).map { tab ->
+                        FloatingPillItem(
+                            icon = tab.icon,
+                            label = stringResource(tab.labelRes),
+                            onClick = {
+                                val target = tab.route
+                                // Tapping HOME (the start destination) needs popBackStack
+                                // — `navigate(HOME) { popUpTo(HOME); launchSingleTop = true }`
+                                // is a no-op because NavController sees HOME at the top of
+                                // the stack and skips re-emitting currentBackStackEntry, so
+                                // the bar stays selected on the previous tab.
+                                if (target != currentRoute) {
+                                    if (target == ChompassRoutes.HOME) {
+                                        nav.popBackStack(ChompassRoutes.HOME, inclusive = false)
+                                    } else {
+                                        nav.navigate(target) {
+                                            popUpTo(ChompassRoutes.HOME) { saveState = true }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    }
+                                }
+                            },
+                            selected = tab.route == currentRoute,
+                            badge = updateAvailable && tab.route == ChompassRoutes.SETTINGS,
+                        )
+                    },
                 )
             }
         }
     ) { _ ->
-        Box(Modifier.fillMaxSize()) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .ambientTouchObserver(ambientTouch)
+                .bottomBarHazeSource(bottomBarHaze)
+        ) {
+            AmbientBackground(
+                Modifier
+                    .fillMaxSize()
+                    .hazeSource(backdropHaze),
+                panFraction = waxPanFraction,
+                touch = ambientTouch,
+            )
             NavHost(
                 navController = nav,
-                startDestination = if (startOnboarding) ChompassRoutes.ONBOARDING else ChompassRoutes.HOME
+                startDestination = if (startOnboarding) ChompassRoutes.ONBOARDING else ChompassRoutes.HOME,
+                enterTransition = {
+                    if (targetState.destination.route in ChompassRoutes.bottomTabs) tabEnter()
+                    else ChompassNavTransitions.pushEnter()
+                },
+                exitTransition = {
+                    if (tabDelta() != null) tabExit() else ChompassNavTransitions.pushExit()
+                },
+                popEnterTransition = {
+                    if (tabDelta() != null) tabEnter() else ChompassNavTransitions.pushPopEnter()
+                },
+                popExitTransition = {
+                    if (tabDelta() != null) tabExit() else ChompassNavTransitions.pushPopExit()
+                },
             ) {
                 composable(ChompassRoutes.ONBOARDING) {
                     OnboardingScreen(container = container, onComplete = {
@@ -365,6 +454,12 @@ fun ChompassNavHost(
                     HealthDataSettingsScreen(
                         container = container,
                         nav = nav,
+                        onBack = { nav.popBackStack() },
+                    )
+                }
+                composable(ChompassRoutes.SETTINGS_FOOD_LIBRARY) {
+                    SavedFoodsScreen(
+                        container = container,
                         onBack = { nav.popBackStack() },
                     )
                 }

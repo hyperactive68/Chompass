@@ -55,11 +55,9 @@ import app.chompass.models.MealType
 import app.chompass.ui.components.ChompassSurface
 import app.chompass.ui.components.ChompassTextButton
 import app.chompass.ui.components.TimeWheelPicker
+import app.chompass.ui.components.glassDialogColor
 import app.chompass.ui.home.mealLabel
 import app.chompass.ui.util.formatMinutesOfDay
-import app.chompass.ui.theme.AppColors
-import app.chompass.ui.theme.AppRadii
-import app.chompass.ui.theme.AppTextOpacity
 
 @Composable
 internal fun MealTimesSheet(
@@ -95,12 +93,12 @@ internal fun MealTimesSheet(
         Text(
             stringResource(R.string.settings_meals_description),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Subtle),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(16.dp))
         ChompassSurface(
             modifier = Modifier.fillMaxWidth(),
-            cornerRadius = AppRadii.Container,
+            cornerRadius = 16.dp,
             padding = 0.dp,
         ) {
             Column {
@@ -133,7 +131,7 @@ internal fun MealTimesSheet(
         Text(
             stringResource(R.string.settings_meals_help),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(12.dp))
         ChompassTextButton(
@@ -144,7 +142,7 @@ internal fun MealTimesSheet(
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-            color = AppColors.Calorie,
+            color = MaterialTheme.colorScheme.primary,
         )
         Spacer(Modifier.height(16.dp))
         ChompassPrimaryButton(flushDrafts = true, onClick = {
@@ -167,7 +165,7 @@ internal fun MealTimesSheet(
             text = stringResource(R.string.settings_restore_default_times),
             onClick = { catalog = MealCatalog.Default },
             modifier = Modifier.fillMaxWidth(),
-            color = AppColors.Calorie,
+            color = MaterialTheme.colorScheme.primary,
         )
         Spacer(Modifier.height(8.dp))
     } else {
@@ -194,7 +192,7 @@ internal fun MealTimesSheet(
             text = stringResource(R.string.action_cancel),
             onClick = { editingId = null },
             modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Subtle),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(8.dp))
     }
@@ -204,6 +202,7 @@ internal fun MealTimesSheet(
     if (remove != null) {
         AlertDialog(
             onDismissRequest = { pendingRemove = null },
+            containerColor = glassDialogColor(MaterialTheme.colorScheme.surfaceContainerHigh),
             title = { Text(stringResource(R.string.settings_meals_remove_title)) },
             text = { Text(stringResource(R.string.settings_meals_remove_body)) },
             confirmButton = {
@@ -280,7 +279,7 @@ private fun MealCatalogRow(
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.onSurface,
                     ),
-                    cursorBrush = SolidColor(AppColors.Calorie),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     modifier = Modifier.fillMaxWidth(),
                 )
                 TextButton(onClick = {

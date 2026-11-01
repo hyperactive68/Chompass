@@ -3,7 +3,12 @@ package app.chompass.ui.coach
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.remember
+import app.chompass.ui.components.pressScale
+import app.chompass.ui.components.PhotoRemoveBadgeScrimAlpha
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +35,7 @@ import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
@@ -53,15 +59,11 @@ import androidx.compose.ui.unit.sp
 import app.chompass.R
 import app.chompass.services.decodeSampledBitmap
 import app.chompass.ui.navigation.BottomNavDockedControlPadding
-import app.chompass.ui.theme.AppColors
-import app.chompass.ui.theme.AppTextOpacity
 import app.chompass.ui.components.isDarkTheme
-import app.chompass.ui.theme.AppRadii
 
 /**
- * Horizontal scrolling chips. Verbatim port of `promptChips`.
- *   ScrollView(.horizontal) HStack spacing 8
- *     Capsule (translucent surface + subtle accent tint + hairline stroke)
+ * Horizontal scrolling chips.
+ *   Capsule (translucent surface + subtle accent tint + hairline stroke)
  *     padding 14h × 9v, footnote rounded medium, calorie text
  */
 @Composable
@@ -77,31 +79,33 @@ internal fun PromptChipRow(chips: List<String>, enabled: Boolean, onTap: (String
 
 @Composable
 private fun PromptChip(text: String, enabled: Boolean, onTap: (String) -> Unit) {
-    val shape = RoundedCornerShape(AppRadii.Pill)
+    val shape = RoundedCornerShape(percent = 50)
     val isDark = isDarkTheme()
-    val borderColor = if (isDark) AppColors.HairlineBorderDark else AppColors.HairlineBorderLight
+    val borderColor = MaterialTheme.colorScheme.outlineVariant
+    val chipInteraction = remember { MutableInteractionSource() }
     Box(
         Modifier
             .clip(shape)
-            .background(if (isDark) AppColors.TranslucentSurfaceDark else AppColors.TranslucentSurfaceLight)
+            .pressScale(chipInteraction, enabled = enabled)
+            .background(MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.92f))
             .border(0.5.dp, borderColor, shape)
-            .clickable(enabled = enabled) { onTap(text) }
+            .clickable(interactionSource = chipInteraction, indication = LocalIndication.current, enabled = enabled) { onTap(text) }
             .padding(horizontal = 14.dp, vertical = 9.dp)
     ) {
         Text(
             text,
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
-            color = AppColors.Calorie
+            color = MaterialTheme.colorScheme.primary
         )
     }
 }
 
 /**
- * Capsule input bar. Verbatim port of `inputBar`.
- *   capsule containing TextField + 34dp gradient send button
+ * Capsule input bar.
+ *   capsule containing TextField + send button
  *   translucent fill + hairline stroke + soft shadow
- *   send: arrow.up icon, 16sp bold, white-on-gradient when canSend, gray otherwise
+ *   send: arrow-up icon, white-on-accent when canSend, gray otherwise
  */
 @Composable
 internal fun InputBar(
@@ -134,7 +138,7 @@ internal fun InputBar(
                     modifier = Modifier
                         .padding(start = 10.dp, end = 10.dp, top = 8.dp, bottom = 4.dp)
                         .size(width = 88.dp, height = 70.dp)
-                        .clip(RoundedCornerShape(AppRadii.Card))
+                        .clip(MaterialTheme.shapes.large)
                 ) {
                     Image(
                         bitmap = bitmap.asImageBitmap(),
@@ -147,11 +151,18 @@ internal fun InputBar(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .padding(4.dp)
-                            .size(24.dp)
-                            .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.55f))
                     ) {
-                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.cd_remove_image), tint = Color.White, modifier = Modifier.size(14.dp))
+                        // Small visual scrim over the photo corner; the
+                        // IconButton keeps the 48dp touch target.
+                        Box(
+                            Modifier
+                                .size(24.dp)
+                                .clip(CircleShape)
+                                .background(Color.Black.copy(alpha = PhotoRemoveBadgeScrimAlpha)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.cd_remove_image), tint = Color.White, modifier = Modifier.size(14.dp))
+                        }
                     }
                 }
             }
@@ -177,7 +188,7 @@ internal fun InputBar(
                         Text(
                             stringResource(R.string.coach_input_placeholder),
                             fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Faint)
+                            color = MaterialTheme.colorScheme.outline
                         )
                     }
                     BasicTextField(
@@ -218,14 +229,14 @@ internal fun CoachMediaActions(
     onPickImage: () -> Unit,
     onCaptureImage: () -> Unit
 ) {
-    val shape = RoundedCornerShape(AppRadii.Pill)
+    val shape = RoundedCornerShape(percent = 50)
     Row(
         modifier = Modifier
             .clip(shape)
-            .background(AppColors.Calorie.copy(alpha = 0.075f))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.075f))
             .border(
                 0.6.dp,
-                AppColors.Calorie.copy(alpha = 0.22f),
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
                 shape
             )
             .padding(2.dp),
@@ -256,30 +267,41 @@ private fun CoachMediaActionButton(
 ) {
     Box(
         modifier = Modifier
-            .size(30.dp)
-            .clip(CircleShape)
-            .background(
-                if (enabled) AppColors.Calorie.copy(alpha = 0.11f)
-                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f)
-            )
+            .minimumInteractiveComponentSize()
             .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Icon(
-            icon,
-            contentDescription = contentDescription,
-            tint = if (enabled) AppColors.Calorie else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.32f),
-            modifier = Modifier.size(17.dp)
-        )
+        // 30dp visual circle inside the 48dp touch target.
+        Box(
+            modifier = Modifier
+                .size(30.dp)
+                .clip(CircleShape)
+                .background(
+                    if (enabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.11f)
+                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                icon,
+                contentDescription = contentDescription,
+                tint = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.32f),
+                modifier = Modifier.size(17.dp)
+            )
+        }
     }
 }
 
 @Composable
 private fun SendButton(canSend: Boolean, onClick: () -> Unit) {
+    val sendInteraction = remember { MutableInteractionSource() }
     androidx.compose.material3.FilledIconButton(
         onClick = onClick,
         enabled = canSend,
-        modifier = Modifier.size(40.dp),
+        modifier = Modifier
+            .size(40.dp)
+            .pressScale(sendInteraction, enabled = canSend),
+        interactionSource = sendInteraction,
         colors = androidx.compose.material3.IconButtonDefaults.filledIconButtonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -314,7 +336,7 @@ internal fun CoachInputBarPreviewStub(value: String, sending: Boolean) {
             modifier = Modifier.weight(1f),
             fontSize = 16.sp,
             color = if (value.isEmpty()) {
-                MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Faint)
+                MaterialTheme.colorScheme.outline
             } else {
                 MaterialTheme.colorScheme.onSurface
             },

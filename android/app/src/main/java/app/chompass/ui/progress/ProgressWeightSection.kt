@@ -1,8 +1,11 @@
 package app.chompass.ui.progress
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.remember
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,9 +13,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.ListAlt
@@ -29,9 +34,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.chompass.R
 import app.chompass.models.UnitFormat
-import app.chompass.ui.components.ChompassSurface
+import app.chompass.ui.components.LocalBackdropHaze
 import app.chompass.ui.components.ChompassIconBubble
-import app.chompass.ui.theme.AppTextOpacity
+import app.chompass.ui.components.hazeGlassFill
+import app.chompass.ui.components.pressScale
 
 internal fun formatWeight(kg: Double, useMetric: Boolean): String =
     UnitFormat.weight(kg, useMetric)
@@ -77,74 +83,80 @@ internal fun LegendSwatch(
                 )
             }
         }
-        Text(label, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Subtle))
+        Text(label, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 @Composable
 internal fun WeightHistoryLink(count: Int, onClick: () -> Unit) {
-    ChompassSurface(
-        modifier = Modifier
+    val cardInteraction = remember { MutableInteractionSource() }
+    Box(
+        Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
-        cornerRadius = 16.dp,
-        padding = 14.dp
+            .pressScale(cardInteraction)
+            .clickable(interactionSource = cardInteraction, indication = LocalIndication.current, onClick = onClick)
+            .hazeGlassFill(MaterialTheme.colorScheme.surfaceContainerLow, RoundedCornerShape(16.dp), LocalBackdropHaze.current)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            ChompassIconBubble(
-                icon = Icons.AutoMirrored.Filled.ListAlt,
-                size = 28.dp,
-                iconSize = 16.dp
-            )
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(stringResource(R.string.progress_weight_history), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-                Text(
-                    stringResource(R.string.progress_history_count_format, count),
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+        Box(Modifier.fillMaxWidth().padding(14.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                ChompassIconBubble(
+                    icon = Icons.AutoMirrored.Filled.ListAlt,
+                    size = 28.dp,
+                    iconSize = 16.dp
+                )
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(stringResource(R.string.progress_weight_history), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        stringResource(R.string.progress_history_count_format, count),
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    null,
+                    tint = MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.size(18.dp)
                 )
             }
-            Icon(
-                Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                null,
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Disabled),
-                modifier = Modifier.size(18.dp)
-            )
         }
     }
 }
 
 @Composable
 internal fun BodyFatHistoryLink(count: Int, onClick: () -> Unit) {
-    ChompassSurface(
-        modifier = Modifier
+    val cardInteraction = remember { MutableInteractionSource() }
+    Box(
+        Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
-        cornerRadius = 16.dp,
-        padding = 14.dp
+            .pressScale(cardInteraction)
+            .clickable(interactionSource = cardInteraction, indication = LocalIndication.current, onClick = onClick)
+            .hazeGlassFill(MaterialTheme.colorScheme.surfaceContainerLow, RoundedCornerShape(16.dp), LocalBackdropHaze.current)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            ChompassIconBubble(
-                icon = Icons.AutoMirrored.Filled.ListAlt,
-                size = 28.dp,
-                iconSize = 16.dp
-            )
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(stringResource(R.string.progress_body_fat_history), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-                Text(
-                    stringResource(R.string.progress_history_count_format, count),
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+        Box(Modifier.fillMaxWidth().padding(14.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                ChompassIconBubble(
+                    icon = Icons.AutoMirrored.Filled.ListAlt,
+                    size = 28.dp,
+                    iconSize = 16.dp
+                )
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(stringResource(R.string.progress_body_fat_history), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        stringResource(R.string.progress_history_count_format, count),
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    null,
+                    tint = MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.size(18.dp)
                 )
             }
-            Icon(
-                Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                null,
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Disabled),
-                modifier = Modifier.size(18.dp)
-            )
         }
     }
 }

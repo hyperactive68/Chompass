@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material.icons.filled.GraphicEq
@@ -37,6 +36,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import app.chompass.ui.components.ChompassBottomSheet
 import app.chompass.ui.components.rememberChompassSheetState
+import app.chompass.ui.components.pressScale
+import app.chompass.ui.theme.AppMotion
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -63,9 +64,6 @@ import app.chompass.services.speech.AudioRecorder
 import app.chompass.services.speech.NativeSpeechRecognizer
 import app.chompass.services.speech.SttEvent
 import app.chompass.ui.components.ChompassTextField
-import app.chompass.ui.theme.AppColors
-import app.chompass.ui.theme.AppTextOpacity
-import app.chompass.ui.theme.AppRadii
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -249,7 +247,6 @@ fun VoiceInputSheet(
             }
         },
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
     ) {
         Column(
             Modifier
@@ -257,24 +254,24 @@ fun VoiceInputSheet(
                 .padding(horizontal = 20.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Provider pill — pink capsule with a bolt + provider name (mirrors iOS).
+            // Provider pill — capsule with a bolt + provider name.
             Row(
                 Modifier
                     .clip(CircleShape)
-                    .background(AppColors.Calorie.copy(alpha = 0.12f))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
                     .padding(horizontal = 12.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     Icons.Filled.GraphicEq,
                     contentDescription = null,
-                    tint = AppColors.Calorie,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(13.dp)
                 )
                 Spacer(Modifier.size(6.dp))
                 Text(
                     stringResource(provider.displayNameRes),
-                    color = AppColors.Calorie,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -296,7 +293,7 @@ fun VoiceInputSheet(
                     .fillMaxWidth()
                     .heightIn(min = 100.dp, max = 200.dp)
                     .verticalScroll(transcriptScroll)
-                    .clip(RoundedCornerShape(AppRadii.Tile))
+                    .clip(MaterialTheme.shapes.medium)
                     .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
                     .padding(horizontal = 14.dp, vertical = 12.dp)
             ) {
@@ -304,7 +301,7 @@ fun VoiceInputSheet(
                     phase == VoicePhase.TRANSCRIBING -> {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             androidx.compose.material3.CircularProgressIndicator(
-                                color = AppColors.Calorie,
+                                color = MaterialTheme.colorScheme.primary,
                                 strokeWidth = 2.dp,
                                 modifier = Modifier.size(16.dp)
                             )
@@ -312,7 +309,7 @@ fun VoiceInputSheet(
                             Text(
                                 stringResource(R.string.voice_transcribing_format, stringResource(provider.displayNameRes)),
                                 fontSize = 13.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -336,7 +333,7 @@ fun VoiceInputSheet(
                         Text(
                             if (phase == VoicePhase.RECORDING) stringResource(R.string.voice_listening) else stringResource(R.string.voice_tap_to_start),
                             fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Disabled)
+                            color = MaterialTheme.colorScheme.outline
                         )
                     }
                 }
@@ -389,7 +386,7 @@ fun VoiceInputSheet(
                 )
             }
 
-            // Analyze / Cancel — iOS match: borderedProminent pink capsule, then
+            // Analyze / Cancel — filled accent capsule, then
             // a secondary Cancel text button. Native is one-tap (stops the live
             // recognizer and submits in one click); remote is two-tap (mic to
             // stop+transcribe, then Analyze on the reviewed transcript).
@@ -422,7 +419,7 @@ fun VoiceInputSheet(
                 recorder.cancel()
                 onDismiss()
             }, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.action_cancel), color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary))
+                Text(stringResource(R.string.action_cancel), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
@@ -431,20 +428,20 @@ fun VoiceInputSheet(
 @Composable
 private fun MicButton(phase: VoicePhase, onToggle: () -> Unit) {
     val recording = phase == VoicePhase.RECORDING
-    // iOS has a slow 0.8s ease-in-out pulse to 1.15x while recording.
+    // Slow 0.8s ease-in-out pulse to 1.15x while recording.
     val infinite = rememberInfiniteTransition(label = "micPulse")
     val pulse by infinite.animateFloat(
         initialValue = 1f,
         targetValue = if (recording) 1.15f else 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(800),
+            animation = tween(AppMotion.TweenPulseMs),
             repeatMode = RepeatMode.Reverse
         ),
         label = "pulseScale"
     )
     val scale by animateFloatAsState(
         targetValue = if (recording) pulse else 1f,
-        animationSpec = tween(200),
+        animationSpec = tween(AppMotion.TweenDefaultMs),
         label = "micScale"
     )
     val bg = if (recording) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
@@ -455,6 +452,7 @@ private fun MicButton(phase: VoicePhase, onToggle: () -> Unit) {
             .size((80 * scale).dp)
             .clip(CircleShape)
             .background(bg)
+            .pressScale(interactionSource)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,

@@ -67,7 +67,23 @@
     <string name="autobalance_carbs">Вуглеводи</string>
     <string name="autobalance_fat">Жири</string>
     <string name="ai_provider_ollama">Ollama (локально)</string>
-    <string name="ai_provider_custom">Власний (сумісний з OpenAI)</string>
+    <string name="ai_provider_ollama_cloud">Ollama Cloud</string>
+    <string name="ai_provider_custom">Інша URL</string>
+    <string name="ai_provider_subtitle_custom">Введи базову URL</string>
+    <string name="ai_provider_search_hint">Ім\'я або хост</string>
+    <string name="ai_provider_section_shortcuts">Ярлики</string>
+    <string name="ai_provider_section_phone">На цьому телефоні</string>
+    <string name="ai_provider_section_server">Твій сервер</string>
+    <string name="ai_provider_section_cloud">Хмара</string>
+    <string name="ai_provider_chip_on_phone">На телефоні</string>
+    <string name="ai_provider_chip_your_server">Твій сервер</string>
+    <string name="ai_provider_chip_native">Власний API</string>
+    <string name="ai_provider_chip_cloud">Хмара</string>
+    <string name="ai_provider_row_gemini">Ключ · перемикач Google Search</string>
+    <string name="ai_provider_row_anthropic">Ключ · окремий API</string>
+    <string name="ai_provider_row_ollama">Ця мережа · без ключа</string>
+    <string name="ai_provider_row_host_key">%1$s · ключ</string>
+    <string name="ai_provider_directory_footer">Хости зі списку йдуть із цією версією. Ключ іде лише на обраний хост.</string>
     <string name="ai_provider_on_device_subtitle">Приватно та офлайн. Менш точний за хмарний ШІ; завантаження ~2–4 ГБ</string>
     <string name="ai_provider_subtitle_gemini">Безкоштовний ключ API · працює одразу</string>
     <string name="ai_provider_subtitle_openai">Моделі GPT</string>
@@ -81,11 +97,7 @@
     <string name="ai_provider_subtitle_deepinfra">Хостовані відкриті моделі</string>
     <string name="ai_provider_subtitle_mistral">Моделі Mistral</string>
     <string name="ai_provider_subtitle_ollama">Твій комп\'ютер, без хмари</string>
-    <string name="ai_provider_subtitle_custom">LM Studio, vLLM, llama.cpp тощо</string>
-    <string name="ai_provider_group_recommended">Рекомендований</string>
-    <string name="ai_provider_group_cloud">Хмарні провайдери</string>
-    <string name="ai_provider_group_local">Локально та self-hosted</string>
-    <string name="ai_provider_group_device">На пристрої</string>
+    <string name="ai_provider_subtitle_ollama_cloud">Хмарні моделі Ollama</string>
     <string name="settings_section_ai_profile">Профіль</string>
     <string name="settings_section_ai_connection">З\'єднання</string>
     <string name="settings_section_ai_advanced">Додатково</string>
@@ -94,7 +106,6 @@
     <string name="settings_ai_key_remove_title">Видалити ключ API?</string>
     <string name="settings_ai_key_remove_body">Збереження порожнього ключа видаляє збережений ключ цього профілю.</string>
     <string name="settings_ai_get_key">Отримати ключ API</string>
-    <string name="settings_ai_value_default">%1$,d (за замовчуванням)</string>
     <string name="settings_ai_timeout_default">%1$,ds (за замовчуванням)</string>
     <string name="api_key_placeholder">Вставте API-ключ</string>
     <string name="ai_key_placeholder_ollama">Ключ не потрібен</string>
@@ -556,6 +567,8 @@
     <string name="settings_tap_to_edit">Натисни, щоб змінити</string>
     <string name="settings_custom_url_placeholder">https://your-endpoint.com/v1</string>
     <string name="settings_custom_url_title">Власний базовий URL</string>
+    <string name="settings_custom_directory_docs">Документація</string>
+    <string name="ai_model_accepts_images">Підтримує зображення (заявлено)</string>
     <string name="settings_ai_allow_insecure_http">Дозволити незахищений HTTP</string>
     <string name="settings_ai_allow_insecure_http_footer">Власні та Ollama-адреси зможуть використовувати http://, наприклад у домашній мережі. Хмарні провайдери використовують https. Тримай вимкненим, якщо на сервері є TLS.</string>
     <string name="settings_clear_key">Очистити ключ</string>
@@ -669,7 +682,7 @@
     <string name="sheet_macro_pinned">закріплено</string>
     <string name="about_rate">Оцінити застосунок</string>
     <string name="about_share">Поділитися застосунком</string>
-    <string name="about_open_source">Вихідний код (MIT)</string>
+    <string name="about_open_source">Вихідний код (GPL v3)</string>
     <string name="about_report_issue">Повідомити про проблему</string>
     <string name="about_request_feature">Запропонувати функцію</string>
     <string name="about_privacy">Політика конфіденційності</string>
@@ -719,20 +732,22 @@
     <string name="ai_error_network_format">Помилка мережі: %1$s</string>
     <string name="ai_error_invalid_response">Не вдалося зрозуміти відповідь ШІ. Спробуй ще раз.</string>
     <string name="ai_error_invalid_url">Недійсний API URL. Перевір налаштування провайдера.</string>
-    <string name="ai_error_insecure_http_blocked">Незахищений HTTP заблоковано. Увімкни «Дозволити незахищений HTTP» у Налаштування → ШІ та мова або використай URL https://.</string>
     <string name="ai_error_on_device_model_not_downloaded">Пристроєву модель ще не завантажено. Відкрий Налаштування → ШІ-провайдер → Модель, щоб завантажити.</string>
     <string name="ai_error_on_device_unsupported_device">Цей пристрій не відповідає вимогам пристроєвого ШІ. Обери хмарного провайдера в Налаштуваннях → ШІ-провайдер.</string>
     <string name="ai_error_on_device_low_memory">Зараз недостатньо вільної пам\'яті для пристроєвого ШІ. Спробуй меншу модель E2B, закрий інші застосунки або зміни провайдера в Налаштуваннях → ШІ-провайдер.</string>
     <string name="ai_error_on_device_engine_init">Не вдалося запустити механізм моделі на цьому пристрої. Спробуй ще раз, вивантаж модель у Налаштуваннях → ШІ-провайдер → Модель або перемкнися на хмарного провайдера.</string>
     <string name="ai_error_key_rejected">Твій API-ключ відхилено. Відкрий Налаштування → ШІ-провайдер і встав дійсний ключ.</string>
+    <string name="ai_error_timeout">ШІ-провайдер відповідав задовго. Спробуй ще раз; для власного сервера збільш тайм-аут у Налаштування → ШІ-провайдер.</string>
+    <string name="ai_error_disabled">Функції ШІ вимкнено в Налаштування → ШІ-провайдер.</string>
+    <string name="ai_error_insecure_http_blocked">Незахищений HTTP заблоковано. Увімкни «Дозволити незахищений HTTP» у Налаштування → ШІ-провайдер або використай адресу https://.</string>
+    <string name="ai_error_truncated_twice">Відповідь двічі вперлася в ліміт виводу моделі — міркування також враховуються. Встанови Рівень міркувань на Низький або Вимк. у Налаштування → ШІ-провайдер або постав коротше запитання.</string>
+    <string name="ai_error_truncated_twice_description">У моделі закінчилося місце для виводу до завершення; токени міркувань входять у ліміт. Встанови Рівень міркувань на Низький або Вимк. у Налаштування → ШІ-провайдер і спробуй ще раз.</string>
+    <string name="ai_error_truncated">Відповідь вперлася в ліміт виводу моделі, не встигнувши завершитися, — міркування також враховуються. Встанови Рівень міркувань на Низький або Вимк. у Налаштування → ШІ-провайдер або постав коротше запитання.</string>
     <string name="ai_error_location_unsupported">Gemini недоступний з цієї мережі (країна/IP). Якщо ти користуєшся VPN, вимкни його або обери домашній вихід. IP дата-центрів часто заблоковані. Або увімкни оплату в проєкті Google AI Studio, спробуй іншу мережу чи зміни провайдера в Налаштуваннях → ШІ-провайдер.</string>
     <string name="ai_error_provider_overloaded">ШІ-провайдер зараз перевантажений. Ми повторили кілька разів. Спробуй за хвилину або зміни провайдера/модель у Налаштуваннях → ШІ-провайдер.</string>
     <string name="ai_error_rate_limit">Досягнуто ліміту запитів для твого API-ключа. Зачекай хвилину або зміни провайдера в Налаштуваннях → ШІ-провайдер. На безкоштовному тарифі модель Flash-Lite має найбільшу квоту.</string>
     <string name="ai_error_coach_on_device">Коуч поки недоступний з пристроєвим провайдером. Перемкнися на хмарного провайдера в Налаштуваннях → ШІ-провайдер.</string>
     <string name="ai_error_coach_round_limit">Коуч перевищив ліміт циклів викликів інструментів. Спробуй переформулювати запитання.</string>
-    <string name="ai_error_truncated_twice">Відповідь ШІ двічі обрізалася на ліміті довжини відповіді. Збільш максимальну довжину відповіді в Налаштуваннях → ШІ та мова або спробуй коротше запитання.</string>
-    <string name="ai_error_truncated_twice_description">Модель досягла ліміту довжини відповіді, не закінчивши її, і роздуми також входять у цей ліміт. Збільш максимальну довжину відповіді в Налаштуваннях → ШІ та мова або обмеж роздуми моделі, потім спробуй ще раз.</string>
-    <string name="ai_error_truncated">Відповідь ШІ обрізалася на ліміті довжини відповіді. Збільш максимальну довжину відповіді в Налаштуваннях → ШІ та мова або спробуй коротше запитання.</string>
     <string name="ai_error_provider_error">ШІ-провайдер повернув помилку.</string>
     <string name="ai_error_grounded_requires_provider">Режим «Перевірене внесення» потребує активного ШІ-провайдера.</string>
     <string name="ai_error_grounded_on_device">Режим «Перевірене внесення» недоступний для пристроєвих моделей.</string>
@@ -831,12 +846,28 @@
     <string name="action_show">Показати</string>
     <string name="action_undo">Скасувати</string>
     <string name="action_save_to_favorites">Зберегти в обране</string>
+    <string name="action_save_to_library">Зберегти до бібліотеки</string>
+    <string name="action_hide_from_suggestions">Сховати з пропозицій</string>
+    <string name="action_unhide">Показати</string>
+    <string name="settings_saved_foods">Збережені продукти</string>
+    <string name="library_hidden_section">Приховані</string>
+    <string name="library_empty">Збережених продуктів ще немає</string>
+    <string name="library_never_logged">Не записувався</string>
+    <string name="library_row_summary">записів: %1$d · останній %2$s</string>
+    <string name="library_delete_rows_title">Видалити записи з дневника?</string>
+    <string name="library_delete_rows_message">Видалити всі записи (%1$d) для «%2$s»? Дні буде перераховано. Збережений продукт залишиться тут; видалиться лише його історія дневника.</string>
+    <string name="library_merge_section">Можливі дублікати</string>
+    <string name="library_merge_title">Об\'єднати дублікати</string>
+    <string name="library_merge_intro">Схоже, це один і той самий продукт. Виберіть ім\'я, яке залишиться; решта об\'єднаються в нього.</string>
+    <string name="library_merge_rows_message">%1$d записів буде перейменовано на «%2$s». Нічого не видаляється; дні буде перераховано.</string>
+    <string name="library_merge_action">Об\'єднати</string>
+    <string name="library_sort_last_logged">За останнім записом</string>
+    <string name="library_sort_name">Назва</string>
+    <string name="library_sort_logs">Записи</string>
     <string name="saved_to_favorites">Збережено в обраному</string>
     <string name="action_what_if">Що як?</string>
     <string name="add_food_relog_kcal">%1$d %2$s</string>
-    <string name="ai_error_disabled">ШІ-функції вимкнено в Налаштуваннях → ШІ та мова.</string>
     <string name="ai_error_model_unavailable">Провайдер не знайшов цю модель. Вона може бути платною на безкоштовному тарифі, недоступною у твоєму регіоні або ж endpoint неправильний. Перемкнися на стандартну модель Flash у Налаштуваннях → ШІ-провайдер або ввімкни білінг у проєкті AI Studio.</string>
-    <string name="ai_error_timeout">ШІ-провайдер відповідав надто довго. Спробуй ще раз або збільш таймаут у Налаштуваннях → ШІ та мова.</string>
     <string name="ai_model_tier_paid">Тільки платна модель (безкоштовний тариф більше не включає Pro)</string>
     <string name="ai_model_tier_varies">Доступність на безкоштовному тарифі залежить від облікового запису та регіону</string>
     <string name="ai_provider_on_device">На пристрої (приватно)</string>
@@ -966,6 +997,12 @@
     <string name="export_format">Формат</string>
     <string name="export_from">З</string>
     <string name="export_no_meals">У вибраному періоді немає записаних страв.</string>
+    <string name="export_include_photos">Включити фотографії</string>
+    <string name="sync_photos">Синхронізувати фото</string>
+    <string name="sync_photos_caption">Якщо увімкнено, фото страв завантажуються на ваш сервер WebDAV</string>
+    <string name="sync_photos_wifi_only">Фото лише через Wi-Fi</string>
+    <string name="sync_photos_syncing">Синхронізація фото…</string>
+    <string name="sync_photos_failed">Не вдалося синхронізувати фото</string>
     <string name="export_range">Період</string>
     <string name="export_range_all">За весь час</string>
     <string name="export_range_custom">Власний</string>
@@ -1029,7 +1066,7 @@
     <string name="home_display_show_active_calories_desc">Показувати сьогоднішні активні витрати на шкалі калорій.</string>
     <string name="home_display_show_steps">Показувати лічильник кроків на головній</string>
     <string name="home_display_slim_full_names">Повні назви нутрієнтів</string>
-    <string name="home_display_slim_full_names_desc">Картки тонких ліній показують повну назву замість короткої мітки. Довгі назви можуть обрізатися при чотирьох картках.</string>
+    <string name="home_display_slim_full_names_desc">Картки нутрієнтів показують повну назву замість короткої мітки. Довгі назви можуть обрізатися при чотирьох картках.</string>
     <string name="home_display_show_steps_desc">Необов\'язкова картка під шкалою. Потребує Health Connect.</string>
     <string name="home_display_step_goal">Денна ціль кроків</string>
     <string name="home_display_step_goal_hint">Крок зміни: 500. Діапазон: 1 000–50 000.</string>
@@ -1066,6 +1103,7 @@
     <string name="import_body_metrics_empty">У цьому файлі немає записів ваги чи даних тіла для імпорту.</string>
     <string name="import_body_metrics_malformed">Не вдалося прочитати файл: %1$s</string>
     <string name="import_body_metrics_success">Імпортовано: вага %1$d, жир %2$d, вимірювань %3$d.</string>
+    <string name="import_body_metrics_success_composition">Також імпортовано записів ваги: %1$d.</string>
     <string name="import_body_metrics_title">Імпорт ваги та даних тіла</string>
     <string name="import_body_metrics_unsupported">Непідтримуваний файл. Підтримуються: Chompass JSON/CSV, CSV openScale або звичайний CSV ваги.</string>
     <string name="import_diary_empty">У цьому файлі немає записів щоденника для імпорту.</string>
@@ -1355,7 +1393,7 @@
     <string name="settings_calc_katch_formula">BMR = 370 + 21,6 × LBM(кг)
 LBM = вага × (1 − %жиру)</string>
     <string name="settings_calc_katch_name">Рівняння Katch-McArdle</string>
-    <string name="settings_calc_katch_used">Використовується автоматично, якщо вказано відсоток жиру. Точніша для худих і спортивних користувачів, оскільки обчислює BMR із сухої маси замість загальної ваги. Заміри старше 90 днів перемикаються на Міффліна—Сан-Жеора.</string>
+    <string name="settings_calc_katch_used">Використовується автоматично, якщо вказано відсоток жиру. Точніша для худих і спортивних користувачів, оскільки обчислює BMR із сухої маси замість загальної ваги. Заміри старше 90 днів перемикаються на Міффліна—Сан-Жеора. Свіже значення сухої маси з ваги розраховує BMR так само і має пріоритет над відсотком жиру.</string>
     <string name="settings_calc_macro_split">Розподіл макронутрієнтів</string>
     <string name="settings_calc_maintenance">Підтримання та коригування цілі</string>
     <string name="settings_calc_methods">Методи розрахунку</string>
@@ -1396,6 +1434,18 @@ LBM = вага × (1 − %жиру)</string>
     <string name="settings_fixed_launcher_icon_subtitle">Іконка залишається бірюзовою та перестає слідувати за кольором теми й шпалер.</string>
     <string name="settings_system_date_time_pickers">Системний вибір дати й часу</string>
     <string name="settings_system_date_time_pickers_subtitle">Під час редагування прийому їжі використовувати системні вікна дати й часу.</string>
+    <string name="settings_glass_blur">Матоване скло</string>
+    <string name="settings_glass_blur_subtitle">Розмиває вміст за плаваючими панелями, наприклад над списком результатів додавання їжі.</string>
+    <string name="settings_ambient_motion">Атмосферний фон</string>
+    <string name="settings_ambient_motion_subtitle">М’які переливи кольорів за кожним екраном. Призупиняється в режимі енергозбереження або зі зменшеними анімаціями.</string>
+    <string name="settings_frost_strength">Сила матування</string>
+    <string name="frost_strength_light">Слабка</string>
+    <string name="frost_strength_medium">Середня</string>
+    <string name="frost_strength_strong">Сильна</string>
+    <string name="settings_ambient_intensity">Інтенсивність фону</string>
+    <string name="ambient_intensity_subtle">Стримано</string>
+    <string name="ambient_intensity_balanced">Збалансовано</string>
+    <string name="ambient_intensity_vivid">Яскраво</string>
     <string name="add_food_log_time">Час запису</string>
     <string name="add_food_log_time_now">Зараз</string>
     <string name="cd_clear_log_time">Використати поточний час</string>
@@ -1406,7 +1456,6 @@ LBM = вага × (1 − %жиру)</string>
     <string name="settings_food_section_photo">Аналіз фото</string>
     <string name="settings_food_section_serving">Розмір порції</string>
     <string name="settings_gemini_google_search">Прив\'язка до пошуку Google</string>
-    <string name="settings_glass_blur">Скляне розмиття</string>
     <string name="settings_goal_auto">Авто</string>
     <string name="settings_goals_how_adaptive">Адаптивні цілі перераховують твої цілі калорій і макросів приблизно раз на тиждень.</string>
     <string name="settings_goals_how_energy">Енерговитрати прив\'язують цілі до виміряного спалювання з Health Connect.</string>
@@ -1434,8 +1483,6 @@ LBM = вага × (1 − %жиру)</string>
     <string name="settings_macro_pinned_label_format">%1$s (закріплено)</string>
     <string name="settings_macro_unlocked">Розблоковано</string>
     <string name="settings_manage_health_access">Керування доступом Health Connect</string>
-    <string name="settings_max_tokens">Максимальна довжина відповіді</string>
-    <string name="settings_max_tokens_unit">токенів</string>
     <string name="settings_meal_constituents">Розбивка страви на інгредієнти</string>
     <string name="settings_meal_constituents_footer">Коли ввімкнено, ШІ може розділяти складні страви на редаговані інгредієнти з грамами й одиницями. Мікронутрієнти для кожного інгредієнта запитують лише у сильніших хмарних моделях; менші моделі все одно повертають список інгредієнтів із макросами.</string>
     <string name="settings_meal_time_edit_format">%1$s</string>
@@ -2137,6 +2184,18 @@ LBM = вага × (1 − %жиру)</string>
     <string name="onboarding_goal_suggested_bmi">При ІМТ %1$.1f</string>
     <!-- Progress v2: оверлей тіла, комбо калорій, фази цілей, дотримання. -->
     <string name="progress_body_section">Тіло</string>
+    <string name="progress_scale_metrics">Дані ваги</string>
+    <string name="progress_scale_metrics_bone_mass">Кісткова маса</string>
+    <string name="progress_scale_metrics_water">Загальна вода в організмі</string>
+    <string name="progress_scale_metrics_muscle">М\'язова маса</string>
+    <string name="progress_scale_metrics_lean">Суха маса</string>
+    <string name="progress_scale_metrics_visceral">Вісцеральний жир</string>
+    <string name="progress_scale_metrics_note">Оцінка побутової ваги — тенденція надійніша за абсолютне значення</string>
+    <string name="progress_scale_metrics_tbw_percent">%1$.1f %% від маси тіла · типовий діапазон 45–65 %%</string>
+    <string name="progress_log_scale_metrics">Дані ваги</string>
+    <string name="progress_log_scale_metrics_title">Записати дані ваги</string>
+    <string name="progress_estimated_smm">Оцінка скелетних м\'язів (Lee)</string>
+    <string name="progress_estimated_smm_note">Антропометрична оцінка за плечем, стегном і гомілкою · ± ~3 кг</string>
     <string name="progress_overlay_off">Вимк.</string>
     <string name="progress_no_entries_in_range">Немає записів за цей період</string>
     <string name="progress_no_series_selected">Торкніться показника вище, щоб відобразити його тут</string>
@@ -2178,6 +2237,7 @@ LBM = вага × (1 − %жиру)</string>
     <string name="body_fat_method_dexa">DEXA</string>
     <string name="body_fat_method_tape">Стрічка</string>
     <string name="cd_collapsed">Згорнуто</string>
+    <string name="cd_change_meal_type">Змінити тип прийому їжі</string>
     <string name="cd_decrease">Зменшити</string>
     <string name="cd_expanded">Розгорнуто</string>
     <string name="cd_import_mealie">Імпортувати з Mealie</string>
@@ -2618,11 +2678,6 @@ LBM = вага × (1 − %жиру)</string>
         <item>локальна</item>
         <item>офлайн</item>
     </string-array>
-    <string-array name="settings_search_kw_max_tokens">
-        <item>токени</item>
-        <item>довжина</item>
-        <item>ліміт</item>
-    </string-array>
     <string-array name="settings_search_kw_ai_read_timeout">
         <item>час очікування</item>
         <item>секунди</item>
@@ -2712,4 +2767,15 @@ LBM = вага × (1 − %жиру)</string>
         <item>скинути</item>
         <item>заводські</item>
     </string-array>
+    <string name="ai_provider_chatgpt">План ChatGPT</string>
+    <string name="ai_provider_subtitle_chatgpt">Використовуйте відповідний план ChatGPT Plus або Pro</string>
+    <string name="settings_chatgpt_account">Обліковий запис ChatGPT</string>
+    <string name="settings_chatgpt_continue">Продовжити з ChatGPT</string>
+    <string name="settings_chatgpt_connecting">Підключення…</string>
+    <string name="settings_chatgpt_plan_enabled">Використання плану ChatGPT увімкнено для аналізу їжі. Ліміт використання спільний із вашим планом ChatGPT.</string>
+    <string name="settings_chatgpt_plan_footer">Увійдіть, щоб використовувати відповідний план ChatGPT Plus або Pro для аналізу їжі. Ключ API не потрібен.</string>
+    <string name="settings_chatgpt_plan_disabled">Ви ввійшли, але використання плану ChatGPT не ввімкнено. Торкніться рядка облікового запису, щоб надати дозвіл.</string>
+    <string name="settings_chatgpt_revoke_unconfirmed">Локально від’єднано. Віддалене відкликання не підтверджено; Chompass також можна видалити в налаштуваннях ChatGPT.</string>
+    <string name="settings_chatgpt_manage_usage">Керувати використанням ChatGPT</string>
+    <string name="settings_chatgpt_disconnect">Від’єднати ChatGPT</string>
 </resources>

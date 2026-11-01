@@ -2,7 +2,6 @@ package app.chompass.ui.home
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.HorizontalDivider
@@ -78,43 +77,18 @@ import app.chompass.ui.components.energyText
 import app.chompass.ui.components.energyUnitLabel
 import app.chompass.ui.navigation.LocalLaunchFillEpoch
 import app.chompass.ui.navigation.LocalEnergyUnit
-import app.chompass.ui.theme.AppColors
-import app.chompass.ui.theme.AppTextOpacity
+import app.chompass.ui.components.pressScale
+import app.chompass.ui.components.AnimatedNumberText
+import app.chompass.ui.theme.AppMotion
 import app.chompass.ui.theme.success
 
 // ── Calorie hero ─────────────────────────────────────────────────────
 
 /**
- * Verbatim port of the calorie hero block in HomeView.body
- * (ios/calorietracker/ContentView.swift, lines ~322–362):
- *
- *   VStack(spacing: 20) {
- *     VStack(spacing: 4) {
- *       Text("\(selectedCalories)")
- *         .font(.system(size: 72, weight: .bold, design: .rounded))
- *         .foregroundStyle(LinearGradient(colors: AppColors.calorieGradient,
- *                                         startPoint: .topLeading,
- *                                         endPoint: .bottomTrailing))
- *         .contentTransition(.numericText())
- *         .animation(.snappy, value: selectedCalories)
- *       Text("of \(calorieGoal) kcal")
- *         .font(.system(.callout, design: .rounded, weight: .medium))
- *         .foregroundStyle(.tertiary)
- *     }
- *     GeometryReader { geo in
- *       ZStack(alignment: .leading) {
- *         Capsule().fill(AppColors.calorie.opacity(0.10)).frame(height: 10)
- *         Capsule().fill(LinearGradient(.leading, .trailing))
- *                  .frame(width: max(10, geo.size.width * progress), height: 10)
- *                  .shadow(color: AppColors.calorie.opacity(0.35), radius: 8, y: 3)
- *                  .animation(.spring(response: 0.8, dampingFraction: 0.75), value: selectedCalories)
- *       }
- *     }.frame(height: 10).padding(.horizontal, 24)
- *     Text("\(caloriesRemaining) left")
- *       .font(.system(.footnote, design: .rounded, weight: .medium))
- *       .foregroundStyle(.secondary)
- *   }
- *   .padding(.vertical, 20)
+ * The Home calorie hero: the selected kcal value in display numerals over a
+ * 10dp progress capsule (accent fill, soft glow), with the goal and remaining
+ * labels beneath. Changes animate — counter swap and fill springs via the
+ * AppMotion specs in the composables below.
  */
 private data class CalorieHeroInput(
     val current: Int,
@@ -279,7 +253,7 @@ private fun rememberArcAnimation(
             animatedRatio.snapTo(ratio)
             return@LaunchedEffect
         }
-        val spec = spring<Float>(dampingRatio = 0.85f, stiffness = 55f)
+        val spec = AppMotion.fillSpring<Float>()
         if (lastEpoch != epoch) {
             animatedRatio.snapTo(0f)
             animatedRatio.animateTo(ratio, spec)
@@ -481,12 +455,14 @@ private fun BudgetGoalLine(
     maxTextWidth: Dp = Dp.Unspecified,
 ) {
     val onClickLabel = stringResource(R.string.home_calorie_budget_info)
+    val src = remember { MutableInteractionSource() }
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(3.dp),
         modifier = modifier
+            .pressScale(src)
             .clickable(
-                interactionSource = remember { MutableInteractionSource() },
+                interactionSource = src,
                 indication = null,
                 onClickLabel = onClickLabel,
                 role = Role.Button,
@@ -579,7 +555,7 @@ private fun DefaultCalorieHero(input: CalorieHeroInput, modifier: Modifier = Mod
         val progressColor = MaterialTheme.colorScheme.primary
         val bonusColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.45f)
         val liveBurnColor = MaterialTheme.colorScheme.tertiary
-        val muted = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+        val muted = MaterialTheme.colorScheme.onSurfaceVariant
         val tertiary = MaterialTheme.colorScheme.tertiary
         val successColor = MaterialTheme.colorScheme.success
 
@@ -647,20 +623,16 @@ private fun DefaultCalorieHero(input: CalorieHeroInput, modifier: Modifier = Mod
                     .padding(top = 30.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(
-                    text = LocaleFormat.integer(EnergyFormat.quantity(current, unit)),
-                    modifier = Modifier
-                        .widthIn(max = 140.dp)
-                        .semantics { contentDescription = eatenA11y },
+                // Counter swap: slide+fade when today's value changes.
+                AnimatedNumberText(
+                    value = LocaleFormat.integer(EnergyFormat.quantity(current, unit)),
+                    modifier = Modifier.widthIn(max = 140.dp),
+                    contentDescription = eatenA11y,
                     style = MaterialTheme.typography.displayMedium,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
-                    autoSize = TextAutoSize.StepBased(
-                        minFontSize = 30.sp,
-                        maxFontSize = 45.sp,
-                        stepSize = 1.sp,
-                    ),
+                    autoSize = TextAutoSize.StepBased(minFontSize = 30.sp, maxFontSize = 45.sp, stepSize = 1.sp),
                 )
                 // Goal caption directly under the eaten number; the burn caption
                 // follows it (see CalorieBurnCaption below).
@@ -773,7 +745,7 @@ private fun SideGaugeCalorieHero(input: CalorieHeroInput, modifier: Modifier = M
         val progressColor = MaterialTheme.colorScheme.primary
         val bonusColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.45f)
         val liveBurnColor = MaterialTheme.colorScheme.tertiary
-        val muted = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+        val muted = MaterialTheme.colorScheme.onSurfaceVariant
         val tertiary = MaterialTheme.colorScheme.tertiary
         val successColor = MaterialTheme.colorScheme.success
 
@@ -936,7 +908,7 @@ private fun CompactArcCalorieHero(input: CalorieHeroInput, modifier: Modifier = 
         val progressColor = MaterialTheme.colorScheme.primary
         val bonusColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.45f)
         val liveBurnColor = MaterialTheme.colorScheme.tertiary
-        val muted = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+        val muted = MaterialTheme.colorScheme.onSurfaceVariant
         val tertiary = MaterialTheme.colorScheme.tertiary
         val successColor = MaterialTheme.colorScheme.success
 
@@ -1116,7 +1088,7 @@ private fun CompactHorizontalCalorieHero(input: CalorieHeroInput, modifier: Modi
         val trackColor = MaterialTheme.colorScheme.surfaceVariant
         val progressColor = MaterialTheme.colorScheme.primary
         val activeColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.45f)
-        val muted = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+        val muted = MaterialTheme.colorScheme.onSurfaceVariant
         val tertiary = MaterialTheme.colorScheme.tertiary
         val successColor = MaterialTheme.colorScheme.success
         val unitLabel = energyUnitLabel()
@@ -1331,12 +1303,15 @@ private fun UntrackedChip(untracked: Boolean, onClick: () -> Unit) {
     val a11y = stringResource(
         if (untracked) R.string.home_untracked_chip_a11y else R.string.home_mark_untracked_chip_a11y,
     )
+    val chipInteraction = remember { MutableInteractionSource() }
     Surface(
         onClick = onClick,
         shape = CircleShape,
         color = if (untracked) MaterialTheme.colorScheme.tertiaryContainer
             else MaterialTheme.colorScheme.surfaceVariant,
+        interactionSource = chipInteraction,
         modifier = Modifier
+            .pressScale(chipInteraction)
             .minimumInteractiveComponentSize()
             .widthIn(max = 140.dp)
             .semantics { contentDescription = a11y },
@@ -1371,11 +1346,14 @@ private fun DayTypeChip(label: String, color: Color? = null, onClick: () -> Unit
     } else {
         MaterialTheme.colorScheme.onSecondaryContainer
     }
+    val chipInteraction = remember { MutableInteractionSource() }
     Surface(
         onClick = onClick,
         shape = CircleShape,
         color = container,
+        interactionSource = chipInteraction,
         modifier = Modifier
+            .pressScale(chipInteraction)
             // The chip shares the remaining-caption line: cap it so a long
             // day-type name ellipsizes instead of pushing the caption around.
             .minimumInteractiveComponentSize()
@@ -1503,7 +1481,7 @@ private fun BudgetExplanationDialog(
     onShowRecalcDetails: (() -> Unit)? = null,
     goalDerivation: GoalDerivation? = null,
 ) {
-    val muted = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val unit = LocalEnergyUnit.current
     val unitLabel = energyUnitLabel()
     ChompassDialog(onDismissRequest = onDismiss) {
@@ -1689,10 +1667,9 @@ private fun BudgetExplanationDialog(
     }
 }
 
-// ── Macro card (iOS port) ────────────────────────────────────────────
+// ── Macro card ───────────────────────────────────────────────────────
 
-// MacroCard moved to ui/components/MacroCard.kt as a verbatim port of
-// HomeComponents.swift's struct MacroCard. Imported above.
+// MacroCard lives in ui/components/MacroCard.kt; imported above.
 
 @Composable
 internal fun ViewMoreButton() {
@@ -1706,13 +1683,13 @@ internal fun ViewMoreButton() {
             stringResource(R.string.home_view_more),
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
-            color = AppColors.Calorie.copy(alpha = 0.6f)
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
         )
         Spacer(Modifier.width(5.dp))
         Icon(
             Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
-            tint = AppColors.Calorie.copy(alpha = 0.6f),
+            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
             modifier = Modifier.size(11.dp)
         )
     }

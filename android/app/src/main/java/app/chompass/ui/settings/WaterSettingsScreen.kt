@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DirectionsRun
 import androidx.compose.material.icons.outlined.Notifications
@@ -43,8 +42,6 @@ import app.chompass.models.WaterGoalBreakdown
 import app.chompass.models.WaterGoalCalculator
 import app.chompass.ui.components.ChompassIconBubble
 import app.chompass.ui.navigation.ChompassRoutes
-import app.chompass.ui.theme.AppRadii
-import app.chompass.ui.theme.AppTextOpacity
 import app.chompass.ui.theme.warning
 import app.chompass.ui.util.clockTimePattern
 import java.time.LocalTime
@@ -75,7 +72,7 @@ fun WaterSettingsScreen(
         Text(
             stringResource(R.string.settings_water_intro),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
         SectionCard(title = stringResource(R.string.settings_water_section_goal)) {
@@ -165,7 +162,7 @@ fun WaterSettingsScreen(
                     Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .clip(RoundedCornerShape(AppRadii.Field))
+                        .clip(MaterialTheme.shapes.medium)
                         .background(MaterialTheme.colorScheme.warning.copy(alpha = 0.09f))
                         .padding(14.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -178,7 +175,7 @@ fun WaterSettingsScreen(
                     Text(
                         stringResource(R.string.settings_water_dynamic_warning_body),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = AppTextOpacity.Muted),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -265,13 +262,13 @@ internal fun WaterDynamicGoalPreviewRow(preview: WaterGoalBreakdown?) {
                     preview.foodWaterMl,
                 ),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         Text(
             stringResource(R.string.settings_water_goal_summary, preview.netGoalMl),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Subtle),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

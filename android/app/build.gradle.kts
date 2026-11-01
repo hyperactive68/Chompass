@@ -66,8 +66,8 @@ android {
         applicationId = "app.chompass"
         minSdk = 26
         targetSdk = 36
-        versionCode = 101
-        versionName = "5.11.0"
+        versionCode = 112
+        versionName = "6.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         if (releaseAbi != null) {
@@ -140,6 +140,10 @@ android {
         }
         getByName("debug2") {
             assets.srcDir("src/debug/assets")
+            // initWith(debug) copies buildConfigFields, not srcDir overrides;
+            // without the debug java dir main's debug launchers (intent-extra
+            // hooks) fail to resolve their Runners on debug2.
+            kotlin.srcDir("src/debug/java")
             kotlin.srcDir("src/grounded/java")
         }
         getByName("release") {
@@ -159,6 +163,14 @@ android {
     }
 
     experimentalProperties["android.experimental.enableScreenshotTest"] = true
+
+    // A11y regression gate (Morphe Phase 3): touch-target sizing and content
+    // labeling fail the build on new violations. Pre-existing findings (all
+    // categories) live in the committed lint baseline.
+    lint {
+        enable += listOf("Accessibility", "ContentDescription")
+        baseline = file("lint-baseline.xml")
+    }
 
     // IzzyOnDroid (and F-Droid infra) strongly prefer keeping APKs small.
     // Compress native *.so libs to reduce the on-disk size of "fat" builds.
@@ -202,6 +214,7 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.haze)
     implementation(libs.coil.compose)
     // Gson is only used by the debug on-device LLM smoke test (src/debug).
     debugImplementation(libs.gson)
@@ -227,11 +240,16 @@ dependencies {
     implementation(libs.androidx.camera.view)
     implementation(libs.zxing.cpp.android)
     implementation(libs.okhttp)
+    implementation(libs.okhttp.dnsoverhttps)
+    implementation(libs.play.services.auth)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.vico.compose.m3)
 
     testImplementation(libs.junit)
+    // JVM DataStore tests use OkioStorage: it exercises the same DataStore
+    // transaction semantics without AndroidX FileStorage's Windows rename path.
+    testImplementation(libs.androidx.datastore.core.okio.jvm)
     testImplementation(libs.robolectric)
     testImplementation("org.json:json:20240303")
     testImplementation(libs.mockwebserver)

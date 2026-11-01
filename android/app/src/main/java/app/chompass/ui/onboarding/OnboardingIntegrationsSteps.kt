@@ -2,6 +2,7 @@ package app.chompass.ui.onboarding
 
 import android.Manifest
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -18,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.Accessibility
@@ -31,7 +31,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,9 +45,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.chompass.AppContainer
 import app.chompass.R
-import app.chompass.ui.theme.AppColors
-import app.chompass.ui.theme.AppRadii
-import app.chompass.ui.theme.AppTextOpacity
+
+private const val TAG = "OnboardingHealthConnect"
+
 @Composable
 internal fun NotificationsStep(enabled: Boolean, onToggle: (Boolean) -> Unit) {
     // iOS notificationsStep: centered bell.badge.fill in pink + big headline
@@ -60,7 +63,7 @@ internal fun NotificationsStep(enabled: Boolean, onToggle: (Boolean) -> Unit) {
         Icon(
             imageVector = Icons.Outlined.NotificationsActive,
             contentDescription = null,
-            tint = AppColors.Calorie,
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(56.dp)
         )
         Spacer(Modifier.height(20.dp))
@@ -74,7 +77,7 @@ internal fun NotificationsStep(enabled: Boolean, onToggle: (Boolean) -> Unit) {
         Text(
             stringResource(R.string.onboarding_notifications_subtitle),
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = AppTextOpacity.Muted),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
         Spacer(Modifier.height(28.dp))
@@ -82,7 +85,7 @@ internal fun NotificationsStep(enabled: Boolean, onToggle: (Boolean) -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp)
-                .clip(RoundedCornerShape(AppRadii.Field))
+                .clip(MaterialTheme.shapes.medium)
                 .background(
                     MaterialTheme.colorScheme.primary
                 )
@@ -106,7 +109,7 @@ internal fun NotificationsStep(enabled: Boolean, onToggle: (Boolean) -> Unit) {
         Text(
             stringResource(R.string.onboarding_notifications_change_anytime),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = AppTextOpacity.Muted)
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -116,6 +119,7 @@ internal fun HealthConnectStep(container: AppContainer, enabled: Boolean, onTogg
     // iOS appleHealthStep: heart.fill in pink circle, title "Connect to\nApple Health",
     // feature row list, pink CTA "Connect". Android maps Apple Health → Health Connect.
     val context = LocalContext.current
+    var manageAccessFailed by remember { mutableStateOf(false) }
     val hcLauncher = rememberLauncherForActivityResult(
         container.health.permissionRequestContract()
     ) { granted ->
@@ -138,7 +142,7 @@ internal fun HealthConnectStep(container: AppContainer, enabled: Boolean, onTogg
                 imageVector = Icons.Filled.Favorite,
                 contentDescription = null,
                 modifier = Modifier.size(56.dp),
-                tint = AppColors.Calorie
+                tint = MaterialTheme.colorScheme.primary
             )
         }
         Spacer(Modifier.height(20.dp))
@@ -152,7 +156,7 @@ internal fun HealthConnectStep(container: AppContainer, enabled: Boolean, onTogg
         Text(
             stringResource(R.string.onboarding_health_subtitle),
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = AppTextOpacity.Muted),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
         Spacer(Modifier.height(18.dp))
@@ -169,7 +173,7 @@ internal fun HealthConnectStep(container: AppContainer, enabled: Boolean, onTogg
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp)
-                .clip(RoundedCornerShape(AppRadii.Field))
+                .clip(MaterialTheme.shapes.medium)
                 .background(
                     if (available) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.15f)
@@ -191,10 +195,28 @@ internal fun HealthConnectStep(container: AppContainer, enabled: Boolean, onTogg
             )
         }
         if (available) {
-            TextButton(onClick = { context.startActivity(container.health.manageAccessIntent()) }) {
+            // Upstream's top Play-vitals crash: this intent throws SecurityException on some
+            // devices (work profile, HC disabled after the availability check, OEM strips).
+            TextButton(onClick = {
+                runCatching { context.startActivity(container.health.manageAccessIntent()) }
+                    .onFailure { e ->
+                        Log.w(TAG, "Health Connect manage-access intent refused: ${e.javaClass.name}")
+                        manageAccessFailed = true
+                    }
+            }) {
                 Text(
                     stringResource(R.string.settings_manage_health_access),
-                    color = AppColors.Calorie,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+            if (manageAccessFailed) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    stringResource(R.string.settings_health_manage_failed),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 40.dp),
                 )
             }
         }
@@ -207,7 +229,7 @@ private fun HealthFeatureRow(icon: ImageVector, label: String) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onBackground.copy(alpha = AppTextOpacity.Muted),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(22.dp)
         )
         Spacer(Modifier.width(14.dp))

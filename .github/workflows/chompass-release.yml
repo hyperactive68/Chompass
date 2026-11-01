@@ -1,0 +1,125 @@
+name: Chompass Android release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: chompass-release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Verify OpenAI endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          auth_status="$(curl --silent --show-error -o /tmp/openai-oidc.json -w '%{http_code}' https://auth.openai.com/.well-known/openid-configuration)"
+          test "$auth_status" = "200"
+          grep -q '"authorization_endpoint"' /tmp/openai-oidc.json
+          api_status="$(curl --silent --show-error -o /dev/null -w '%{http_code}' https://api.openai.com/v1/models)"
+          test "$api_status" != "000"
+
+      - name: Configure release signing
+        shell: bash
+        env:
+          RELEASE_KEYSTORE_B64: ${{ secrets.CHOMPASS_RELEASE_KEYSTORE_B64 }}
+          RELEASE_STORE_PASSWORD: ${{ secrets.CHOMPASS_RELEASE_STORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.CHOMPASS_RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.CHOMPASS_RELEASE_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$RELEASE_KEYSTORE_B64" || { echo "::error::Missing CHOMPASS_RELEASE_KEYSTORE_B64"; exit 1; }
+          test -n "$RELEASE_STORE_PASSWORD" || { echo "::error::Missing CHOMPASS_RELEASE_STORE_PASSWORD"; exit 1; }
+          test -n "$RELEASE_KEY_ALIAS" || { echo "::error::Missing CHOMPASS_RELEASE_KEY_ALIAS"; exit 1; }
+          test -n "$RELEASE_KEY_PASSWORD" || { echo "::error::Missing CHOMPASS_RELEASE_KEY_PASSWORD"; exit 1; }
+          printf '%s' "$RELEASE_KEYSTORE_B64" | base64 --decode > android/chompass-release.jks
+          cat > android/keystore.properties <<EOF
+          storeFile=../chompass-release.jks
+          storePassword=$RELEASE_STORE_PASSWORD
+          keyAlias=$RELEASE_KEY_ALIAS
+          keyPassword=$RELEASE_KEY_PASSWORD
+          EOF
+          test -s android/chompass-release.jks
+          chmod 600 android/chompass-release.jks android/keystore.properties
+
+      - name: Print release certificate fingerprints
+        shell: bash
+        env:
+          RELEASE_STORE_PASSWORD: ${{ secrets.CHOMPASS_RELEASE_STORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.CHOMPASS_RELEASE_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          keytool -list -v \
+            -keystore android/chompass-release.jks \
+            -storepass "$RELEASE_STORE_PASSWORD" \
+            -alias "$RELEASE_KEY_ALIAS" \
+            | grep -E 'Alias name:|SHA1:|SHA-256:'
+
+      - name: Build and test signed release APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x android/gradlew
+          cd android
+          ./gradlew :app:testDebugUnitTest :app:assembleRelease --no-daemon
+
+      - name: Collect signed release APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          apk="$(find android/app/build/outputs/apk -type f -name '*universal*.apk' | head -n 1)"
+          if [ -z "$apk" ]; then
+            apk="$(find android/app/build/outputs/apk -type f -name '*release*.apk' | head -n 1)"
+          fi
+          test -n "$apk"
+          cp "$apk" dist/Chompass-6.0.0-universal.apk
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Chompass-6.0.0-universal
+          path: dist/Chompass-6.0.0-universal.apk
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Chompass ${{ github.ref_name }}
+          target_commitish: ${{ github.sha }}
+          body: |
+            ## Chompass 6.0.0
+
+            This release provides a signed Android build with stable update signing and the official Google Android AuthorizationClient flow for Drive app-data backup/sync.
+
+            - Uses system DNS first, with Cloudflare and Google DNS-over-HTTPS fallback when Android returns no address.
+            - Keeps the official ChatGPT OAuth and Responses API flow unchanged.
+            - Coach can now retrieve local nutrition data and prepare user-confirmed log proposals through Responses function calling.
+            - No API key is embedded or required for eligible ChatGPT Plus or Pro plan usage.
+            - Google Drive uses the official Android AuthorizationClient consent flow; the Google Drive app is not required on the phone.
+            - One-time Google Cloud OAuth setup is required for the `app.chompass` package and the release signing certificate. No HTTPS domain or client secret in the APK is required.
+            - The backup is stored in Drive’s private appDataFolder using the limited drive.appdata scope.
+            - Optional “Sync after logging food” uploads the updated privacy-limited JSON after food additions, edits, and deletions. Photos, API keys, passwords, and OAuth tokens are not included.
+            - Adds a model-aware Responses API reasoning-level picker (Auto through Maximum) and treats explicit zero nutrition values as answered.
+            - Restores the selected per-profile reasoning level after app restart and startup hydration.
+
+            This APK is release-signed with the project keystore and is intended to update earlier Chompass builds signed with the same key.
+          files: dist/Chompass-6.0.0-universal.apk

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Info
@@ -18,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import app.chompass.ui.components.glassDialogColor
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,9 +28,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.chompass.R
-import app.chompass.ui.theme.AppColors
-import app.chompass.ui.theme.AppRadii
-import app.chompass.ui.theme.AppTextOpacity
 /**
  * Progressive accuracy guidance for photo entry: a dismissible tip card for early
  * entries, otherwise a compact Info control that opens the same body in a dialog.
@@ -84,8 +81,8 @@ fun PhotoAccuracyTipCard(
         modifier
             .fillMaxWidth()
             .background(
-                AppColors.Calorie.copy(alpha = 0.10f),
-                RoundedCornerShape(AppRadii.Field),
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+                MaterialTheme.shapes.medium,
             )
             .padding(start = 14.dp, end = 4.dp, top = 10.dp, bottom = 12.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -98,14 +95,14 @@ fun PhotoAccuracyTipCard(
                 stringResource(R.string.photo_accuracy_guide_title),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
-                color = AppColors.Calorie,
+                color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.weight(1f),
             )
             IconButton(onClick = onDismiss, modifier = Modifier.size(36.dp)) {
                 Icon(
                     Icons.Outlined.Close,
                     contentDescription = stringResource(R.string.photo_accuracy_guide_dismiss),
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(18.dp),
                 )
             }
@@ -113,7 +110,7 @@ fun PhotoAccuracyTipCard(
         Text(
             stringResource(R.string.photo_accuracy_guide_body),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Emphasized),
+            color = MaterialTheme.colorScheme.onSurface,
         )
     }
 }
@@ -127,7 +124,7 @@ fun PhotoAccuracyInfoButton(
         Icon(
             Icons.Outlined.Info,
             contentDescription = stringResource(R.string.photo_accuracy_guide_cd),
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Subtle),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(18.dp),
         )
     }
@@ -137,6 +134,7 @@ fun PhotoAccuracyInfoButton(
 fun PhotoAccuracyGuideDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = glassDialogColor(MaterialTheme.colorScheme.surfaceContainerHigh),
         title = { Text(stringResource(R.string.photo_accuracy_guide_title)) },
         text = {
             Text(

@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -24,11 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.chompass.R
 import app.chompass.ui.components.ChompassSurface
+import app.chompass.ui.components.contentMaxWidth
 import app.chompass.ui.navigation.BottomNavScrollPadding
-import app.chompass.ui.theme.AppColors
 import app.chompass.ui.theme.warning
-import app.chompass.ui.theme.AppRadii
-import app.chompass.ui.theme.AppTextOpacity
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
@@ -36,7 +35,7 @@ fun CalculationMethodsScreen(
     onBack: () -> Unit
 ) {
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = Color.Transparent,
         topBar = {
             SettingsTopBar(
                 title = stringResource(R.string.settings_calc_methods),
@@ -47,6 +46,7 @@ fun CalculationMethodsScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .contentMaxWidth()
                 .padding(padding)
                 .padding(horizontal = 16.dp),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(
@@ -59,7 +59,7 @@ fun CalculationMethodsScreen(
                 Text(
                     stringResource(R.string.settings_calc_intro),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = AppTextOpacity.Subtle)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -210,7 +210,7 @@ fun CalculationMethodsScreen(
                 Column(
                     Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(AppRadii.Field))
+                        .clip(MaterialTheme.shapes.medium)
                         .background(MaterialTheme.colorScheme.warning.copy(alpha = 0.09f))
                         .padding(14.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -224,7 +224,7 @@ fun CalculationMethodsScreen(
                     Text(
                         stringResource(R.string.settings_not_medical_body),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = AppTextOpacity.Muted)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -257,7 +257,7 @@ internal fun CalcFormulaCard(
     val uriHandler = LocalUriHandler.current
     ChompassSurface(
         modifier = Modifier.fillMaxWidth(),
-        cornerRadius = AppRadii.Container,
+        cornerRadius = 16.dp,
         padding = 14.dp,
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -270,13 +270,13 @@ internal fun CalcFormulaCard(
             Text(
                 usedWhen,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Subtle)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             if (formula != null) {
                 Box(
                     Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(AppRadii.Chip))
+                        .clip(MaterialTheme.shapes.small)
                         .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
                         .padding(10.dp)
                 ) {
@@ -284,7 +284,7 @@ internal fun CalcFormulaCard(
                         formula,
                         fontFamily = FontFamily.Monospace,
                         fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Strong)
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -292,19 +292,19 @@ internal fun CalcFormulaCard(
                 Text(
                     "SOURCE",
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Faint)
+                    color = MaterialTheme.colorScheme.outline
                 )
                 Text(
                     citation,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 if (url != null) {
                     Text(
                         "Open source ↗",
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Medium,
-                        color = AppColors.Calorie,
+                        color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
                             .clickable { uriHandler.openUri(url) }

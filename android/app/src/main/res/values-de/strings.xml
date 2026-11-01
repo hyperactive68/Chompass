@@ -279,8 +279,24 @@
     <string name="ai_provider_mistral">Mistral</string>
 
     <string name="ai_provider_ollama">Ollama (lokal)</string>
+    <string name="ai_provider_ollama_cloud">Ollama Cloud</string>
+    <string name="ai_provider_custom">Andere URL</string>
+    <string name="ai_provider_subtitle_custom">Basis-URL eingeben</string>
+    <string name="ai_provider_search_hint">Name oder Host suchen</string>
+    <string name="ai_provider_section_shortcuts">Kurzbefehle</string>
+    <string name="ai_provider_section_phone">Auf diesem Telefon</string>
+    <string name="ai_provider_section_server">Dein Server</string>
+    <string name="ai_provider_section_cloud">Cloud</string>
+    <string name="ai_provider_chip_on_phone">Auf dem Telefon</string>
+    <string name="ai_provider_chip_your_server">Dein Server</string>
+    <string name="ai_provider_chip_native">Nativ</string>
+    <string name="ai_provider_chip_cloud">Cloud</string>
+    <string name="ai_provider_row_gemini">Schlüssel · Google-Suche</string>
+    <string name="ai_provider_row_anthropic">Schlüssel · eigene API</string>
+    <string name="ai_provider_row_ollama">Dieses Netz · kein Schlüssel</string>
+    <string name="ai_provider_row_host_key">%1$s · Schlüssel</string>
+    <string name="ai_provider_directory_footer">Gelistete Hosts kommen mit dieser Version. Der Schlüssel geht nur an den Host, den du wählst.</string>
 
-    <string name="ai_provider_custom">Benutzerdefiniert (OpenAI-kompatibel)</string>
 
     <string name="ai_provider_on_device">Auf dem Gerät (privat)</string>
 
@@ -309,16 +325,12 @@
     <string name="ai_provider_subtitle_mistral">Mistral-Modelle</string>
 
     <string name="ai_provider_subtitle_ollama">Dein Rechner, keine Cloud</string>
+    <string name="ai_provider_subtitle_ollama_cloud">Ollamas gehostete Modelle</string>
 
-    <string name="ai_provider_subtitle_custom">LM Studio, vLLM, llama.cpp u. a.</string>
 
-    <string name="ai_provider_group_recommended">Empfohlen</string>
 
-    <string name="ai_provider_group_cloud">Cloud-Anbieter</string>
 
-    <string name="ai_provider_group_local">Lokal &amp; selbst gehostet</string>
 
-    <string name="ai_provider_group_device">Auf dem Gerät</string>
 
     <string name="settings_section_ai_profile">Profil</string>
 
@@ -336,7 +348,6 @@
 
     <string name="settings_ai_get_key">API-Schlüssel holen</string>
 
-    <string name="settings_ai_value_default">%1$,d (Standard)</string>
 
     <string name="settings_ai_timeout_default">%1$,ds (Standard)</string>
 
@@ -811,6 +822,24 @@ für dich ein</string>
 
     <string name="action_undo">Rückgängig</string>
     <string name="action_save_to_favorites">Zu Favoriten speichern</string>
+    <string name="action_save_to_library">In Bibliothek speichern</string>
+    <string name="action_hide_from_suggestions">Aus Vorschlägen ausblenden</string>
+    <string name="action_unhide">Einblenden</string>
+    <string name="settings_saved_foods">Gespeicherte Lebensmittel</string>
+    <string name="library_hidden_section">Ausgeblendet</string>
+    <string name="library_empty">Noch keine gespeicherten Lebensmittel</string>
+    <string name="library_never_logged">Nie geloggt</string>
+    <string name="library_row_summary">%1$d Einträge · zuletzt %2$s</string>
+    <string name="library_delete_rows_title">Geloggte Einträge löschen?</string>
+    <string name="library_delete_rows_message">Alle %1$d Einträge von „%2$s“ löschen? Die Tage werden neu berechnet. Das gespeicherte Lebensmittel bleibt erhalten, nur seine Tagebuch-Einträge werden entfernt.</string>
+    <string name="library_merge_section">Mögliche Duplikate</string>
+    <string name="library_merge_title">Duplikate zusammenführen</string>
+    <string name="library_merge_intro">Das sieht nach demselben Lebensmittel aus. Wähle den Namen, der bleiben soll – die anderen werden darin zusammengeführt.</string>
+    <string name="library_merge_rows_message">%1$d Einträge werden in „%2$s“ umbenannt. Nichts wird gelöscht; die Tage werden neu berechnet.</string>
+    <string name="library_merge_action">Zusammenführen</string>
+    <string name="library_sort_last_logged">Zuletzt geloggt</string>
+    <string name="library_sort_name">Name</string>
+    <string name="library_sort_logs">Einträge</string>
     <string name="saved_to_favorites">In Favoriten gespeichert</string>
 
     <string name="add_food_photo_source_title">Foto hinzufügen</string>
@@ -1703,6 +1732,36 @@ für dich ein</string>
     <string name="settings_fixed_launcher_icon_subtitle">Behält die Launcher-Ikone in Petrol. Sie folgt nicht mehr der Akzentfarbe oder dem Hintergrundbild.</string>
     <string name="settings_system_date_time_pickers">System-Datums- und Zeitwahl</string>
     <string name="settings_system_date_time_pickers_subtitle">Beim Bearbeiten einer Mahlzeit die Datums- und Zeitdialoge des Telefons nutzen.</string>
+    <string name="settings_glass_blur">Mattes Glas</string>
+    <string name="settings_glass_blur_subtitle">Inhalte hinter schwebenden Bereichen weichzeichnen, z. B. über der Ergebnisliste beim Essen hinzufügen.</string>
+    <string name="settings_ambient_motion">Ambient-Hintergrund</string>
+    <string name="settings_ambient_motion_subtitle">Weiche, treibende Farbflächen hinter jedem Bildschirm. Pausiert im Energiesparmodus oder wenn Animationen reduziert sind.</string>
+    <string name="settings_frost_strength">Froststärke</string>
+    <string name="frost_strength_light">Leicht</string>
+    <string name="frost_strength_medium">Mittel</string>
+    <string name="frost_strength_strong">Stark</string>
+    <string name="settings_ambient_intensity">Ambient-Intensität</string>
+    <string name="ambient_intensity_subtle">Dezent</string>
+    <string name="ambient_intensity_balanced">Ausgewogen</string>
+    <string name="ambient_intensity_vivid">Lebhaft</string>
+    <string name="settings_ambient_contrast">Kontrast</string>
+    <string name="settings_ambient_contrast_subtitle">Wie klar sich das Feld abhebt. Stark mildert die Abdunklung auf OLED-Schwarz.</string>
+    <string name="ambient_contrast_soft">Weich</string>
+    <string name="ambient_contrast_balanced">Ausgewogen</string>
+    <string name="ambient_contrast_strong">Stark</string>
+    <string name="settings_ambient_saturation">Sättigung</string>
+    <string name="settings_ambient_saturation_subtitle">Wie weit die Farben von Grau entfernt sind.</string>
+    <string name="ambient_saturation_muted">Gedämpft</string>
+    <string name="ambient_saturation_natural">Natürlich</string>
+    <string name="ambient_saturation_rich">Kräftig</string>
+    <string name="settings_ambient_speed">Ambient-Geschwindigkeit</string>
+    <string name="ambient_speed_calm">Ruhig</string>
+    <string name="ambient_speed_lively">Zügig</string>
+    <string name="settings_ambient_palette">Ambient-Palette</string>
+    <string name="ambient_palette_accent">Akzent</string>
+    <string name="ambient_palette_macro">Makros</string>
+    <string name="settings_ambient_tilt">Neigungsparallaxe</string>
+    <string name="settings_ambient_tilt_subtitle">Die Farbflächen wandern, wenn du das Handy neigst. Der Bewegungssensor läuft nur, solange ein Bildschirm offen ist.</string>
     <string name="add_food_log_time">Log-Zeit</string>
     <string name="add_food_log_time_now">Jetzt</string>
     <string name="cd_clear_log_time">Aktuelle Uhrzeit verwenden</string>
@@ -1858,8 +1917,6 @@ für dich ein</string>
 
     <string name="unit_celsius">°C</string>
 
-    <string name="settings_glass_blur">Glas-Unschärfe</string>
-
     <string name="settings_food_log_sort">Sortierung des Ernährungsprotokolls</string>
 
     <string name="settings_week_starts">Die Woche beginnt am</string>
@@ -1978,6 +2035,8 @@ für dich ein</string>
     <string name="settings_custom_url_placeholder">https://your-endpoint.com/v1</string>
 
     <string name="settings_custom_url_title">Benutzerdefinierte Basis-URL</string>
+    <string name="settings_custom_directory_docs">Dokumentation</string>
+    <string name="ai_model_accepts_images">Unterstützt Bilder (angegeben)</string>
     <string name="settings_ai_allow_insecure_http">Unsicheres HTTP erlauben</string>
     <string name="settings_ai_allow_insecure_http_footer">Eigene und Ollama-Endpunkte dürfen dann http://-URLs nutzen, zum Beispiel im Heimnetz. Cloud-Anbieter nutzen https. Lass aus, außer dein Server hat kein TLS.</string>
 
@@ -2360,7 +2419,7 @@ für dich ein</string>
 
     <string name="about_share">App teilen</string>
 
-    <string name="about_open_source">Quellcode (MIT)</string>
+    <string name="about_open_source">Quellcode (GPL v3)</string>
 
     <string name="about_asset_credits">Open Source &amp; Assets</string>
 
@@ -2462,11 +2521,8 @@ für dich ein</string>
 
     <string name="ai_error_invalid_response">Die KI-Antwort konnte nicht verstanden werden. Bitte versuche es erneut.</string>
 
-    <string name="ai_error_timeout">Der KI-Anbieter hat zu lange gebraucht, um zu antworten. Versuch es erneut oder erhöhe das Zeitlimit unter Einstellungen → KI &amp; Sprache.</string>
-    <string name="ai_error_disabled">KI-Funktionen sind unter Einstellungen → KI &amp; Sprache deaktiviert.</string>
 
     <string name="ai_error_invalid_url">Ungültige API-URL. Überprüfe deine Anbietereinstellungen.</string>
-    <string name="ai_error_insecure_http_blocked">Unsicheres HTTP ist gesperrt. Schalte „Unsicheres HTTP erlauben“ unter Einstellungen → KI &amp; Sprache ein, oder nutze eine https://-URL.</string>
 
     <string name="ai_error_on_device_model_not_downloaded">Das geräteinterne Modell wurde noch nicht heruntergeladen. Öffne „Einstellungen“ → „KI-Anbieter“ → „Modell“, um es herunterzuladen.</string>
 
@@ -2476,6 +2532,12 @@ für dich ein</string>
     <string name="ai_error_on_device_engine_init">Die Modul-Engine konnte auf diesem Gerät nicht gestartet werden. Versuche es erneut, entlade das Modell unter Einstellungen → KI-Anbieter → Modell oder wechsle zu einem Cloud-Anbieter.</string>
 
     <string name="ai_error_key_rejected">Dein API-Schlüssel wurde abgelehnt. Öffne „Einstellungen“ → „KI-Anbieter“ und füge einen gültigen Schlüssel erneut ein.</string>
+    <string name="ai_error_timeout">Der KI-Anbieter hat zu lange zum Antworten gebraucht. Versuche es erneut; bei einem selbst gehosteten Endpunkt erhöhst du die Zeitspanne unter „Einstellungen“ → „KI-Anbieter“.</string>
+    <string name="ai_error_disabled">KI-Funktionen sind unter „Einstellungen“ → „KI-Anbieter“ ausgeschaltet.</string>
+    <string name="ai_error_insecure_http_blocked">Unsicheres HTTP ist blockiert. Aktiviere „Unsicheres HTTP erlauben“ unter „Einstellungen“ → „KI-Anbieter“ oder verwende eine https://-Adresse.</string>
+    <string name="ai_error_truncated_twice">Die Antwort hat zweimal das Ausgabelimit des Modells erreicht — Denken zählt mit. Stelle den Denkaufwand auf Niedrig oder Aus unter „Einstellungen“ → „KI-Anbieter“ ein oder formuliere die Frage kürzer.</string>
+    <string name="ai_error_truncated_twice_description">Dem Modell ging der Ausgabeplatz aus, bevor es fertig war; Denk-Token zählen mit. Stelle den Denkaufwand auf Niedrig oder Aus unter „Einstellungen“ → „KI-Anbieter“ ein und versuche es erneut.</string>
+    <string name="ai_error_truncated">Die Antwort hat das Ausgabelimit des Modells erreicht, bevor sie fertig war — Denken zählt mit. Stelle den Denkaufwand auf Niedrig oder Aus unter „Einstellungen“ → „KI-Anbieter“ ein oder formuliere die Frage kürzer.</string>
 
     <string name="ai_error_location_unsupported">Gemini ist von diesem Netzwerkstandort (Land/IP) aus nicht verfügbar. Wenn du ein VPN verwendest, deaktiviere es oder wechsle zu einem privaten Ausgangspunkt. IP-Adressen von Rechenzentren oder nicht-privaten VPNs werden häufig blockiert. Oder aktiviere die Abrechnung für das Google AI Studio-Projekt, probiere ein anderes Netzwerk aus oder wechsle unter „Einstellungen“ → „KI-Anbieter“ den Anbieter.</string>
 
@@ -2489,11 +2551,8 @@ für dich ein</string>
 
     <string name="ai_error_coach_round_limit">Der Coach hat das Limit für die Anzahl der Tool-Aufrufe überschritten. Formuliere deine Frage bitte um.</string>
 
-    <string name="ai_error_truncated_twice">Die KI-Antwort wurde zweimal am Limit der Antwortlänge abgeschnitten. Erhöhe die maximale Antwortlänge unter Einstellungen → KI &amp; Sprache oder frag kürzer.</string>
 
-    <string name="ai_error_truncated_twice_description">Das Modell hat das Limit der Antwortlänge erreicht, bevor es fertig war; auch Denken zählt dazu. Erhöhe die maximale Antwortlänge unter Einstellungen → KI &amp; Sprache oder begrenze das Denken des Modells, und versuch es dann erneut.</string>
 
-    <string name="ai_error_truncated">Die KI-Antwort wurde am Limit der Antwortlänge abgeschnitten. Erhöhe die maximale Antwortlänge unter Einstellungen → KI &amp; Sprache oder frag kürzer.</string>
 
     <string name="ai_error_provider_error">Der KI-Anbieter hat einen Fehler zurückgegeben. </string>
 
@@ -2556,6 +2615,7 @@ für dich ein</string>
     <string name="import_body_metrics_title">Gewichts- und Körperdaten importieren</string>
 
     <string name="import_body_metrics_success">%1$d Einträge zu Gewicht, %2$d Einträge zu Körperfett und %3$d Einträge zu Körpermaßen wurden importiert.</string>
+    <string name="import_body_metrics_success_composition">Zusätzlich %1$d Waagen-Werte importiert.</string>
 
     <string name="import_body_metrics_empty">Diese Datei enthält keine Einträge zu Gewicht oder Körperdaten, die importiert werden können.</string>
 
@@ -2655,7 +2715,7 @@ für dich ein</string>
     <string name="home_display_show_steps">Schrittzähler auf dem Startbildschirm anzeigen</string>
 
     <string name="home_display_slim_full_names">Vollständige Nährstoffnamen</string>
-    <string name="home_display_slim_full_names_desc">Schlanke-Linien-Karten zeigen den vollständigen Namen statt des Kurzlabels. Lange Namen können bei vier Karten abgeschnitten werden.</string>
+    <string name="home_display_slim_full_names_desc">Nährstoffkarten zeigen den vollständigen Namen statt des Kurzlabels. Lange Namen können bei vier Karten abgeschnitten werden.</string>
     <string name="home_display_show_steps_desc">Optionale Karte unterhalb der Anzeige. Erfordert Health Connect oder vorinstallierte Testdaten.</string>
 
     <string name="home_display_step_goal">Tägliches Schrittziel</string>
@@ -2870,6 +2930,7 @@ für dich ein</string>
     <string name="cd_decrease">Verringern</string>
     <string name="cd_expanded">Erweitert</string>
     <string name="cd_collapsed">Eingeklappt</string>
+    <string name="cd_change_meal_type">Mahlzeitenart ändern</string>
 
     <string name="cd_clear_quantity">Menge löschen</string>
 
@@ -3021,6 +3082,12 @@ für dich ein</string>
     <string name="export_to">Bis</string>
 
     <string name="export_no_meals">Im ausgewählten Zeitraum sind keine Mahlzeiten erfasst.</string>
+    <string name="export_include_photos">Fotos einschließen</string>
+    <string name="sync_photos">Fotos synchronisieren</string>
+    <string name="sync_photos_caption">Wenn aktiviert, werden Essensfotos auf deinen WebDAV-Server hochgeladen</string>
+    <string name="sync_photos_wifi_only">Fotos nur über WLAN</string>
+    <string name="sync_photos_syncing">Fotos werden synchronisiert…</string>
+    <string name="sync_photos_failed">Foto-Synchronisierung fehlgeschlagen</string>
 
     <string name="export_failed">Export fehlgeschlagen.</string>
 
@@ -3028,9 +3095,7 @@ für dich ein</string>
 
     <string name="settings_calc_methods">Berechnungsmethoden</string>
 
-    <string name="settings_max_tokens">Maximale Antwortlänge</string>
 
-    <string name="settings_max_tokens_unit">Tokens</string>
 
     <string name="settings_ai_read_timeout">Zeitlimit für das Auslesen der KI</string>
 
@@ -3299,7 +3364,7 @@ für dich ein</string>
 
     <string name="settings_calc_katch_name">Katch-McArdle-Gleichung</string>
 
-    <string name="settings_calc_katch_used">Wird automatisch verwendet, wenn du einen Körperfettanteil eingegeben hast. Genauere Berechnung für schlanke und sportliche Nutzer, da der Grundumsatz (BMR) aus der fettfreien Körpermasse statt aus dem Gesamtgewicht abgeleitet wird. Messungen, die älter als 90 Tage sind, fallen auf Mifflin-St Jeor zurück.</string>
+    <string name="settings_calc_katch_used">Wird automatisch verwendet, wenn du einen Körperfettanteil eingegeben hast. Genauere Berechnung für schlanke und sportliche Nutzer, da der Grundumsatz (BMR) aus der fettfreien Körpermasse statt aus dem Gesamtgewicht abgeleitet wird. Messungen, die älter als 90 Tage sind, fallen auf Mifflin-St Jeor zurück. Ein frischer Wert für die fettfreie Masse von der Waage bestimmt den BMR ebenso und hat Vorrang vor dem Körperfett.</string>
 
     <string name="settings_calc_katch_formula">BMR = 370 + 21,6 × LBM (kg)\nLBM = Gewicht × (1 − Körperfettanteil in %)</string>
 
@@ -3463,6 +3528,7 @@ für dich ein</string>
     <string name="nutrient_short_calories">Kal</string>
     <string name="nutrient_short_added_sugar">Z. Zucker</string>
     <string name="nutrient_short_sodium">Na</string>
+    <string name="nutrient_short_cholesterol">Chol.</string>
     <string name="nutrient_short_potassium">K</string>
     <string name="nutrient_short_trans_fat">Transfett</string>
     <string name="nutrient_short_calcium">Ca</string>
@@ -3725,6 +3791,18 @@ für dich ein</string>
     <string name="onboarding_goal_suggested_bmi">Auf Basis eines BMI von %1$.1f</string>
     <!-- Progress v2: Körper-Overlay, Kalorien-Kombi, Zielphasen, Treue. -->
     <string name="progress_body_section">Körper</string>
+    <string name="progress_scale_metrics">Waagen-Werte</string>
+    <string name="progress_scale_metrics_bone_mass">Knochenmasse</string>
+    <string name="progress_scale_metrics_water">Gesamtkörperwasser</string>
+    <string name="progress_scale_metrics_muscle">Muskelmasse</string>
+    <string name="progress_scale_metrics_lean">Fettfreie Masse</string>
+    <string name="progress_scale_metrics_visceral">Viszeralfett</string>
+    <string name="progress_scale_metrics_note">Schätzung einer Körperwaage — der Trend ist verlässlicher als der Absolutwert</string>
+    <string name="progress_scale_metrics_tbw_percent">%1$.1f %% des Körpergewichts · typischer Bereich 45–65 %%</string>
+    <string name="progress_log_scale_metrics">Waagen-Werte</string>
+    <string name="progress_log_scale_metrics_title">Waagen-Werte erfassen</string>
+    <string name="progress_estimated_smm">Geschätzte Skelettmuskulatur (Lee)</string>
+    <string name="progress_estimated_smm_note">Anthropometrische Schätzung aus Arm, Oberschenkel und Wade · ± ~3 kg</string>
     <string name="progress_overlay_off">Aus</string>
     <string name="progress_no_entries_in_range">Keine Einträge in diesem Zeitraum</string>
     <string name="progress_no_series_selected">Tippe oben auf eine Metrik, um sie hier anzuzeigen</string>
@@ -4135,11 +4213,6 @@ für dich ein</string>
         <item>lokal</item>
         <item>offline</item>
     </string-array>
-    <string-array name="settings_search_kw_max_tokens">
-        <item>Tokens</item>
-        <item>Länge</item>
-        <item>Obergrenze</item>
-    </string-array>
     <string-array name="settings_search_kw_ai_read_timeout">
         <item>Zeitlimit</item>
         <item>Sekunden</item>
@@ -4229,4 +4302,15 @@ für dich ein</string>
         <item>zurücksetzen</item>
         <item>Werkseinstellungen</item>
     </string-array>
+    <string name="ai_provider_chatgpt">ChatGPT-Tarif</string>
+    <string name="ai_provider_subtitle_chatgpt">Geeigneten ChatGPT-Plus- oder Pro-Tarif verwenden</string>
+    <string name="settings_chatgpt_account">ChatGPT-Konto</string>
+    <string name="settings_chatgpt_continue">Mit ChatGPT fortfahren</string>
+    <string name="settings_chatgpt_connecting">Verbindung wird hergestellt…</string>
+    <string name="settings_chatgpt_plan_enabled">Die Nutzung des ChatGPT-Tarifs ist für die Lebensmittelanalyse aktiviert. Die Nutzung wird mit deinem ChatGPT-Tarif geteilt.</string>
+    <string name="settings_chatgpt_plan_footer">Melde dich an, um einen geeigneten ChatGPT-Plus- oder Pro-Tarif für die Lebensmittelanalyse zu verwenden. Kein API-Schlüssel erforderlich.</string>
+    <string name="settings_chatgpt_plan_disabled">Du bist angemeldet, aber die Nutzung des ChatGPT-Tarifs ist nicht aktiviert. Tippe zum Autorisieren auf die Kontozeile.</string>
+    <string name="settings_chatgpt_revoke_unconfirmed">Lokal getrennt. Der entfernte Widerruf konnte nicht bestätigt werden; du kannst Chompass auch in den ChatGPT-Einstellungen entfernen.</string>
+    <string name="settings_chatgpt_manage_usage">ChatGPT-Nutzung verwalten</string>
+    <string name="settings_chatgpt_disconnect">ChatGPT trennen</string>
 </resources>

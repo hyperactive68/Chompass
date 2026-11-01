@@ -48,6 +48,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -62,16 +63,13 @@ import app.chompass.ui.components.ChompassSurface
 import app.chompass.ui.components.ChompassIconBubble
 import app.chompass.ui.navigation.BottomNavScrollPadding
 import app.chompass.ui.navigation.ChompassRoutes
-import app.chompass.ui.theme.AppColors
-import app.chompass.ui.theme.AppRadii
-import app.chompass.ui.theme.AppTextOpacity
 @Composable
 fun SettingsScreen(container: AppContainer, nav: NavHostController) {
     val vm: SettingsViewModel = rememberSettingsViewModel(container, nav)
     val ui by vm.ui.collectAsState()
     var query by rememberSaveable { mutableStateOf("") }
 
-    Scaffold(containerColor = MaterialTheme.colorScheme.background) { padding ->
+    Scaffold(containerColor = Color.Transparent) { padding ->
         Column(
             Modifier
                 .fillMaxSize()
@@ -103,7 +101,7 @@ fun SettingsScreen(container: AppContainer, nav: NavHostController) {
 
                 ChompassSurface(
                     modifier = Modifier.fillMaxWidth(),
-                    cornerRadius = AppRadii.Container,
+                    cornerRadius = 16.dp,
                     padding = 0.dp,
                                     ) {
                     Column(Modifier.padding(vertical = 4.dp)) {
@@ -188,7 +186,7 @@ fun SettingsScreen(container: AppContainer, nav: NavHostController) {
 
                 ChompassSurface(
                     modifier = Modifier.fillMaxWidth(),
-                    cornerRadius = AppRadii.Container,
+                    cornerRadius = 16.dp,
                     padding = 0.dp,
                 ) {
                     Column(Modifier.padding(vertical = 4.dp)) {
@@ -230,7 +228,7 @@ internal fun SettingsSearchField(
 ) {
     ChompassSurface(
         modifier = Modifier.fillMaxWidth(),
-        cornerRadius = AppRadii.Container,
+        cornerRadius = 16.dp,
         padding = 0.dp,
             ) {
         Row(
@@ -242,7 +240,7 @@ internal fun SettingsSearchField(
             Icon(
                 Icons.Outlined.Search,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(20.dp),
             )
             Spacer(Modifier.width(10.dp))
@@ -254,13 +252,13 @@ internal fun SettingsSearchField(
                 textStyle = MaterialTheme.typography.bodyLarge.copy(
                     color = MaterialTheme.colorScheme.onSurface,
                 ),
-                cursorBrush = SolidColor(AppColors.Calorie),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
             ) {
                 if (query.isEmpty()) {
                     Text(
                         stringResource(R.string.settings_search_hint),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 it()
@@ -274,7 +272,7 @@ internal fun SettingsSearchField(
                     Icon(
                         Icons.Filled.Close,
                         contentDescription = stringResource(R.string.settings_suggestions_dismiss),
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(16.dp),
                     )
                 }
@@ -308,13 +306,13 @@ private fun SettingsSearchResults(query: String, nav: NavHostController) {
         Text(
             stringResource(R.string.settings_search_empty),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         return
     }
     ChompassSurface(
         modifier = Modifier.fillMaxWidth(),
-        cornerRadius = AppRadii.Container,
+        cornerRadius = 16.dp,
         padding = 0.dp,
             ) {
         Column(Modifier.padding(vertical = 4.dp)) {
@@ -338,13 +336,13 @@ private fun SettingsSearchResults(query: String, nav: NavHostController) {
                         Text(
                             stringResource(entry.groupRes),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                     Icon(
                         Icons.AutoMirrored.Filled.KeyboardArrowRight,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Disabled),
+                        tint = MaterialTheme.colorScheme.outline,
                     )
                 }
             }
@@ -361,14 +359,14 @@ private fun SuggestionsCard(
 ) {
     ChompassSurface(
         modifier = Modifier.fillMaxWidth(),
-        cornerRadius = AppRadii.Container,
+        cornerRadius = 16.dp,
         padding = 0.dp,
             ) {
         Column(Modifier.padding(vertical = 4.dp)) {
             Text(
                 stringResource(R.string.settings_suggestions),
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = AppTextOpacity.Muted),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 16.dp, top = 10.dp, end = 16.dp),
             )
             suggestions.forEachIndexed { index, suggestion ->
@@ -387,7 +385,7 @@ private fun SuggestionsCard(
                     TextButton(onClick = { onAction(suggestion) }) {
                         Text(
                             suggestion.actionLabel,
-                            color = AppColors.Calorie,
+                            color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.SemiBold,
                         )
                     }
@@ -395,7 +393,7 @@ private fun SuggestionsCard(
                         Icon(
                             Icons.Filled.Close,
                             contentDescription = stringResource(R.string.settings_suggestions_dismiss),
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(16.dp),
                         )
                     }

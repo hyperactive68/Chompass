@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
@@ -30,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import app.chompass.ui.components.glassDialogColor
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,7 +45,6 @@ import app.chompass.models.WeightGoal
 import java.time.LocalDate
 import java.time.Period
 import app.chompass.services.ondevice.OnDeviceCapability
-import app.chompass.ui.theme.AppRadii
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun OnboardingScreen(container: AppContainer, onComplete: () -> Unit) {
@@ -229,7 +228,7 @@ fun OnboardingScreen(container: AppContainer, onComplete: () -> Unit) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp)
-                            .clip(RoundedCornerShape(AppRadii.Field))
+                            .clip(MaterialTheme.shapes.medium)
                             .background(
                                 MaterialTheme.colorScheme.primary
                             )
@@ -259,7 +258,7 @@ fun OnboardingScreen(container: AppContainer, onComplete: () -> Unit) {
                         .padding(horizontal = 24.dp)
                         .padding(bottom = 36.dp)
                         .height(54.dp)
-                        .clip(RoundedCornerShape(AppRadii.Sheet))
+                        .clip(MaterialTheme.shapes.extraLarge)
                         .background(
                             MaterialTheme.colorScheme.primary
                         )
@@ -288,7 +287,7 @@ fun OnboardingScreen(container: AppContainer, onComplete: () -> Unit) {
                             else vm.next()
                         },
                         enabled = ui.canAdvance,
-                        shape = RoundedCornerShape(AppRadii.Sheet),
+                        shape = MaterialTheme.shapes.extraLarge,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.onBackground,
                             contentColor = MaterialTheme.colorScheme.background
@@ -319,7 +318,7 @@ fun OnboardingScreen(container: AppContainer, onComplete: () -> Unit) {
                         } else vm.next()
                     },
                     enabled = ui.canAdvance,
-                    shape = RoundedCornerShape(AppRadii.Sheet),
+                    shape = MaterialTheme.shapes.extraLarge,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.onBackground,
                         contentColor = MaterialTheme.colorScheme.background
@@ -343,6 +342,7 @@ fun OnboardingScreen(container: AppContainer, onComplete: () -> Unit) {
     if (showMinorDialog) {
         AlertDialog(
             onDismissRequest = { showMinorDialog = false },
+            containerColor = glassDialogColor(MaterialTheme.colorScheme.surfaceContainerHigh),
             title = { Text(stringResource(R.string.onboarding_minor_title)) },
             text = { Text(stringResource(R.string.onboarding_minor_message)) },
             confirmButton = {
@@ -360,6 +360,7 @@ fun OnboardingScreen(container: AppContainer, onComplete: () -> Unit) {
     if (showAiSkipDialog) {
         AlertDialog(
             onDismissRequest = { showAiSkipDialog = false },
+            containerColor = glassDialogColor(MaterialTheme.colorScheme.surfaceContainerHigh),
             title = { Text(stringResource(R.string.onboarding_skip_ai_title)) },
             text = {
                 Text(

@@ -1,6 +1,8 @@
 package app.chompass.ui.home
 
 import app.chompass.ui.components.ChompassBottomSheet
+import app.chompass.ui.components.ChompassDialog
+import app.chompass.ui.components.ChompassDialogActions
 import app.chompass.ui.components.rememberChompassSheetState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -29,7 +31,6 @@ import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.PhotoLibrary
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -72,9 +73,7 @@ import app.chompass.ui.components.rememberDecodedBitmap
 import app.chompass.ui.components.ChompassPrimaryButton
 import app.chompass.ui.components.MagnitudeDrafts
 import app.chompass.ui.components.NumericWheelPicker
-import app.chompass.ui.theme.AppColors
-import app.chompass.ui.theme.AppTextOpacity
-import app.chompass.ui.theme.AppRadii
+import app.chompass.ui.components.PhotoRemoveBadgeScrimAlpha
 
 /**
  * Intermediate sheet after a photo is captured or picked. Shows the image and an
@@ -118,7 +117,6 @@ fun ContextNoteSheet(
     ChompassBottomSheet(
         onDismiss = { if (!busy) onDismiss() },
         sheetState = state,
-        containerColor = MaterialTheme.colorScheme.surface,
         // Codeberg #6/#14: zero the chrome insets — the default M3
         // consumeWindowInsets(0,0,0,max(0,offset)) plus the sticky footer's own
         // imePadding/navigationBarsPadding loops while the keyboard is open
@@ -160,7 +158,7 @@ fun ContextNoteSheet(
                             contentScale = androidx.compose.ui.layout.ContentScale.Crop,
                             modifier = Modifier
                                 .size(240.dp)
-                                .clip(RoundedCornerShape(AppRadii.Pill))
+                                .clip(RoundedCornerShape(percent = 50))
                         )
                     }
                 }
@@ -181,7 +179,7 @@ fun ContextNoteSheet(
                 Text(
                     stringResource(R.string.context_note_hint),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 ChompassTextField(
@@ -201,7 +199,7 @@ fun ContextNoteSheet(
                 Text(
                     stringResource(R.string.context_note_weight_hint),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 var weightGrams by remember(weightText) { mutableStateOf(weightText.replace(',', '.').toDoubleOrNull()?.toInt() ?: 0) }
                 NumericWheelPicker(
@@ -231,12 +229,12 @@ fun ContextNoteSheet(
                     modifier = Modifier
                         .weight(1f)
                         .height(48.dp),
-                    shape = RoundedCornerShape(AppRadii.PillCard)
+                    shape = RoundedCornerShape(percent = 50)
                 ) {
                     androidx.compose.material3.Icon(
                         Icons.Filled.AddAPhoto,
                         contentDescription = null,
-                        tint = AppColors.Calorie,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(Modifier.width(6.dp))
@@ -347,26 +345,22 @@ fun MultiPhotoCaptureSheet(
     }
 
     if (pendingConfirm) {
-        AlertDialog(
-            onDismissRequest = { pendingConfirm = false },
-            title = { Text(stringResource(R.string.meal_photos_confirm_title)) },
-            text = { Text(confirmMessage) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        pendingConfirm = false
-                        commitAnalyze()
-                    },
-                ) {
-                    Text(stringResource(R.string.meal_photos_confirm_continue))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { pendingConfirm = false }) {
-                    Text(stringResource(R.string.meal_photos_confirm_back))
-                }
-            },
-        )
+        ChompassDialog(onDismissRequest = { pendingConfirm = false }) {
+            Text(
+                stringResource(R.string.meal_photos_confirm_title),
+                style = MaterialTheme.typography.headlineSmall,
+            )
+            Text(confirmMessage, style = MaterialTheme.typography.bodyMedium)
+            ChompassDialogActions(
+                primaryText = stringResource(R.string.meal_photos_confirm_continue),
+                onPrimary = {
+                    pendingConfirm = false
+                    commitAnalyze()
+                },
+                dismissText = stringResource(R.string.meal_photos_confirm_back),
+                onDismiss = { pendingConfirm = false },
+            )
+        }
     }
 
     ChompassBottomSheet(
@@ -401,7 +395,7 @@ fun MultiPhotoCaptureSheet(
                         else R.string.meal_photos_subtitle_note_optional,
                     ),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Subtle),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 20.dp),
                 )
 
@@ -409,7 +403,7 @@ fun MultiPhotoCaptureSheet(
                     Text(
                         stringResource(R.string.progressive_meal_scale_tip),
                         fontSize = 14.sp,
-                        color = AppColors.Calorie,
+                        color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(horizontal = 20.dp),
                     )
                 }
@@ -423,7 +417,7 @@ fun MultiPhotoCaptureSheet(
                 ) {
                     Text(
                         stringResource(R.string.meal_photos_count, imageBytesList.size),
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
 
@@ -445,7 +439,7 @@ fun MultiPhotoCaptureSheet(
                                     contentScale = ContentScale.Fit,
                                     modifier = Modifier
                                         .size(width = 160.dp, height = 180.dp)
-                                        .clip(RoundedCornerShape(AppRadii.Card)),
+                                        .clip(MaterialTheme.shapes.large),
                                 )
                             }
                             IconButton(
@@ -454,7 +448,7 @@ fun MultiPhotoCaptureSheet(
                                     .align(Alignment.TopEnd)
                                     .padding(6.dp)
                                     .size(32.dp)
-                                    .background(Color.Black.copy(alpha = AppTextOpacity.Subtle), CircleShape),
+                                    .background(Color.Black.copy(alpha = PhotoRemoveBadgeScrimAlpha), CircleShape),
                             ) {
                                 Icon(
                                     Icons.Filled.Close,
@@ -493,7 +487,7 @@ fun MultiPhotoCaptureSheet(
                         Text(
                             stringResource(R.string.context_note_hint),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         ChompassTextField(
                             value = note,
@@ -507,7 +501,7 @@ fun MultiPhotoCaptureSheet(
                             placeholder = stringResource(R.string.context_note_placeholder),
                             textStyle = MaterialTheme.typography.bodyLarge.copy(
                                 color = if (autofilled) {
-                                    MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+                                    MaterialTheme.colorScheme.onSurfaceVariant
                                 } else {
                                     MaterialTheme.colorScheme.onSurface
                                 },
@@ -521,13 +515,13 @@ fun MultiPhotoCaptureSheet(
                                 Icon(
                                     Icons.Filled.History,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(16.dp),
                                 )
                                 Spacer(Modifier.width(6.dp))
                                 Text(
                                     stringResource(R.string.prompt_history_button),
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                         }
@@ -576,7 +570,7 @@ fun MultiPhotoCaptureSheet(
                         TextButton(onClick = { tipExpanded = true }) {
                             Text(
                                 stringResource(R.string.entry_analysis_tip_cta),
-                                color = AppColors.Calorie,
+                                color = MaterialTheme.colorScheme.primary,
                                 fontSize = 14.sp,
                             )
                         }
@@ -615,7 +609,7 @@ internal fun MealPhotoAddTile(
     OutlinedButton(
         onClick = onAddPhoto,
         modifier = Modifier.size(width = 150.dp, height = 180.dp),
-        shape = RoundedCornerShape(AppRadii.Card),
+        shape = MaterialTheme.shapes.large,
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -624,12 +618,12 @@ internal fun MealPhotoAddTile(
             Icon(
                 if (addsFromLibrary) Icons.Filled.PhotoLibrary else Icons.Filled.AddAPhoto,
                 contentDescription = null,
-                tint = AppColors.Calorie,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(28.dp),
             )
             Text(
                 label,
-                color = AppColors.Calorie,
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 13.sp,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 maxLines = 2,

@@ -1,5 +1,7 @@
 package app.chompass.ui.settings
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Add
@@ -26,11 +28,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import app.chompass.R
+import app.chompass.data.OpenRouterReasoningEffort
 import app.chompass.models.AIProvider
 import app.chompass.models.LocaleFormat
 import app.chompass.services.FillGapsFeature
-import app.chompass.services.ai.OpenAICompatibleClient
 import app.chompass.services.ondevice.OnDeviceDownloadState
 
 private fun leftoverGb(bytes: Long): String =
@@ -48,6 +51,7 @@ internal fun SettingsAiSection(
     onOpenSheet: (SettingsSheet) -> Unit,
 ) {
     var confirmDeleteProfile by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     SectionCard(title = stringResource(R.string.settings_section_ai_profile)) {
                 // Phase 2 of Codeberg #20: the master AI-features switch. When
                 // off, nothing is sent to any LLM provider (gated at the service
@@ -136,6 +140,61 @@ internal fun SettingsAiSection(
                 ) { onOpenSheet(SettingsSheet.AI_PROVIDER) }
                 HorizontalDivider()
                 SettingRow(stringResource(R.string.settings_ai_model), ui.activeModel.ifEmpty { stringResource(R.string.settings_ai_model_unset) }, icon = Icons.Outlined.Tune) { onOpenSheet(SettingsSheet.AI_MODEL) }
+                val reasoningOptions = OpenRouterReasoningEffort.availableFor(ui.activeProvider, ui.activeModel)
+                if (reasoningOptions.isNotEmpty()) {
+                    HorizontalDivider()
+                    SettingRow(
+                        stringResource(R.string.settings_ai_reasoning_effort),
+                        stringResource(
+                            OpenRouterReasoningEffort.sanitizeFor(
+                                ui.activeProvider,
+                                ui.activeModel,
+                                ui.openRouterReasoningEffort,
+                            ).displayNameRes,
+                        ),
+                        icon = Icons.Outlined.Tune,
+                    ) { onOpenSheet(SettingsSheet.AI_REASONING_EFFORT) }
+                }
+                if (ui.activeProvider == AIProvider.CHATGPT) {
+                    HorizontalDivider()
+                    SettingRow(
+                        stringResource(
+                            if (ui.chatGptConnected) R.string.settings_chatgpt_account
+                            else R.string.settings_chatgpt_continue
+                        ),
+                        when {
+                            ui.chatGptAuthBusy -> stringResource(R.string.settings_chatgpt_connecting)
+                            ui.chatGptConnected -> ui.chatGptEmail ?: stringResource(R.string.onboarding_health_connected)
+                            else -> stringResource(R.string.settings_not_set)
+                        },
+                        icon = Icons.Outlined.AccountCircle,
+                    ) {
+                        if (!ui.chatGptConnected || !ui.chatGptPlanUsageEnabled) vm.signInWithChatGpt()
+                    }
+                    SettingFootnote(
+                        ui.chatGptAuthError ?: stringResource(
+                            if (ui.chatGptPlanUsageEnabled) R.string.settings_chatgpt_plan_enabled
+                            else if (ui.chatGptConnected) R.string.settings_chatgpt_plan_disabled
+                            else R.string.settings_chatgpt_plan_footer
+                        )
+                    )
+                    if (ui.chatGptConnected) {
+                        HorizontalDivider()
+                        SettingRow(
+                            stringResource(R.string.settings_chatgpt_manage_usage),
+                            "",
+                            icon = Icons.Outlined.Link,
+                        ) {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://chatgpt.com/settings/usage")))
+                        }
+                        HorizontalDivider()
+                        SettingRow(
+                            stringResource(R.string.settings_chatgpt_disconnect),
+                            "",
+                            icon = Icons.Outlined.Delete,
+                        ) { vm.disconnectChatGpt() }
+                    }
+                }
                 if (ui.activeProvider.requiresApiKey) {
                     HorizontalDivider()
                     // ✓/✗ mirrors the fresh key-test result from the key sheet.
@@ -170,8 +229,8 @@ internal fun SettingsAiSection(
                 // Advanced knobs are stored per profile; subtitles show the
                 // effective value with "(default)" while the profile has no override.
                 val showVisionModel = ui.activeProvider != AIProvider.ON_DEVICE
-                val showReasoningEffort = OpenAICompatibleClient.usesReasoningEffort(ui.activeProvider)
                 val showMaxTokens = ui.activeProvider.apiFormat != AIProvider.ApiFormat.GEMINI &&
+                    ui.activeProvider.apiFormat != AIProvider.ApiFormat.CHATGPT_RESPONSES &&
                     ui.activeProvider != AIProvider.ON_DEVICE
                 val showReadTimeout = ui.activeProvider != AIProvider.ON_DEVICE
                 val showGoalTier = ui.activeProvider.usesConfigurableRequestTimeout
@@ -186,18 +245,10 @@ internal fun SettingsAiSection(
                         icon = Icons.Outlined.Tune,
                     ) { onOpenSheet(SettingsSheet.VISION_MODEL) }
                 }
-                if (showReasoningEffort) {
-                    if (showVisionModel) HorizontalDivider()
-                    SettingRow(
-                        stringResource(R.string.settings_ai_reasoning_effort),
-                        stringResource(ui.openRouterReasoningEffort.displayNameRes),
-                        icon = Icons.Outlined.Tune,
-                    ) { onOpenSheet(SettingsSheet.AI_REASONING_EFFORT) }
-                }
                 // Only OpenAI-compatible + Anthropic send a token cap; Gemini is left
                 // uncapped and on-device dispatch doesn't take one at all.
                 if (showMaxTokens) {
-                    if (showVisionModel || showReasoningEffort) HorizontalDivider()
+                    if (showVisionModel) HorizontalDivider()
                     SettingRow(
                         stringResource(R.string.settings_max_tokens),
                         if (ui.activeProfile?.maxResponseTokens == null) {
@@ -209,7 +260,7 @@ internal fun SettingsAiSection(
                     ) { onOpenSheet(SettingsSheet.MAX_TOKENS) }
                 }
                 if (showReadTimeout) {
-                    if (showVisionModel || showReasoningEffort || showMaxTokens) HorizontalDivider()
+                    if (showVisionModel || showMaxTokens) HorizontalDivider()
                     SettingRow(
                         stringResource(R.string.settings_ai_read_timeout),
                         if (ui.activeProfile?.readTimeoutSeconds == null) {
@@ -224,7 +275,7 @@ internal fun SettingsAiSection(
                 // OpenAI-compatible) host models the AUTO tier rules can't
                 // classify by name, so the manual override row shows there.
                 if (showGoalTier) {
-                    if (showVisionModel || showReasoningEffort || showMaxTokens || showReadTimeout) HorizontalDivider()
+                    if (showVisionModel || showMaxTokens || showReadTimeout) HorizontalDivider()
                     SettingRow(
                         stringResource(R.string.settings_goal_tier),
                         stringResource(ui.goalRecalcTier.displayNameRes),
@@ -232,7 +283,7 @@ internal fun SettingsAiSection(
                     ) { onOpenSheet(SettingsSheet.GOAL_RECALC_TIER) }
                 }
                 if (showGeminiSearch) {
-                    if (showVisionModel || showReasoningEffort || showMaxTokens || showReadTimeout || showGoalTier) HorizontalDivider()
+                    if (showVisionModel || showMaxTokens || showReadTimeout || showGoalTier) HorizontalDivider()
                     ToggleRow(
                         stringResource(R.string.settings_gemini_google_search),
                         ui.geminiGoogleSearchEnabled,
@@ -247,7 +298,7 @@ internal fun SettingsAiSection(
                 if (showFillMissing) {
                     val gapScan by vm.container.fillGapsEngine.scan.collectAsState(initial = null)
                     val gapCount = gapScan?.count ?: 0
-                    if (showVisionModel || showReasoningEffort || showMaxTokens || showReadTimeout || showGoalTier || showGeminiSearch) HorizontalDivider()
+                    if (showVisionModel || showMaxTokens || showReadTimeout || showGoalTier || showGeminiSearch) HorizontalDivider()
                     ToggleRow(
                         stringResource(R.string.settings_fill_missing_reminders),
                         ui.fillMissingRemindersEnabled,

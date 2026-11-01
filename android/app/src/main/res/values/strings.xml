@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Chompass</string>
 
     <!-- Widgets -->
@@ -171,7 +171,8 @@
     <string name="ai_provider_deepinfra">DeepInfra</string>
     <string name="ai_provider_mistral">Mistral</string>
     <string name="ai_provider_ollama">Ollama (Local)</string>
-    <string name="ai_provider_custom">Custom (OpenAI-compatible)</string>
+    <string name="ai_provider_ollama_cloud">Ollama Cloud</string>
+    <string name="ai_provider_custom">Other URL</string>
     <string name="ai_provider_on_device">On-Device (Private)</string>
     <string name="ai_provider_on_device_subtitle">Private and offline. Less accurate than cloud AI; ~2 to 4 GB download</string>
     <string name="ai_provider_subtitle_gemini">Free API key · works out of the box</string>
@@ -186,13 +187,22 @@
     <string name="ai_provider_subtitle_deepinfra">Hosted open models</string>
     <string name="ai_provider_subtitle_mistral">Mistral models</string>
     <string name="ai_provider_subtitle_ollama">Your computer, no cloud</string>
-    <string name="ai_provider_subtitle_custom">LM Studio, vLLM, llama.cpp…</string>
-
-    <!-- AI provider picker groups (settings sheet + onboarding order) -->
-    <string name="ai_provider_group_recommended">Recommended</string>
-    <string name="ai_provider_group_cloud">Cloud providers</string>
-    <string name="ai_provider_group_local">Local &amp; self-hosted</string>
-    <string name="ai_provider_group_device">On-device</string>
+    <string name="ai_provider_subtitle_ollama_cloud">Ollama\'s hosted models</string>
+    <string name="ai_provider_subtitle_custom">Type a base URL</string>
+    <string name="ai_provider_search_hint">Search name or host</string>
+    <string name="ai_provider_section_shortcuts">Shortcuts</string>
+    <string name="ai_provider_section_phone">On this phone</string>
+    <string name="ai_provider_section_server">Your server</string>
+    <string name="ai_provider_section_cloud">Cloud</string>
+    <string name="ai_provider_chip_on_phone">On phone</string>
+    <string name="ai_provider_chip_your_server">Your server</string>
+    <string name="ai_provider_chip_native">Native</string>
+    <string name="ai_provider_chip_cloud">Cloud</string>
+    <string name="ai_provider_row_gemini">Key · Google Search toggle</string>
+    <string name="ai_provider_row_anthropic">Key · separate API</string>
+    <string name="ai_provider_row_ollama">This network · no key</string>
+    <string name="ai_provider_row_host_key">%1$s · key</string>
+    <string name="ai_provider_directory_footer">Listed hosts ship with this release. The key is sent only to the host you pick.</string>
 
     <string name="settings_section_ai_profile">Profile</string>
     <string name="settings_section_ai_connection">Connection</string>
@@ -202,7 +212,7 @@
     <string name="settings_ai_key_remove_title">Remove API key?</string>
     <string name="settings_ai_key_remove_body">Saving an empty key clears the stored key for this profile.</string>
     <string name="settings_ai_get_key">Get API key</string>
-    <string name="settings_ai_value_default">%1$,d (default)</string>
+    <string name="settings_ai_value_default" tools:ignore="MissingTranslation">%1$,d (default)</string>
     <string name="settings_ai_timeout_default">%1$,ds (default)</string>
 
     <!-- AI Provider API key placeholders -->
@@ -639,7 +649,25 @@
     <string name="home_day_type_switched">Day type switched</string>
     <string name="action_undo">Undo</string>
     <string name="action_save_to_favorites">Save to favorites</string>
+    <string name="action_save_to_library">Save to library</string>
+    <string name="action_hide_from_suggestions">Hide from suggestions</string>
+    <string name="action_unhide">Unhide</string>
     <string name="saved_to_favorites">Saved to favorites</string>
+    <string name="settings_saved_foods">Saved foods</string>
+    <string name="library_hidden_section">Hidden</string>
+    <string name="library_empty">No saved foods yet</string>
+    <string name="library_never_logged">Never logged</string>
+    <string name="library_row_summary">%1$d logs · last %2$s</string>
+    <string name="library_delete_rows_title">Delete logged rows?</string>
+    <string name="library_delete_rows_message">Delete all %1$d logged rows of “%2$s”? Days recalculate. The saved food stays here; diary history for it is removed.</string>
+    <string name="library_merge_section">Possible duplicates</string>
+    <string name="library_merge_title">Merge duplicates</string>
+    <string name="library_merge_intro">These look like the same food. Pick the name to keep — the others merge into it.</string>
+    <string name="library_merge_rows_message">%1$d logged rows will be renamed to “%2$s”. Nothing is deleted; days recalculate.</string>
+    <string name="library_merge_action">Merge</string>
+    <string name="library_sort_last_logged">Last logged</string>
+    <string name="library_sort_name">Name</string>
+    <string name="library_sort_logs">Logs</string>
     <string name="add_food_photo_source_title">Add a photo</string>
     <string name="add_food_photo_camera">Take Photo</string>
     <string name="add_food_photo_gallery">Choose from Gallery</string>
@@ -1005,6 +1033,18 @@
 
     <string name="progress_weight_section">Weight</string>
     <string name="progress_body_section">Body</string>
+    <string name="progress_scale_metrics">Scale metrics</string>
+    <string name="progress_scale_metrics_bone_mass">Bone mass</string>
+    <string name="progress_scale_metrics_water">Total body water</string>
+    <string name="progress_scale_metrics_muscle">Muscle mass</string>
+    <string name="progress_scale_metrics_lean">Lean mass</string>
+    <string name="progress_scale_metrics_visceral">Visceral fat</string>
+    <string name="progress_scale_metrics_note">Consumer scale estimate — the trend is more reliable than the absolute value</string>
+    <string name="progress_scale_metrics_tbw_percent">%1$.1f %% of body weight · typical range 45–65 %%</string>
+    <string name="progress_log_scale_metrics">Scale metrics</string>
+    <string name="progress_log_scale_metrics_title">Log Scale Metrics</string>
+    <string name="progress_estimated_smm">Estimated skeletal muscle (Lee)</string>
+    <string name="progress_estimated_smm_note">Anthropometric estimate from arm, thigh and calf · ± ~3 kg</string>
     <string name="progress_overlay_off">Off</string>
     <string name="progress_log_weight">Log Weight</string>
     <string name="progress_log_measurement_format">Log %1$s</string>
@@ -1493,11 +1533,6 @@
         <item>local</item>
         <item>offline</item>
     </string-array>
-    <string-array name="settings_search_kw_max_tokens">
-        <item>tokens</item>
-        <item>length</item>
-        <item>cap</item>
-    </string-array>
     <string-array name="settings_search_kw_ai_read_timeout">
         <item>timeout</item>
         <item>seconds</item>
@@ -1637,6 +1672,37 @@
     <string name="settings_fixed_launcher_icon_subtitle">Keeps the launcher icon teal. It stops following the theme color and wallpaper.</string>
     <string name="settings_system_date_time_pickers">System date and time pickers</string>
     <string name="settings_system_date_time_pickers_subtitle">Use the phone’s date and time dialogs when editing a meal.</string>
+    <string name="settings_glass_blur">Frosted glass</string>
+    <string name="settings_glass_blur_subtitle">Blur the content behind floating panels like the Add Food results header.</string>
+    <string name="settings_ambient_motion">Ambient background</string>
+    <string name="settings_ambient_motion_subtitle">Soft drifting color fields behind every screen. Pauses on battery saver or when animations are reduced.</string>
+    <string name="settings_frost_strength">Frost strength</string>
+    <string name="frost_strength_light">Light</string>
+    <string name="frost_strength_medium">Medium</string>
+    <string name="frost_strength_strong">Strong</string>
+    <string name="settings_ambient_intensity">Ambient intensity</string>
+    <string name="ambient_intensity_subtle">Subtle</string>
+    <string name="ambient_intensity_balanced">Balanced</string>
+    <string name="ambient_intensity_vivid">Vivid</string>
+    <string name="settings_ambient_contrast" tools:ignore="MissingTranslation">Contrast</string>
+    <string name="settings_ambient_contrast_subtitle" tools:ignore="MissingTranslation">How sharply the field stands out. Strong eases the dim on OLED black.</string>
+    <string name="ambient_contrast_soft" tools:ignore="MissingTranslation">Soft</string>
+    <string name="ambient_contrast_balanced" tools:ignore="MissingTranslation">Balanced</string>
+    <string name="ambient_contrast_strong" tools:ignore="MissingTranslation">Strong</string>
+    <string name="settings_ambient_saturation" tools:ignore="MissingTranslation">Saturation</string>
+    <string name="settings_ambient_saturation_subtitle" tools:ignore="MissingTranslation">How far the colors sit from gray.</string>
+    <string name="ambient_saturation_muted" tools:ignore="MissingTranslation">Muted</string>
+    <string name="ambient_saturation_natural" tools:ignore="MissingTranslation">Natural</string>
+    <string name="ambient_saturation_rich" tools:ignore="MissingTranslation">Rich</string>
+    <string name="settings_ambient_speed" tools:ignore="MissingTranslation">Drift speed</string>
+    <string name="ambient_speed_calm" tools:ignore="MissingTranslation">Calm</string>
+    <string name="ambient_speed_standard" tools:ignore="MissingTranslation">Standard</string>
+    <string name="ambient_speed_lively" tools:ignore="MissingTranslation">Lively</string>
+    <string name="settings_ambient_palette" tools:ignore="MissingTranslation">Ambient palette</string>
+    <string name="ambient_palette_accent" tools:ignore="MissingTranslation">Accent</string>
+    <string name="ambient_palette_macro" tools:ignore="MissingTranslation">Macros</string>
+    <string name="settings_ambient_tilt" tools:ignore="MissingTranslation">Tilt parallax</string>
+    <string name="settings_ambient_tilt_subtitle" tools:ignore="MissingTranslation">The color field drifts as you tilt the phone. Uses the motion sensor only while a screen is open.</string>
     <string name="sheet_theme_color">Theme Color</string>
     <string name="sheet_theme_color_footer">Changes the main accent used for buttons, charts, and progress indicators.</string>
     <string name="theme_color_system">System</string>
@@ -1714,7 +1780,6 @@
     <string name="settings_water_restore_default_plan">Restore defaults (08:00 to 21:00, 300 ml)</string>
     <string name="settings_water_reminder_window_too_short">The drinking window needs at least 15 minutes.</string>
     <string name="unit_celsius">°C</string>
-    <string name="settings_glass_blur">Glass blur</string>
     <string name="settings_food_log_sort">Food log sort</string>
     <string name="settings_week_starts">Week Starts On</string>
     <string name="settings_week_monday">Monday</string>
@@ -1769,11 +1834,13 @@
     <string name="settings_ai_provider">Provider</string>
     <string name="settings_ai_model">Model</string>
     <string name="settings_ai_reasoning_effort">Reasoning effort</string>
-    <string name="settings_ai_reasoning_effort_footer">OpenRouter models: sets the thinking budget. Custom and Ollama servers: sends reasoning_effort where the server supports it. If your server rejects the request, set Auto.</string>
+    <string name="settings_ai_reasoning_effort_footer">ChatGPT-plan models: uses the selected Responses API reasoning level when supported. OpenRouter, custom and Ollama providers send their supported reasoning setting. Auto uses the model default.</string>
     <string name="ai_reasoning_effort_auto">Auto</string>
     <string name="ai_reasoning_effort_low">Low</string>
     <string name="ai_reasoning_effort_medium">Medium</string>
     <string name="ai_reasoning_effort_high">High</string>
+    <string name="ai_reasoning_effort_xhigh" tools:ignore="MissingTranslation">Extra high</string>
+    <string name="ai_reasoning_effort_max" tools:ignore="MissingTranslation">Maximum</string>
     <string name="ai_reasoning_effort_disabled">Off (no thinking)</string>
     <string name="settings_ai_vision_model">Vision model</string>
     <string name="settings_ai_vision_model_unset">(same as Model)</string>
@@ -1790,6 +1857,8 @@
     <string name="settings_ai_allow_insecure_http">Allow insecure HTTP</string>
     <string name="settings_ai_allow_insecure_http_footer">Lets custom and Ollama endpoints use plain http:// URLs, for example on your home network. Cloud providers use https. Keep off unless your server has no TLS.</string>
     <string name="settings_custom_url_title">Custom base URL</string>
+    <string name="settings_custom_directory_docs">Documentation</string>
+    <string name="ai_model_accepts_images">Accepts images (declared)</string>
     <string name="settings_clear_key">Clear key</string>
     <string name="settings_on_device_model">Model file</string>
     <string name="settings_on_device_model_ready">Downloaded</string>
@@ -1918,6 +1987,22 @@
     <string name="settings_webdav_auto_sync_desc">Once a day when you open the app, if WebDAV is configured. Off by default. Manual Sync now still works anytime.</string>
     <string name="export_sync_title">Export sync JSON</string>
     <string name="import_sync_title">Import sync JSON</string>
+    <string name="settings_google_drive_backup" tools:ignore="MissingTranslation">Back up to Google Drive</string>
+    <string name="settings_google_drive_backup_desc" tools:ignore="MissingTranslation">Sign in with Google to sync this app\'s private backup area. Chompass never handles your Google password.</string>
+    <string name="settings_google_drive_backup_success" tools:ignore="MissingTranslation">Backup saved. Check the selected Google Drive location.</string>
+    <string name="settings_google_drive_backup_cancelled" tools:ignore="MissingTranslation">Backup cancelled.</string>
+    <string name="settings_google_drive_backup_no_stream" tools:ignore="MissingTranslation">The selected location cannot be written.</string>
+    <string name="settings_google_drive_backup_failed" tools:ignore="MissingTranslation">Could not save the Google Drive backup: %1$s</string>
+    <string name="settings_google_drive_connect" tools:ignore="MissingTranslation">Connect Google Drive</string>
+    <string name="settings_google_drive_connected" tools:ignore="MissingTranslation">Google Drive connected · Sync now</string>
+    <string name="settings_google_drive_sync_on_food_log" tools:ignore="MissingTranslation">Sync after logging food</string>
+    <string name="settings_google_drive_sync_on_food_log_desc" tools:ignore="MissingTranslation">Upload the updated backup after each food log, edit, or deletion when authorized.</string>
+    <string name="settings_google_drive_auth_cancelled" tools:ignore="MissingTranslation">Google Drive connection cancelled.</string>
+    <string name="settings_google_drive_auth_failed" tools:ignore="MissingTranslation">Google Drive authorization failed. Try again while online.</string>
+    <string name="settings_google_drive_syncing" tools:ignore="MissingTranslation">Syncing with Google Drive…</string>
+    <string name="settings_google_drive_sync_success" tools:ignore="MissingTranslation">Google Drive backup synced.</string>
+    <string name="settings_google_drive_sync_failed" tools:ignore="MissingTranslation">Google Drive sync failed: %1$s</string>
+    <string name="settings_google_drive_not_connected" tools:ignore="MissingTranslation">Connect Google Drive before syncing.</string>
     <string name="settings_sync_now">Sync now</string>
     <string name="settings_last_sync">Last sync: %1$s</string>
     <string name="settings_not_synced">Not synced yet</string>
@@ -2016,7 +2101,7 @@
     <string name="about_version_format">Version %1$s</string>
     <string name="about_rate">Rate the App</string>
     <string name="about_share">Share the App</string>
-    <string name="about_open_source">Source Code (MIT)</string>
+    <string name="about_open_source">Source Code (GPL v3)</string>
     <string name="about_asset_credits">Open Source &amp; Assets</string>
     <string name="about_upstream">Based on Fud AI (upstream)</string>
     <string name="about_report_issue">Report an Issue</string>
@@ -2079,10 +2164,10 @@
     <string name="ai_error_image_conversion_failed">Failed to process the image.</string>
     <string name="ai_error_network_format">Network error: %1$s</string>
     <string name="ai_error_invalid_response">Could not understand the AI response. Please try again.</string>
-    <string name="ai_error_timeout">The AI provider took too long to answer. Try again, or raise the timeout in Settings → AI &amp; Speech.</string>
-    <string name="ai_error_disabled">AI features are turned off in Settings → AI &amp; Speech.</string>
+    <string name="ai_error_timeout">The AI provider took too long to answer. Try again; if you use a self-hosted endpoint, raise the timeout in Settings → AI Provider.</string>
+    <string name="ai_error_disabled">AI features are turned off in Settings → AI Provider.</string>
     <string name="ai_error_invalid_url">Invalid API URL. Check your provider settings.</string>
-    <string name="ai_error_insecure_http_blocked">Insecure HTTP is blocked. Turn on “Allow insecure HTTP” in Settings → AI &amp; Speech, or use an https:// URL.</string>
+    <string name="ai_error_insecure_http_blocked">Insecure HTTP is blocked. Turn on “Allow insecure HTTP” in Settings → AI Provider, or use an https:// URL.</string>
     <string name="ai_error_on_device_model_not_downloaded">On-device model not downloaded yet. Open Settings → AI Provider → Model to download it.</string>
     <string name="ai_error_on_device_unsupported_device">This device doesn\'t meet the requirements for on-device AI. Choose a cloud provider in Settings → AI Provider.</string>
     <string name="ai_error_on_device_low_memory">Not enough free memory for on-device AI right now. Try the smaller E2B model, close other apps, or switch providers in Settings → AI Provider.</string>
@@ -2094,9 +2179,9 @@
     <string name="ai_error_model_unavailable">Your provider couldn\'t find this model. It may be paid-only on the free tier, restricted in your region, or the endpoint may be wrong. Switch to the default Flash model in Settings → AI Provider, or enable billing on your AI Studio project.</string>
     <string name="ai_error_coach_on_device">Coach isn\'t available with the on-device provider yet. Switch to a cloud provider in Settings → AI Provider.</string>
     <string name="ai_error_coach_round_limit">Coach could not answer. Try rephrasing your question.</string>
-    <string name="ai_error_truncated_twice">The AI response was cut off at the response length limit twice. Raise the max response length in Settings → AI &amp; Speech, or try a shorter question.</string>
-    <string name="ai_error_truncated_twice_description">The model hit the response length limit before finishing, and thinking counts toward it. Raise the max response length in Settings → AI &amp; Speech, or limit the model\'s thinking, then try again.</string>
-    <string name="ai_error_truncated">The AI response was cut off at the response length limit. Raise the max response length in Settings → AI &amp; Speech, or try a shorter question.</string>
+    <string name="ai_error_truncated_twice">The reply hit the model\'s output limit twice — thinking counts toward it. Set Reasoning effort to Low or Off in Settings → AI Provider, or try a shorter question.</string>
+    <string name="ai_error_truncated_twice_description">The model ran out of output room before finishing; thinking tokens count toward the limit. Set Reasoning effort to Low or Off in Settings → AI Provider, then try again.</string>
+    <string name="ai_error_truncated">The reply hit the model\'s output limit before it finished — thinking counts toward the limit. Set Reasoning effort to Low or Off in Settings → AI Provider, or try a shorter question.</string>
     <string name="ai_error_provider_error">The AI provider returned an error.</string>
     <string name="ai_error_grounded_requires_provider">Grounded tool loop requires a live AI provider.</string>
     <string name="ai_error_grounded_on_device">Grounded tool loop is not available for on-device models.</string>
@@ -2130,6 +2215,7 @@
     <string name="export_body_metrics_format">Format</string>
     <string name="import_body_metrics_title">Import Weight &amp; Body Data</string>
     <string name="import_body_metrics_success">Imported %1$d weight, %2$d body-fat and %3$d measurement entries.</string>
+    <string name="import_body_metrics_success_composition">Also imported %1$d scale-metric entries.</string>
     <string name="import_body_metrics_empty">This file has no weight or body-data entries to import.</string>
     <string name="import_body_metrics_unsupported">Unsupported file. Supported: Chompass JSON/CSV, openScale CSV, or a generic weight CSV.</string>
     <string name="import_body_metrics_malformed">Could not read file: %1$s</string>
@@ -2186,7 +2272,7 @@
     <string name="home_nutrient_card_layout_classic">Classic cards</string>
     <string name="home_display_show_steps">Show step counter on home</string>
     <string name="home_display_slim_full_names">Full nutrient names</string>
-    <string name="home_display_slim_full_names_desc">Slim-line cards show the complete name instead of the short label. Long names can truncate when four cards are selected.</string>
+    <string name="home_display_slim_full_names_desc">Nutrient cards show the complete name instead of the short label. Long names can truncate when four cards are selected.</string>
     <string name="home_display_show_steps_desc">Optional card below the gauge. Needs Health Connect.</string>
     <string name="home_display_step_goal">Daily step goal</string>
     <string name="home_display_step_goal_hint">Adjusts by 500. 1,000–50,000.</string>
@@ -2377,6 +2463,7 @@
     <string name="cd_decrease">Decrease</string>
     <string name="cd_expanded">Expanded</string>
     <string name="cd_collapsed">Collapsed</string>
+    <string name="cd_change_meal_type">Change meal type</string>
     <string name="cd_clear_quantity">Clear quantity</string>
     <string name="cd_edit_serving">Edit serving</string>
     <string name="cd_apply_serving_edit">Apply serving edit</string>
@@ -2465,11 +2552,17 @@
     <string name="export_from">From</string>
     <string name="export_to">To</string>
     <string name="export_no_meals">No logged meals in the selected range.</string>
+    <string name="export_include_photos">Include photos</string>
+    <string name="sync_photos">Sync photos</string>
+    <string name="sync_photos_caption">When enabled, meal photos upload to your WebDAV server</string>
+    <string name="sync_photos_wifi_only">Photos on Wi-Fi only</string>
+    <string name="sync_photos_syncing">Syncing photos…</string>
+    <string name="sync_photos_failed">Photo sync failed</string>
     <string name="export_failed">Export failed.</string>
     <string name="settings_tap_to_update">Tap to update</string>
     <string name="settings_calc_methods">Calculation Methods</string>
-    <string name="settings_max_tokens">Max response length</string>
-    <string name="settings_max_tokens_unit">tokens</string>
+    <string name="settings_max_tokens" tools:ignore="MissingTranslation">Max response length</string>
+    <string name="settings_max_tokens_unit" tools:ignore="MissingTranslation">tokens</string>
     <string name="settings_ai_read_timeout">AI read timeout</string>
     <string name="settings_ai_read_timeout_unit">s</string>
     <string name="settings_ai_read_timeout_value">%1$d s</string>
@@ -2643,7 +2736,7 @@
     <string name="settings_calc_mifflin_used" formatted="false">Default formula for resting metabolism. Used when you haven\'t entered a body fat %.</string>
     <string name="settings_calc_mifflin_formula">Men: 10×weight(kg) + 6.25×height(cm) − 5×age + 5\nWomen: 10×weight(kg) + 6.25×height(cm) − 5×age − 161</string>
     <string name="settings_calc_katch_name">Katch-McArdle equation</string>
-    <string name="settings_calc_katch_used" formatted="false">Used when you\'ve entered a body fat % and left Use body fat % in BMR on. More accurate for lean and athletic users since it derives BMR from lean body mass instead of total weight. Turn the toggle off to keep Mifflin-St Jeor. Readings older than 90 days fall back to Mifflin-St Jeor.</string>
+    <string name="settings_calc_katch_used" formatted="false">Used when you\'ve entered a body fat % and left Use body fat % in BMR on. More accurate for lean and athletic users since it derives BMR from lean body mass instead of total weight. Turn the toggle off to keep Mifflin-St Jeor. Readings older than 90 days fall back to Mifflin-St Jeor. A fresh scale reading of lean (fat-free) mass drives BMR the same way and takes priority over body fat.</string>
     <string name="settings_calc_katch_formula" formatted="false">BMR = 370 + 21.6 × LBM(kg)\nLBM = weight × (1 − bodyFat%)</string>
     <string name="settings_calc_tdee_name">Activity-multiplier method</string>
     <string name="settings_calc_tdee_used">TDEE = BMR × activity multiplier. The multiplier corresponds to your selected activity level. Moderate uses 1.465 (between FAO/WHO light 1.375 and moderate 1.55) for desk-active users who exercise a few times per week. This is the maintenance baseline the AI starts from (unless Energy Burn supplies a measured one).</string>
@@ -2803,4 +2896,15 @@
     <string name="settings_fill_missing_reminders">Missing-value reminders</string>
     <string name="settings_fill_missing_reminders_footer">Show the Home banner when logged meals or favorites have missing values</string>
     <string name="fill_gaps_never_remind">Don\'t remind me again</string>
+    <string name="ai_provider_chatgpt">ChatGPT plan</string>
+    <string name="ai_provider_subtitle_chatgpt">Use an eligible ChatGPT Plus or Pro plan</string>
+    <string name="settings_chatgpt_account">ChatGPT account</string>
+    <string name="settings_chatgpt_continue">Continue with ChatGPT</string>
+    <string name="settings_chatgpt_connecting">Connecting…</string>
+    <string name="settings_chatgpt_plan_enabled">ChatGPT plan usage is enabled for food analysis. Usage is shared with your ChatGPT plan.</string>
+    <string name="settings_chatgpt_plan_footer">Sign in to use an eligible ChatGPT Plus or Pro plan for food analysis. No API key is required.</string>
+    <string name="settings_chatgpt_plan_disabled">Signed in, but ChatGPT plan usage is not enabled. Tap the account row to authorize it.</string>
+    <string name="settings_chatgpt_revoke_unconfirmed">Disconnected locally. Remote revocation could not be confirmed; you can also remove Chompass in ChatGPT settings.</string>
+    <string name="settings_chatgpt_manage_usage">Manage ChatGPT usage</string>
+    <string name="settings_chatgpt_disconnect">Disconnect ChatGPT</string>
 </resources>
