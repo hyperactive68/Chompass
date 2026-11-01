@@ -19,6 +19,13 @@ class WebDavAutoSyncTest {
     }
 
     @Test
+    fun tracksRevisionsForConnectedGoogleDriveWithoutWebDav() {
+        assertTrue(shouldTrackSyncRevisions("", googleDriveConnected = true))
+        assertTrue(shouldTrackSyncRevisions("   ", googleDriveConnected = true))
+        assertFalse(shouldTrackSyncRevisions("", googleDriveConnected = false))
+    }
+
+    @Test
     fun skipsWhenDisabledOrNotConfigured() {
         assertFalse(
             shouldAutoSyncWebDav(
