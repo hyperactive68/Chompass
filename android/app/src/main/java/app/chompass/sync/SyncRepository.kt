@@ -381,21 +381,26 @@ class SyncRepository(
     }
 
     /**
-     * Whether revision tracking is meaningful: a WebDAV URL is set. Auto-sync
-     * is a separate toggle; Sync Now still runs without it, so deletes must
-     * tombstone or the next pull re-injects the row (#39). When false,
-     * [touch]/[tombstone] are no-ops so logging never pays a full-file
-     * DataStore write for a revision map nothing will consume.
+     * Whether revision tracking is meaningful for an enabled sync backend.
+     * Auto-sync is a separate toggle; Sync Now still runs without it, so
+     * deletes must tombstone or the next pull re-injects the row (#39).
+     * Google Drive has no WebDAV URL, but it consumes the same revision map
+     * during its download/merge/upload cycle. When false, [touch]/[tombstone]
+     * are no-ops so logging never pays a full-file DataStore write for a
+     * revision map nothing will consume.
      */
     private suspend fun syncConfigured(): Boolean =
-        shouldTrackSyncRevisions(prefs.webDavUrl.first())
+        shouldTrackSyncRevisions(
+            webDavUrl = prefs.webDavUrl.first(),
+            googleDriveConnected = prefs.googleDriveConnected.first(),
+        )
 
     /**
-     * One-time repair for records created while WebDAV was disabled (or before
-     * revision tracking existed): records a live revision for every current
-     * row the revision map is missing, so a freshly-enabled sync uploads the
-     * whole history instead of relying on wire-level timestamp fallbacks. Runs
-     * only at sync time, never on the save path.
+     * One-time repair for records created while both sync backends were
+     * disabled (or before revision tracking existed): records a live revision
+     * for every current row the revision map is missing, so a freshly-enabled
+     * sync uploads the whole history instead of relying on wire-level
+     * timestamp fallbacks. Runs only at sync time, never on the save path.
      */
     private suspend fun backfillRevisionsIfNeeded() {
         val revisions = prefs.syncRevisions.first().toMutableMap()

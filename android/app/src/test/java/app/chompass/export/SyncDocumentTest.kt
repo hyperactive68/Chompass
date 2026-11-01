@@ -152,6 +152,66 @@ class SyncDocumentTest {
     }
 
     @Test
+    fun newerRevisionKeepsMealTypeEditWhenRemoteRowIsStale() {
+        val id = UUID.fromString("11111111-1111-4111-8111-111111111111")
+        val timestamp = Instant.parse("2026-07-24T12:30:00Z")
+        val localEntry = FoodEntry(
+            id = id,
+            name = "Coffee",
+            calories = 2,
+            protein = 0.0,
+            carbs = 0.0,
+            fat = 0.0,
+            timestamp = timestamp,
+            source = FoodSource.MANUAL,
+            mealType = MealType.LUNCH.id,
+        )
+        val localJson = SyncDocument.buildJson(
+            foodEntries = listOf(localEntry),
+            favorites = emptyList(),
+            weights = emptyList(),
+            bodyFats = emptyList(),
+            measurements = emptyList(),
+            water = emptyList(),
+            recipes = emptyList(),
+            revisions = mapOf(
+                id.toString() to SyncDocument.Revision(
+                    updatedAt = "2026-07-24T12:30:01Z",
+                    kind = "food",
+                ),
+            ),
+            zone = ZoneOffset.UTC,
+        )
+        val localRoot = Json.parseToJsonElement(localJson).jsonObject
+        val localRow = localRoot["food_entries"]!!.jsonArray.single().jsonObject
+        val remoteRow = buildJsonObject {
+            localRow.forEach { (key, value) ->
+                when (key) {
+                    "updated_at" -> put(key, "2026-07-24T12:30:00Z")
+                    "meal_type" -> put(key, "dinner")
+                    else -> put(key, value)
+                }
+            }
+        }
+        val remoteRoot = buildJsonObject {
+            localRoot.forEach { (key, value) ->
+                if (key == "food_entries") {
+                    put(key, buildJsonArray { add(remoteRow) })
+                } else {
+                    put(key, value)
+                }
+            }
+        }
+        val local = (SyncDocument.parse(localJson, ZoneOffset.UTC) as SyncDocument.ParseResult.Success).parsed.raw
+        val remote = (SyncDocument.parse(remoteRoot.toString(), ZoneOffset.UTC) as SyncDocument.ParseResult.Success).parsed.raw
+
+        val merged = SyncDocument.mergeRawDocuments(local, remote)
+        val parsed = (SyncDocument.parse(merged.toString(), ZoneOffset.UTC) as SyncDocument.ParseResult.Success).parsed
+
+        assertEquals(MealType.LUNCH.id, parsed.foodEntries.single { it.id == id.toString() }.entry?.mealType)
+    }
+
+    @Test
     fun mergeRawDocumentsDedupesWeightRows() {
         // #39: same date+value written under different ids (and different wire
         // styles: Android writes 80.0, the PWA writes 80) must collapse, while

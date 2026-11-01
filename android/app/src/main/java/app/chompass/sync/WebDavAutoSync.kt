@@ -16,6 +16,13 @@ import java.time.ZoneId
 fun shouldTrackSyncRevisions(webDavUrl: String): Boolean =
     normalizeWebDavUrl(webDavUrl).isNotEmpty()
 
+/**
+ * Revision metadata is shared by WebDAV and Google Drive sync. Drive is
+ * selected through OAuth and therefore has no WebDAV URL to identify it.
+ */
+fun shouldTrackSyncRevisions(webDavUrl: String, googleDriveConnected: Boolean): Boolean =
+    googleDriveConnected || shouldTrackSyncRevisions(webDavUrl)
+
 fun shouldAutoSyncWebDav(
     enabled: Boolean,
     configured: Boolean,
