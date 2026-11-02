@@ -68,8 +68,8 @@ android {
         targetSdk = 36
         // 6.1.0 upstream also used code 113; later fork releases stay above it
         // so installed builds remain directly upgradeable.
-        versionCode = 115
-        versionName = "6.1.1"
+        versionCode = 116
+        versionName = "6.1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         if (releaseAbi != null) {
