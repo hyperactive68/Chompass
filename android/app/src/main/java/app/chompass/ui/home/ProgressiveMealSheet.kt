@@ -427,7 +427,12 @@ private fun ProgressiveIngredientRow(
             )
             val servingText = if (displayMode == ServingUnitDisplayMode.METRIC) {
                 analysis.servingSizeGrams?.takeIf { it > 0 }?.let { totalGrams ->
-                    val amount = metricServingAmount(echo?.second ?: ServingUnitOption.grams, echo?.first, totalGrams)
+                    val amount = metricServingAmount(
+                        echo?.second ?: ServingUnitOption.grams,
+                        echo?.first,
+                        totalGrams,
+                        analysis.name,
+                    )
                     "${ServingUnitOption.formatQuantity(amount.value)} ${if (amount.unit == "ml") stringResource(R.string.unit_ml) else stringResource(R.string.unit_g)}"
                 }
             } else echo?.let { (qty, option) ->

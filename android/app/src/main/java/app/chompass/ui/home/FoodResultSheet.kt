@@ -944,6 +944,7 @@ fun FoodResultSheet(
                         servingQuantityText = ServingUnitOption.formatQuantity(quantity)
                     },
                     servingSizeGrams = servingGrams,
+                    foodName = name,
                     unitOptions = servingUnitOptions,
                     menuExpanded = servingMenuExpanded && analysisReady,
                     onMenuExpandedChange = { if (analysisReady) servingMenuExpanded = it },

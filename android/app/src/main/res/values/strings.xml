@@ -2613,7 +2613,7 @@
     <string name="serving_unit_display_mode_ai_units">AI units</string>
     <string name="serving_unit_display_mode_ai_units_subtitle">Shows the unit returned or inferred by the AI, such as cup, tbsp, or pinch.</string>
     <string name="serving_unit_display_mode_metric">Grams/ml</string>
-    <string name="serving_unit_display_mode_metric_subtitle">Shows the portion as grams, or ml when the stored unit is explicitly ml/l. The AI unit remains stored internally.</string>
+    <string name="serving_unit_display_mode_metric_subtitle">Shows the portion as grams, or approximate ml for recognized liquid foods. The AI unit remains stored internally.</string>
     <string name="serving_unit_heuristics_footer">Toggle a category off to leave it in grams, or set a custom grams-per-unit (e.g. a 0.5 L beer can instead of the default 330 mL).</string>
     <string name="serving_unit_heuristics_reset">Reset to default</string>
     <string name="serving_unit_heuristics_default_value">Default: %1$s g / unit</string>

@@ -658,6 +658,7 @@ fun EditFavoriteSheet(
                                     servingQuantityText = ServingUnitOption.formatQuantity(quantity)
                                 },
                                 servingSizeGrams = servingGrams,
+                                foodName = name,
                                 unitOptions = servingUnitOptions,
                                 menuExpanded = servingMenuExpanded,
                                 onMenuExpandedChange = { servingMenuExpanded = it },

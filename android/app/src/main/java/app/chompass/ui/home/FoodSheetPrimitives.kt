@@ -447,6 +447,7 @@ internal fun ServingQuantityCard(
     selectedUnitId: String,
     onSelectedUnitChange: (String) -> Unit,
     servingSizeGrams: Double,
+    foodName: String? = null,
     unitOptions: List<ServingUnitOption>,
     menuExpanded: Boolean,
     onMenuExpandedChange: (Boolean) -> Unit,
@@ -486,7 +487,7 @@ internal fun ServingQuantityCard(
         packagePluralLabel,
         culinaryLabels,
     )
-    val metricAmount = metricServingAmount(selectedOption, parsedQuantity, servingSizeGrams)
+    val metricAmount = metricServingAmount(selectedOption, parsedQuantity, servingSizeGrams, foodName)
     val metricUnit = if (metricAmount.unit == "ml") stringResource(R.string.unit_ml) else gramUnit
     val metricSummary = "${ServingUnitOption.formatQuantity(metricAmount.value)} $metricUnit"
     val focusManager = LocalFocusManager.current

@@ -1387,7 +1387,7 @@
     <string name="serving_unit_display_mode_ai_units">AI-eenheden</string>
     <string name="serving_unit_display_mode_ai_units_subtitle">Toont de eenheid die de AI teruggeeft of afleidt, zoals kop, el of pinch.</string>
     <string name="serving_unit_display_mode_metric">Grammen/ml</string>
-    <string name="serving_unit_display_mode_metric_subtitle">Toont de portie als gram, of ml bij een opgeslagen ml/l-eenheid. De AI-eenheid blijft intern behouden.</string>
+    <string name="serving_unit_display_mode_metric_subtitle">Toont de portie als gram, of ongeveer ml bij herkende vloeibare voeding. De AI-eenheid blijft intern behouden.</string>
     <string name="serving_unit_mode_grams_only">Alleen grammen</string>
     <string name="serving_unit_mode_grams_only_subtitle">Snelst. Items blijven in grammen, geen extra stap.</string>
     <string name="serving_unit_mode_heuristic">Heuristiek</string>

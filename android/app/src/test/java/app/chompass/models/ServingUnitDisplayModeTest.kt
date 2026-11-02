@@ -27,4 +27,31 @@ class ServingUnitDisplayModeTest {
         assertEquals("ml", display.unit)
         assertEquals("l", liter.unit)
     }
+
+    @Test
+    fun recognizedLiquidFoodUsesMillilitersWhenParserUnitIsServing() {
+        val serving = ServingUnitOption(unit = "serving", gramsPerUnit = 300.0)
+        val display = metricServingAmount(
+            serving,
+            quantity = 1.0,
+            totalGrams = 300.0,
+            foodName = "Tomato soup",
+        )
+        assertEquals(300.0, display.value, 0.0)
+        assertEquals("ml", display.unit)
+        assertEquals("serving", serving.unit)
+    }
+
+    @Test
+    fun localizedLiquidFoodNameUsesMillilitersToo() {
+        val bowl = ServingUnitOption(unit = "bowl", gramsPerUnit = 300.0)
+        val display = metricServingAmount(
+            bowl,
+            quantity = 1.0,
+            totalGrams = 300.0,
+            foodName = "Tomatensoep",
+        )
+        assertEquals(300.0, display.value, 0.0)
+        assertEquals("ml", display.unit)
+    }
 }

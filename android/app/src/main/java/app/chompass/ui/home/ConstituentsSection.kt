@@ -185,6 +185,7 @@ private fun ConstituentRowCard(
                     )
                 },
                 servingSizeGrams = row.servingSizeGrams,
+                foodName = row.name,
                 unitOptions = row.servingUnitOptions,
                 menuExpanded = unitMenuExpanded,
                 onMenuExpandedChange = { unitMenuExpanded = it },
