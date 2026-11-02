@@ -115,6 +115,27 @@ class AndroidAppIconManagerRobolectricTest {
     }
 
     @Test
+    fun apply_repairsStaleSecondAlias() {
+        val packageManager = context.packageManager
+        packageManager.setComponentEnabledSetting(
+            component(AppThemeColor.PLUM),
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+            PackageManager.DONT_KILL_APP,
+        )
+        packageManager.setComponentEnabledSetting(
+            component(AppThemeColor.TEAL),
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+            PackageManager.DONT_KILL_APP,
+        )
+
+        AndroidAppIconManager.apply(context, AppThemeColor.PLUM)
+
+        assertEquals(1, enabledCount())
+        assertTrue(isEnabled(AppThemeColor.PLUM))
+        assertTrue(!isEnabled(AppThemeColor.TEAL))
+    }
+
+    @Test
     fun apply_fixedIcon_pinsBrandDefaultRegardlessOfThemeColor() {
         AndroidAppIconManager.apply(context, AppThemeColor.BLUE)
         AndroidAppIconManager.apply(context, AppThemeColor.BLUE, fixedIcon = true)

@@ -22,10 +22,14 @@ object AndroidAppIconManager {
     fun apply(context: Context, themeColor: AppThemeColor, fixedIcon: Boolean = false) {
         val resolved = themeColor.resolveLauncherIconTheme(context, fixedIcon)
         val pm = context.packageManager
-        val currentlyEnabled = AppThemeColor.iconSelectableColors().firstOrNull { color ->
+        val enabledColors = AppThemeColor.iconSelectableColors().filter { color ->
             isAliasEnabled(pm, context, color)
         }
-        if (currentlyEnabled != resolved) {
+        // PackageManager preserves explicit component state across updates. A
+        // downgrade or an interrupted alias swap can therefore leave two launcher
+        // aliases enabled; do not let that stale state persist just because the
+        // desired alias happens to be the first one we find.
+        if (enabledColors.size != 1 || enabledColors.singleOrNull() != resolved) {
             AppThemeColor.iconSelectableColors().forEach { color ->
                 val component = ComponentName(
                     context.packageName,
