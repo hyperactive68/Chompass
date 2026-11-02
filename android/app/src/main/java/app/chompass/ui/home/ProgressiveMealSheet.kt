@@ -55,6 +55,8 @@ import app.chompass.models.MealType
 import app.chompass.models.ProgressiveMealDraft
 import app.chompass.models.ProgressiveMealItem
 import app.chompass.models.ServingUnitOption
+import app.chompass.models.ServingUnitDisplayMode
+import app.chompass.models.metricServingAmount
 import app.chompass.services.ai.FoodAnalysis
 import app.chompass.ui.components.MacroChip
 import app.chompass.ui.components.energyText
@@ -84,6 +86,7 @@ fun ProgressiveMealSheet(
     onLogMeal: () -> Unit,
     onDiscard: () -> Unit,
     onDismiss: () -> Unit,
+    displayMode: ServingUnitDisplayMode = ServingUnitDisplayMode.Default,
 ) {
     val state = rememberChompassSheetState(
         busy = isSaving,
@@ -104,6 +107,7 @@ fun ProgressiveMealSheet(
                 onMealTypeChange = onMealTypeChange,
                 onRemoveItem = onRemoveItem,
                 onDiscard = onDiscard,
+                displayMode = displayMode,
             )
         },
         footer = {
@@ -133,6 +137,7 @@ internal fun ProgressiveMealSheetBody(
     onLogMeal: () -> Unit = {},
     onDiscard: () -> Unit = {},
     onDismiss: () -> Unit = {},
+    displayMode: ServingUnitDisplayMode = ServingUnitDisplayMode.Default,
 ) {
     val canLog = draft.items.isNotEmpty() && !isSaving
 
@@ -146,6 +151,7 @@ internal fun ProgressiveMealSheetBody(
                 onMealTypeChange = onMealTypeChange,
                 onRemoveItem = onRemoveItem,
                 onDiscard = onDiscard,
+                displayMode = displayMode,
             )
         },
         footer = {
@@ -176,6 +182,7 @@ private fun ProgressiveMealContentList(
     onMealTypeChange: (String) -> Unit,
     onRemoveItem: (java.util.UUID) -> Unit,
     onDiscard: () -> Unit,
+    displayMode: ServingUnitDisplayMode,
 ) {
     val listState = rememberLazyListState()
     var mealMenuExpanded by remember { mutableStateOf(false) }
@@ -282,6 +289,7 @@ private fun ProgressiveMealContentList(
                 ProgressiveIngredientRow(
                     item = item,
                     enabled = !isSaving,
+                    displayMode = displayMode,
                     onRemove = { onRemoveItem(item.id) },
                 )
             }
@@ -372,6 +380,7 @@ internal fun ProgressiveMealFooterRow(
 private fun ProgressiveIngredientRow(
     item: ProgressiveMealItem,
     enabled: Boolean,
+    displayMode: ServingUnitDisplayMode,
     onRemove: () -> Unit,
 ) {
     val isDark = isDarkTheme()
@@ -416,7 +425,12 @@ private fun ProgressiveIngredientRow(
                 analysis.servingSizeGrams?.takeIf { it > 0 },
                 analysis.servingUnitOptions,
             )
-            val servingText = echo?.let { (qty, option) ->
+            val servingText = if (displayMode == ServingUnitDisplayMode.METRIC) {
+                analysis.servingSizeGrams?.takeIf { it > 0 }?.let { totalGrams ->
+                    val amount = metricServingAmount(echo?.second ?: ServingUnitOption.grams, echo?.first, totalGrams)
+                    "${ServingUnitOption.formatQuantity(amount.value)} ${if (amount.unit == "ml") stringResource(R.string.unit_ml) else stringResource(R.string.unit_g)}"
+                }
+            } else echo?.let { (qty, option) ->
                 "${ServingUnitOption.formatQuantity(qty)} " + option.displayUnit(
                     qty,
                     stringResource(R.string.unit_serving),

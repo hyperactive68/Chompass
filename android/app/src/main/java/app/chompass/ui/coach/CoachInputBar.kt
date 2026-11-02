@@ -9,6 +9,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.remember
 import app.chompass.ui.components.pressScale
 import app.chompass.ui.components.PhotoRemoveBadgeScrimAlpha
+import app.chompass.ui.navigation.FloatingPillHeight
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
@@ -125,11 +127,16 @@ internal fun InputBar(
     Column(
         modifier = Modifier
             .padding(horizontal = 12.dp)
-            .padding(top = 4.dp, bottom = 10.dp)
+            // 4.dp above matches the chip row's 8.dp bottom padding to a 12.dp
+            // gap. 20.dp below clears the 64.dp pill (which sits 8.dp higher
+            // than the 72.dp dock) by that same 12.dp. #149
+            .padding(top = 4.dp, bottom = 20.dp)
             .fillMaxWidth()
+            .heightIn(min = FloatingPillHeight)
             .clip(capsule)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .padding(start = 4.dp, end = 5.dp, top = 4.dp, bottom = 4.dp),
+            .padding(start = 4.dp, end = 5.dp),
+        verticalArrangement = Arrangement.Center,
     ) {
         attachedImageBytes?.let { bytes ->
             val bitmap = rememberDecodedBitmap(bytes) { decodeSampledBitmap(bytes) }
@@ -323,11 +330,12 @@ internal fun CoachInputBarPreviewStub(value: String, sending: Boolean) {
     Row(
         modifier = Modifier
             .padding(horizontal = 12.dp)
-            .padding(top = 4.dp, bottom = 10.dp)
+            .padding(top = 4.dp, bottom = 20.dp)
             .fillMaxWidth()
+            .heightIn(min = FloatingPillHeight)
             .clip(capsule)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .padding(horizontal = 14.dp, vertical = 14.dp),
+            .padding(horizontal = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {

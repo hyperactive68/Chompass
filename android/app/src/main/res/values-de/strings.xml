@@ -1729,7 +1729,7 @@ für dich ein</string>
 
     <string name="settings_fixed_launcher_icon">Feste Launcher-Ikone</string>
 
-    <string name="settings_fixed_launcher_icon_subtitle">Behält die Launcher-Ikone in Petrol. Sie folgt nicht mehr der Akzentfarbe oder dem Hintergrundbild.</string>
+    <string name="settings_fixed_launcher_icon_subtitle">Behält das Markensymbol. Es folgt nicht mehr der Akzentfarbe oder dem Hintergrundbild.</string>
     <string name="settings_system_date_time_pickers">System-Datums- und Zeitwahl</string>
     <string name="settings_system_date_time_pickers_subtitle">Beim Bearbeiten einer Mahlzeit die Datums- und Zeitdialoge des Telefons nutzen.</string>
     <string name="settings_glass_blur">Mattes Glas</string>
@@ -1772,6 +1772,8 @@ für dich ein</string>
     <string name="sheet_theme_color_footer">Ändert die Hauptakzentfarbe, die für Schaltflächen, Diagramme und Fortschrittsanzeigen verwendet wird.</string>
 
     <string name="theme_color_system">System</string>
+    <string name="theme_color_plum">Pflaume</string>
+    <string name="theme_color_peach">Pfirsich</string>
 
     <string name="theme_color_teal">Türkis</string>
 
@@ -2016,6 +2018,10 @@ für dich ein</string>
 
     <string name="settings_ai_vision_model_footer">Fotos verwenden dieses Modell; Text verwendet das Hauptmodell. Ohne Auswahl wird für alles das Hauptmodell verwendet.</string>
 
+    <string name="settings_ai_coach_model">Coach-Modell</string>
+
+    <string name="settings_ai_coach_model_footer">Coach verwendet dieses Modell. Essensprotokollierung und Ziel-Neuberechnung nutzen weiterhin das Hauptmodell. Ohne Auswahl verwendet auch Coach das Hauptmodell.</string>
+
     <string name="settings_speech_language">Sprache</string>
 
     <string name="settings_ai_model_unset">(bitte unten eine Option auswählen)</string>
@@ -2219,7 +2225,7 @@ für dich ein</string>
 
     <string name="notif_body_fat_log_text">Trage deinen heutigen Körperfettanteil ein, um die Entwicklung deiner Körperzusammensetzung zu verfolgen.</string>
 
-    <string name="settings_health_companions">Synchronisiert sich mit allen Geräten, die Health Connect unterstützen: Gadgetbridge (Huawei, Honor, Amazfit, Mi Band und andere Wearables), openScale (Bluetooth-Waagen), Samsung Health, Fitbit und mehr. Gewicht und Körperfett werden automatisch importiert; von dir erfasste Mahlzeiten und Wasseraufnahme werden exportiert, und Mahlzeiten aus anderen Apps werden importiert. Schlaf, Ruhepuls und Flüssigkeitszufuhr werden auf dem Reiter „Fortschritt“ angezeigt.</string>
+    <string name="settings_health_companions">Synchronisiert sich mit allen Geräten, die Health Connect unterstützen: Gadgetbridge (Huawei, Honor, Amazfit, Mi Band und andere Wearables), openScale (Bluetooth-Waagen), Samsung Health, Fitbit und mehr. Gewicht, Körperfett, Knochenmasse, Körperwasser und Magermasse werden automatisch importiert; von dir erfasste Mahlzeiten und Wasseraufnahme werden exportiert, und Mahlzeiten aus anderen Apps werden importiert. Schlaf, Ruhepuls und Flüssigkeitszufuhr werden auf dem Reiter „Fortschritt“ angezeigt.</string>
 
     <string name="settings_health_background_sync">Hintergrundsynchronisierung</string>
 
@@ -2252,6 +2258,30 @@ für dich ein</string>
     <string name="import_sync_title">Synchronisierungs-JSON importieren</string>
 
     <string name="settings_sync_now">Jetzt synchronisieren</string>
+
+    <string name="settings_local_backup_section">Lokale Sicherung</string>
+
+    <string name="settings_local_backup_blurb">Sichere eine Kopie deines Tagebuchs und deiner Körperdaten in einer Datei. Chompass schreibt Chompass-sync.json in den gewählten Ordner und ersetzt sie bei jeder Sicherung. Fotos sind nicht enthalten. Zum Wiederherstellen die Datei über „Synchronisierungs-JSON importieren“ einlesen.</string>
+
+    <string name="settings_local_backup_enable">Lokale Sicherung aktivieren</string>
+
+    <string name="settings_local_backup_folder">Ordner</string>
+
+    <string name="settings_local_backup_no_folder">Kein Ordner ausgewählt</string>
+
+    <string name="settings_local_backup_auto">Beim Öffnen sichern</string>
+
+    <string name="settings_local_backup_auto_desc">Einmal täglich beim Öffnen der App. Standardmäßig deaktiviert. Jetzt sichern funktioniert weiterhin jederzeit.</string>
+
+    <string name="settings_local_backup_now">Jetzt sichern</string>
+
+    <string name="settings_local_backup_saved">Ordner gespeichert.</string>
+
+    <string name="settings_local_backup_folder_failed">Der Zugriff auf den Ordner konnte nicht gespeichert werden. Wähle ihn erneut.</string>
+
+    <string name="settings_local_backup_last">Letzte Sicherung: %1$s</string>
+
+    <string name="settings_local_backup_never">Noch nicht gesichert</string>
 
     <string name="settings_last_sync">Letzte Synchronisierung: %1$s</string>
 
@@ -2432,6 +2462,7 @@ für dich ein</string>
     <string name="about_privacy">Datenschutzerklärung</string>
 
     <string name="about_donate">Kauf mir einen Joghurt</string>
+    <string name="about_brand_tagline">Jeder Bissen auf Kurs.</string>
     <string name="about_made_by">Chompass von fitguy</string>
 
     <string name="about_with_care">Basierend auf Fud AI von Apoorv Darshan</string>
@@ -2493,9 +2524,15 @@ für dich ein</string>
 
     <string name="error_webdav_sync_failed">WebDAV-Synchronisierung fehlgeschlagen</string>
 
+    <string name="error_local_backup_failed">Sicherung fehlgeschlagen: %1$s. Wähle den Ordner erneut, falls der Zugriff verloren ging.</string>
+
     <string name="sync_error_unsupported_file">Nicht unterstützte Synchronisierungsdatei</string>
 
     <string name="sync_error_configure_webdav">Konfiguriere zunächst die WebDAV-URL, den Benutzernamen und das Passwort</string>
+
+    <string name="sync_error_configure_local">Wähle zuerst einen Ordner für die Sicherung aus</string>
+
+    <string name="sync_error_local_backup_disabled">Lokale Sicherung ist ausgeschaltet</string>
 
     <string name="sync_error_build_local_doc">Lokales Synchronisierungsdokument konnte nicht erstellt werden</string>
 
@@ -2510,6 +2547,8 @@ für dich ein</string>
     <string name="sync_error_merged_invalid">Zusammengeführtes Synchronisierungsdokument ungültig</string>
 
     <string name="sync_success_synced">Mit WebDAV synchronisiert</string>
+
+    <string name="sync_success_local_backup">In lokale Datei gesichert</string>
 
     <string name="sync_success_applied">Synchronisierungsdokument angewendet</string>
 

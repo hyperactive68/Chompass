@@ -1,10 +1,31 @@
 #!/usr/bin/env python3
-"""Emit scripts/assets/chompass_icon_mark.svg from the CC0 SVG Repo fork needle.
+"""Emit the Chompass brand mark SVGs and the BIMI logo from one geometry table.
 
-Ring geometry is fixed (outer R=344, inner R=297). The needle path comes from
-scripts/assets/fork_needle_svgrepo.svg (https://www.svgrepo.com/svg/203809/fork,
-CC0). Transform centers the fork's diagonal midpoint and scales so both tips
-sit just inside the inner ring.
+The geometry is transcribed from docs/brand/logo-system.html (the design study,
+which is authoritative for the mark). Everything here uses the study's 200-unit
+coordinate box:
+
+* `RING` is a 72-radius compass ring centred on (100, 100) whose stroke is bitten
+  by two 34-radius scallops between 1 and 3 o'clock — the "chomp".
+* `NEEDLE_A` / `NEEDLE_B` are the two facets of a needle whose tip sits in the
+  bite and whose pivot is the dial centre (100, 100).
+* The hub is an opaque disc over the needle, matching the ground it sits on
+  (cream on cream, plum on plum) so the pivot reads as a hole; the pin in its
+  centre keeps the needle legible.
+
+The wordmark's bitten "o" (60-unit box, stroke 8) is not emitted here: its two
+consumers are Compose (`ChompassMark.kt`) and the Hugo partial
+(`website/layouts/partials/wordmark.html`).
+
+It also emits the API 31+ animated splash icon (`res/drawable-v31/splash_icon.xml`), whose
+ring trims on in 400 ms; pre-31 keeps the static PNG so an old device never shows an empty ring.
+
+Generators that consume these files:
+
+* scripts/generate_icons.py — launcher / adaptive / PWA / site / splash PNGs
+* scripts/generate_og_image.py, website themes — the transparent site logo
+
+Run: uv run python scripts/assets/build_icon_mark.py
 """
 
 from __future__ import annotations
@@ -13,51 +34,410 @@ import re
 from pathlib import Path
 
 ASSETS = Path(__file__).resolve().parent
-OUT = ASSETS / "chompass_icon_mark.svg"
-FORK = ASSETS / "fork_needle_svgrepo.svg"
+ROOT = ASSETS.parents[1]
+BIMI = ROOT / "website" / "static" / "bimi" / "logo.svg"
+RES = ROOT / "android" / "app" / "src" / "main" / "res"
 
-# Measured so tips ≈ R 285 on the 1024 viewBox (inner ring R=297).
-FORK_SCALE = 0.863064
-FORK_OX = 242.5
-FORK_OY = 269.5
+# Splash icon: an AnimatedVectorDrawable that draws the ring on API 31+. Pre-31 keeps the
+# static PNG (drawable/splash_icon.xml), so an old device can never show an empty ring.
+SPLASH_TRIM_MS = 400
+# cp-needleIntro from the study: -1080° → 26° → -11° → 5° → -2° → 0° over 1450 ms.
+SPLASH_NEEDLE_SEGMENTS = ((797, -1080.0, 26.0), (218, 26.0, -11.0), (174, -11.0, 5.0),
+                          (145, 5.0, -2.0), (116, -2.0, 0.0))
+# cp-chomp from the study: the dial flinches about the bite at 1080 ms (start, duration, scaleX, scaleY)
+SPLASH_CHOMP_KEYFRAMES = (
+    (1080, 121, 0.955, 1.042),
+    (1201, 154, 1.028, 0.976),
+    (1355, 132, 0.993, 1.006),
+    (1487, 143, 1.0, 1.0),
+)
+
+# --- geometry (200-unit box; see docs/brand/logo-system.html) ---------------
+RING = "M171.7 106.3A72 72 0 1 1 118.6 30.5A34 34 0 0 0 159 58.7A34 34 0 0 0 171.7 106.3Z"
+NEEDLE_A = "M151.6 63.9L104.3 106.1L83.6 111.5Z"
+NEEDLE_B = "M151.6 63.9L83.6 111.5L95.7 93.9Z"
+
+RING_STROKE = 16
+NEEDLE_PIVOT = (100, 100)
+HUB_R = 7
+PIN_R = 2.5
+
+# Ring gradient runs corner to corner of the 200 box (study axis).
+RING_AXIS = (20, 10, 180, 190)
+
+# --- palette (BrandPalette.kt mirrors these; keep them in sync) -------------
+INK = "#1C131A"
+NEEDLE_B_LIGHT = "#4A3346"
+CREAM = "#FFF6EC"
+PLUM = "#170E16"
+NEEDLE_A_NOIR = "#FFF6EC"
+NEEDLE_B_NOIR = "#FFC9A8"
+
+RIPENED = ((0.0, "#FFD9C2"), (0.32, "#FF9A6C"), (0.68, "#E0685E"), (1.0, "#8C2E4A"))
+RIPENED_GLOW = ((0.0, "#FFE8D6"), (0.38, "#FFA07A"), (0.70, "#D9555C"), (1.0, "#5E1F45"))
+
+BIMI_BOX = 1024
+BIMI_SCALE = BIMI_BOX / 200  # 5.12
 
 
-def fork_path_d() -> str:
-    text = FORK.read_text(encoding="utf-8")
-    match = re.search(r'<path\s+d="([^"]+)"', text)
-    if not match:
-        raise SystemExit(f"no path d= in {FORK}")
-    return match.group(1)
+def _gradient(grad_id: str, stops: tuple[tuple[float, str], ...]) -> str:
+    x1, y1, x2, y2 = RING_AXIS
+    body = "".join(
+        f'      <stop offset="{offset:g}" stop-color="{color}"/>\n' for offset, color in stops
+    )
+    return (
+        f'    <linearGradient id="{grad_id}" x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}"\n'
+        '        gradientUnits="userSpaceOnUse">\n'
+        f"{body}"
+        "    </linearGradient>\n"
+    )
+
+
+def _mark_svg(
+    *,
+    grad_id: str,
+    stops: tuple[tuple[float, str], ...],
+    needle_a: str,
+    needle_b: str,
+    hub: str,
+    pin: str,
+    ring_stroke: str,
+    opaque_ring: bool = False,
+) -> str:
+    """One 200-unit mark. `opaque_ring` skips the gradient (alpha silhouette)."""
+    ring = (
+        f'  <path d="{RING}" stroke="{ring_stroke}" stroke-width="{RING_STROKE}"\n'
+        '      stroke-linecap="round" stroke-linejoin="round" fill="none"/>\n'
+    )
+    defs = "" if opaque_ring else "  <defs>\n" + _gradient(grad_id, stops) + "  </defs>\n"
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        "<!-- Generated by scripts/assets/build_icon_mark.py from docs/brand/logo-system.html. -->\n"
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">\n'
+        f"{defs}"
+        f"{ring}"
+        f'  <path d="{NEEDLE_A}" fill="{needle_a}"/>\n'
+        f'  <path d="{NEEDLE_B}" fill="{needle_b}"/>\n'
+        f'  <circle cx="{NEEDLE_PIVOT[0]}" cy="{NEEDLE_PIVOT[1]}" r="{HUB_R:g}" fill="{hub}"/>\n'
+        f'  <circle cx="{NEEDLE_PIVOT[0]}" cy="{NEEDLE_PIVOT[1]}" r="{PIN_R:g}" fill="{pin}"/>\n'
+        "</svg>\n"
+    )
+
+
+# --- BIMI: same geometry on the 1024 box ------------------------------------
+_TOKENS = re.compile(r"[A-Za-z]|-?\d*\.?\d+")
+# Arity + which arguments of an arc are flags (rotation/geometry may scale, flags may not).
+_ARITY = {"M": 2, "L": 2, "A": 7, "Z": 0}
+_FLAGS = {"A": (3, 4)}
+
+
+def _fmt(value: float) -> str:
+    return f"{round(value, 4):g}"
+
+
+def scale_path(d: str, factor: float) -> str:
+    """Scale every coordinate in `d`, leaving arc flags and rotations intact."""
+    tokens = _TOKENS.findall(d)
+    out: list[str] = []
+    command = ""
+    args: list[str] = []
+
+    def flush() -> None:
+        if not command:
+            return
+        arity = _ARITY[command]
+        out.append(command)
+        if arity == 0:
+            args.clear()
+            return
+        if len(args) % arity:
+            raise SystemExit(f"{command}: {len(args)} args not a multiple of {arity} in {d!r}")
+        flags = _FLAGS.get(command, ())
+        for start in range(0, len(args), arity):
+            group = args[start : start + arity]
+            out.extend(
+                token if index in flags else _fmt(float(token) * factor)
+                for index, token in enumerate(group)
+            )
+        args.clear()
+
+    for token in tokens:
+        if token.isalpha():
+            flush()
+            command = token
+        else:
+            args.append(token)
+    flush()
+    return " ".join(out)
+
+
+def bimi_svg() -> str:
+    stops = "".join(
+        f'      <stop offset="{offset:g}" stop-color="{color}"/>\n' for offset, color in RIPENED
+    )
+    center = _fmt(NEEDLE_PIVOT[0] * BIMI_SCALE)
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny-ps\"\n"
+        f'    width="{BIMI_BOX}" height="{BIMI_BOX}" viewBox="0 0 {BIMI_BOX} {BIMI_BOX}">\n'
+        "  <title>Chompass</title>\n"
+        "  <defs>\n"
+        '    <linearGradient id="ripened" '
+        f'x1="{_fmt(RING_AXIS[0] * BIMI_SCALE)}" y1="{_fmt(RING_AXIS[1] * BIMI_SCALE)}" '
+        f'x2="{_fmt(RING_AXIS[2] * BIMI_SCALE)}" y2="{_fmt(RING_AXIS[3] * BIMI_SCALE)}"\n'
+        '        gradientUnits="userSpaceOnUse">\n'
+        f"{stops}"
+        "    </linearGradient>\n"
+        "  </defs>\n"
+        f'  <rect width="{BIMI_BOX}" height="{BIMI_BOX}" fill="{CREAM}"/>\n'
+        f'  <path d="{scale_path(RING, BIMI_SCALE)}" stroke="url(#ripened)"\n'
+        f'      stroke-width="{_fmt(RING_STROKE * BIMI_SCALE)}" stroke-linecap="round"\n'
+        '      stroke-linejoin="round" fill="none"/>\n'
+        f'  <path d="{scale_path(NEEDLE_A, BIMI_SCALE)}" fill="{INK}"/>\n'
+        f'  <path d="{scale_path(NEEDLE_B, BIMI_SCALE)}" fill="{NEEDLE_B_LIGHT}"/>\n'
+        f'  <circle cx="{center}" cy="{center}" r="{_fmt(HUB_R * BIMI_SCALE)}" fill="{CREAM}"/>\n'
+        f'  <circle cx="{center}" cy="{center}" r="{_fmt(PIN_R * BIMI_SCALE)}" fill="{INK}"/>\n'
+        "</svg>\n"
+    )
+
+
+def _splash_vector(
+    *,
+    stops: tuple[tuple[float, str], ...],
+    needle_a: str,
+    needle_b: str,
+    hub: str,
+    pin: str,
+) -> str:
+    """Splash mark as a vector drawable, with the ring trimmable for the intro animation.
+
+    The two nested groups reproduce the PNG's framing exactly: 0.5 for the 25% inset the
+    SplashScreen clip circle needs, 0.88 for the mark box inside it.
+    """
+    items = "".join(
+        f'\n                            <item android:offset="{offset:g}" android:color="{color}"/>'
+        for offset, color in stops
+    )
+    return (
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        "<!-- Generated by scripts/assets/build_icon_mark.py from docs/brand/logo-system.html. -->\n"
+        '<vector xmlns:android="http://schemas.android.com/apk/res/android"\n'
+        '    xmlns:aapt="http://schemas.android.com/aapt"\n'
+        '    android:width="288dp"\n'
+        '    android:height="288dp"\n'
+        '    android:viewportWidth="200"\n'
+        '    android:viewportHeight="200">\n'
+        '    <group android:scaleX="0.5" android:scaleY="0.5" android:pivotX="100" android:pivotY="100">\n'
+        '        <group android:scaleX="0.88" android:scaleY="0.88" android:pivotX="100" android:pivotY="100">\n'
+        '            <group android:name="dial" android:pivotX="142" android:pivotY="56">\n'
+        '            <path\n'
+        '                android:name="ring"\n'
+        f'                android:pathData="{RING}"\n'
+        '                android:strokeWidth="16"\n'
+        '                android:strokeLineCap="round"\n'
+        '                android:strokeLineJoin="round"\n'
+        '                android:trimPathStart="0"\n'
+        '                android:trimPathEnd="0"\n'
+        '                android:fillColor="@android:color/transparent">\n'
+        '                <aapt:attr name="android:strokeColor">\n'
+        '                    <gradient\n'
+        '                        android:type="linear"\n'
+        '                        android:startX="20"\n'
+        '                        android:startY="10"\n'
+        '                        android:endX="180"\n'
+        '                        android:endY="190">'
+        f"{items}\n"
+        '                    </gradient>\n'
+        '                </aapt:attr>\n'
+        '            </path>\n'
+        '            </group>\n'
+        '            <group android:name="needle" android:pivotX="100" android:pivotY="100">\n'
+        f'                <path android:pathData="{NEEDLE_A}" android:fillColor="{needle_a}"/>\n'
+        f'                <path android:pathData="{NEEDLE_B}" android:fillColor="{needle_b}"/>\n'
+        f'                <path android:pathData="M100,93a7,7 0 1,1 0,14a7,7 0 1,1 0,-14" android:fillColor="{hub}"/>\n'
+        f'                <path android:pathData="M100,97.5a2.5,2.5 0 1,1 0,5a2.5,2.5 0 1,1 0,-5" android:fillColor="{pin}"/>\n'
+        '            </group>\n'
+        "        </group>\n"
+        "    </group>\n"
+        "</vector>\n"
+    )
+
+
+def _splash_animated_vector() -> str:
+    return (
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        "<!-- Generated by scripts/assets/build_icon_mark.py. -->\n"
+        '<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"\n'
+        '    android:drawable="@drawable/splash_icon_avd">\n'
+        '    <target android:name="ring" android:animation="@animator/splash_ring_trim" />\n'
+        '    <target android:name="needle" android:animation="@animator/splash_needle_spin" />\n'
+        '    <target android:name="dial" android:animation="@animator/splash_dial_chomp" />\n'
+        "</animated-vector>\n"
+    )
+
+
+def _splash_trim_animator() -> str:
+    return (
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        '<objectAnimator xmlns:android="http://schemas.android.com/apk/res/android"\n'
+        '    android:propertyName="trimPathEnd"\n'
+        '    android:valueFrom="0"\n'
+        '    android:valueTo="1"\n'
+        f'    android:duration="{SPLASH_TRIM_MS}"\n'
+        '    android:interpolator="@interpolator/mark_draw" />\n'
+    )
+
+
+def _splash_needle_spin() -> str:
+    """Piecewise spin: one objectAnimator per study keyframe interval, chained sequentially."""
+    steps = "".join(
+        f'    <objectAnimator\n'
+        f'        android:propertyName="rotation"\n'
+        f'        android:valueFrom="{start:g}"\n'
+        f'        android:valueTo="{end:g}"\n'
+        f'        android:duration="{duration}"\n'
+        f'        android:interpolator="@interpolator/mark_easing"'
+        + ('\n        android:startOffset="180"' if index == 0 else "")
+        + " />\n"
+        for index, (duration, start, end) in enumerate(SPLASH_NEEDLE_SEGMENTS)
+    )
+    return (
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        "<set xmlns:android=\"http://schemas.android.com/apk/res/android\"\n"
+        '    android:ordering="sequentially">\n'
+        f"{steps}"
+        "</set>\n"
+    )
+
+
+def _splash_dial_chomp() -> str:
+    """The dial's squash-and-stretch, absolute offsets so it runs across the needle spin."""
+    start_x, start_y = 1.0, 1.0
+    steps = ""
+    for offset, duration, end_x, end_y in SPLASH_CHOMP_KEYFRAMES:
+        for prop, start, end in (("scaleX", start_x, end_x), ("scaleY", start_y, end_y)):
+            steps += (
+                f'    <objectAnimator\n'
+                f'        android:propertyName="{prop}"\n'
+                f'        android:valueFrom="{start:g}"\n'
+                f'        android:valueTo="{end:g}"\n'
+                f'        android:duration="{duration}"\n'
+                f'        android:startOffset="{offset}"\n'
+                f'        android:interpolator="@interpolator/mark_chomp" />\n'
+            )
+        start_x, start_y = end_x, end_y
+    return (
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        "<set xmlns:android=\"http://schemas.android.com/apk/res/android\"\n"
+        '    android:ordering="together">\n'
+        f"{steps}"
+        "</set>\n"
+    )
+
+
+def _splash_interpolator() -> str:
+    # MarkDrawEasing: cubic-bezier(0.65, 0, 0.35, 1) from AppMotion.
+    return (
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        '<pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"\n'
+        '    android:controlX1="0.65"\n'
+        '    android:controlX2="0.35"\n'
+        '    android:controlY1="0"\n'
+        '    android:controlY2="1" />\n'
+    )
+
+
+def write_splash_avd() -> None:
+    """Emit the API 31+ animated splash icon (light + night) and its animator."""
+    variants = {
+        "drawable-v31": _splash_vector(
+            stops=RIPENED, needle_a=INK, needle_b=NEEDLE_B_LIGHT, hub=CREAM, pin=INK
+        ),
+        "drawable-night-v31": _splash_vector(
+            stops=RIPENED_GLOW,
+            needle_a=NEEDLE_A_NOIR,
+            needle_b=NEEDLE_B_NOIR,
+            hub=PLUM,
+            pin=NEEDLE_A_NOIR,
+        ),
+    }
+    for folder, vector in variants.items():
+        out = RES / folder
+        out.mkdir(parents=True, exist_ok=True)
+        (out / "splash_icon_avd.xml").write_text(vector, encoding="utf-8")
+        (out / "splash_icon.xml").write_text(_splash_animated_vector(), encoding="utf-8")
+        print(f"Wrote {folder}/splash_icon{{,_avd}}.xml")
+
+    (RES / "animator").mkdir(parents=True, exist_ok=True)
+    (RES / "animator" / "splash_ring_trim.xml").write_text(_splash_trim_animator(), encoding="utf-8")
+    (RES / "animator" / "splash_needle_spin.xml").write_text(_splash_needle_spin(), encoding="utf-8")
+    (RES / "animator" / "splash_dial_chomp.xml").write_text(_splash_dial_chomp(), encoding="utf-8")
+    # MarkChompEasing: cubic-bezier(0.34, 1.56, 0.64, 1) from AppMotion.
+    (RES / "interpolator" / "mark_chomp.xml").write_text(
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        '<pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"\n'
+        '    android:controlX1="0.34"\n'
+        '    android:controlX2="0.64"\n'
+        '    android:controlY1="1.56"\n'
+        '    android:controlY2="1" />\n',
+        encoding="utf-8",
+    )
+    # MarkEasing: cubic-bezier(0.22, 1, 0.36, 1) from AppMotion.
+    (RES / "interpolator" / "mark_easing.xml").write_text(
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        '<pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"\n'
+        '    android:controlX1="0.22"\n'
+        '    android:controlX2="0.36"\n'
+        '    android:controlY1="1"\n'
+        '    android:controlY2="1" />\n',
+        encoding="utf-8",
+    )
+    (RES / "interpolator").mkdir(parents=True, exist_ok=True)
+    (RES / "interpolator" / "mark_draw.xml").write_text(_splash_interpolator(), encoding="utf-8")
+    print("Wrote animator/splash_{ring_trim,needle_spin,dial_chomp}.xml "
+          "+ interpolator/{mark_draw,mark_easing,mark_chomp}.xml")
 
 
 def main() -> None:
-    d = fork_path_d()
-    svg = f"""<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="#FFFFFF">
-  <!--
-    Chompass brand mark. Ring outer R=344, inner R=297 (~47px thick).
-    Needle: CC0 fork from SVG Repo https://www.svgrepo.com/svg/203809/fork
-    (see scripts/assets/fork_needle_svgrepo.svg). Regenerate via build_icon_mark.py.
-  -->
-  <path fill-rule="evenodd" d="
-    M 512 168
-    A 344 344 0 1 1 511.9 168
-    Z
-    M 512 215
-    A 297 297 0 1 0 512.1 215
-    Z
-  "/>
-  <path d="M 512 252 L 530 282 L 512 312 L 494 282 Z"/>
-  <path d="M 780 512 L 753.5 529 L 727 512 L 753.5 495 Z"/>
-  <path d="M 512 780 L 529 753.5 L 512 727 L 495 753.5 Z"/>
-  <path d="M 244 512 L 270.5 529 L 297 512 L 270.5 495 Z"/>
-  <g transform="translate(512 512) scale({FORK_SCALE}) translate({-FORK_OX} {-FORK_OY})">
-    <path d="{d}"/>
-  </g>
-</svg>
-"""
-    OUT.write_text(svg, encoding="utf-8")
-    print(f"Wrote {OUT.relative_to(ASSETS.parents[1])}")
+    outputs = {
+        "chompass_icon_mark.svg": _mark_svg(
+            grad_id="ripened",
+            stops=RIPENED,
+            needle_a=INK,
+            needle_b=NEEDLE_B_LIGHT,
+            hub=CREAM,
+            pin=INK,
+            ring_stroke="url(#ripened)",
+        ),
+        "chompass_icon_mark_noir.svg": _mark_svg(
+            grad_id="ripenedGlow",
+            stops=RIPENED_GLOW,
+            needle_a=NEEDLE_A_NOIR,
+            needle_b=NEEDLE_B_NOIR,
+            hub=PLUM,
+            pin=NEEDLE_A_NOIR,
+            ring_stroke="url(#ripenedGlow)",
+        ),
+        "chompass_icon_mark_mask.svg": _mark_svg(
+            grad_id="mask",
+            stops=RIPENED,
+            needle_a="#FFFFFF",
+            needle_b="#FFFFFF",
+            hub="#FFFFFF",
+            pin="#FFFFFF",
+            ring_stroke="#FFFFFF",
+            opaque_ring=True,
+        ),
+    }
+    for name, svg in outputs.items():
+        (ASSETS / name).write_text(svg, encoding="utf-8")
+        print(f"Wrote {name}")
+
+    BIMI.parent.mkdir(parents=True, exist_ok=True)
+    BIMI.write_text(bimi_svg(), encoding="utf-8")
+    print(f"Wrote {BIMI.relative_to(ROOT)}")
+
+    write_splash_avd()
 
 
 if __name__ == "__main__":

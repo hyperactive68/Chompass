@@ -92,6 +92,7 @@ import app.chompass.models.MacroPlanResolver
 import app.chompass.services.grounding.FoodSuggestion
 import app.chompass.models.CurrentMealCatalog
 import app.chompass.models.FoodSource
+import app.chompass.models.offersFavoriteSave
 import app.chompass.models.CaffeineEntry
 import app.chompass.models.NicotineEntry
 import app.chompass.models.WaterAmountFormat
@@ -945,6 +946,7 @@ fun HomeScreen(
                                         isSelected = isSelected,
                                         macroChips = ui.foodLogMacroChips,
                                         compact = ui.homeDisplay.foodLogLayout != HomeFoodLogLayout.CLASSIC,
+                                        displayMode = ui.servingUnitDisplayMode,
                                     )
                                 }
                             } else {
@@ -955,6 +957,7 @@ fun HomeScreen(
                                     rowShape = rowShape,
                                     macroChips = ui.foodLogMacroChips,
                                     compact = ui.homeDisplay.foodLogLayout != HomeFoodLogLayout.CLASSIC,
+                                     displayMode = ui.servingUnitDisplayMode,
                                     onTap = { editingEntry = entry },
                                     onLongPress = { selectedEntryIds = setOf(entry.id) },
                                     onDelete = {
@@ -1579,6 +1582,7 @@ fun HomeScreen(
             initialTime = ui.logTimeOverride ?: LocalTime.now(),
             useSystemDateTimePickers = useSystemDateTimePickers,
             mealTimesEnabled = ui.mealTimesEnabled,
+            displayMode = ui.servingUnitDisplayMode,
             onDismiss = {
                 showManual = false
                 returnToAddFoodGrid()
@@ -1646,6 +1650,7 @@ fun HomeScreen(
             container = container,
             entry = favorite,
             optionalGoals = ui.optionalNutrientGoals,
+            displayMode = ui.servingUnitDisplayMode,
             aiFeaturesEnabled = aiFeaturesEnabled,
             onReprocess = { updatedNote, editedMix, onProgress ->
                 if (editedMix != null) vm.reestimateFoodEntry(editedMix, onProgress)
@@ -1912,6 +1917,7 @@ fun HomeScreen(
             entry = entry,
             optionalGoals = ui.optionalNutrientGoals,
             preferGramsByDefault = ui.preferGramsByDefault,
+            displayMode = ui.servingUnitDisplayMode,
             aiFeaturesEnabled = aiFeaturesEnabled,
             useSystemDateTimePickers = useSystemDateTimePickers,
             dayEntries = ui.todayEntries,
@@ -2077,6 +2083,7 @@ fun HomeScreen(
             analysis = ui.pendingAnalysis,
             imageBytes = ui.pendingImageBytes,
             preferGramsByDefault = ui.preferGramsByDefault,
+            displayMode = ui.servingUnitDisplayMode,
             profile = ui.profile,
             resolved = resolvedTargets,
             optionalGoals = ui.optionalNutrientGoals,
@@ -2143,10 +2150,10 @@ fun HomeScreen(
                     logTime = logTime,
                 )
             },
-            // Fresh barcode reviews only — a saved-meals relog review or
-            // an in-progress progressive meal keeps its own flows.
+            // Fresh barcode or photo reviews only — a saved-meals relog
+            // review or an in-progress progressive meal keeps its own flows.
             onSaveFavorite = if (
-                ui.pendingFoodSource == FoodSource.BARCODE &&
+                ui.pendingFoodSource?.offersFavoriteSave() == true &&
                 ui.pendingReviewSource == null
             ) {
                 { name, grams, scale, mealType, selectedServingUnit, selectedServingQuantity, editedAnalysis, logTime ->
@@ -2191,7 +2198,7 @@ fun HomeScreen(
             // Save to library instead (Codeberg #142) — "add next" only makes
             // sense when there is a draft to add to.
             onAddToProgressiveMeal = if (
-                ui.pendingFoodSource == FoodSource.BARCODE &&
+                ui.pendingFoodSource?.offersFavoriteSave() == true &&
                 ui.pendingReviewSource == null &&
                 ui.progressiveMeal?.items?.isNotEmpty() != true
             ) {
@@ -2237,6 +2244,7 @@ fun HomeScreen(
             onLogMeal = { vm.logProgressiveMeal() },
             onDiscard = { vm.discardProgressiveMeal() },
             onDismiss = { vm.showProgressiveMealSheet(false) },
+            displayMode = ui.servingUnitDisplayMode,
         )
     }
     // Hero ⓘ → recalc details: reopen the persisted goal-change explanation.
@@ -2450,6 +2458,7 @@ internal fun HomeScreenPreviewContent(
                                     rowShape = rowShape,
                                     macroChips = ui.foodLogMacroChips,
                                     compact = ui.homeDisplay.foodLogLayout != HomeFoodLogLayout.CLASSIC,
+                                    displayMode = ui.servingUnitDisplayMode,
                                 )
                                 if (index != group.entries.lastIndex) Divider()
                             }

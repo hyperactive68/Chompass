@@ -17,6 +17,7 @@ import app.chompass.models.parseHabitPresetCatalog
 import app.chompass.models.OptionalNutrient
 import app.chompass.models.OptionalNutrientGoals
 import app.chompass.models.ServingUnitInferenceMode
+import app.chompass.models.ServingUnitDisplayMode
 import app.chompass.models.SpeechLanguage
 import app.chompass.models.SpeechProvider
 import app.chompass.models.WaterGoalCalculator
@@ -118,6 +119,7 @@ internal data class SettingsPrefsHydration(
     val maxResponseTokens: Int,
     val aiReadTimeoutSeconds: Int,
     val servingUnitInferenceMode: ServingUnitInferenceMode,
+    val servingUnitDisplayMode: ServingUnitDisplayMode,
     val heuristicServingUnitSettings: HeuristicServingUnitSettings,
     val fallbackEnabled: Boolean,
     val geminiGoogleSearchEnabled: Boolean,
@@ -271,6 +273,7 @@ internal fun Preferences.toSettingsHydration(json: Json): SettingsPrefsHydration
             this[Keys.AI_READ_TIMEOUT_SECONDS] ?: DEFAULT_AI_READ_TIMEOUT_SECONDS
         ),
         servingUnitInferenceMode = ServingUnitInferenceMode.fromStorage(this[Keys.SERVING_UNIT_INFERENCE_MODE]),
+        servingUnitDisplayMode = ServingUnitDisplayMode.fromStorage(this[Keys.FOOD_MEASUREMENT_DISPLAY_MODE]),
         heuristicServingUnitSettings = this[Keys.HEURISTIC_SERVING_UNIT_SETTINGS]?.let {
             runCatching { json.decodeFromString(HeuristicServingUnitSettings.serializer(), it) }.getOrNull()
         } ?: HeuristicServingUnitSettings.Default,

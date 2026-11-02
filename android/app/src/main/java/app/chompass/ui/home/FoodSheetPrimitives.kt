@@ -88,6 +88,8 @@ import app.chompass.R
 import app.chompass.models.CurrentMealCatalog
 import app.chompass.models.MealType
 import app.chompass.models.ServingUnitOption
+import app.chompass.models.ServingUnitDisplayMode
+import app.chompass.models.metricServingAmount
 import app.chompass.ui.components.isDarkTheme
 import app.chompass.ui.components.glassSheetColor
 import app.chompass.ui.components.pressScale
@@ -449,6 +451,8 @@ internal fun ServingQuantityCard(
     menuExpanded: Boolean,
     onMenuExpandedChange: (Boolean) -> Unit,
     gramUnit: String,
+    /** Presentation only: the stored/parser unit is unchanged. */
+    displayMode: ServingUnitDisplayMode = ServingUnitDisplayMode.Default,
     isLoadingUnits: Boolean = false,
     enabled: Boolean = true,
     /** Set false for hosts that don't resolve deltas/expressions (constituents). */
@@ -482,6 +486,9 @@ internal fun ServingQuantityCard(
         packagePluralLabel,
         culinaryLabels,
     )
+    val metricAmount = metricServingAmount(selectedOption, parsedQuantity, servingSizeGrams)
+    val metricUnit = if (metricAmount.unit == "ml") stringResource(R.string.unit_ml) else gramUnit
+    val metricSummary = "${ServingUnitOption.formatQuantity(metricAmount.value)} $metricUnit"
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val dismissKeyboard = {
@@ -552,16 +559,20 @@ internal fun ServingQuantityCard(
         }
         val currentQty = parsedQuantity ?: 1.0
         val showUnitWheel = pickerOptions.size > 1
-        val summaryValue = buildString {
-            val qty = parsedQuantity
-            if (qty != null) {
-                append(ServingUnitOption.formatQuantity(qty))
-                append(' ')
-            } else if (quantityText.isNotBlank()) {
-                append(quantityText.trim())
-                append(' ')
+        val summaryValue = if (displayMode == ServingUnitDisplayMode.METRIC) {
+            metricSummary
+        } else {
+            buildString {
+                val qty = parsedQuantity
+                if (qty != null) {
+                    append(ServingUnitOption.formatQuantity(qty))
+                    append(' ')
+                } else if (quantityText.isNotBlank()) {
+                    append(quantityText.trim())
+                    append(' ')
+                }
+                append(selectedUnitLabel)
             }
-            append(selectedUnitLabel)
         }
         val rotation by animateFloatAsState(
             targetValue = if (expanded) 180f else 0f,

@@ -66,8 +66,10 @@ android {
         applicationId = "app.chompass"
         minSdk = 26
         targetSdk = 36
-        versionCode = 113
-        versionName = "6.0.1"
+        // 6.1.0 upstream also used code 113; 114 keeps this fork directly
+        // upgradeable without colliding with the upstream release.
+        versionCode = 114
+        versionName = "6.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         if (releaseAbi != null) {

@@ -1358,6 +1358,12 @@
         <item>unit</item>
         <item>detection</item>
     </string-array>
+    <string-array name="settings_search_kw_serving_unit_display_mode">
+        <item>grams</item>
+        <item>milliliters</item>
+        <item>metric</item>
+        <item>units</item>
+    </string-array>
     <string-array name="settings_search_kw_serving_unit_heuristics">
         <item>serving</item>
         <item>rules</item>
@@ -1669,7 +1675,7 @@
     <string name="settings_appearance_oled">OLED</string>
     <string name="settings_theme_color">Theme Color</string>
     <string name="settings_fixed_launcher_icon">Fixed Launcher Icon</string>
-    <string name="settings_fixed_launcher_icon_subtitle">Keeps the launcher icon teal. It stops following the theme color and wallpaper.</string>
+    <string name="settings_fixed_launcher_icon_subtitle">Keeps the brand icon. It stops following the theme color and wallpaper.</string>
     <string name="settings_system_date_time_pickers">System date and time pickers</string>
     <string name="settings_system_date_time_pickers_subtitle">Use the phone’s date and time dialogs when editing a meal.</string>
     <string name="settings_glass_blur">Frosted glass</string>
@@ -1706,6 +1712,8 @@
     <string name="sheet_theme_color">Theme Color</string>
     <string name="sheet_theme_color_footer">Changes the main accent used for buttons, charts, and progress indicators.</string>
     <string name="theme_color_system">System</string>
+    <string name="theme_color_plum">Plum</string>
+    <string name="theme_color_peach">Peach</string>
     <string name="theme_color_teal">Teal</string>
     <string name="theme_color_blue">Blue</string>
     <string name="theme_color_green">Green</string>
@@ -1845,6 +1853,8 @@
     <string name="settings_ai_vision_model">Vision model</string>
     <string name="settings_ai_vision_model_unset">(same as Model)</string>
     <string name="settings_ai_vision_model_footer">Photos use this model; text uses the main model. Leave unset to use the main model for everything.</string>
+    <string name="settings_ai_coach_model">Coach model</string>
+    <string name="settings_ai_coach_model_footer">Coach uses this model. Food logging and goal recalculation keep the main model. Leave unset to use the main model for Coach too.</string>
     <string name="settings_speech_language">Language</string>
     <string name="settings_ai_model_unset">(set one below)</string>
     <string name="ai_model_tier_paid">Paid-only model (free tier no longer includes Pro)</string>
@@ -1971,7 +1981,7 @@
     <string name="notif_weight_log_text">Log today\'s weight to keep your progress chart accurate.</string>
     <string name="notif_body_fat_log_title">Body fat check-in</string>
     <string name="notif_body_fat_log_text">Log today\'s body fat % to track your composition trend.</string>
-    <string name="settings_health_companions">Syncs with anything that speaks Health Connect: Gadgetbridge (Huawei, Honor, Amazfit, Mi Band and other wearables), openScale (Bluetooth scales), Samsung Health, Fitbit and more. Weight and body fat flow in automatically; meals and water you log flow out, and meals from other apps flow in. Sleep, resting heart rate and hydration appear on the Progress tab.</string>
+    <string name="settings_health_companions">Syncs with anything that speaks Health Connect: Gadgetbridge (Huawei, Honor, Amazfit, Mi Band and other wearables), openScale (Bluetooth scales), Samsung Health, Fitbit and more. Weight, body fat, bone mass, body water and lean mass flow in automatically; meals and water you log flow out, and meals from other apps flow in. Sleep, resting heart rate and hydration appear on the Progress tab.</string>
     <string name="settings_health_background_sync">Background sync</string>
     <string name="settings_health_background_sync_desc">Check Health Connect for new data every few hours, even when Chompass is closed. Off by default. Needs background-read permission when your Health Connect module supports it.</string>
     <string name="settings_health_background_sync_unsupported">Background sync isn\'t supported on this device\'s Health Connect module. Foreground sync still works when you open Chompass.</string>
@@ -2004,6 +2014,18 @@
     <string name="settings_google_drive_sync_failed" tools:ignore="MissingTranslation">Google Drive sync failed: %1$s</string>
     <string name="settings_google_drive_not_connected" tools:ignore="MissingTranslation">Connect Google Drive before syncing.</string>
     <string name="settings_sync_now">Sync now</string>
+    <string name="settings_local_backup_section">Local backup</string>
+    <string name="settings_local_backup_blurb">Save a copy of your diary and body data to a file. Chompass writes Chompass-sync.json in the folder you choose and replaces it on each backup. Photos are not included. Use Import sync JSON to restore it.</string>
+    <string name="settings_local_backup_enable">Enable local backup</string>
+    <string name="settings_local_backup_folder">Folder</string>
+    <string name="settings_local_backup_no_folder">No folder chosen</string>
+    <string name="settings_local_backup_auto">Back up on open</string>
+    <string name="settings_local_backup_auto_desc">Once a day when you open the app. Off by default. Back up now still works anytime.</string>
+    <string name="settings_local_backup_now">Back up now</string>
+    <string name="settings_local_backup_saved">Folder saved.</string>
+    <string name="settings_local_backup_folder_failed">Could not keep access to that folder. Choose it again.</string>
+    <string name="settings_local_backup_last">Last backup: %1$s</string>
+    <string name="settings_local_backup_never">Not backed up yet</string>
     <string name="settings_last_sync">Last sync: %1$s</string>
     <string name="settings_not_synced">Not synced yet</string>
     <string name="import_sync_success">Sync document imported.</string>
@@ -2108,6 +2130,7 @@
     <string name="about_request_feature">Request a Feature</string>
     <string name="about_privacy">Privacy Policy</string>
     <string name="about_donate">Buy me a yogurt</string>
+    <string name="about_brand_tagline">Every bite, on course.</string>
     <string name="about_made_by">Chompass by fitguy</string>
     <string name="about_with_care">Based on Fud AI by Apoorv Darshan</string>
     <string name="about_share_message">I\'ve been tracking my meals with Chompass, an ad-free fork of Fud AI. Snap a photo, speak it, or type it, and the AI logs the calories. Open source, and your data stays on your device.\n\nSource: https://codeberg.org/fitguy/chompass</string>
@@ -2146,10 +2169,13 @@
     <string name="error_invalid_json">Invalid JSON</string>
     <string name="error_unknown">Unknown error</string>
     <string name="error_webdav_sync_failed">WebDAV sync failed</string>
+    <string name="error_local_backup_failed">Local backup failed: %1$s. Choose the folder again if access was lost.</string>
 
     <!-- Sync (WebDAV / sync document) messages -->
     <string name="sync_error_unsupported_file">Unsupported sync file</string>
     <string name="sync_error_configure_webdav">Configure WebDAV URL, username, and password first</string>
+    <string name="sync_error_configure_local">Choose a backup folder first</string>
+    <string name="sync_error_local_backup_disabled">Local backup is turned off</string>
     <string name="sync_error_build_local_doc">Could not build local sync document</string>
     <string name="sync_error_remote_invalid">Remote sync document is invalid</string>
     <string name="sync_error_local_rebuild_failed">Local sync rebuild failed after conflict</string>
@@ -2157,6 +2183,7 @@
     <string name="sync_error_conflict_persisted">WebDAV conflict persisted; try again</string>
     <string name="sync_error_merged_invalid">Merged sync document invalid</string>
     <string name="sync_success_synced">Synced with WebDAV</string>
+    <string name="sync_success_local_backup">Backed up to local file</string>
     <string name="sync_success_applied">Sync document applied</string>
 
     <!-- AI provider errors (resolved at the UI layer) -->
@@ -2572,8 +2599,10 @@
     <string name="goal_tier_safe">Safe (compact)</string>
     <string name="goal_tier_smart">Smart (full history)</string>
     <string name="settings_serving_unit_mode">Serving size detection</string>
+    <string name="settings_serving_unit_display_mode">Serving units shown</string>
     <string name="settings_serving_unit_heuristics">Serving size rules</string>
     <string name="sheet_serving_unit_mode">Serving unit inference</string>
+    <string name="sheet_serving_unit_display_mode">Serving units shown</string>
     <string name="sheet_serving_unit_heuristics">Customize heuristics</string>
     <string name="serving_unit_mode_grams_only">Grams only</string>
     <string name="serving_unit_mode_grams_only_subtitle">Fastest. Entries stay in grams, no extra step.</string>
@@ -2581,6 +2610,10 @@
     <string name="serving_unit_mode_heuristic_subtitle">Instant, approximate. Guesses common units (slice, ml, tbsp…) from the food name, no network call.</string>
     <string name="serving_unit_mode_ai_call">AI-inferred</string>
     <string name="serving_unit_mode_ai_call_subtitle">Slowest, most accurate. Asks the AI provider for the unit when needed.</string>
+    <string name="serving_unit_display_mode_ai_units">AI units</string>
+    <string name="serving_unit_display_mode_ai_units_subtitle">Shows the unit returned or inferred by the AI, such as cup, tbsp, or pinch.</string>
+    <string name="serving_unit_display_mode_metric">Grams/ml</string>
+    <string name="serving_unit_display_mode_metric_subtitle">Shows the portion as grams, or ml when the stored unit is explicitly ml/l. The AI unit remains stored internally.</string>
     <string name="serving_unit_heuristics_footer">Toggle a category off to leave it in grams, or set a custom grams-per-unit (e.g. a 0.5 L beer can instead of the default 330 mL).</string>
     <string name="serving_unit_heuristics_reset">Reset to default</string>
     <string name="serving_unit_heuristics_default_value">Default: %1$s g / unit</string>

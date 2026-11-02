@@ -177,6 +177,26 @@ internal fun SettingsSyncSection(
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
         )
         HorizontalDivider()
+        ToggleRow(
+            label = stringResource(R.string.sync_photos),
+            checked = webDavPhotosEnabled,
+            onChange = onWebDavPhotosEnabledChange,
+        )
+        Text(
+            stringResource(R.string.sync_photos_caption),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
+        )
+        if (webDavPhotosEnabled) {
+            HorizontalDivider()
+            ToggleRow(
+                label = stringResource(R.string.sync_photos_wifi_only),
+                checked = webDavPhotosWifiOnly,
+                onChange = onWebDavPhotosWifiOnlyChange,
+            )
+        }
+        HorizontalDivider()
         Row(
             Modifier
                 .fillMaxWidth()
@@ -224,14 +244,7 @@ internal fun SettingsSyncSection(
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                 )
-                val subtitle = syncStatus
-                    ?: lastSyncAt?.let { raw ->
-                        val formatted = runCatching {
-                            LocaleFormat.mediumDateTimeZoned().format(Instant.parse(raw))
-                        }.getOrNull() ?: raw
-                        stringResource(R.string.settings_last_sync, formatted)
-                    }
-                    ?: stringResource(R.string.settings_not_synced)
+                val subtitle = syncStatusSubtitle(syncStatus, lastSyncAt)
                 Text(
                     subtitle,
                     style = MaterialTheme.typography.bodySmall,
@@ -239,5 +252,23 @@ internal fun SettingsSyncSection(
                 )
             }
         }
+    }
+}
+
+@Composable
+internal fun syncStatusSubtitle(
+    status: String?,
+    lastSyncAt: String?,
+    lastLabelRes: Int = R.string.settings_last_sync,
+    neverLabelRes: Int = R.string.settings_not_synced,
+): String {
+    status?.let { return it }
+    val formatted = lastSyncAt?.let { raw ->
+        runCatching { LocaleFormat.mediumDateTimeZoned().format(Instant.parse(raw)) }.getOrNull() ?: raw
+    }
+    return if (formatted != null) {
+        stringResource(lastLabelRes, formatted)
+    } else {
+        stringResource(neverLabelRes)
     }
 }

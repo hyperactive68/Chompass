@@ -714,6 +714,7 @@ export const de = Object.freeze({
 
   // settings.* (PWA UI audit sweep, 2026-08)
   "settings.about.install_tail": "diese App auf deinem Handy oder Computer.",
+  "settings.about.brand_tagline": "Jeder Bissen auf Kurs.",
   "settings.about.intro": "Chompass-Browser-PWA. Lokale Speicherung, keine Analyse. Kompatibel mit dem Tagebuch- und Körperwerte-JSON der Android-App.",
   "settings.about.kofi_link": "kauf fitguy einen Joghurt",
   "settings.about.kofi_post": "auf Ko-fi.",
@@ -921,6 +922,8 @@ export const de = Object.freeze({
   "settings.units.accent_pink": "Pink",
   "settings.units.accent_purple": "Lila",
   "settings.units.accent_system": "System",
+  "settings.units.accent_plum": "Pflaume",
+  "settings.units.accent_peach": "Pfirsich",
   "settings.units.accent_teal": "Türkis",
   "settings.units.height": "Größe",
   "settings.units.meal_times": "Mahlzeiten",

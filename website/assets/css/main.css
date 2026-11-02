@@ -1,22 +1,33 @@
 :root {
-  --teal: #5cc48f;
-  --teal-deep: #006b5e;
-  --teal-ink: #003731;
-  --bg: #0f0e13;
-  --bg-weak: #16151b;
-  --bg-weak-hover: #1d1c23;
-  --bg-strong: #eef0ec;
-  --bg-strong-hover: #f4f6f2;
-  --surface: #24232a;
-  --text: #c9c4cc;
-  --text-weak: #8f8a94;
-  --text-strong: #eef0ec;
-  --text-inverted: #0f0e13;
-  --line: rgba(230, 225, 229, 0.14);
-  --line-weak: rgba(230, 225, 229, 0.08);
-  --icon: #7d7882;
-  --focus: #a7f0c8;
-  --radius: 6px;
+  --teal: #d6a2be;
+  --teal-deep: #b8759c;
+  --teal-ink: #1c131a;
+  --brand-peach: #ffb994;
+  --bg: #170e16;
+  --bg-weak: #1c1119;
+  --bg-weak-hover: #241722;
+  --bg-strong: #fff6ec;
+  --bg-strong-hover: #ffffff;
+  --surface: #221621;
+  --text: #dccfd6;
+  --text-weak: #a8959f;
+  --text-strong: #fbf0f4;
+  --text-inverted: #1c131a;
+  --line: rgba(251, 240, 244, 0.14);
+  --line-weak: rgba(251, 240, 244, 0.08);
+  --icon: #a8959f;
+  --focus: #ffb994;
+  --radius: 8px;
+  /* Morphe glass: tint alphas are GlassStrength LIGHT/MEDIUM/STRONG from
+     android/.../ui/theme/Traits.kt; blur 18px + saturate(1.2) matches the PWA's
+     .card--glass. Tint-only surfaces use --glass-tint with no filter. */
+  --glass-tint: rgba(34, 22, 33, 0.30);
+  --glass-tint-soft: rgba(34, 22, 33, 0.18);
+  --glass-tint-hover: rgba(34, 22, 33, 0.44);
+  --glass-rim: rgba(251, 240, 244, 0.06);
+  --glass-blur: 18px;
+  --radius-card: 16px;
+  --radius-panel: 28px;
   --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
   --font-body: "Manrope", "Segoe UI", system-ui, sans-serif;
   --font-mono:
@@ -89,8 +100,7 @@ a:hover {
   position: sticky;
   top: 0;
   z-index: 50;
-  backdrop-filter: blur(12px);
-  background: rgba(15, 14, 19, 0.86);
+  background: rgba(24, 23, 29, 0.55);
   border-bottom: 1px solid var(--line-weak);
 }
 
@@ -121,11 +131,56 @@ a:hover {
   color: var(--text-strong);
 }
 
-.site-logo img {
+/* Bitten-o wordmark (docs/brand/logo-system.html): the "o" stays brand peach even
+   when the page tint is fig/plum — the study's guardrail is that plum there would
+   over-explain the joke. */
+.wordmark {
+  /* The study's lockup is a geometric grotesque; the site's display face is a
+     serif, so the wordmark opts into the body font instead of inheriting it. */
+  font-family: var(--font-body);
+  letter-spacing: -0.035em;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.wordmark__o {
+  width: 0.58em;
+  height: 0.58em;
+  display: inline-block;
+  vertical-align: -0.012em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  color: var(--brand-peach);
+}
+
+.wordmark__tail {
+  margin-left: 0.045em;
+  color: color-mix(in oklab, currentColor 93%, var(--brand-peach));
+}
+
+/* The mark (partials/mark.html): noir treatment, since every site ground is plum. */
+.chompass-mark {
   width: 2rem;
   height: 2rem;
-  border-radius: 0.5rem;
+  display: block;
+  flex: none;
 }
+
+.chompass-mark__ring {
+  fill: none;
+  stroke: url(#chompass-mark-glow);
+  stroke-width: 16;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chompass-mark__needle-a { fill: #fff6ec; }
+.chompass-mark__needle-b { fill: #ffc9a8; }
+.chompass-mark__hub { fill: var(--bg); }
+.chompass-mark__pin { fill: #fff6ec; }
 
 .site-nav {
   display: flex;
@@ -241,10 +296,10 @@ a:hover {
   align-items: center;
   gap: 0.9rem;
   width: fit-content;
-  border: 1px solid var(--line-weak);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 0.35rem 0.75rem;
-  background: var(--bg-weak);
+  background: var(--glass-tint-soft);
   margin-bottom: 2.25rem;
   font-size: 0.85rem;
 }
@@ -266,6 +321,17 @@ a:hover {
   line-height: 1;
   letter-spacing: -0.03em;
   color: var(--text-strong);
+}
+
+/* Study §05 lockup tagline: Fraunces italic, muted, right under the wordmark. */
+.hero-copy .hero-tag {
+  margin: 0.9rem 0 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.05rem, 2.2vw, 1.4rem);
+  letter-spacing: -0.005em;
+  color: var(--text-weak);
 }
 
 .hero-copy p {
@@ -302,18 +368,21 @@ a:hover {
   flex-direction: column;
   gap: 0.35rem;
   padding: 1rem 1.1rem;
-  border: 1px solid var(--line-weak);
-  border-radius: var(--radius);
-  background: var(--bg-weak);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--glass-tint);
+  box-shadow: inset 0 1px 0 var(--glass-rim);
   color: var(--text-strong);
   text-decoration: none;
   transition:
+    background 0.15s ease,
     border-color 0.15s ease,
     transform 0.15s ease;
 }
 
 .platform-card:hover {
   border-color: var(--teal);
+  background: var(--glass-tint-hover);
   transform: translateY(-2px);
   color: var(--text-strong);
 }
@@ -350,7 +419,8 @@ a:hover {
   margin: 1.25rem 0 0;
   padding: 0.75rem 1rem;
   border-left: 3px solid var(--teal);
-  background: var(--bg-weak);
+  border-radius: 0 var(--radius-card) var(--radius-card) 0;
+  background: var(--glass-tint-soft);
   color: var(--text-weak);
   font-size: 0.9rem;
   line-height: 1.6;
@@ -864,10 +934,11 @@ a:hover {
 .stat {
   flex: 1 1 14rem;
   min-width: 14rem;
-  border: 1px solid var(--line-weak);
-  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
   padding: 1.1rem 1.2rem;
-  background: var(--bg-weak);
+  background: var(--glass-tint);
+  box-shadow: inset 0 1px 0 var(--glass-rim);
 }
 
 .stat--wide {
@@ -941,7 +1012,12 @@ a:hover {
 }
 
 .faq-item {
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--glass-tint-soft);
+  box-shadow: inset 0 1px 0 var(--glass-rim);
 }
 
 .faq-item:last-child {
@@ -1008,6 +1084,14 @@ a:hover {
   padding: calc(var(--vpad) * 1.2) var(--padding);
 }
 
+.cta-copy {
+  padding: 1.75rem 2rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--glass-tint);
+  box-shadow: inset 0 1px 0 var(--glass-rim);
+}
+
 .cta-copy h2 {
   margin: 0 0 0.75rem;
   font-family: var(--font-display);
@@ -1032,9 +1116,9 @@ a:hover {
 
 .cta-platform {
   padding: 0.3rem 0.75rem;
-  border: 1px solid var(--line-weak);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: var(--bg-weak);
+  background: var(--glass-tint-soft);
   color: var(--text-weak);
   font-size: 0.88rem;
 }
@@ -1113,7 +1197,7 @@ a:hover {
 }
 
 .prose th {
-  background: var(--bg-weak);
+  background: var(--glass-tint-soft);
   color: var(--text-strong);
 }
 
@@ -1195,9 +1279,9 @@ a:hover {
   gap: 0.15rem;
   width: min(22rem, calc(100% - 2rem));
   padding: 0.9rem 1.1rem;
-  border: 1px solid var(--line-weak);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: rgba(22, 21, 27, 0.97);
+  background: rgba(24, 23, 29, 0.92);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
   color: var(--text);
   font-size: 0.95rem;
@@ -1267,4 +1351,68 @@ a:hover {
   color: var(--text-weak);
   font-size: 0.85rem;
   text-align: center;
+}
+
+/* ------------------------------------------------------------------ wax ---- */
+
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+main,
+.site-footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* ----------------------------------------------------------------- glass -- */
+
+/* The only two backdrop-filter surfaces on the site: the sticky header and the
+   landing hero panel. Each blurred layer re-filters its backdrop every frame
+   because the wax moves, so more than these two turns into scroll jank on
+   mid-range phones. Everything else is tint-only glass above. */
+.hero-glass,
+.site-header {
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.2);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.2);
+}
+
+.hero-glass {
+  padding: 2rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  background: var(--glass-tint);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim),
+    0 24px 60px rgba(0, 0, 0, 0.28);
+}
+
+@media (max-width: 60rem) {
+  .hero-glass {
+    padding: 1.25rem;
+    border-radius: var(--radius-card);
+    box-shadow: inset 0 1px 0 var(--glass-rim);
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .hero-glass {
+    background: rgba(24, 23, 29, 0.72);
+  }
+
+  .site-header {
+    background: rgba(15, 14, 19, 0.94);
+  }
+}
+
+@media print {
+  .ambient {
+    display: none;
+  }
 }

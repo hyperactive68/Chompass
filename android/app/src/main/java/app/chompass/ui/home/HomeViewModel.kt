@@ -17,6 +17,7 @@ import app.chompass.models.resolveModelForRequest
 import app.chompass.models.ActiveCalorieSource
 import app.chompass.models.FoodEntry
 import app.chompass.models.FoodSource
+import app.chompass.models.offersFavoriteSave
 import app.chompass.models.FoodLogMacroChip
 import app.chompass.models.GoalDerivation
 import app.chompass.models.HomeCalorieDisplay
@@ -52,6 +53,7 @@ import app.chompass.models.ProgressiveMealItem
 import app.chompass.models.QueuedAnalysis
 import app.chompass.models.QueueStatus
 import app.chompass.models.ServingUnitOption
+import app.chompass.models.ServingUnitDisplayMode
 import app.chompass.models.UserProfile
 import app.chompass.models.ActivityLevel
 import app.chompass.models.WaterGoalCalculator
@@ -189,6 +191,7 @@ data class HomeUiState(
     val optionalNutrientGoals: OptionalNutrientGoals = OptionalNutrientGoals.Default,
     val foodLogSortOrder: FoodLogSortOrder = FoodLogSortOrder.STANDARD,
     val preferGramsByDefault: Boolean = false,
+    val servingUnitDisplayMode: ServingUnitDisplayMode = ServingUnitDisplayMode.Default,
     /** Latest persisted goal-change explanation (hero ⓘ → recalc details); null = none yet. */
     val lastRecalcSheet: app.chompass.services.ai.RecalcSheetData? = null,
     /** Recalc details sheet currently shown (opened from the hero ⓘ budget dialog). */
@@ -626,6 +629,7 @@ data class HomeUiState(
             optionalNutrientGoals == other.optionalNutrientGoals &&
             foodLogSortOrder == other.foodLogSortOrder &&
             preferGramsByDefault == other.preferGramsByDefault &&
+            servingUnitDisplayMode == other.servingUnitDisplayMode &&
             lastRecalcSheet == other.lastRecalcSheet &&
             recalcSheet == other.recalcSheet &&
             skipPhotoNotePrompt == other.skipPhotoNotePrompt &&
@@ -735,6 +739,7 @@ data class HomeUiState(
         result = 31 * result + optionalNutrientGoals.hashCode()
         result = 31 * result + foodLogSortOrder.hashCode()
         result = 31 * result + preferGramsByDefault.hashCode()
+        result = 31 * result + servingUnitDisplayMode.hashCode()
         result = 31 * result + (lastRecalcSheet?.hashCode() ?: 0)
         result = 31 * result + (recalcSheet?.hashCode() ?: 0)
         result = 31 * result + skipPhotoNotePrompt.hashCode()
@@ -1454,6 +1459,12 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
         container.prefs.preferGramsByDefault
             .onEach { preferGrams ->
                 _ui.update { it.copy(preferGramsByDefault = preferGrams) }
+            }
+            .launchIn(viewModelScope)
+
+        container.prefs.servingUnitDisplayMode
+            .onEach { displayMode ->
+                _ui.update { it.copy(servingUnitDisplayMode = displayMode) }
             }
             .launchIn(viewModelScope)
 
@@ -2785,9 +2796,9 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
     }
 
     /**
-     * Saves a fresh barcode review straight to favorites without a diary row
-     * Builds the same entry [saveAnalysis] would, then upserts it into
-     * the favorites list only: no addEntry, no Health Connect mirror, no
+     * Saves a fresh barcode or photo review straight to favorites without a
+     * diary row. Builds the same entry [saveAnalysis] would, then upserts it
+     * into the favorites list only: no addEntry, no Health Connect mirror, no
      * saved-index promotion — the food can be logged later from Saved Meals.
      * Favorite identity stays the trimmed lowercase name, so two products
      * sharing a name replace each other (inserted=false, no Undo).
@@ -2805,10 +2816,11 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
         val pendingAnalysis = _ui.value.pendingAnalysis
         val analysis = editedAnalysis ?: pendingAnalysis ?: return
         if (_ui.value.saving) return
-        // Favorites save is for fresh barcode reviews only: saved-meals
+        // Favorites save is for fresh barcode and photo reviews: saved-meals
         // relogs and progressive meals keep their own flows.
         if (_ui.value.pendingReviewSource != null) return
-        if (_ui.value.pendingFoodSource != FoodSource.BARCODE) return
+        val entrySource = _ui.value.pendingFoodSource ?: return
+        if (!entrySource.offersFavoriteSave()) return
         val pendingDraftImageFilename = _ui.value.pendingDraftImageFilename
         viewModelScope.launch {
             if (_ui.value.saving) return@launch
@@ -2849,7 +2861,7 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
                             ),
                             imageFilename = filename,
                             emoji = analysis.emoji,
-                            source = FoodSource.BARCODE,
+                            source = entrySource,
                             mealType = mealType,
                             servingSizeGrams = servingGrams ?: analysis.servingSizeGrams,
                             servingUnitOptions = analysis.servingUnitOptions,
@@ -2880,7 +2892,7 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
                         savedFavoriteAck = SavedFavoriteAck(stored, inserted = !existed),
                     ) }
                     DebugTrace.event(
-                        "op=favorite phase=barcodeSave key=${stored.favoriteKey.replace(' ', '_')} inserted=${!existed}",
+                        "op=favorite phase=save source=${entrySource.name} key=${stored.favoriteKey.replace(' ', '_')} inserted=${!existed}",
                     )
                 }
             } finally {

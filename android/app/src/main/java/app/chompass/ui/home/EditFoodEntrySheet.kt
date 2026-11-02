@@ -90,6 +90,7 @@ import app.chompass.models.MacroValueFormatter
 import app.chompass.models.MicronutrientField
 import app.chompass.models.MicronutrientValues
 import app.chompass.models.ServingUnitOption
+import app.chompass.models.ServingUnitDisplayMode
 import app.chompass.models.OptionalNutrientGoals
 import app.chompass.ui.components.ClockTimeWheelPicker
 import app.chompass.ui.components.parseClockDigits
@@ -100,10 +101,9 @@ import app.chompass.ui.components.ChompassDialogActions
 import app.chompass.ui.components.ChompassPrimaryButton
 import app.chompass.ui.components.ChompassSegmentedTabs
 import app.chompass.ui.components.isDarkTheme
+import app.chompass.ui.components.PhotoRemoveBadgeScrimAlpha
 import app.chompass.ui.theme.AppColors
 import java.time.LocalDate
-import app.chompass.ui.theme.AppRadii
-import app.chompass.ui.theme.AppTextOpacity
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -134,6 +134,7 @@ fun EditFoodEntrySheet(
     /** #86: user's optional micro goals, shown as "(N%)" on ingredient micros. */
     optionalGoals: OptionalNutrientGoals? = null,
     preferGramsByDefault: Boolean = false,
+    displayMode: ServingUnitDisplayMode = ServingUnitDisplayMode.Default,
     /** Codeberg #20 phase 2: with the master AI switch off, the Ask-AI-to-correct
      *  section is hidden and the stored note is a plain editable field (Save
      *  only — never Reprocess). */
@@ -646,7 +647,7 @@ fun EditFoodEntrySheet(
                             fontSize = 16.sp,
                             textAlign = androidx.compose.ui.text.style.TextAlign.End
                         ),
-                        cursorBrush = androidx.compose.ui.graphics.SolidColor(AppColors.Calorie),
+                        cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
                         modifier = Modifier.weight(2f)
                     )
                 }
@@ -654,7 +655,13 @@ fun EditFoodEntrySheet(
 
             item { SheetSectionHeader(stringResource(R.string.sheet_meal)) }
             item {
-                SheetPillRow(onClick = { mealMenuExpanded = true }) {
+                SheetPillRow(
+                    onClick = { mealMenuExpanded = true },
+                    onClickLabel = stringResource(R.string.cd_change_meal_type),
+                    stateDescription = stringResource(
+                        if (mealMenuExpanded) R.string.cd_expanded else R.string.cd_collapsed
+                    ),
+                ) {
                     Text(stringResource(R.string.sheet_meal_type), fontSize = 16.sp, modifier = Modifier.weight(1f))
                     // Wrap only the right cluster in a Box so the DropdownMenu
                     // anchors on the right side of the row (under the value),
@@ -666,21 +673,21 @@ fun EditFoodEntrySheet(
                             Icon(
                                 sheetMealIcon(mealType),
                                 contentDescription = null,
-                                tint = AppColors.Calorie,
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(Modifier.width(6.dp))
                             Text(
                                 mealLabel(mealType),
                                 fontSize = 16.sp,
-                                color = AppColors.Calorie,
+                                color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.Medium
                             )
                             Spacer(Modifier.width(6.dp))
                             Icon(
                                 Icons.Filled.UnfoldMore,
                                 contentDescription = null,
-                                tint = AppColors.Calorie
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
                         SheetGlassDropdownMenu(
@@ -721,7 +728,7 @@ fun EditFoodEntrySheet(
                         Text(
                             loggedDate.format(dateFormatter),
                             fontSize = 16.sp,
-                            color = AppColors.Calorie,
+                            color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -740,7 +747,7 @@ fun EditFoodEntrySheet(
                         Text(
                             loggedTime.format(timeFormatter),
                             fontSize = 16.sp,
-                            color = AppColors.Calorie,
+                            color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -760,7 +767,7 @@ fun EditFoodEntrySheet(
                             Text(
                                 stringResource(R.string.edit_food_apply_time, mealLabel(entry.mealType)),
                                 fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Strong),
+                                color = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.padding(end = 8.dp),
                             )
                         }
@@ -789,6 +796,7 @@ fun EditFoodEntrySheet(
                     menuExpanded = servingMenuExpanded,
                     onMenuExpandedChange = { servingMenuExpanded = it },
                     gramUnit = stringResource(R.string.unit_g),
+                        displayMode = displayMode,
                     onUnitOptionsChange = { options, newId ->
                         resolveServingDraft()
                         val gramsBefore = servingGrams
@@ -810,7 +818,7 @@ fun EditFoodEntrySheet(
                     Text(
                         stringResource(R.string.sheet_serving_unlocked_hint),
                         fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         lineHeight = 18.sp,
                         modifier = Modifier.padding(horizontal = 18.dp),
                     )
@@ -820,7 +828,7 @@ fun EditFoodEntrySheet(
                         Text(
                             stringResource(R.string.sheet_serving_baseless_hint),
                             fontSize = 13.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             lineHeight = 18.sp,
                             modifier = Modifier.padding(horizontal = 18.dp),
                         )
@@ -948,7 +956,7 @@ fun EditFoodEntrySheet(
             }
 
             // "More Nutrition" — own pill row with chevron-right that flips to
-            // chevron-down when expanded; matches iOS DisclosureGroup behavior.
+            // chevron-down when expanded.
             if (MicronutrientField.MoreNutrition.any { editableMicros[it] != null }) {
                 item {
                     SheetPillRow(onClick = { moreNutritionExpanded = !moreNutritionExpanded }) {
@@ -957,7 +965,7 @@ fun EditFoodEntrySheet(
                             if (moreNutritionExpanded) Icons.Filled.KeyboardArrowDown
                             else Icons.AutoMirrored.Filled.KeyboardArrowRight,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted)
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -1004,6 +1012,7 @@ fun EditFoodEntrySheet(
                         scale,
                     ),
                     optionalGoals = optionalGoals,
+                    displayMode = displayMode,
                     expanded = constituentsExpanded,
                     onExpandedChange = { constituentsExpanded = it },
                     onRowsChange = { displayRows ->
@@ -1080,7 +1089,7 @@ fun EditFoodEntrySheet(
                             Text(
                                 stringResource(R.string.edit_ai_missing_line, missingLabels),
                                 fontSize = 13.sp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 lineHeight = 18.sp,
                                 modifier = Modifier.padding(horizontal = 18.dp),
                             )
@@ -1096,7 +1105,7 @@ fun EditFoodEntrySheet(
                                 Text(
                                     stringResource(R.string.edit_reprocess_explain),
                                     fontSize = 13.sp,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     lineHeight = 18.sp,
                                 )
                                 OutlinedTextField(
@@ -1109,10 +1118,10 @@ fun EditFoodEntrySheet(
                                     placeholder = {
                                         Text(
                                             stringResource(R.string.edit_reprocess_hint),
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Disabled)
+                                            color = MaterialTheme.colorScheme.outline
                                         )
                                     },
-                                    shape = RoundedCornerShape(AppRadii.Pill),
+                                    shape = RoundedCornerShape(percent = 50),
                                     modifier = Modifier.fillMaxWidth().heightIn(min = 90.dp)
                                 )
                             } else if (!isReprocessing) {
@@ -1145,7 +1154,7 @@ fun EditFoodEntrySheet(
                                         androidx.compose.material3.CircularProgressIndicator(
                                             modifier = Modifier.size(18.dp),
                                             strokeWidth = 2.dp,
-                                            color = AppColors.Calorie,
+                                            color = MaterialTheme.colorScheme.primary,
                                         )
                                         Text(
                                             when (phase) {
@@ -1160,7 +1169,7 @@ fun EditFoodEntrySheet(
                                                 else -> stringResource(R.string.edit_reprocessing)
                                             },
                                             fontSize = 13.sp,
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Secondary),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         )
                                     }
                                 }
@@ -1178,7 +1187,7 @@ fun EditFoodEntrySheet(
                                             stringResource(R.string.edit_reprocess_diff_title),
                                             fontSize = 14.sp,
                                             fontWeight = FontWeight.SemiBold,
-                                            color = AppColors.Calorie,
+                                            color = MaterialTheme.colorScheme.primary,
                                         )
                                         changedFields.forEach { row ->
                                             Text(
@@ -1189,13 +1198,13 @@ fun EditFoodEntrySheet(
                                                     row.after,
                                                 ),
                                                 fontSize = 13.sp,
-                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Emphasized),
+                                                color = MaterialTheme.colorScheme.onSurface,
                                             )
                                         }
                                         Text(
                                             stringResource(R.string.edit_reprocess_review_hint),
                                             fontSize = 12.sp,
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Muted),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         )
                                     }
                                 }
@@ -1219,10 +1228,10 @@ fun EditFoodEntrySheet(
                         placeholder = {
                             Text(
                                 stringResource(R.string.edit_note_placeholder),
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = AppTextOpacity.Disabled)
+                                color = MaterialTheme.colorScheme.outline
                             )
                         },
-                        shape = RoundedCornerShape(AppRadii.Pill),
+                        shape = RoundedCornerShape(percent = 50),
                         modifier = Modifier.fillMaxWidth().heightIn(min = 90.dp)
                     )
                 }
@@ -1242,7 +1251,7 @@ fun EditFoodEntrySheet(
                         Icon(
                             Icons.Filled.Share,
                             contentDescription = null,
-                            tint = AppColors.Calorie,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(Modifier.width(12.dp))
@@ -1543,7 +1552,7 @@ internal fun EditFoodEntryHero(
                             if (packShot) Modifier.fillMaxWidth().height(160.dp)
                             else Modifier.size(96.dp),
                         )
-                        .clip(RoundedCornerShape(AppRadii.Field))
+                        .clip(MaterialTheme.shapes.medium)
                         .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
                 )
                 // #220: analysis-queue-style direct remove; pending state only.
@@ -1555,7 +1564,7 @@ internal fun EditFoodEntryHero(
                             .align(Alignment.TopEnd)
                             .padding(4.dp)
                             .size(28.dp)
-                            .background(Color.Black.copy(alpha = AppTextOpacity.Subtle), CircleShape),
+                            .background(Color.Black.copy(alpha = PhotoRemoveBadgeScrimAlpha), CircleShape),
                     ) {
                         Icon(
                             Icons.Filled.Close,
@@ -1602,7 +1611,7 @@ internal fun EditFoodIconDialog(
                             emoji,
                             fontSize = 24.sp,
                             modifier = Modifier
-                                .clip(RoundedCornerShape(AppRadii.Track))
+                                .clip(MaterialTheme.shapes.small)
                                 .clickable { onPickEmoji(emoji) }
                                 .padding(horizontal = 8.dp, vertical = 4.dp),
                         )

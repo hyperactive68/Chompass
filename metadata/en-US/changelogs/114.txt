@@ -1,0 +1,3 @@
+• Show serving quantities as grams/ml with a new display preference, while keeping the AI/parser unit and nutrition calculations unchanged.
+• Include the upstream 6.1 brand refresh, local backup, Coach model slot and Progress additions.
+• Preserve ChatGPT sign-in/Responses and Google Drive sync in this fork.

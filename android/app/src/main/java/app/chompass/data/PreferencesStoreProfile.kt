@@ -13,6 +13,7 @@ import app.chompass.models.HomeFoodLogLayout
 import app.chompass.models.HomeDisplayPreferences
 import app.chompass.models.HomeTopNutrient
 import app.chompass.models.OptionalNutrientGoals
+import app.chompass.models.ServingUnitDisplayMode
 import app.chompass.models.UserProfile
 import app.chompass.ui.onboarding.OnboardingDraft
 import app.chompass.ui.theme.AppThemeColor
@@ -84,6 +85,12 @@ internal suspend fun PreferencesStore.setEnergyUnitImpl(v: String) { dataStore.e
 internal val PreferencesStore.preferGramsByDefaultImpl: Flow<Boolean> get() = dataStore.data.map { it[Keys.PREFER_GRAMS_BY_DEFAULT] ?: false }
 internal suspend fun PreferencesStore.setPreferGramsByDefaultImpl(v: Boolean) { dataStore.edit { it[Keys.PREFER_GRAMS_BY_DEFAULT] = v } }
 
+internal val PreferencesStore.servingUnitDisplayModeImpl: Flow<ServingUnitDisplayMode>
+    get() = dataStore.data.map { ServingUnitDisplayMode.fromStorage(it[Keys.FOOD_MEASUREMENT_DISPLAY_MODE]) }
+internal suspend fun PreferencesStore.setServingUnitDisplayModeImpl(mode: ServingUnitDisplayMode) {
+    dataStore.edit { it[Keys.FOOD_MEASUREMENT_DISPLAY_MODE] = mode.storageKey }
+}
+
     /** "system" | "light" | "dark". */
 internal val PreferencesStore.appearanceModeImpl: Flow<String> get() = dataStore.data.map { it[Keys.APPEARANCE_MODE] ?: "system" }
 internal suspend fun PreferencesStore.setAppearanceModeImpl(v: String) { dataStore.edit { it[Keys.APPEARANCE_MODE] = v } }
@@ -102,7 +109,7 @@ internal val PreferencesStore.appThemeColorImpl: Flow<String> get() = dataStore.
     }
 internal suspend fun PreferencesStore.setAppThemeColorImpl(v: String) { dataStore.edit { it[Keys.APP_THEME_COLOR] = v } }
 
-    /** When ON the launcher icon stays teal and never swaps activity aliases (launcher workaround, #21). */
+    /** When ON the launcher icon stays the brand icon and never swaps activity aliases (launcher workaround, #21). */
 internal val PreferencesStore.fixedLauncherIconImpl: Flow<Boolean> get() = dataStore.data.map { it[Keys.FIXED_LAUNCHER_ICON] ?: false }
 internal suspend fun PreferencesStore.setFixedLauncherIconImpl(v: Boolean) { dataStore.edit { it[Keys.FIXED_LAUNCHER_ICON] = v } }
 

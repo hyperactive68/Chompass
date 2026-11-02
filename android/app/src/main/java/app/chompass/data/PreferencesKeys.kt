@@ -169,6 +169,7 @@ internal object Keys {
         val WEIGHT_UNIT = stringPreferencesKey("weightUnit")
         val ENERGY_UNIT = stringPreferencesKey("energyUnit")
         val PREFER_GRAMS_BY_DEFAULT = booleanPreferencesKey("foodMeasurementPreferGramsByDefault")
+        val FOOD_MEASUREMENT_DISPLAY_MODE = stringPreferencesKey("foodMeasurementDisplayMode")
         val APPEARANCE_MODE = stringPreferencesKey("appearanceMode")
         val APP_LANGUAGE = stringPreferencesKey("appLanguage")
         /** Codeberg #20 (phase 1): View-only coach-tab toggle; default ON. */
@@ -351,6 +352,17 @@ internal object Keys {
         val WEBDAV_SYNCED_PHOTOS_URL = stringPreferencesKey("webDavSyncedPhotosUrl")
         val LAST_SYNC_AT = stringPreferencesKey("lastSyncAt")
         val LAST_SYNC_ETAG = stringPreferencesKey("lastSyncEtag")
+        /** SAF tree URI of the folder that receives the local backup file. */
+        val LOCAL_BACKUP_TREE_URI = stringPreferencesKey("localBackupTreeUri")
+        /** Folder display name for the local backup settings row. */
+        val LOCAL_BACKUP_FOLDER_NAME = stringPreferencesKey("localBackupFolderName")
+        /** Master switch for local backup. */
+        val LOCAL_BACKUP_ENABLED = booleanPreferencesKey("localBackupEnabled")
+        /** Opt-in automatic local backup on app open. */
+        val LOCAL_BACKUP_AUTO_ENABLED = booleanPreferencesKey("localBackupAutoEnabled")
+        /** Local calendar day of the last automatic local backup attempt. */
+        val LOCAL_BACKUP_AUTO_DAY = stringPreferencesKey("localBackupAutoDay")
+        val LAST_LOCAL_BACKUP_AT = stringPreferencesKey("lastLocalBackupAt")
         val GOOGLE_DRIVE_CONNECTED = booleanPreferencesKey("googleDriveConnected")
         val GOOGLE_DRIVE_SYNC_ON_FOOD_LOG = booleanPreferencesKey("googleDriveSyncOnFoodLog")
         val GOOGLE_DRIVE_LAST_SYNC_AT = stringPreferencesKey("googleDriveLastSyncAt")

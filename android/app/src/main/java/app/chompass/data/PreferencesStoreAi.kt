@@ -175,8 +175,9 @@ internal suspend fun PreferencesStore.editActiveProfileImpl(
 
 /**
  * Retargets the active profile. Same provider is a no-op (key, base URL,
- * vision model, and model stay). A real switch clears base URL and vision
- * model — they belong to the old host — and deletes that profile's key.
+ * vision model, coach model, and model stay). A real switch clears base URL
+ * and both per-feature model slots — they belong to the old host — and
+ * deletes that profile's key.
  * Returns false when there is no profile or the provider did not change.
  */
 internal suspend fun PreferencesStore.switchActiveProfileProviderImpl(
@@ -187,7 +188,7 @@ internal suspend fun PreferencesStore.switchActiveProfileProviderImpl(
     val active = activeAiProfile.first() ?: return false
     if (active.provider == provider) return false
     editActiveProfileImpl {
-        it.copy(provider = provider, model = model, baseUrl = null, visionModel = null)
+        it.copy(provider = provider, model = model, baseUrl = null, visionModel = null, coachModel = null)
     }
     keyStore.setProfileApiKey(active.id, null)
     return true
@@ -276,7 +277,7 @@ internal suspend fun PreferencesStore.setSelectedFallbackProviderCompatImpl(p: A
         val existingId = prefs[Keys.FALLBACK_AI_PROFILE_ID]
         val idx = list.indexOfFirst { it.id.toString() == existingId }
         val replaced = if (idx >= 0) {
-            list[idx].copy(provider = p, model = null, baseUrl = null, visionModel = null)
+            list[idx].copy(provider = p, model = null, baseUrl = null, visionModel = null, coachModel = null)
         } else {
             AiProfile(
                 id = UUID.randomUUID(),
@@ -550,19 +551,19 @@ internal suspend fun PreferencesStore.setGoalRecalcTierImpl(v: GoalRecalcTierOve
     dataStore.edit { it[Keys.GOAL_RECALC_TIER] = v.storageKey }
 }
 
+internal const val DEFAULT_MAX_RESPONSE_TOKENS = 4096
 internal const val MIN_MAX_RESPONSE_TOKENS = 256
 internal const val MAX_MAX_RESPONSE_TOKENS = 16384
-internal const val DEFAULT_MAX_RESPONSE_TOKENS = 4096
 internal const val MAX_REASONING_RESPONSE_TOKENS = 16384
 internal const val DEFAULT_AI_READ_TIMEOUT_SECONDS = 180
 internal const val MIN_AI_READ_TIMEOUT_SECONDS = 30
 internal const val MAX_AI_READ_TIMEOUT_SECONDS = 900
 
-internal fun clampMaxResponseTokens(v: Int): Int =
-    v.coerceIn(MIN_MAX_RESPONSE_TOKENS, MAX_MAX_RESPONSE_TOKENS)
-
 internal fun clampAiReadTimeoutSeconds(v: Int): Int =
     v.coerceIn(MIN_AI_READ_TIMEOUT_SECONDS, MAX_AI_READ_TIMEOUT_SECONDS)
+
+internal fun clampMaxResponseTokens(v: Int): Int =
+    v.coerceIn(MIN_MAX_RESPONSE_TOKENS, MAX_MAX_RESPONSE_TOKENS)
 
 /**
  * Output-token cap sent with every request (not user-settable). Thinking
@@ -740,6 +741,8 @@ internal data class AiCallConfig(
     val customBaseUrl: String? get() = profile.baseUrl
     /** Raw profile vision slot. */
     val visionModel: String? get() = profile.visionModel
+    /** Raw profile Coach slot; null = [selectedModel] serves Coach too. */
+    val coachModel: String? get() = profile.coachModel
 }
 
 /** In-memory stand-in used when the profile store is empty (pre-migration call). */

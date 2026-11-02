@@ -76,6 +76,8 @@ import app.chompass.models.FoodEntry
 import app.chompass.models.FoodSource
 import app.chompass.models.FoodLogMacroChip
 import app.chompass.models.ServingUnitOption
+import app.chompass.models.ServingUnitDisplayMode
+import app.chompass.models.metricServingAmount
 import app.chompass.ui.components.ChompassSurface
 import app.chompass.ui.components.rememberFoodThumbnail
 import app.chompass.ui.components.isDarkTheme
@@ -447,6 +449,7 @@ internal fun SwipeableFoodRow(
     rowShape: RoundedCornerShape,
     macroChips: List<FoodLogMacroChip>,
     compact: Boolean = false,
+    displayMode: ServingUnitDisplayMode = ServingUnitDisplayMode.Default,
     onTap: () -> Unit,
     onLongPress: () -> Unit,
     onDelete: () -> Unit,
@@ -530,6 +533,7 @@ internal fun SwipeableFoodRow(
                     rowShape = rowShape,
                     macroChips = macroChips,
                     compact = compact,
+                    displayMode = displayMode,
                     planningMode = planningMode,
                     onLogNow = onLogNow,
                 )
@@ -596,6 +600,7 @@ internal fun FoodRow(
     isSelected: Boolean = false,
     macroChips: List<FoodLogMacroChip> = FoodLogMacroChip.DefaultSelection,
     compact: Boolean = false,
+    displayMode: ServingUnitDisplayMode = ServingUnitDisplayMode.Default,
     /** Meal planning mode: planned rows show the chip and the Log-now action. */
     planningMode: Boolean = false,
     onLogNow: ((FoodEntry) -> Unit)? = null,
@@ -723,16 +728,23 @@ internal fun FoodRow(
                 entry.servingSizeGrams?.takeIf { it > 0 },
                 entry.servingUnitOptions,
             )
-            val servingText = echo?.let { (qty, option) ->
-                "${ServingUnitOption.formatQuantity(qty)} " + option.displayUnit(
-                    qty,
-                    stringResource(R.string.unit_serving),
-                    stringResource(R.string.unit_serving_plural),
-                    stringResource(R.string.unit_package),
-                    stringResource(R.string.unit_package_plural),
-                    culinaryUnitLabels(),
-                )
-            } ?: entry.servingSizeGrams?.takeIf { it > 0 }?.let { gramsText(it) }
+            val servingText = if (displayMode == ServingUnitDisplayMode.METRIC) {
+                entry.servingSizeGrams?.takeIf { it > 0 }?.let { totalGrams ->
+                    val amount = metricServingAmount(echo?.second ?: ServingUnitOption.grams, echo?.first, totalGrams)
+                    "${ServingUnitOption.formatQuantity(amount.value)} ${if (amount.unit == "ml") stringResource(R.string.unit_ml) else stringResource(R.string.unit_g)}"
+                }
+            } else {
+                echo?.let { (qty, option) ->
+                    "${ServingUnitOption.formatQuantity(qty)} " + option.displayUnit(
+                        qty,
+                        stringResource(R.string.unit_serving),
+                        stringResource(R.string.unit_serving_plural),
+                        stringResource(R.string.unit_package),
+                        stringResource(R.string.unit_package_plural),
+                        culinaryUnitLabels(),
+                    )
+                } ?: entry.servingSizeGrams?.takeIf { it > 0 }?.let { gramsText(it) }
+            }
             var servingLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
             Row(
                 modifier = Modifier.fillMaxWidth(),

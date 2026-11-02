@@ -10,14 +10,16 @@ import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Key
 import androidx.compose.material.icons.outlined.Link
-import androidx.compose.material.icons.outlined.Numbers
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Numbers
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.SmartToy
 import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import app.chompass.ui.components.glassDialogColor
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -52,6 +54,7 @@ internal fun SettingsAiSection(
 ) {
     var confirmDeleteProfile by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val providerName = stringResource(ui.activeProvider.displayNameRes)
     SectionCard(title = stringResource(R.string.settings_section_ai_profile)) {
                 // Phase 2 of Codeberg #20: the master AI-features switch. When
                 // off, nothing is sent to any LLM provider (gated at the service
@@ -68,7 +71,7 @@ internal fun SettingsAiSection(
                 // profiles keep their own provider, model, endpoint and key.
                 SettingRow(
                     stringResource(R.string.settings_ai_profile),
-                    "${ui.activeProfile?.name.orEmpty()} · ${stringResource(ui.activeProvider.displayNameRes)}",
+                    "${ui.activeProfile?.name.orEmpty()} · $providerName",
                     icon = Icons.Outlined.AccountCircle
                 ) { onOpenSheet(SettingsSheet.AI_PROFILE) }
                 // Privacy disclosure per provider: cloud providers receive food/chat/
@@ -131,13 +134,20 @@ internal fun SettingsAiSection(
                 }
     }
     SectionCard(title = stringResource(R.string.settings_section_ai_connection)) {
-                // Provider picker: grouped Recommended / Cloud / Local / On-device
-                // with one-line subtitles (ListSheet sectionHeader).
+                val directoryMatch = ui.directoryEntry
                 SettingRow(
                     stringResource(R.string.settings_ai_provider),
-                    stringResource(ui.activeProvider.displayNameRes),
+                    providerName,
                     icon = Icons.Outlined.SmartToy
                 ) { onOpenSheet(SettingsSheet.AI_PROVIDER) }
+                if (directoryMatch != null) {
+                    SettingFootnote(ui.activeProfile?.baseUrl.orEmpty())
+                    val context = LocalContext.current
+                    val docsUrl = directoryMatch.docsUrl
+                    TextButton(onClick = {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(docsUrl)))
+                    }) { Text(stringResource(R.string.settings_custom_directory_docs)) }
+                }
                 HorizontalDivider()
                 SettingRow(stringResource(R.string.settings_ai_model), ui.activeModel.ifEmpty { stringResource(R.string.settings_ai_model_unset) }, icon = Icons.Outlined.Tune) { onOpenSheet(SettingsSheet.AI_MODEL) }
                 val reasoningOptions = OpenRouterReasoningEffort.availableFor(ui.activeProvider, ui.activeModel)
@@ -206,7 +216,7 @@ internal fun SettingsAiSection(
                         }
                     SettingRow(stringResource(R.string.settings_api_key), keySubtitle, icon = Icons.Outlined.Key) { onOpenSheet(SettingsSheet.API_KEY) }
                 }
-                if (ui.activeProvider.requiresCustomEndpoint || ui.activeProvider == AIProvider.OLLAMA) {
+                if (directoryMatch == null && (ui.activeProvider.requiresCustomEndpoint || ui.activeProvider == AIProvider.OLLAMA)) {
                     HorizontalDivider()
                     SettingRow(
                         if (ui.activeProvider.requiresCustomEndpoint) stringResource(R.string.settings_base_url) else stringResource(R.string.settings_server_url),
@@ -228,6 +238,11 @@ internal fun SettingsAiSection(
     SectionCard(title = stringResource(R.string.settings_section_ai_advanced)) {
                 // Advanced knobs are stored per profile; subtitles show the
                 // effective value with "(default)" while the profile has no override.
+                // Max response length is not a setting: every provider gets the
+                // built-in 4096 cap (a low cap truncates JSON replies and reads
+                // like a model bug), and the read timeout only applies to
+                // self-hosted endpoints — cloud budgets are fixed cold-start
+                // windows (AiHttp.effectiveReadTimeoutSeconds).
                 val showVisionModel = ui.activeProvider != AIProvider.ON_DEVICE
                 val showMaxTokens = ui.activeProvider.apiFormat != AIProvider.ApiFormat.GEMINI &&
                     ui.activeProvider.apiFormat != AIProvider.ApiFormat.CHATGPT_RESPONSES &&
@@ -236,14 +251,23 @@ internal fun SettingsAiSection(
                 val showGoalTier = ui.activeProvider.usesConfigurableRequestTimeout
                 val showGeminiSearch = ui.activeProvider == AIProvider.GEMINI
                 val showFillMissing = FillGapsFeature.ENABLED && ui.aiFeaturesEnabled
-                // Vision-model slot: routing is provider-generic (resolveModelForRequest),
-                // so any non-on-device provider can pin a separate vision model.
+                // Per-feature model slots: routing is provider-generic
+                // (resolveModelForRequest / coachSelectedModel), so any
+                // non-on-device provider can pin a vision and a Coach model.
                 if (showVisionModel) {
                     SettingRow(
                         stringResource(R.string.settings_ai_vision_model),
                         ui.activeProfile?.visionModel.orEmpty().ifEmpty { stringResource(R.string.settings_ai_vision_model_unset) },
                         icon = Icons.Outlined.Tune,
                     ) { onOpenSheet(SettingsSheet.VISION_MODEL) }
+                    // Coach slot: same routing freedom, scoped to chat so a
+                    // cheap model can log food while Coach stays on the good one.
+                    HorizontalDivider()
+                    SettingRow(
+                        stringResource(R.string.settings_ai_coach_model),
+                        ui.activeProfile?.coachModel.orEmpty().ifEmpty { stringResource(R.string.settings_ai_vision_model_unset) },
+                        icon = Icons.Outlined.Tune,
+                    ) { onOpenSheet(SettingsSheet.COACH_MODEL) }
                 }
                 // Only OpenAI-compatible + Anthropic send a token cap; Gemini is left
                 // uncapped and on-device dispatch doesn't take one at all.
@@ -317,6 +341,7 @@ internal fun SettingsAiSection(
     if (confirmDeleteProfile) {
         AlertDialog(
             onDismissRequest = { confirmDeleteProfile = false },
+            containerColor = glassDialogColor(MaterialTheme.colorScheme.surfaceContainerHigh),
             title = { Text(stringResource(R.string.settings_profile_delete)) },
             text = { Text(stringResource(R.string.settings_profile_delete_confirm)) },
             confirmButton = {

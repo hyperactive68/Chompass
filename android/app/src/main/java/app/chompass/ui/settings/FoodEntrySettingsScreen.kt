@@ -161,6 +161,12 @@ fun FoodEntrySettingsScreen(
                 stringResource(ui.servingUnitInferenceMode.displayNameRes),
                 icon = Icons.Outlined.Tune
             ) { sheet = SettingsSheet.SERVING_UNIT_MODE }
+            HorizontalDivider()
+            SettingRow(
+                stringResource(R.string.settings_serving_unit_display_mode),
+                stringResource(ui.servingUnitDisplayMode.displayNameRes),
+                icon = Icons.Outlined.Tune,
+            ) { sheet = SettingsSheet.SERVING_UNIT_DISPLAY_MODE }
             if (ui.servingUnitInferenceMode == ServingUnitInferenceMode.HEURISTIC) {
                 HorizontalDivider()
                 SettingRow(

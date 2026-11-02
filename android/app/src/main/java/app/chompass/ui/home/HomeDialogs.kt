@@ -62,6 +62,7 @@ import app.chompass.models.MicronutrientField
 import app.chompass.models.MicronutrientValues
 import app.chompass.models.ServingUnitHeuristics
 import app.chompass.models.ServingUnitOption
+import app.chompass.models.ServingUnitDisplayMode
 import app.chompass.ui.theme.AppColors
 import app.chompass.services.ai.FoodAnalysis
 import app.chompass.services.ai.PartialFoodAnalysis
@@ -544,6 +545,7 @@ internal fun ManualEntryDialog(
     initialTime: LocalTime = LocalTime.now(),
     useSystemDateTimePickers: Boolean = false,
     mealTimesEnabled: Boolean = true,
+    displayMode: ServingUnitDisplayMode = ServingUnitDisplayMode.Default,
     onDismiss: () -> Unit,
     onSave: (
         name: String,
@@ -813,6 +815,7 @@ internal fun ManualEntryDialog(
                     menuExpanded = servingMenuExpanded,
                     onMenuExpandedChange = { servingMenuExpanded = it },
                     gramUnit = stringResource(R.string.unit_g),
+                    displayMode = displayMode,
                     onUnitOptionsChange = { options, newId ->
                         val gramsBefore = servingGrams
                         servingUnitOptions = options

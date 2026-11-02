@@ -43,6 +43,7 @@ import app.chompass.models.NicotineKind
 import app.chompass.models.OptionalNutrientGoals
 import app.chompass.models.ProteinTargetMode
 import app.chompass.models.ServingUnitInferenceMode
+import app.chompass.models.ServingUnitDisplayMode
 import app.chompass.models.SpeechLanguage
 import app.chompass.models.SpeechProvider
 import app.chompass.models.UserProfile
@@ -114,6 +115,7 @@ data class SettingsUiState(
     val maxResponseTokens: Int = app.chompass.data.DEFAULT_MAX_RESPONSE_TOKENS,
     val aiReadTimeoutSeconds: Int = app.chompass.data.DEFAULT_AI_READ_TIMEOUT_SECONDS,
     val servingUnitInferenceMode: ServingUnitInferenceMode = ServingUnitInferenceMode.Default,
+    val servingUnitDisplayMode: ServingUnitDisplayMode = ServingUnitDisplayMode.Default,
     val heuristicServingUnitSettings: HeuristicServingUnitSettings = HeuristicServingUnitSettings.Default,
     val selectedSpeech: SpeechProvider = SpeechProvider.NATIVE,
     val selectedSpeechLanguage: SpeechLanguage = SpeechLanguage.defaultFor(SpeechProvider.NATIVE),
@@ -245,7 +247,7 @@ data class SettingsUiState(
     val aiFeaturesEnabled: Boolean = true,
     /** Issue #8 follow-up: release cleartext opt-in for user-entered endpoints; default OFF. */
     val allowInsecureHttp: Boolean = false,
-    val appThemeColor: AppThemeColor = AppThemeColor.SYSTEM,
+    val appThemeColor: AppThemeColor = AppThemeColor.PLUM,
     /** Opt-in: launcher icon stays the brand teal and never swaps aliases (#21). */
     val fixedLauncherIcon: Boolean = false,
     /** Codeberg #77: meal date/time uses the system pickers. */
@@ -476,6 +478,24 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
         }
 
         viewModelScope.launch {
+            // The accent and appearance slices follow the store instead of the one-shot
+            // hydrate: a row must never render the default accent next to a themed UI,
+            // and writes via the debug pins or another surface land here within a frame.
+            combine(
+                container.prefs.appThemeColor,
+                container.prefs.appearanceMode,
+            ) { theme, appearance -> theme to appearance }
+                .collect { (theme, appearance) ->
+                    _ui.update {
+                        it.copy(
+                            appThemeColor = AppThemeColor.fromKey(theme),
+                            appearanceMode = appearance,
+                        )
+                    }
+                }
+        }
+
+        viewModelScope.launch {
             container.prefs.heuristicServingUnitSettings.collect { settings ->
                 _ui.value = _ui.value.copy(heuristicServingUnitSettings = settings)
             }
@@ -586,6 +606,7 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
                     maxResponseTokens = snap.maxResponseTokens,
                     aiReadTimeoutSeconds = snap.aiReadTimeoutSeconds,
                     servingUnitInferenceMode = snap.servingUnitInferenceMode,
+                    servingUnitDisplayMode = snap.servingUnitDisplayMode,
                     heuristicServingUnitSettings = snap.heuristicServingUnitSettings,
                     selectedSpeech = speech,
                     selectedSpeechLanguage = snap.selectedSpeechLanguage,
@@ -1031,6 +1052,11 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
     fun setServingUnitInferenceMode(mode: ServingUnitInferenceMode) = updateUiPref(
         { container.prefs.setServingUnitInferenceMode(mode) },
         { copy(servingUnitInferenceMode = mode) },
+    )
+
+    fun setServingUnitDisplayMode(mode: ServingUnitDisplayMode) = updateUiPref(
+        { container.prefs.setServingUnitDisplayMode(mode) },
+        { copy(servingUnitDisplayMode = mode) },
     )
 
     fun setHeuristicRuleEnabled(ruleId: String, enabled: Boolean) {
@@ -1490,6 +1516,16 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
             val active = _ui.value.activeProfile ?: return@launch
             val model = m?.takeIf { it.isNotBlank() }?.let { active.provider.supportedModelOrDefault(it) }
             container.prefs.editActiveProfile { it.copy(visionModel = model) }
+            refreshAiState()
+        }
+    }
+
+    /** Sets the per-profile Coach slot; null/blank clears it back to "same as Model". */
+    fun setProfileCoachModel(m: String?) {
+        viewModelScope.launch {
+            val active = _ui.value.activeProfile ?: return@launch
+            val model = m?.takeIf { it.isNotBlank() }?.let { active.provider.supportedModelOrDefault(it) }
+            container.prefs.editActiveProfile { it.copy(coachModel = model) }
             refreshAiState()
         }
     }
@@ -2356,9 +2392,11 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
             container.prefs.clearHealthEnergyMeasuredActive()
         }
 
+        // The types version is stamped only after the permission sheet returns
+        // (MainActivity, or the connect toggle). Stamping here would skip the
+        // re-ask that an update adding record types depends on.
         if (granted && (!stored || version < HealthConnectManager.CURRENT_TYPES_VERSION)) {
             backfillHealthConnect()
-            container.prefs.setHealthPermissionsVersion(HealthConnectManager.CURRENT_TYPES_VERSION)
         }
 
         // Pull external weigh-ins / body-fat readings whenever Settings reloads while connected.
@@ -2385,7 +2423,6 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
                     return@launch
                 }
                 container.prefs.setHealthConnectEnabled(true)
-                container.prefs.setHealthPermissionsVersion(HealthConnectManager.CURRENT_TYPES_VERSION)
                 val energySummary = container.health.readRecentEnergySummary(days = 14)
                 if (energySummary == null) {
                     showHealthEnergyGoalAlert(

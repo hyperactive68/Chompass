@@ -38,6 +38,7 @@ import app.chompass.models.MicronutrientField
 import app.chompass.models.MicronutrientValues
 import app.chompass.models.OptionalNutrient
 import app.chompass.models.ServingUnitOption
+import app.chompass.models.ServingUnitDisplayMode
 import app.chompass.models.OptionalNutrientGoals
 import app.chompass.services.ai.ConstituentReconcile
 import app.chompass.ui.components.energyText
@@ -57,6 +58,7 @@ internal fun ConstituentsSection(
     onRowsChange: (List<FoodConstituent>) -> Unit,
     /** User's optional daily goals for the "(N%)" suffixes; null hides percents. */
     optionalGoals: OptionalNutrientGoals? = null,
+    displayMode: ServingUnitDisplayMode = ServingUnitDisplayMode.Default,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -75,6 +77,7 @@ internal fun ConstituentsSection(
             ConstituentRowCard(
                 row = row,
                 optionalGoals = optionalGoals,
+                displayMode = displayMode,
                 onChange = { updated ->
                     onRowsChange(rows.toMutableList().also { it[index] = updated })
                 },
@@ -107,6 +110,7 @@ internal fun ConstituentsSection(
 private fun ConstituentRowCard(
     row: FoodConstituent,
     optionalGoals: OptionalNutrientGoals?,
+    displayMode: ServingUnitDisplayMode,
     onChange: (FoodConstituent) -> Unit,
     onRemove: () -> Unit,
 ) {
@@ -185,6 +189,7 @@ private fun ConstituentRowCard(
                 menuExpanded = unitMenuExpanded,
                 onMenuExpandedChange = { unitMenuExpanded = it },
                 gramUnit = stringResource(R.string.unit_g),
+                displayMode = displayMode,
                 onUnitOptionsChange = { options, newId ->
                     val gramsBefore = row.servingSizeGrams
                     val option = ServingUnitOption.optionMatching(newId, options)

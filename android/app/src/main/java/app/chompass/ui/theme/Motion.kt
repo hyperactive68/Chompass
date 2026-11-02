@@ -1,6 +1,7 @@
 package app.chompass.ui.theme
 
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.SpringSpec
@@ -53,6 +54,25 @@ object AppMotion {
 
     /** Ambient record/listening pulse duration (ms). */
     const val TweenPulseMs = 800
+
+    // Brand mark intro tokens from upstream 6.1. These are presentation-only
+    // and keep the new mark animation isolated from existing app motion.
+    const val MarkIntroDelayMs = 120
+    const val MarkDrawMs = 900
+    const val MarkNeedleDelayMs = 180
+    const val MarkNeedleMs = 1450
+    const val MarkChompDelayMs = 1080
+    const val MarkChompMs = 550
+    const val MarkSwayStartMs = 2100
+    const val MarkSwayMs = 7000
+    val MarkEasing = CubicBezierEasing(0.22f, 1f, 0.36f, 1f)
+    val MarkDrawEasing = CubicBezierEasing(0.65f, 0f, 0.35f, 1f)
+    val MarkChompEasing = CubicBezierEasing(0.34f, 1.56f, 0.64f, 1f)
+    const val MarkInMs = 450
+    const val MarkFloatMs = 7000
+    const val MarkFloatRise = 0.028f
+    val MarkInEasing = CubicBezierEasing(0.25f, 0.1f, 0.25f, 1f)
+    val MarkFloatEasing = CubicBezierEasing(0.42f, 0f, 0.58f, 1f)
 
     /** Standard accelerate-decelerate curve for container/position transitions. */
     val EasingStandard = FastOutSlowInEasing

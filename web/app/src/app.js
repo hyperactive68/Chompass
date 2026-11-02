@@ -83,11 +83,13 @@ async function applyThemeAndLocale() {
   const root = document.documentElement;
   if (p.theme === "system") root.removeAttribute("data-theme");
   else root.setAttribute("data-theme", p.theme);
-  // Android default accent is "system" (Material You → teal fallback). PWA "system"/"teal" use CSS defaults.
-  if (p.accent && p.accent !== "teal" && p.accent !== "system") root.setAttribute("data-accent", p.accent);
+  // Android default accent is plum; "system" follows the palette, and the CSS default is plum.
+  if (p.accent && p.accent !== "plum" && p.accent !== "system") root.setAttribute("data-accent", p.accent);
   else root.removeAttribute("data-accent");
+  // Browser/PWA chrome follows the ground, not the accent: a plum status bar on
+  // a cream page (or a stale teal one) is the mismatch users see first.
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute("content", getComputedStyle(root).getPropertyValue("--teal-deep").trim() || "#006b5e");
+  if (meta) meta.setAttribute("content", getComputedStyle(root).getPropertyValue("--bg").trim() || "#170e16");
 }
 
 async function ensureOnboarding() {

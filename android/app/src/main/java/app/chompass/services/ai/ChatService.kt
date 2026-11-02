@@ -42,6 +42,10 @@ import java.util.Locale
 import app.chompass.models.UnitFormat
 import app.chompass.models.resolveModelForRequest
 
+/** Coach's profile slot wins for text; a blank slot falls back to primary. */
+internal fun coachSelectedModel(coachModel: String?, primaryModel: String?): String? =
+    coachModel?.takeIf { it.isNotBlank() } ?: primaryModel
+
 /**
  * Multi-turn coach chat with **tool calling** — Coach can fetch any slice of
  * the user's data on demand instead of the previous fixed last-N-entries dump
@@ -124,7 +128,7 @@ class ChatService(
         val provider = cfg.provider
         val model = resolveModelForRequest(
             provider = provider,
-            selectedModel = cfg.selectedModel,
+            selectedModel = coachSelectedModel(cfg.coachModel, cfg.selectedModel),
             visionModel = cfg.visionModel,
             hasImages = imageBytes != null,
         )

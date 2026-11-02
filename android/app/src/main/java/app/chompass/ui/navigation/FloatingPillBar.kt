@@ -323,7 +323,7 @@ private fun pillLabelWeights(labels: List<String>, width: Dp): List<Float>? {
     }
 }
 
-private val FloatingPillHeight = 64.dp
+internal val FloatingPillHeight = 64.dp
 private val PillActionHeight = 52.dp
 private val PillInset = 6.dp
 private val PillSlotMaxWidth = 96.dp

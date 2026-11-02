@@ -21,6 +21,7 @@ import app.chompass.models.OptionalNutrientGoals
 import app.chompass.models.PendingFoodAnalysisDraft
 import app.chompass.models.PendingFoodInputDraft
 import app.chompass.models.ServingUnitInferenceMode
+import app.chompass.models.ServingUnitDisplayMode
 import app.chompass.models.SpeechLanguage
 import app.chompass.models.SpeechProvider
 import app.chompass.models.UserProfile
@@ -412,6 +413,8 @@ class PreferencesStore(private val appContext: Context) : NutritionSyncStore {
     suspend fun setEnergyUnit(v: String) = setEnergyUnitImpl(v)
     val preferGramsByDefault: Flow<Boolean> get() = preferGramsByDefaultImpl
     suspend fun setPreferGramsByDefault(v: Boolean) = setPreferGramsByDefaultImpl(v)
+    val servingUnitDisplayMode: Flow<ServingUnitDisplayMode> get() = servingUnitDisplayModeImpl
+    suspend fun setServingUnitDisplayMode(mode: ServingUnitDisplayMode) = setServingUnitDisplayModeImpl(mode)
     val appearanceMode: Flow<String> get() = appearanceModeImpl
     suspend fun setAppearanceMode(v: String) = setAppearanceModeImpl(v)
     val appLanguage: Flow<String> get() = appLanguageImpl
@@ -698,6 +701,17 @@ class PreferencesStore(private val appContext: Context) : NutritionSyncStore {
     suspend fun setLastSyncAt(iso: String?) = setLastSyncAtImpl(iso)
     val lastSyncEtag: Flow<String?> get() = lastSyncEtagImpl
     suspend fun setLastSyncEtag(etag: String?) = setLastSyncEtagImpl(etag)
+    val localBackupTreeUri: Flow<String> get() = localBackupTreeUriImpl
+    val localBackupFolderName: Flow<String> get() = localBackupFolderNameImpl
+    suspend fun setLocalBackupFolder(treeUri: String, folderName: String) = setLocalBackupFolderImpl(treeUri, folderName)
+    val localBackupEnabled: Flow<Boolean> get() = localBackupEnabledImpl
+    suspend fun setLocalBackupEnabled(enabled: Boolean) = setLocalBackupEnabledImpl(enabled)
+    val localBackupAutoEnabled: Flow<Boolean> get() = localBackupAutoEnabledImpl
+    suspend fun setLocalBackupAutoEnabled(enabled: Boolean) = setLocalBackupAutoEnabledImpl(enabled)
+    val localBackupAutoDay: Flow<String?> get() = localBackupAutoDayImpl
+    suspend fun setLocalBackupAutoDay(day: String?) = setLocalBackupAutoDayImpl(day)
+    val lastLocalBackupAt: Flow<String?> get() = lastLocalBackupAtImpl
+    suspend fun setLastLocalBackupAt(iso: String?) = setLastLocalBackupAtImpl(iso)
     val googleDriveConnected: Flow<Boolean> get() = googleDriveConnectedImpl
     suspend fun setGoogleDriveConnected(connected: Boolean) = setGoogleDriveConnectedImpl(connected)
     val googleDriveSyncOnFoodLog: Flow<Boolean> get() = googleDriveSyncOnFoodLogImpl

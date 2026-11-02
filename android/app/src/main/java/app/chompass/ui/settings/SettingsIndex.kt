@@ -206,6 +206,8 @@ internal val SETTINGS_INDEX: List<SettingsIndexEntry> = listOf(
         R.array.settings_search_kw_food_databases, ChompassRoutes.SETTINGS_FOOD, Icons.Outlined.Storage),
     SettingsIndexEntry(R.string.settings_group_food, R.string.settings_serving_unit_mode,
         R.array.settings_search_kw_serving_unit_mode, ChompassRoutes.SETTINGS_FOOD, Icons.Outlined.Tune),
+    SettingsIndexEntry(R.string.settings_group_food, R.string.settings_serving_unit_display_mode,
+        R.array.settings_search_kw_serving_unit_display_mode, ChompassRoutes.SETTINGS_FOOD, Icons.Outlined.Tune),
     SettingsIndexEntry(R.string.settings_group_food, R.string.settings_serving_unit_heuristics,
         R.array.settings_search_kw_serving_unit_heuristics, ChompassRoutes.SETTINGS_FOOD, Icons.Outlined.Tune),
 
@@ -253,6 +255,8 @@ internal val SETTINGS_INDEX: List<SettingsIndexEntry> = listOf(
         R.array.settings_search_kw_ai_model, ChompassRoutes.SETTINGS_AI, Icons.Outlined.Tune),
     SettingsIndexEntry(R.string.settings_group_ai, R.string.settings_ai_vision_model,
         R.array.settings_search_kw_ai_vision_model, ChompassRoutes.SETTINGS_AI, Icons.Outlined.Tune),
+    SettingsIndexEntry(R.string.settings_group_ai, R.string.settings_ai_coach_model,
+        R.array.settings_search_kw_ai_model, ChompassRoutes.SETTINGS_AI, Icons.Outlined.Tune),
     SettingsIndexEntry(R.string.settings_group_ai, R.string.settings_api_key,
         R.array.settings_search_kw_api_key, ChompassRoutes.SETTINGS_AI, Icons.Outlined.Key),
     SettingsIndexEntry(R.string.settings_group_ai, R.string.settings_base_url,
