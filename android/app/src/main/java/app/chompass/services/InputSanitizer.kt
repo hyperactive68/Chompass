@@ -84,19 +84,21 @@ object InputSanitizer {
     fun emoji(raw: String?): String? = text(raw, MAX_EMOJI_LENGTH)
 
     /**
-     * Neutralizes the prompt-data delimiters themselves so hostile content cannot
-     * close a `<user_data>` / `<external_data>` block early and splice text into
-     * the instructions region. Only the exact tag tokens are stripped; everything
-     * else between the tags is treated as data by the model instruction anyway.
+     * Neutralizes prompt delimiters themselves so user-entered text cannot close
+     * a data/instructions block early and splice text into another prompt region.
      */
     fun delimiterSafe(raw: String?): String? = raw
         ?.replace(USER_DATA_OPEN, "")
         ?.replace(USER_DATA_CLOSE, "")
+        ?.replace(USER_INSTRUCTIONS_OPEN, "")
+        ?.replace(USER_INSTRUCTIONS_CLOSE, "")
         ?.replace(EXTERNAL_DATA_OPEN, "")
         ?.replace(EXTERNAL_DATA_CLOSE, "")
 
     const val USER_DATA_OPEN = "<user_data>"
     const val USER_DATA_CLOSE = "</user_data>"
+    const val USER_INSTRUCTIONS_OPEN = "<user_instructions>"
+    const val USER_INSTRUCTIONS_CLOSE = "</user_instructions>"
     const val EXTERNAL_DATA_OPEN = "<external_data>"
     const val EXTERNAL_DATA_CLOSE = "</external_data>"
 

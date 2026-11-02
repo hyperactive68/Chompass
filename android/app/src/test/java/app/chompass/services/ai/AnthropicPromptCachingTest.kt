@@ -78,16 +78,16 @@ class AnthropicPromptCachingTest {
 
     @Test
     fun systemBlocks_userContextStaysInUncachedTail() {
-        // sendMessage appends "## User-provided context" after the base prompt;
+        // sendMessage appends "## Fixed user instructions" after the base prompt;
         // it must never land in the cached prefix — even when it quotes the
         // "## Current date" marker itself (first occurrence is the real one).
-        val prompt = coachPrompt() + "\n\n## User-provided context\nDon't log anything after 6pm. Today (## Current date is wrong) is fine."
+        val prompt = coachPrompt() + "\n\n## Fixed user instructions\nDon't log anything after 6pm. Today (## Current date is wrong) is fine."
         val blocks = anthropicSystemBlocks(prompt)
 
         assertEquals(2, blocks.length())
-        assertFalse(blocks.getJSONObject(0).getString("text").contains("User-provided context"))
+        assertFalse(blocks.getJSONObject(0).getString("text").contains("Fixed user instructions"))
         val tail = blocks.getJSONObject(1).getString("text")
-        assertTrue(tail.contains("User-provided context"))
+        assertTrue(tail.contains("Fixed user instructions"))
         assertTrue(tail.contains("Today (## Current date is wrong) is fine."))
     }
 

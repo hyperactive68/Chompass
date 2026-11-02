@@ -109,19 +109,10 @@ jobs:
           body: |
             ## Chompass ${{ github.ref_name }}
 
-            This release provides a signed Android build with stable update signing and the official Google Android AuthorizationClient flow for Drive app-data backup/sync.
-
-            - Uses system DNS first, with Cloudflare and Google DNS-over-HTTPS fallback when Android returns no address.
-            - Keeps the official ChatGPT OAuth and Responses API flow unchanged.
-            - Coach can now retrieve local nutrition data and prepare user-confirmed log proposals through Responses function calling.
-            - No API key is embedded or required for eligible ChatGPT Plus or Pro plan usage.
-            - Google Drive uses the official Android AuthorizationClient consent flow; the Google Drive app is not required on the phone.
-            - One-time Google Cloud OAuth setup is required for the `app.chompass` package and the release signing certificate. No HTTPS domain or client secret in the APK is required.
-            - The backup is stored in Drive’s private appDataFolder using the limited drive.appdata scope.
-            - Optional “Sync after logging food” uploads the updated privacy-limited JSON after food additions, edits, and deletions. Photos, API keys, passwords, and OAuth tokens are not included.
-            - Adds a model-aware Responses API reasoning-level picker (Auto through Maximum) and treats explicit zero nutrition values as answered.
-            - Restores the selected per-profile reasoning level after app restart and startup hydration.
-            - Preserves meal-type edits when Google Drive sync merges a stale remote copy.
+            - Adds **Fixed AI instructions** under Settings → Coach. They are sent with every AI request and can contain persistent assumptions, portion rules, and response preferences.
+            - Keeps app rules, required JSON/schema, safety constraints, and confirmed data above those user-configured instructions.
+            - Shows recognized liquid foods such as soup as approximate `ml` in metric serving display, even when the AI stored `serving`, `bowl`, or `cup`.
+            - Leaves parser units, stored entries, and nutrition calculations unchanged.
 
             This APK is release-signed with the project keystore and is intended to update earlier Chompass builds signed with the same key.
           files: dist/Chompass-*-universal.apk

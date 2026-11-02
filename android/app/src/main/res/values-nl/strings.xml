@@ -619,9 +619,9 @@
     <string name="notif_body_fat_log_text">Log je vetpercentage van vandaag om je samenstellings-trend te volgen.</string>
     <string name="saved_meals_search_placeholder">Zoek in opgeslagen maaltijden</string>
     <string name="saved_meals_no_match">Geen overeenkomende maaltijden</string>
-    <string name="settings_section_custom_instructions">Aangepaste AI-instructies</string>
-    <string name="settings_custom_instructions_placeholder">Bijv. ik woon in Duitsland, ga uit van Europese portiegroottes, voorkeur voor ALDI/REWE-merken. Ik zit in een bodybuilding-cut.</string>
-    <string name="settings_custom_instructions_footer">Optionele context die met elk AI-verzoek wordt meegestuurd: regio, dieet, sportieve doelen, alles wat je anders elke keer zou herhalen. Laat leeg om uit te schakelen.</string>
+    <string name="settings_section_custom_instructions">Vaste AI-instructies</string>
+    <string name="settings_custom_instructions_placeholder">Bijv. gebruik metrische eenheden. Noem aannames duidelijk. Verzin geen portiegrootte; vraag het als de hoeveelheid onduidelijk is.</string>
+    <string name="settings_custom_instructions_footer">Deze instructies worden met elk AI-verzoek meegestuurd en moeten consequent worden gevolgd. Appregels, JSON/schema, veiligheid en bevestigde gegevens hebben voorrang. Laat leeg om uit te schakelen.</string>
     <string name="settings_save">Opslaan</string>
     <string name="settings_saved">Opgeslagen</string>
     <string name="settings_section_fallback">Reserveprovider</string>

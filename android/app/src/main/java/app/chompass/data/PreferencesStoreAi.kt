@@ -605,7 +605,7 @@ internal suspend fun PreferencesStore.setHeuristicServingUnitSettingsImpl(settin
     setObjectPref(Keys.HEURISTIC_SERVING_UNIT_SETTINGS, HeuristicServingUnitSettings.serializer(), settings)
 
     // -- Custom AI Instructions ------------------------------------------
-    /** Free-form text appended to every AI request. Empty = disabled. */
+    /** Fixed user instructions appended to every AI request. Empty = disabled. */
 internal val PreferencesStore.userContextImpl: Flow<String> get() = dataStore.data.map { it[Keys.USER_CONTEXT].orEmpty() }
 internal suspend fun PreferencesStore.setUserContextImpl(value: String) {
         val trimmed = value.trim()

@@ -193,15 +193,15 @@ class FillEntryServiceTest {
         newService().reestimateEntry(mealieEntry())
 
         // The "appended to every AI request" contract (PreferencesStoreAi
-        // userContext doc): callAi.promptBuild prepends the USER_DATA-wrapped
+        // userContext doc): callAi.promptBuild prepends the USER_INSTRUCTIONS-wrapped
         // block to BOTH ops' wire prompts — the behavior
         // REVIEW_UNRELEASED_2026-10-12 R5 claimed was missing (it read the
         // prompt builders, not the routing; appending there would send the
         // context twice per request).
         for (recorded in listOf(server.takeRequest(), server.takeRequest())) {
             val prompt = promptOf(bodyOf(recorded))
-            assertTrue(prompt.contains("User context (apply as user preferences/data"))
-            assertTrue(prompt.contains("<user_data>\nprefer round gram numbers\n</user_data>"))
+            assertTrue(prompt.contains("Fixed user instructions (follow consistently"))
+            assertTrue(prompt.contains("<user_instructions>\nprefer round gram numbers\n</user_instructions>"))
         }
     }
 
