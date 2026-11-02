@@ -1,3 +1,22 @@
+<table>
+  <tr>
+    <td bgcolor="#ffebe9">
+      <strong>⚠️ This is a fork of Chompass.</strong><br />
+      This GitHub repository is maintained separately from the upstream project at <a href="https://codeberg.org/fitguy/chompass">Codeberg</a>.
+    </td>
+  </tr>
+</table>
+
+## Fork-specific changes
+
+This fork keeps the original Chompass features and adds:
+
+- **Continue with ChatGPT** on Android for eligible ChatGPT plans, using the official OAuth and Responses API flow without embedding an API key.
+- **ChatGPT Coach** support with streamed responses and local nutrition-data tools.
+- Privacy-limited **Google Drive app-data backup and sync**, excluding photos, API keys, passwords and OAuth tokens.
+- A per-profile **Responses reasoning-level** setting for supported models.
+- Optional **grams/ml serving display** for visible serving summaries; the parser units and nutrition calculations remain unchanged.
+
 <div align="center">
 
 <img src="metadata/en-US/images/icon.png" alt="Chompass icon" width="96" />
