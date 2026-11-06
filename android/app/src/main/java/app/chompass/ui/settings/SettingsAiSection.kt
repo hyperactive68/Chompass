@@ -38,6 +38,7 @@ import app.chompass.models.AIProvider
 import app.chompass.models.LocaleFormat
 import app.chompass.services.FillGapsFeature
 import app.chompass.services.ai.OpenAICompatibleClient
+import app.chompass.services.ai.ProviderDirectory.Companion.matchedName
 import app.chompass.services.ondevice.OnDeviceDownloadState
 
 private fun leftoverGb(bytes: Long): String =

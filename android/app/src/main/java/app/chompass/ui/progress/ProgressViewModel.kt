@@ -73,6 +73,8 @@ data class ProgressUiState(
     val filteredMeasurements: List<BodyMeasurement> = emptyList(),
     /** Scale composition rows inside the selected range, date-sorted (for the plot cards). */
     val filteredCompositions: List<BodyCompositionEntry> = emptyList(),
+    /** True when any composition row ever carried muscle mass; hides the estimate. */
+    val hasMeasuredMuscle: Boolean = false,
     /** Sites with a Progress-tab trend plot enabled in Customize Progress; empty = plots off. */
     val measurementSites: Set<BodyMeasurement.Site> = emptySet(),
     /** One [CalorieSlot] per calendar day in range — logged kcal, untracked
@@ -513,6 +515,7 @@ private fun ProgressSnapshot.toUiState(anchorDate: LocalDate = LocalDate.now()):
         filteredBodyFats = filteredBodyFats,
         filteredMeasurements = filteredMeasurements,
         filteredCompositions = filteredCompositions,
+        hasMeasuredMuscle = base.compositions.any { it.muscleMassKg != null },
         measurementSites = base.measurementSites.mapNotNull { BodyMeasurement.Site.fromStorageId(it) }.toSet(),
         calorieSlots = calorieSlots,
         calorieAverage = calorieAverage,

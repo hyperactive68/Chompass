@@ -34,6 +34,7 @@ import app.chompass.R
 import app.chompass.models.BodyCompositionEntry
 import app.chompass.models.BodyCompositionEntry.CompositionMetric
 import app.chompass.models.UnitFormat
+import app.chompass.models.UserProfile
 import app.chompass.models.WeightEntry
 
 /** How far a weigh-in may sit from a composition row and still supply the TBW% denominator. */
@@ -101,6 +102,9 @@ internal fun CompositionSection(
     compositions: List<BodyCompositionEntry>,
     weights: List<WeightEntry>,
     useMetric: Boolean,
+    profile: UserProfile? = null,
+    /** True when the scale ever reported muscle mass — the estimate then stays hidden. */
+    hasMeasuredMuscle: Boolean = false,
     chartsImmediate: Boolean = false,
     dayTypeByDay: Map<String, String> = emptyMap(),
     untrackedDays: Set<String> = emptySet(),
