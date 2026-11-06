@@ -1054,6 +1054,8 @@
     <string name="progress_scale_metrics_visceral">Visceral fat</string>
     <string name="progress_scale_metrics_note">Consumer scale estimate — the trend is more reliable than the absolute value</string>
     <string name="progress_scale_metrics_tbw_percent">%1$.1f %% of body weight · typical range 45–65 %%</string>
+    <string name="progress_scale_metrics_muscle_estimated">Muscle mass (estimated)</string>
+    <string name="progress_estimated_smm_body_note">Anthropometric estimate from weight, height, age and sex · ± ~3 kg</string>
     <string name="progress_log_scale_metrics">Scale metrics</string>
     <string name="progress_log_scale_metrics_title">Log Scale Metrics</string>
     <string name="progress_estimated_smm">Estimated skeletal muscle (Lee)</string>
