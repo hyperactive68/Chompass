@@ -66,10 +66,10 @@ android {
         applicationId = "app.chompass"
         minSdk = 26
         targetSdk = 36
-        // 6.1.0 upstream also used code 113; later fork releases stay above it
-        // so installed builds remain directly upgradeable.
-        versionCode = 117
-        versionName = "6.1.3"
+        // Upstream 6.3.0-beta.2 uses code 119; the fork stays above it so
+        // installed fork builds remain directly upgradeable.
+        versionCode = 120
+        versionName = "6.3.0-beta.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         if (releaseAbi != null) {
@@ -247,6 +247,11 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.vico.compose.m3)
+    // Vendored openScale BLE drivers (third_party/openscale/SNAPSHOT.md):
+    // blessed-kotlin (MIT) drives GATT; room-common supplies annotation classes
+    // referenced by vendored MeasurementType.kt — annotations only, no Room runtime.
+    implementation(libs.blessed.kotlin)
+    implementation(libs.androidx.room.common)
 
     testImplementation(libs.junit)
     // JVM DataStore tests use OkioStorage: it exercises the same DataStore

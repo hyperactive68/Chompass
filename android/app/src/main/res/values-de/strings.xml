@@ -49,6 +49,7 @@
     <string name="action_info">Info</string>
 
     <string name="action_clear">Leeren</string>
+    <string name="action_refresh">Aktualisieren</string>
 
     <string name="action_delete">Löschen</string>
 
@@ -336,7 +337,8 @@
 
     <string name="settings_section_ai_connection">Verbindung</string>
 
-    <string name="settings_section_ai_advanced">Erweitert</string>
+    <string name="settings_section_ai_model_overrides">Modell-Overrides</string>
+    <string name="settings_section_ai_features">KI-Funktionen</string>
 
     <string name="settings_ai_key_test">Testen</string>
 
@@ -666,6 +668,7 @@ für dich ein</string>
     <string name="onboarding_building_recommendation">Tägliche Empfehlung für</string>
 
     <string name="onboarding_building_bullet">•</string>
+    <string name="onboarding_building_skip">Überspringen</string>
 
     <string name="onboarding_plan_title">Dein Plan</string>
 
@@ -1448,6 +1451,16 @@ für dich ein</string>
 
     <string name="coach_chip_log_advice">Gibt es Ratschläge basierend auf meinem Protokoll?</string>
 
+    <string name="settings_coach_quick_prompts">Schnellprompts</string>
+    <string name="settings_coach_quick_prompts_footer">Wähle, welche Prompts im Coach erscheinen, sortiere sie oder füge eigene hinzu.</string>
+    <string name="settings_coach_quick_prompts_help">Diese Chips erscheinen über der Coach-Eingabe. Sortiere sie, entferne sie oder füge eigene hinzu; eine leere Liste blendet die Leiste aus.</string>
+    <string name="settings_coach_quick_prompts_shown">%1$d angezeigt</string>
+    <string name="settings_coach_quick_prompts_empty">Schnellprompts sind ausgeblendet. Füge welche hinzu oder speichere, um sie ausgeblendet zu lassen.</string>
+    <string name="settings_coach_quick_prompts_add_builtin">Eingebauten hinzufügen</string>
+    <string name="settings_coach_quick_prompts_add_custom">Eigenen hinzufügen</string>
+    <string name="settings_coach_quick_prompts_custom_label">Beschriftung</string>
+    <string name="settings_coach_quick_prompts_custom_prompt">Prompttext</string>
+
     <string name="progress_range_week">1W</string>
 
     <string name="progress_range_month">1M</string>
@@ -1756,6 +1769,7 @@ für dich ein</string>
     <string name="ambient_saturation_rich">Kräftig</string>
     <string name="settings_ambient_speed">Ambient-Geschwindigkeit</string>
     <string name="ambient_speed_calm">Ruhig</string>
+    <string name="ambient_speed_standard">Standard</string>
     <string name="ambient_speed_lively">Zügig</string>
     <string name="settings_ambient_palette">Ambient-Palette</string>
     <string name="ambient_palette_accent">Akzent</string>
@@ -2001,7 +2015,7 @@ für dich ein</string>
 
     <string name="settings_ai_reasoning_effort">Denkaufwand</string>
 
-    <string name="settings_ai_reasoning_effort_footer">OpenRouter-Modelle: legt das Denkbudget fest. Eigene Server und Ollama: sendet reasoning_effort, sofern der Server es unterstützt. Lehnt dein Server die Anfrage ab, wähl Automatisch.</string>
+    <string name="settings_ai_reasoning_effort_footer">Modelle mit Denkbudget: legt fest, wie intensiv sie denken. Eigene Server und Ollama: sendet reasoning_effort, sofern der Server es unterstützt. Lehnt dein Server die Anfrage ab, wähl Automatisch.</string>
 
     <string name="ai_reasoning_effort_auto">Automatisch</string>
 
@@ -2016,11 +2030,17 @@ für dich ein</string>
 
     <string name="settings_ai_vision_model_unset">(gleich wie Modell)</string>
 
-    <string name="settings_ai_vision_model_footer">Fotos verwenden dieses Modell; Text verwendet das Hauptmodell. Ohne Auswahl wird für alles das Hauptmodell verwendet.</string>
+    <string name="settings_ai_vision_model_footer">Fotos verwenden dieses Modell; Text verwendet das Hauptmodell, oder das Food-Modell, wenn eines gesetzt ist.</string>
 
     <string name="settings_ai_coach_model">Coach-Modell</string>
+    <string name="settings_ai_coach_model_unset">(gleich wie Modell)</string>
 
-    <string name="settings_ai_coach_model_footer">Coach verwendet dieses Modell. Essensprotokollierung und Ziel-Neuberechnung nutzen weiterhin das Hauptmodell. Ohne Auswahl verwendet auch Coach das Hauptmodell.</string>
+    <string name="settings_ai_coach_model_footer">Coach verwendet dieses Modell. Essensprotokollierung folgt dem Food-Modell. Ohne Auswahl verwendet auch Coach das Hauptmodell.</string>
+
+    <string name="settings_ai_analysis_model">Food-Modell</string>
+    <string name="settings_ai_analysis_model_unset">(gleich wie Modell)</string>
+
+    <string name="settings_ai_analysis_model_footer">Essensprotokollierung, Was wäre wenn und Ziel-Neuberechnung verwenden dieses Modell. Ohne Auswahl wird für alles das Hauptmodell verwendet.</string>
 
     <string name="settings_speech_language">Sprache</string>
 
@@ -2080,6 +2100,18 @@ für dich ein</string>
     <string name="settings_meal_constituents_footer">Wenn diese Funktion aktiviert ist, kann die KI zusammengesetzte Mahlzeiten in bearbeitbare Zutaten mit Grammangaben und Einheiten aufschlüsseln. Mikronährstoffe je Zutat werden nur bei stärkeren Cloud-Modellen angefragt; kleinere Modelle liefern weiterhin die Zutatenliste mit Makros.</string>
 
     <string name="settings_meal_constituents_footer_on_device">Nicht verfügbar für Gemma auf dem Gerät: Die Aufschlüsselung der Zutaten erfordert ein leistungsfähigeres Modell. Wechsle zu einem Cloud-Anbieter, um diese Funktion zu aktivieren.</string>
+    <string name="settings_offline_index_section">Offline-Produktdaten</string>
+    <string name="settings_offline_pack_usda_name">USDA-Markenprodukte (GTIN)</string>
+    <string name="settings_offline_pack_usda_desc">Optionaler Download: Barcode → Name, Marke und Kalorien für US-Verpackungsprodukte (USDA FoodData Central, gemeinfrei).</string>
+    <string name="settings_offline_pack_offde_name">Open Food Facts Deutschland</string>
+    <string name="settings_offline_pack_offde_desc">Optionaler Download: Barcode → Name, Marke und Kalorien für in Deutschland verkaufte Produkte (Open Food Facts, ODbL).</string>
+    <string name="settings_offline_pack_download">Zum Laden tippen</string>
+    <string name="settings_offline_pack_downloading">Download %1$d%%</string>
+    <string name="settings_offline_pack_installed">v%1$s · %2$s MB</string>
+    <string name="settings_offline_pack_failed">Download fehlgeschlagen — zum Wiederholen tippen</string>
+    <string name="settings_offline_index_wifi_only">Nur über WLAN laden</string>
+    <string name="settings_offline_index_wifi_only_desc">Downloads warten auf ein nicht getaktetes Netzwerk, es sei denn, du schaltest das aus.</string>
+    <string name="settings_offline_index_license_footer">Paketdaten: Open Food Facts (Open-Database-Lizenz) und USDA FoodData Central (gemeinfrei). Pakete laden einmalig von der Release-Seite dieses Projekts; Scans fragen nirgendwo sonst an. Tippe auf ein geladenes Paket, um es zu entfernen.</string>
 
     <string name="on_device_model_privacy_notice">Wird vollständig auf diesem Gerät ausgeführt. Nichts, was du eingibst oder fotografierst, wird an einen Server gesendet. Beim Herunterladen wird die Modelldatei direkt von Hugging Face (%1$s) abgerufen, einem Drittanbieter-Host, der von dieser App ansonsten nicht genutzt wird.</string>
 
@@ -2148,6 +2180,9 @@ für dich ein</string>
     <string name="settings_profile_rename">Profil umbenennen</string>
     <string name="settings_profile_delete">Profil löschen</string>
     <string name="settings_profile_delete_confirm">Dieses Profil löschen? Sein API-Schlüssel wird ebenfalls entfernt.</string>
+    <string name="settings_ai_switch_provider_title">Anbieter wechseln?</string>
+    <string name="settings_ai_switch_provider_body">Beim Wechsel werden der API-Schlüssel dieses Profils, der Endpunkt und die Vision-, Coach- und Food-Modell-Einstellungen gelöscht. Sie gehören zum alten Anbieter.</string>
+    <string name="settings_ai_switch_provider_confirm">Wechseln</string>
     <string name="settings_profile_fallback">Fallback-Profil</string>
     <string name="settings_profile_fallback_none">Ohne</string>
     <string name="sheet_profile_name">Profilname</string>
@@ -2887,6 +2922,15 @@ für dich ein</string>
 
     <string name="home_calories_left">%1$s verbleiben</string>
     <string name="home_calories_eaten_a11y">Gegessen %1$s</string>
+    <string name="home_a11y_prev_day">Vorheriger Tag</string>
+    <string name="home_a11y_next_day">Nächster Tag</string>
+    <string name="home_planned_caption">+%1$s geplant</string>
+    <string name="home_budget_legend_title">So liest du die Kalorienanzeige</string>
+    <string name="home_budget_legend_eaten">Gegessen</string>
+    <string name="home_budget_legend_estimated_active">Geschätzter aktiver Kalorienverbrauch</string>
+    <string name="home_budget_legend_live_burn">Aktiver Kalorienverbrauch gerade jetzt</string>
+    <string name="home_budget_legend_over_typical">Über dem typischen Wert</string>
+    <string name="home_macro_card_summary">%1$s kcal · %2$s Protein · %3$s Kohlenhydrate · %4$s Fett · %5$s Ballaststoffe</string>
 
     <string name="home_calorie_budget_sheet_title">Das heutige Kalorienbudget</string>
 
@@ -3140,7 +3184,7 @@ für dich ein</string>
 
     <string name="settings_ai_read_timeout_unit">s</string>
 
-    <string name="settings_ai_read_timeout_value">%1$d s</string>
+    <string name="settings_ai_timeout_override">%1$d s · Profil-Override</string>
 
     <string name="settings_goal_tier">Prompt für Ziele-Neuberechnung</string>
 
@@ -3842,6 +3886,8 @@ für dich ein</string>
     <string name="progress_log_scale_metrics_title">Waagen-Werte erfassen</string>
     <string name="progress_estimated_smm">Geschätzte Skelettmuskulatur (Lee)</string>
     <string name="progress_estimated_smm_note">Anthropometrische Schätzung aus Arm, Oberschenkel und Wade · ± ~3 kg</string>
+    <string name="progress_scale_metrics_muscle_estimated">Muskelmasse (geschätzt)</string>
+    <string name="progress_estimated_smm_body_note">Anthropometrische Schätzung aus Gewicht, Größe, Alter und Geschlecht · ± ~3 kg</string>
     <string name="progress_overlay_off">Aus</string>
     <string name="progress_no_entries_in_range">Keine Einträge in diesem Zeitraum</string>
     <string name="progress_no_series_selected">Tippe oben auf eine Metrik, um sie hier anzuzeigen</string>
@@ -4208,6 +4254,11 @@ für dich ein</string>
         <item>Tab</item>
         <item>ausblenden</item>
     </string-array>
+    <string-array name="settings_search_kw_coach_quick_prompts">
+        <item>Coach</item>
+        <item>Prompts</item>
+        <item>Chips</item>
+    </string-array>
     <string-array name="settings_search_kw_ai_provider">
         <item>Gemini</item>
         <item>OpenAI</item>
@@ -4328,6 +4379,13 @@ für dich ein</string>
         <item>automatische Synchronisierung</item>
         <item>Server</item>
     </string-array>
+    <string-array name="settings_search_kw_saved_foods">
+        <item>Favoriten</item>
+        <item>Favorit</item>
+        <item>Bibliothek</item>
+        <item>Lebensmittelbibliothek</item>
+        <item>Ausgeblendet</item>
+    </string-array>
     <string-array name="settings_search_kw_clear_food_log">
         <item>löschen</item>
         <item>löschen</item>
@@ -4341,15 +4399,25 @@ für dich ein</string>
         <item>zurücksetzen</item>
         <item>Werkseinstellungen</item>
     </string-array>
-    <string name="ai_provider_chatgpt">ChatGPT-Tarif</string>
-    <string name="ai_provider_subtitle_chatgpt">Geeigneten ChatGPT-Plus- oder Pro-Tarif verwenden</string>
-    <string name="settings_chatgpt_account">ChatGPT-Konto</string>
-    <string name="settings_chatgpt_continue">Mit ChatGPT fortfahren</string>
-    <string name="settings_chatgpt_connecting">Verbindung wird hergestellt…</string>
-    <string name="settings_chatgpt_plan_enabled">Die Nutzung des ChatGPT-Tarifs ist für die Lebensmittelanalyse aktiviert. Die Nutzung wird mit deinem ChatGPT-Tarif geteilt.</string>
-    <string name="settings_chatgpt_plan_footer">Melde dich an, um einen geeigneten ChatGPT-Plus- oder Pro-Tarif für die Lebensmittelanalyse zu verwenden. Kein API-Schlüssel erforderlich.</string>
-    <string name="settings_chatgpt_plan_disabled">Du bist angemeldet, aber die Nutzung des ChatGPT-Tarifs ist nicht aktiviert. Tippe zum Autorisieren auf die Kontozeile.</string>
-    <string name="settings_chatgpt_revoke_unconfirmed">Lokal getrennt. Der entfernte Widerruf konnte nicht bestätigt werden; du kannst Chompass auch in den ChatGPT-Einstellungen entfernen.</string>
-    <string name="settings_chatgpt_manage_usage">ChatGPT-Nutzung verwalten</string>
-    <string name="settings_chatgpt_disconnect">ChatGPT trennen</string>
-</resources>
+
+    <string name="settings_nav_bar">Navigationsleiste</string>
+    <string name="settings_nav_bar_subtitle">Unten angedockte klassische Leiste oder schwebende Glas-Pille.</string>
+    <string name="settings_nav_bar_pill">Schwebende Pille</string>
+    <string name="settings_nav_bar_classic">Klassische Leiste</string>
+    <string name="export_settings_section">Einstellungs-Backup</string>
+    <string name="export_settings_row">Einstellungen exportieren</string>
+    <string name="export_settings_summary">Speichert Einstellungen als JSON-Datei. Enthält keine API-Schlüssel.</string>
+    <string name="export_settings_success">Einstellungen exportiert.</string>
+    <string name="export_settings_failed">Export der Einstellungen fehlgeschlagen: %1$s</string>
+    <string name="progress_sync_scale_metrics">Von der Waage synchronisieren</string>
+    <string name="progress_sync_scale_rationale">Chompass braucht die Berechtigung für Geräte in der Nähe, um mit deiner Waage zu sprechen.</string>
+    <string name="progress_sync_scale_grant">Erlauben</string>
+    <string name="progress_sync_scale_scanning">Suche nach deiner Waage … steig drauf</string>
+    <string name="progress_sync_scale_reading">Lese von %1$s …</string>
+    <string name="progress_sync_scale_done">%1$d neue Wiegungen importiert</string>
+    <string name="progress_sync_scale_failed">Waage-Sync fehlgeschlagen: %1$s</string>
+    <string name="progress_sync_scale_user_title">Deine Waage fragt, wer wiegt. Wähle dein Profil:</string>
+    <string name="progress_sync_scale_user_new">Als neuen Benutzer registrieren</string>
+    <string name="progress_sync_scale_consent_slot">Platz %1$d an %2$s braucht die 4-stellige PIN von der Waage.</string>
+    <string name="progress_sync_scale_consent_hint">PIN (4 Ziffern)</string>
+    </resources>

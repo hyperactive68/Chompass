@@ -729,7 +729,6 @@
     <string name="ai_provider_subtitle_ollama_cloud">Modèles hébergés d\'Ollama</string>
     <string name="settings_section_ai_profile">Profil</string>
     <string name="settings_section_ai_connection">Connexion</string>
-    <string name="settings_section_ai_advanced">Avancé</string>
     <string name="settings_ai_key_test">Tester</string>
     <string name="settings_ai_key_test_failed">Clé refusée : %1$s</string>
     <string name="settings_ai_key_remove_title">Supprimer la clé API ?</string>
@@ -801,6 +800,18 @@
     <string name="settings_gemini_google_search_footer">Si activé, Gemini peut effectuer une recherche web lorsque cela aide à répondre à une requête. Les recherches sont envoyées à Google. Google facture cela à votre projet API Gemini. Sur les modèles Gemini 3, chaque recherche exécutée compte dans l\'utilisation ; sur Gemini 2.5 et versions antérieures, la facturation est par requête utilisant la recherche.</string>
     <string name="settings_health_unavailable_platform">Health Connect n\'est pas disponible pour les apps sur cet appareil. À partir d\'Android 14, c\'est un module système. Si Réglages affiche Health Connect mais Chompass ne peut pas se connecter, votre ROM n\'expose peut-être pas le service Health Connect (fréquent sur certaines builds de-Googled). Chompass n\'exige ni Play Store ni Play sandboxé. Utilisez plutôt l\'export/import du journal et des mesures corporelles, ou WebDAV en option.</string>
     <string name="settings_meal_constituents_footer_on_device">Indisponible pour Gemma sur l\'appareil : le détail des ingrédients nécessite un modèle plus puissant. Passez à un fournisseur cloud pour activer cette option.</string>
+    <string name="settings_offline_index_section">Données produits hors ligne</string>
+    <string name="settings_offline_pack_usda_name">Produits de marque USDA (GTIN)</string>
+    <string name="settings_offline_pack_usda_desc">Téléchargement facultatif : code-barres → nom, marque et calories des aliments emballés américains (USDA FoodData Central, domaine public).</string>
+    <string name="settings_offline_pack_offde_name">Open Food Facts Allemagne</string>
+    <string name="settings_offline_pack_offde_desc">Téléchargement facultatif : code-barres → nom, marque et calories des produits vendus en Allemagne (Open Food Facts, ODbL).</string>
+    <string name="settings_offline_pack_download">Toucher pour télécharger</string>
+    <string name="settings_offline_pack_downloading">Downloading %1$d%%</string>
+    <string name="settings_offline_pack_installed">v%1$s · %2$s MB</string>
+    <string name="settings_offline_pack_failed">Échec du téléchargement — toucher pour réessayer</string>
+    <string name="settings_offline_index_wifi_only">Télécharger uniquement en Wi-Fi</string>
+    <string name="settings_offline_index_wifi_only_desc">Les téléchargements attendent une connexion non limitée sauf si vous désactivez cette option.</string>
+    <string name="settings_offline_index_license_footer">Données des paquets : Open Food Facts (Licence base de données ouverte) et USDA FoodData Central (domaine public). Les paquets se téléchargent une fois depuis la page des versions de ce projet ; les scans n\'interrogent rien de nouveau. Toucher un paquet téléchargé pour le retirer.</string>
     <string name="settings_photo_note_prompt">Demander une note photo</string>
     <string name="settings_photo_note_prompt_footer">Si activé, la saisie par photo met en évidence le champ note avant Analyser. Vous pouvez quand même confirmer et continuer sans note.</string>
     <string name="settings_progress_default_range">Période par défaut des progrès</string>
@@ -1139,6 +1150,15 @@
     <string name="home_calories_goal_plus_active">Objectif %1$s + %2$s actives</string>
     <string name="home_calories_left">%1$s restantes</string>
     <string name="home_calories_eaten_a11y">Ingérées %1$s</string>
+    <string name="home_a11y_prev_day">Jour précédent</string>
+    <string name="home_a11y_next_day">Jour suivant</string>
+    <string name="home_planned_caption">+%1$s prévu</string>
+    <string name="home_budget_legend_title">Comment lire la jauge</string>
+    <string name="home_budget_legend_eaten">Ingérées</string>
+    <string name="home_budget_legend_estimated_active">Dépense active estimée</string>
+    <string name="home_budget_legend_live_burn">Dépense active en ce moment</string>
+    <string name="home_budget_legend_over_typical">Au-dessus de la normale</string>
+    <string name="home_macro_card_summary">%1$s kcal · %2$s Protéines · %3$s Glucides · %4$s Lipides · %5$s Fibres</string>
     <string name="home_display_calorie_mode">Jauge de calories</string>
     <string name="home_display_group_calorie">Jauge de calories</string>
     <string name="home_display_calorie_mode_pointer">Mode de la jauge de calories</string>
@@ -1462,7 +1482,6 @@
     <string name="settings_ai_privacy_ondevice">Entièrement privé : l\'analyse alimentaire, « Et si… ? » et les estimations d\'objectifs tournent sur cet appareil. Rien n\'est envoyé à un serveur.</string>
     <string name="settings_ai_read_timeout">Délai de lecture de l\'IA</string>
     <string name="settings_ai_read_timeout_unit">s</string>
-    <string name="settings_ai_read_timeout_value">%1$d s</string>
     <string name="settings_goal_tier">Prompt de recalcul des objectifs</string>
     <string name="settings_goal_tier_footer">La quantité de données que le recalcul des objectifs envoie au modèle. Sûr envoie des résumés compacts, adaptés aux petits modèles ou aux modèles locaux. Intelligent envoie tout votre historique de poids et d\'aliments pour qu\'un grand modèle juge lui-même les tendances. Automatique choisit selon le nom du modèle.</string>
     <string name="goal_tier_auto">Automatique</string>
@@ -2279,6 +2298,8 @@ macros rééquilibrées au nouveau total calorique</string>
     <string name="progress_log_scale_metrics_title">Enregistrer les mesures de balance</string>
     <string name="progress_estimated_smm">Muscle squelettique estimé (Lee)</string>
     <string name="progress_estimated_smm_note">Estimation anthropométrique (bras, cuisse, mollet) · ± ~3 kg</string>
+    <string name="progress_scale_metrics_muscle_estimated">Masse musculaire (estimée)</string>
+    <string name="progress_estimated_smm_body_note">Estimation anthropométrique (poids, taille, âge, sexe) · ± ~3 kg</string>
     <string name="progress_overlay_off">Désactivé</string>
     <string name="progress_no_entries_in_range">Aucune entrée sur cette période</string>
     <string name="progress_no_series_selected">Touchez une métrique ci-dessus pour l\'afficher ici</string>
@@ -2838,15 +2859,21 @@ macros rééquilibrées au nouveau total calorique</string>
         <item>réinitialiser</item>
         <item>usine</item>
     </string-array>
-    <string name="ai_provider_chatgpt">Forfait ChatGPT</string>
-    <string name="ai_provider_subtitle_chatgpt">Utiliser un forfait ChatGPT Plus ou Pro éligible</string>
-    <string name="settings_chatgpt_account">Compte ChatGPT</string>
-    <string name="settings_chatgpt_continue">Continuer avec ChatGPT</string>
-    <string name="settings_chatgpt_connecting">Connexion…</string>
-    <string name="settings_chatgpt_plan_enabled">L’utilisation du forfait ChatGPT est activée pour l’analyse des aliments. Elle est partagée avec votre forfait ChatGPT.</string>
-    <string name="settings_chatgpt_plan_footer">Connectez-vous pour utiliser un forfait ChatGPT Plus ou Pro éligible pour l’analyse des aliments. Aucune clé API n’est requise.</string>
-    <string name="settings_chatgpt_plan_disabled">Vous êtes connecté, mais l’utilisation du forfait ChatGPT n’est pas activée. Touchez la ligne du compte pour l’autoriser.</string>
-    <string name="settings_chatgpt_revoke_unconfirmed">Déconnecté localement. La révocation à distance n’a pas pu être confirmée ; vous pouvez aussi supprimer Chompass dans les réglages de ChatGPT.</string>
-    <string name="settings_chatgpt_manage_usage">Gérer l’utilisation de ChatGPT</string>
-    <string name="settings_chatgpt_disconnect">Déconnecter ChatGPT</string>
-</resources>
+
+    <string name="settings_nav_bar">Barre de navigation</string>
+    <string name="settings_nav_bar_subtitle">Barre classique ancrée en bas ou pastille de verre flottante.</string>
+    <string name="settings_nav_bar_pill">Pastille flottante</string>
+    <string name="settings_nav_bar_classic">Barre classique</string>
+    <string name="export_settings_section">Sauvegarde des réglages</string>
+    <string name="export_settings_row">Exporter les réglages</string>
+    <string name="export_settings_summary">Enregistre les préférences dans un fichier JSON. Aucune clé d\'API n\'est incluse.</string>
+    <string name="export_settings_success">Réglages exportés.</string>
+    <string name="export_settings_failed">Échec de l\'export des réglages : %1$s</string>
+    <string name="progress_sync_scale_metrics">Synchroniser depuis la balance</string>
+    <string name="progress_sync_scale_rationale">Chompass a besoin de l\'autorisation des appareils à proximité pour communiquer avec votre balance.</string>
+    <string name="progress_sync_scale_grant">Accorder</string>
+    <string name="progress_sync_scale_scanning">Recherche de votre balance… montez dessus</string>
+    <string name="progress_sync_scale_reading">Lecture depuis %1$s…</string>
+    <string name="progress_sync_scale_done">%1$d nouvelles pesées importées</string>
+    <string name="progress_sync_scale_failed">Échec de la synchronisation de la balance : %1$s</string>
+    </resources>

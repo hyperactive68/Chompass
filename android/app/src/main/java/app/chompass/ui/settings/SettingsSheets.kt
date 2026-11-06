@@ -136,6 +136,17 @@ private fun ProviderPickerChipLabel(chip: ProviderPickerChip) {
             .padding(horizontal = 8.dp, vertical = 2.dp),
     )
 }
+/**
+ * True when switching the provider would clear stored state: the switch drops
+ * the key, endpoint and both per-feature model slots, so only warn when the
+ * active profile actually carries any of them.
+ */
+private fun providerSwitchClearsSettings(ui: SettingsUiState): Boolean =
+    ui.apiKeyMasked.isNotEmpty() ||
+        !ui.activeProfile?.baseUrl.isNullOrBlank() ||
+        ui.activeProfile?.visionModel != null ||
+        ui.activeProfile?.coachModel != null
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SettingsSheets(
@@ -164,7 +175,9 @@ internal fun SettingsSheets(
             onDismiss()
         }
     }
-    LaunchedEffect(sheet, ui.activeProfile?.id, ui.activeProfile?.baseUrl, ui.activeProvider) {
+    // Bumped by the model sheet's Refresh footer to re-run the lineup fetch.
+    var modelSheetRefresh by remember(sheet) { mutableIntStateOf(0) }
+    LaunchedEffect(sheet, ui.activeProfile?.id, ui.activeProfile?.baseUrl, ui.activeProvider, modelSheetRefresh) {
         if (sheet == SettingsSheet.AI_MODEL && ui.activeProvider == AIProvider.OLLAMA) {
             vm.fetchOllamaModels()
         }
@@ -209,6 +222,7 @@ internal fun SettingsSheets(
             when (sheet) {
                 SettingsSheet.AI_PROVIDER -> {
                     var providerQuery by remember { mutableStateOf("") }
+                    var pendingProviderSwitch by remember { mutableStateOf<AIProvider?>(null) }
                     val context = LocalContext.current
                     val directory = vm.container.providerDirectory
                     val rows = buildProviderPickerRows(
@@ -245,8 +259,15 @@ internal fun SettingsSheets(
                         onSelect = { row ->
                             when (row) {
                                 is ProviderPickerRow.Builtin -> {
-                                    vm.setProfileProvider(row.provider)
-                                    onDismiss()
+                                    val target = row.provider
+                                    if (target != ui.activeProvider && providerSwitchClearsSettings(ui)) {
+                                        // A real switch drops the key, endpoint and both
+                                        // model slots — name exactly what clears first.
+                                        pendingProviderSwitch = target
+                                    } else {
+                                        vm.setProfileProvider(target)
+                                        onDismiss()
+                                    }
                                 }
                                 is ProviderPickerRow.Directory -> {
                                     vm.selectOpenAiEndpoint(row.entry.baseUrl)
@@ -257,6 +278,26 @@ internal fun SettingsSheets(
                             }
                         },
                     )
+                    pendingProviderSwitch?.let { target ->
+                        AlertDialog(
+                            onDismissRequest = { pendingProviderSwitch = null },
+                            containerColor = glassDialogColor(MaterialTheme.colorScheme.surfaceContainerHigh),
+                            title = { Text(stringResource(R.string.settings_ai_switch_provider_title)) },
+                            text = { Text(stringResource(R.string.settings_ai_switch_provider_body)) },
+                            confirmButton = {
+                                TextButton(onClick = {
+                                    pendingProviderSwitch = null
+                                    vm.setProfileProvider(target)
+                                    onDismiss()
+                                }) { Text(stringResource(R.string.settings_ai_switch_provider_confirm)) }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { pendingProviderSwitch = null }) {
+                                    Text(stringResource(R.string.action_cancel))
+                                }
+                            },
+                        )
+                    }
                     if (!directory?.entries.isNullOrEmpty()) {
                         Spacer(Modifier.height(8.dp))
                         Text(
@@ -319,6 +360,18 @@ internal fun SettingsSheets(
                             stringResource(R.string.settings_ollama_models_error)
                         ui.activeProvider == AIProvider.OLLAMA_CLOUD && ui.runtimeModelsLoading ->
                             stringResource(R.string.settings_ollama_models_loading)
+                        ui.activeProvider.supportsRuntimeLineup &&
+                            ui.activeProvider != AIProvider.OLLAMA &&
+                            ui.activeProvider != AIProvider.OLLAMA_CLOUD &&
+                            ui.activeProvider != AIProvider.CUSTOM_OPENAI &&
+                            ui.runtimeModelsLoading ->
+                            stringResource(R.string.settings_ollama_models_loading)
+                        ui.activeProvider.supportsRuntimeLineup &&
+                            ui.activeProvider != AIProvider.OLLAMA &&
+                            ui.activeProvider != AIProvider.OLLAMA_CLOUD &&
+                            ui.activeProvider != AIProvider.CUSTOM_OPENAI &&
+                            ui.runtimeModelsFailed ->
+                            stringResource(R.string.settings_ollama_models_error)
                         ui.activeProvider == AIProvider.CUSTOM_OPENAI && ui.customModelsLoading ->
                             stringResource(R.string.settings_custom_models_loading)
                         ui.activeProvider == AIProvider.CUSTOM_OPENAI && ui.customModelsError ->
@@ -330,6 +383,11 @@ internal fun SettingsSheets(
                     customField = if (ui.activeProvider.supportsCustomModelName) {
                         { m -> vm.setProfileModel(m); onDismiss() }
                     } else null,
+                    footerButton = {
+                        TextButton(onClick = { modelSheetRefresh++ }) {
+                            Text(stringResource(R.string.action_refresh))
+                        }
+                    },
                     onDismiss = onDismiss
                 )
                 SettingsSheet.COACH_MODEL -> ListSheet(
@@ -390,6 +448,67 @@ internal fun SettingsSheets(
                     },
                     customField = if (ui.activeProvider.supportsCustomModelName) {
                         { m -> vm.setProfileCoachModel(m); onDismiss() }
+                    } else null,
+                    onDismiss = onDismiss
+                )
+                SettingsSheet.ANALYSIS_MODEL -> ListSheet(
+                    title = stringResource(R.string.settings_ai_analysis_model),
+                    // Same lineup as the Coach sheet — a logging pin reads from
+                    // the host's real catalog, not the vision list.
+                    items = listOf("") + when {
+                        ui.activeProvider == AIProvider.OLLAMA && !ui.ollamaModels.isNullOrEmpty() ->
+                            ui.ollamaModels!!.map { it.id }
+                        ui.activeProvider == AIProvider.CUSTOM_OPENAI ->
+                            app.chompass.services.ai.OpenAiModelsClient.mergeOverCurated(
+                                ui.directoryEntry?.visionModels ?: emptyList(),
+                                ui.customModels,
+                                sortRuntime = true,
+                            )
+                        ui.activeProvider == AIProvider.ON_DEVICE && ui.onDeviceModels.isNotEmpty() ->
+                            ui.onDeviceModels
+                        ui.activeProvider == AIProvider.OLLAMA_CLOUD ->
+                            app.chompass.services.ai.OpenAiModelsClient.catalogLineup(ui.runtimeModels)
+                        ui.activeProvider.supportsRuntimeLineup ->
+                            app.chompass.services.ai.OpenAiModelsClient.mergeOverCurated(
+                                ui.activeProvider.models,
+                                ui.runtimeModels,
+                                sortRuntime = true,
+                            )
+                        else -> ui.activeProvider.models
+                    },
+                    searchable = true,
+                    filterText = { it },
+                    label = { if (it.isEmpty()) stringResource(R.string.settings_ai_analysis_model_unset) else it },
+                    subtitle = { model ->
+                        when {
+                            ui.activeProvider == AIProvider.OLLAMA ->
+                                ui.ollamaModels?.find { it.id == model }?.subtitle
+                            model in ui.directoryEntry?.visionModels.orEmpty() ->
+                                stringResource(R.string.ai_model_accepts_images)
+                            else -> when (ui.activeProvider.modelTiers[model]) {
+                                "paid" -> stringResource(R.string.ai_model_tier_paid)
+                                "varies" -> stringResource(R.string.ai_model_tier_varies)
+                                else -> null
+                            }
+                        }
+                    },
+                    selected = { it == ui.activeProfile?.analysisModel.orEmpty() },
+                    onSelect = { vm.setProfileAnalysisModel(it.ifEmpty { null }); onDismiss() },
+                    footer = when {
+                        ui.activeProvider == AIProvider.OLLAMA && ui.ollamaModelsLoading ->
+                            stringResource(R.string.settings_ollama_models_loading)
+                        ui.activeProvider == AIProvider.OLLAMA && ui.ollamaModelsError ->
+                            stringResource(R.string.settings_ollama_models_error)
+                        ui.activeProvider == AIProvider.OLLAMA_CLOUD && ui.runtimeModelsLoading ->
+                            stringResource(R.string.settings_ollama_models_loading)
+                        ui.activeProvider == AIProvider.CUSTOM_OPENAI && ui.customModelsLoading ->
+                            stringResource(R.string.settings_custom_models_loading)
+                        ui.activeProvider == AIProvider.CUSTOM_OPENAI && ui.customModelsError ->
+                            stringResource(R.string.settings_custom_models_error)
+                        else -> stringResource(R.string.settings_ai_analysis_model_footer)
+                    },
+                    customField = if (ui.activeProvider.supportsCustomModelName) {
+                        { m -> vm.setProfileAnalysisModel(m); onDismiss() }
                     } else null,
                     onDismiss = onDismiss
                 )

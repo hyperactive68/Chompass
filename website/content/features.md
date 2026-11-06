@@ -47,11 +47,11 @@ The [Chompass PWA](https://chompass.app/app/) runs in any modern browser on phon
 
 **On-Device (Private)** in Settings → AI & Speech runs Gemma 4 Edge (E2B or E4B) via LiteRT-LM. One-time download (about 2.4-3.4 GB). No API key and no server upload for food text or photo analysis. Cloud AI remains more accurate; optional fallback retries in the cloud when on-device fails. The PWA has no on-device option; it always uses cloud AI with your own key.
 
-## Accuracy, honestly
+## Accuracy
 
-Accuracy comes down to the model you pick, not a Chompass secret. We test against labeled datasets and publish the results instead of quoting a single accuracy number.
+Accuracy depends on the model you pick. We test against labeled datasets and publish the results.
 
-Typed entry **with a stated portion** is close to solved: about 90% of estimates land within 20% of true calories. Photo entry is harder. Even the best AI models we tested land within 20% only about half the time, and that is true across the vision AI industry, not just here. A meal title or ingredient list without quantities is not the same as typed entry with grams. It may help identification on some models and datasets, but it does not close the portion gap. Full write-up: [published accuracy notes](https://codeberg.org/fitguy/chompass/src/branch/main/docs/ACCURACY.md).
+Typed entry **with a stated portion** is close to solved: about 90% of estimates land within 20% of true calories. Photo entry is harder. Even the best AI models we tested land within 20% only about half the time, and that is true across the vision AI industry, not just here. A meal title or ingredient list without quantities is not the same as typed entry with grams. It may help identification on some models and datasets, but it does not close the portion gap. Full write-up: [accuracy write-up](https://codeberg.org/fitguy/chompass/src/branch/main/docs/ACCURACY.md).
 
 ## AI Coach
 
@@ -82,23 +82,9 @@ The [settings guide](/settings/) lists every toggle on Android and the PWA. Excl
 
 Chompass is based on [Fud&nbsp;AI](https://github.com/apoorvdarshan/fud-ai) by **Apoorv Darshan**. Huge thanks for the open, bring-your-own-key food logger. Prefer workouts and the full upstream set? Use [Fud&nbsp;AI](https://github.com/apoorvdarshan/fud-ai).
 
-| Feature                     | [Fud&nbsp;AI](https://github.com/apoorvdarshan/fud-ai) | Chompass Android                           | [Chompass&nbsp;PWA](https://chompass.app/app/) |
-| --------------------------- | ------------------------------------------------------ | ------------------------------------------ | ---------------------------------------------- |
-| Banner ads                  | Brief AdMob; removed in 3.0.3                          | **Never shipped**                          | **Never shipped**                              |
-| On-device AI (Gemma&nbsp;4) | No                                                     | **Yes** (opt-in)                           | No (cloud, your key)                                |
-| Barcode                     | ML Kit                                                 | **FOSS zxing-cpp**                         | Browser / OFF                                  |
-| Workouts library            | Yes (~120&nbsp;MB APK)                                 | **Omitted** ({{< apk_arm64_note >}} arm64) | Omitted                                        |
-| Keto / diet modes           | No                                                     | **Yes**                                    | **Yes**                                        |
-| Health Connect              | Partial                                                | **Steps, exercise, sleep, HR, hydration**  | No                                             |
-| Widgets / notifications     | Upstream set                                           | **Yes**                                    | No (installable PWA)                           |
-| Languages                   | Upstream                                               | **18**                                     | **18** (core screens)                          |
-| Distribution                | Play-focused                                           | **F-Droid** / Obtainium / Codeberg         | **PWA** in any modern browser                  |
-| Open diary / body JSON      | Upstream formats                                       | **Yes**                                    | **Same contracts as Android**                  |
-
-- **No ads, no analytics:** never shipped AdMob; no tracking SDKs
-- **FOSS barcode:** zxing-cpp on Android; browser / Open Food Facts in the PWA
-- **Lean APK:** no workouts tab or bundled exercise library ({{< apk_arm64_note >}} arm64 / {{< apk_universal_note >}} universal in v{{< site_version >}}, vs ~120 MB upstream with workouts)
 - **Open data:** export diary and body metrics; import JSON, CSV, openScale, Health Connect (Android app)
 - **PWA + Android:** installable PWA in any modern browser; Material 3 Android app; shared JSON contracts
 
-Full comparison also lives in the [project README](https://codeberg.org/fitguy/chompass). Upstream: [Fud&nbsp;AI releases](https://github.com/apoorvdarshan/fud-ai/releases).
+Barcode scanning uses FOSS zxing-cpp on Android and a vendored zxing-wasm build in the browser. Product data comes from Open Food Facts (ODbL) and offline USDA and Swiss databases. Licenses and full list: [Credits](/credits/).
+
+Upstream: [Fud&nbsp;AI releases](https://github.com/apoorvdarshan/fud-ai/releases).

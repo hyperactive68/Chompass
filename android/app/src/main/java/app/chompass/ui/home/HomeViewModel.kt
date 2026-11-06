@@ -13,6 +13,7 @@ import app.chompass.data.loadLastGoalChangeSheet
 import app.chompass.models.ActiveBurnShade
 import app.chompass.models.GaugeBudget
 import app.chompass.models.AiProfile
+import app.chompass.models.analysisSelectedModel
 import app.chompass.models.resolveModelForRequest
 import app.chompass.models.ActiveCalorieSource
 import app.chompass.models.FoodEntry
@@ -146,7 +147,7 @@ internal fun queuedEntryWithAttemptRecord(
     lastAttemptProfile = profile.name,
     lastAttemptModel = resolveModelForRequest(
         profile.provider,
-        profile.model,
+        analysisSelectedModel(profile.analysisModel, profile.model),
         profile.visionModel,
         hasImages,
     ),
@@ -2160,7 +2161,12 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
                 )
             },
         ) { start ->
-            val lookup = OpenFoodFactsService.lookupWithImage(barcode, container.prefs)
+            val lookup = OpenFoodFactsService.lookupWithImage(
+                barcode,
+                container.prefs,
+                photoStore = container.barcodePhotoStore,
+                packs = container.packResolver,
+            )
             savePendingDraft(
                 analysis = lookup.analysis,
                 imageBytes = lookup.productImageBytes,

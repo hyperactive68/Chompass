@@ -720,7 +720,6 @@
     <string name="ai_provider_subtitle_ollama_cloud">Ollama 云端模型</string>
     <string name="settings_section_ai_profile">配置文件</string>
     <string name="settings_section_ai_connection">连接</string>
-    <string name="settings_section_ai_advanced">高级</string>
     <string name="settings_ai_key_test">测试</string>
     <string name="settings_ai_key_test_failed">密钥被拒绝：%1$s</string>
     <string name="settings_ai_key_remove_title">移除 API 密钥？</string>
@@ -792,6 +791,18 @@
     <string name="settings_gemini_google_search_footer">启用后，Gemini 可能在有助于回答提示时搜索网页。搜索查询会发送到 Google。Google 会向你的 Gemini API 项目计费。Gemini 3 模型中，每次执行的搜索查询计入用量；Gemini 2.5 及更早版本按使用搜索的每次提示计费。</string>
     <string name="settings_health_unavailable_platform">此设备上的应用无法使用 Health Connect。Android 14 及更高版本它是系统模块。若设置中显示 Health Connect 但 Chompass 无法连接，你的 ROM 可能未公开 Health Connect 服务（某些去 Google 化版本常见）。Chompass 不需要 Play Store 或沙盒 Play。请改用日记和体成分导出/导入，或可选 WebDAV。</string>
     <string name="settings_meal_constituents_footer_on_device">设备端 Gemma 不可用：食材分解需要更强的模型。切换到云端提供商以启用。</string>
+    <string name="settings_offline_index_section">离线产品数据</string>
+    <string name="settings_offline_pack_usda_name">USDA 品牌食品（GTIN）</string>
+    <string name="settings_offline_pack_usda_desc">可选下载：条形码 → 美国包装食品的名称、品牌和热量（USDA FoodData Central，公有领域）。</string>
+    <string name="settings_offline_pack_offde_name">Open Food Facts 德国</string>
+    <string name="settings_offline_pack_offde_desc">可选下载：条形码 → 在德国销售的产品的名称、品牌和热量（Open Food Facts，ODbL）。</string>
+    <string name="settings_offline_pack_download">点按以下载</string>
+    <string name="settings_offline_pack_downloading">Downloading %1$d%%</string>
+    <string name="settings_offline_pack_installed">v%1$s · %2$s MB</string>
+    <string name="settings_offline_pack_failed">下载失败 — 点按重试</string>
+    <string name="settings_offline_index_wifi_only">仅通过 Wi-Fi 下载</string>
+    <string name="settings_offline_index_wifi_only_desc">除非关闭此开关，数据包下载会等待不计流量的网络。</string>
+    <string name="settings_offline_index_license_footer">数据包内容：Open Food Facts（开放数据库许可）和 USDA FoodData Central（公有领域）。数据包从本项目的发布页面一次性下载；扫描本身不会向任何新地方发送查询。点按已下载的数据包即可移除。</string>
     <string name="settings_photo_note_prompt">要求填写照片备注</string>
     <string name="settings_photo_note_prompt_footer">开启后，照片录入在分析前会突出备注字段。你仍可确认并继续，无需备注。</string>
     <string name="settings_progress_default_range">进度默认范围</string>
@@ -1103,6 +1114,15 @@
     <string name="home_calories_goal_plus_active">目标 %1$s + 主动 %2$s</string>
     <string name="home_calories_left">剩余 %1$s</string>
     <string name="home_calories_eaten_a11y">摄入 %1$s</string>
+    <string name="home_a11y_prev_day">前一天</string>
+    <string name="home_a11y_next_day">下一天</string>
+    <string name="home_planned_caption">+%1$s 已计划</string>
+    <string name="home_budget_legend_title">如何读懂表盘</string>
+    <string name="home_budget_legend_eaten">摄入</string>
+    <string name="home_budget_legend_estimated_active">估计的主动消耗</string>
+    <string name="home_budget_legend_live_burn">当前主动消耗</string>
+    <string name="home_budget_legend_over_typical">高于平常</string>
+    <string name="home_macro_card_summary">%1$s 千卡 · %2$s 蛋白质 · %3$s 碳水 · %4$s 脂肪 · %5$s 纤维</string>
     <string name="home_display_calorie_mode">热量表盘</string>
     <string name="home_display_group_calorie">热量表盘</string>
     <string name="home_display_calorie_mode_pointer">热量表盘模式</string>
@@ -1402,7 +1422,6 @@
     <string name="settings_ai_privacy_ondevice">完全私密：食物分析、“会怎样？”和目标估算都在本设备运行，不会发送到服务器。</string>
     <string name="settings_ai_read_timeout">AI 读取超时</string>
     <string name="settings_ai_read_timeout_unit">秒</string>
-    <string name="settings_ai_read_timeout_value">%1$d 秒</string>
     <string name="settings_goal_tier">目标重新计算提示词</string>
     <string name="settings_goal_tier_footer">目标重新计算向模型发送多少数据。“保守”发送精简摘要，适合小型或本地模型。“智能”发送完整的体重和饮食历史，让大型模型自行判断趋势。“自动”按模型名称选择。</string>
     <string name="goal_tier_auto">自动</string>
@@ -2250,6 +2269,8 @@
     <string name="progress_log_scale_metrics_title">记录体脂秤指标</string>
     <string name="progress_estimated_smm">估算骨骼肌量（Lee）</string>
     <string name="progress_estimated_smm_note">由上臂、大腿和小腿的围度估算 · ± ~3 公斤</string>
+    <string name="progress_scale_metrics_muscle_estimated">肌肉量（估算）</string>
+    <string name="progress_estimated_smm_body_note">根据体重、身高、年龄和性别的估算 · ± ~3 公斤</string>
     <string name="progress_overlay_off">关闭</string>
     <string name="progress_no_entries_in_range">该时间段内暂无记录</string>
     <string name="progress_no_series_selected">点按上方的指标以在此显示</string>
@@ -2821,15 +2842,21 @@
         <item>重置</item>
         <item>出厂</item>
     </string-array>
-    <string name="ai_provider_chatgpt">ChatGPT 套餐</string>
-    <string name="ai_provider_subtitle_chatgpt">使用符合条件的 ChatGPT Plus 或 Pro 套餐</string>
-    <string name="settings_chatgpt_account">ChatGPT 账户</string>
-    <string name="settings_chatgpt_continue">使用 ChatGPT 继续</string>
-    <string name="settings_chatgpt_connecting">正在连接…</string>
-    <string name="settings_chatgpt_plan_enabled">已启用 ChatGPT 套餐进行食物分析。用量与您的 ChatGPT 套餐共享。</string>
-    <string name="settings_chatgpt_plan_footer">登录以使用符合条件的 ChatGPT Plus 或 Pro 套餐进行食物分析。无需 API 密钥。</string>
-    <string name="settings_chatgpt_plan_disabled">已登录，但未启用 ChatGPT 套餐用量。请点按账户行进行授权。</string>
-    <string name="settings_chatgpt_revoke_unconfirmed">已在本地断开连接。无法确认远程撤销；您也可以在 ChatGPT 设置中移除 Chompass。</string>
-    <string name="settings_chatgpt_manage_usage">管理 ChatGPT 用量</string>
-    <string name="settings_chatgpt_disconnect">断开 ChatGPT</string>
-</resources>
+
+    <string name="settings_nav_bar">导航栏</string>
+    <string name="settings_nav_bar_subtitle">底部停靠的经典栏或浮动玻璃胶囊。</string>
+    <string name="settings_nav_bar_pill">浮动胶囊</string>
+    <string name="settings_nav_bar_classic">经典栏</string>
+    <string name="export_settings_section">设置备份</string>
+    <string name="export_settings_row">导出设置</string>
+    <string name="export_settings_summary">将偏好设置保存为 JSON 文件。不包含 API 密钥。</string>
+    <string name="export_settings_success">设置已导出。</string>
+    <string name="export_settings_failed">导出设置失败：%1$s</string>
+    <string name="progress_sync_scale_metrics">从体脂秤同步</string>
+    <string name="progress_sync_scale_rationale">Chompass 需要“附近设备”权限才能与您的体脂秤通信。</string>
+    <string name="progress_sync_scale_grant">授权</string>
+    <string name="progress_sync_scale_scanning">正在寻找您的体脂秤…请站上去</string>
+    <string name="progress_sync_scale_reading">正在从 %1$s 读取…</string>
+    <string name="progress_sync_scale_done">已导入 %1$d 条新的体重记录</string>
+    <string name="progress_sync_scale_failed">体脂秤同步失败：%1$s</string>
+    </resources>

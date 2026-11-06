@@ -13,6 +13,7 @@ import app.chompass.data.FoodRepository
 import app.chompass.data.KeyStore
 import app.chompass.data.ManualActiveRepository
 import app.chompass.data.CaffeineRepository
+import app.chompass.scale.ScaleSyncController
 import app.chompass.data.NicotineRepository
 import app.chompass.data.NotesRepository
 import app.chompass.data.PreferencesStore
@@ -27,6 +28,7 @@ import app.chompass.models.CurrentMealSchedule
 import app.chompass.models.UserProfile
 import app.chompass.services.AdaptiveGoalResult
 import app.chompass.services.AdaptiveGoalsService
+import app.chompass.services.BarcodePhotoStore
 import app.chompass.services.FastingAutoPlanner
 import app.chompass.services.FastingGoalPlanner
 import app.chompass.services.FastingReminderPlanner
@@ -48,12 +50,15 @@ import app.chompass.services.ai.ProviderDirectory
 import app.chompass.services.grounding.FoodDatabaseSearch
 import app.chompass.services.grounding.GroundedFoodEntryService
 import app.chompass.services.grounding.GroundedEntryFeature
+import app.chompass.services.grounding.PackResolver
 import app.chompass.services.grounding.SwissFoodIndex
 import app.chompass.services.grounding.UsdaFoodIndex
 import app.chompass.services.health.HealthConnectManager
 import app.chompass.services.health.HealthConnectReadSync
 import app.chompass.services.health.HealthSyncWorker
 import app.chompass.services.health.HomeActivityReader
+import app.chompass.services.offline.InstalledPackResolver
+import app.chompass.services.offline.OfflineIndexManager
 import app.chompass.sync.SyncRepository
 import app.chompass.sync.GoogleDriveSyncService
 import app.chompass.utils.LocaleHelper
@@ -101,6 +106,9 @@ class ChompassApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // Vendored openScale drivers log through LogManager (third_party/openscale/
+        // SNAPSHOT.md); logcat only — file logging stays a vendored-app feature.
+        com.health.openscale.core.utils.LogManager.init(this, enableLoggingToFile = false)
         container = AppContainer(this)
         // API < 33: notification/widget/receiver contexts localize through the
         // cached legacy tag. One small DataStore read at cold start; the first
@@ -270,6 +278,14 @@ class AppContainer(app: ChompassApp) {
     val bodyFatRepository = BodyFatRepository(prefs, profileRepository, health, syncRepository)
     val bodyMeasurementRepository = BodyMeasurementRepository(prefs, syncRepository)
     val bodyCompositionRepository = BodyCompositionRepository(prefs, profileRepository, health, syncRepository)
+    // Native BLE scale sync (vendored openScale drivers, third_party/openscale/SNAPSHOT.md).
+    val scaleSyncController = ScaleSyncController(
+        appContext,
+        profileRepository,
+        weightRepository,
+        bodyFatRepository,
+        bodyCompositionRepository,
+    )
     val chatRepository = ChatRepository(prefs)
     val waterRepository = WaterRepository(prefs, health, syncRepository).apply {
         // Re-arm the adaptive reminder chain after every water entry so the next
@@ -301,6 +317,18 @@ class AppContainer(app: ChompassApp) {
     val weatherRepository = WeatherRepository(prefs, openMeteo)
 
     val chatGptAuth = ChatGptAuthManager(appContext, keyStore, FoodAnalysisService.defaultClient)
+
+    /** Disk cache of OFF product photos (Codeberg #160): repeat scans render from disk. */
+    val barcodePhotoStore by lazy(LazyThreadSafetyMode.NONE) { BarcodePhotoStore(appContext) }
+
+    /**
+     * Downloadable offline barcode packs (USDA GTIN + Open Food Facts
+     * Germany): installer/state plus open read-only handles for the barcode
+     * lookup chain.
+     */
+    val offlineIndexManager by lazy(LazyThreadSafetyMode.NONE) { OfflineIndexManager(appContext, prefs) }
+    val packResolver: PackResolver by lazy(LazyThreadSafetyMode.NONE) { InstalledPackResolver(offlineIndexManager) }
+
     val onDeviceLlmGateway = OnDeviceLlmGateway(appContext, prefs)
     val onDeviceModelDownloadManager = ModelDownloadManager(appContext)
     val foodAnalysis = FoodAnalysisService(

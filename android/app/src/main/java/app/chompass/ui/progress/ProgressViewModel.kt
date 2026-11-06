@@ -23,6 +23,7 @@ import app.chompass.models.BodyMeasurement
 import app.chompass.models.DailyFoodTotals
 import app.chompass.models.HomeTopNutrient
 import app.chompass.models.FoodEntry
+import app.chompass.scale.ScaleSyncState
 import app.chompass.models.GoalJournalEntry
 import app.chompass.models.MacroPlanResolver
 import app.chompass.models.UserProfile
@@ -151,6 +152,26 @@ class ProgressViewModel(private val container: AppContainer) : ViewModel() {
      *  unavailable, or no wellness read permission was granted. */
     private val _wellness = MutableStateFlow<List<DailyWellness>>(emptyList())
     val wellness: StateFlow<List<DailyWellness>> = _wellness.asStateFlow()
+
+    /** Native BLE scale sync (vendored openScale drivers). One run at a time;
+     *  entries land through the normal repository Flows, so no extra refresh. */
+    val scaleSyncState: StateFlow<ScaleSyncState> = container.scaleSyncController.state
+
+    fun startScaleSync() {
+        viewModelScope.launch { container.scaleSyncController.startAndAwait() }
+    }
+
+    fun cancelScaleSync() {
+        container.scaleSyncController.cancel()
+    }
+
+    fun onScaleUserSelected(scaleIndex: Int) {
+        container.scaleSyncController.onUserSelected(scaleIndex)
+    }
+
+    fun onScaleConsentEntered(consent: Int) {
+        container.scaleSyncController.onConsentEntered(consent)
+    }
 
     init {
         viewModelScope.launch {

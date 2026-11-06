@@ -23,7 +23,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import app.chompass.services.FillGapsFeature
@@ -49,6 +48,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.withFrameNanos
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 
@@ -119,6 +119,10 @@ import androidx.compose.foundation.layout.WindowInsets
 
 import app.chompass.ui.components.energyUnitLabel
 import app.chompass.ui.navigation.LocalEnergyUnit
+
+/** 0-based flat index of the ServingQuantityCard item in the edit sheet list (see #159 scroll). */
+private const val SERVING_QUANTITY_ITEM_INDEX = 8
+
 /**
  * Edit page for an existing FoodEntry. Visually identical to [FoodResultSheet]
  * (the first-time review page), so the edit experience matches the logging
@@ -186,6 +190,26 @@ fun EditFoodEntrySheet(
     // sheet thresholds (maintainer decision 2026-08-18) so a read-only scroll
     // gesture cannot dismiss; only a decisive pull/flick can.
     val listState = rememberLazyListState()
+
+    // #159: with the compact hero + name + meal/date rows the serving card can
+    // open below the fold, leaving the amount — the field the user tapped the
+    // entry to reach — out of view. One-shot on open: if neither the Serving
+    // header nor the card is in the first viewport, scroll the header in.
+    // SERVING_QUANTITY_ITEM_INDEX ties to the fixed items above the card
+    // (0 hero · 1 Food details header · 2 name row · 3 Meal header · 4 meal
+    // row · 5 Date/time header · 6 date/time card · 7 Serving header) —
+    // update both when inserting items above the serving card.
+    LaunchedEffect(currentBaseEntry.id) {
+        withFrameNanos { }
+        val info = listState.layoutInfo
+        if (info.viewportEndOffset <= info.viewportStartOffset) return@LaunchedEffect
+        val visible = info.visibleItemsInfo.any {
+            it.index in (SERVING_QUANTITY_ITEM_INDEX - 1)..SERVING_QUANTITY_ITEM_INDEX
+        }
+        if (!visible) {
+            runCatching { listState.animateScrollToItem(SERVING_QUANTITY_ITEM_INDEX - 1) }
+        }
+    }
 
     // Serving-less entries with a unit quantity carry an honest portion base
     // (Codeberg #89); pure-gram entries keep null (Codeberg #10 follow-up).
@@ -776,7 +800,7 @@ fun EditFoodEntrySheet(
             }
 
             item { SheetSectionHeader(stringResource(R.string.sheet_serving)) }
-            item {
+            item(key = "serving-quantity") {
                 ServingQuantityCard(
                     quantityText = servingQuantityText,
                     onQuantityChange = { newValue ->
@@ -1122,7 +1146,8 @@ fun EditFoodEntrySheet(
                                             color = MaterialTheme.colorScheme.outline
                                         )
                                     },
-                                    shape = RoundedCornerShape(percent = 50),
+                                    // Fixed radius: percent=50 corners scale with the box and clip once the note grows (FoodSheetPrimitives SheetPillCard precedent).
+                                    shape = MaterialTheme.shapes.large,
                                     modifier = Modifier.fillMaxWidth().heightIn(min = 90.dp)
                                 )
                             } else if (!isReprocessing) {
@@ -1232,7 +1257,8 @@ fun EditFoodEntrySheet(
                                 color = MaterialTheme.colorScheme.outline
                             )
                         },
-                        shape = RoundedCornerShape(percent = 50),
+                        // Fixed radius: percent=50 corners scale with the box and clip once the note grows (FoodSheetPrimitives SheetPillCard precedent).
+                        shape = MaterialTheme.shapes.large,
                         modifier = Modifier.fillMaxWidth().heightIn(min = 90.dp)
                     )
                 }

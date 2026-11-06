@@ -201,7 +201,6 @@
     <string name="ai_provider_subtitle_ollama_cloud">Ollama bulut modelleri</string>
     <string name="settings_section_ai_profile">Profil</string>
     <string name="settings_section_ai_connection">Bağlantı</string>
-    <string name="settings_section_ai_advanced">Gelişmiş</string>
     <string name="settings_ai_key_test">Test et</string>
     <string name="settings_ai_key_test_failed">Anahtar reddedildi: %1$s</string>
     <string name="settings_ai_key_remove_title">API anahtarı kaldırılsın mı?</string>
@@ -1153,6 +1152,18 @@
     <string name="settings_meal_constituents">Öğün malzemesi dökümü</string>
     <string name="settings_meal_constituents_footer">Etkinken AI, karma öğünleri gram ve birimlerle düzenlenebilir malzemelere ayırabilir. Malzeme başına mikro besinler yalnızca daha güçlü bulut modellerinden istenir; küçük modeller yine de makrolu malzeme listesini döndürür.</string>
     <string name="settings_meal_constituents_footer_on_device">Cihazdaki Gemma için kullanılamaz: malzeme dökümü daha güçlü bir model gerektirir. Bunu etkinleştirmek için bir bulut sağlayıcısına geç.</string>
+    <string name="settings_offline_index_section">Çevrimdışı ürün verileri</string>
+    <string name="settings_offline_pack_usda_name">USDA markalı gıdalar (GTIN)</string>
+    <string name="settings_offline_pack_usda_desc">İsteğe bağlı indirme: barkod → ABD paketli gıdalar için ad, marka ve kalori (USDA FoodData Central, kamu malı).</string>
+    <string name="settings_offline_pack_offde_name">Open Food Facts Almanya</string>
+    <string name="settings_offline_pack_offde_desc">İsteğe bağlı indirme: barkod → Almanya\'da satılan ürünler için ad, marka ve kalori (Open Food Facts, ODbL).</string>
+    <string name="settings_offline_pack_download">İndirmek için dokun</string>
+    <string name="settings_offline_pack_downloading">Downloading %1$d%%</string>
+    <string name="settings_offline_pack_installed">v%1$s · %2$s MB</string>
+    <string name="settings_offline_pack_failed">İndirme başarısız — yeniden denemek için dokun</string>
+    <string name="settings_offline_index_wifi_only">Yalnızca Wi-Fi ile indir</string>
+    <string name="settings_offline_index_wifi_only_desc">Bunu kapatmadığınız sürece paket indirmeleri ölçülmeyen bir bağlantı bekler.</string>
+    <string name="settings_offline_index_license_footer">Paket verileri: Open Food Facts (Açık Veritabanı Lisansı) ve USDA FoodData Central (kamu malı). Paketler bu projenin sürüm sayfasından bir kez indirilir; taramalar hiçbir yere yeni sorgu göndermez. Kaldırmak için indirilmiş bir pakete dokunun.</string>
     <string name="on_device_model_privacy_notice">Tamamen bu cihazda çalışır. Yazdığın veya fotoğrafladığın hiçbir şey bir sunucuya gönderilmez. İndirme, model dosyasını doğrudan Hugging Face\'ten (%1$s) getirir; bu, uygulamanın başka şekilde kullanmadığı üçüncü taraf bir barındırıcıdır.</string>
     <string name="on_device_model_device_notice">Pixel 9a (GrapheneOS) üzerinde test edildi. Diğer cihazlar, özellikle alt seviye veya Tensor olmayan donanımlar henüz doğrulanmadı ve daha yavaş olabilir veya desteklenmeyebilir; orada bir bulut sağlayıcısı daha güvenli bir varsayılandır.</string>
     <string name="on_device_model_accuracy_notice">Bu modeller bulut tabanlı AI kadar doğru değildir. Özellikle daha küçük E2B modeliyle yanlış kaloriler, kaçırılan öğeler veya zayıf fotoğraf okumaları bekleyin. Güvenilir kayıt için bulut sağlayıcıları önerilen varsayılan olmaya devam eder.</string>
@@ -1563,6 +1574,15 @@
     <string name="home_display_show_active_calories_desc">Kalori göstergesinde bugünün aktif yakımını göster.</string>
     <string name="home_calories_left">%1$s kaldı</string>
     <string name="home_calories_eaten_a11y">Yenilen %1$s</string>
+    <string name="home_a11y_prev_day">Önceki gün</string>
+    <string name="home_a11y_next_day">Sonraki gün</string>
+    <string name="home_planned_caption">+%1$s planlandı</string>
+    <string name="home_budget_legend_title">Gösterge nasıl okunur</string>
+    <string name="home_budget_legend_eaten">Yenilen</string>
+    <string name="home_budget_legend_estimated_active">Tahmini aktif yakım</string>
+    <string name="home_budget_legend_live_burn">Şu andaki aktif yakım</string>
+    <string name="home_budget_legend_over_typical">Tipikten fazla</string>
+    <string name="home_macro_card_summary">%1$s kcal · %2$s Protein · %3$s Karbonhidrat · %4$s Yağ · %5$s Lif</string>
     <string name="home_calorie_budget_sheet_title">Bugünün kalori bütçesi</string>
     <string name="home_calorie_budget_source_measured">Health Connect\'ten aktif kaloriler</string>
     <string name="home_calorie_budget_day_type_typical">Typical active burn for %1$s days is %2$d %4$s (14-day average is %3$d %4$s).</string>
@@ -1700,7 +1720,6 @@
     <string name="settings_calc_methods">Hesaplama Yöntemleri</string>
     <string name="settings_ai_read_timeout">AI okuma zaman aşımı</string>
     <string name="settings_ai_read_timeout_unit">s</string>
-    <string name="settings_ai_read_timeout_value">%1$d s</string>
     <string name="settings_goal_tier">Hedef yeniden hesaplama istemi</string>
     <string name="settings_goal_tier_footer">Hedef yeniden hesaplaması modele ne kadar veri gönderdiğini belirler. Güvenli, küçük veya yerel modeller için uygun kompakt özetler gönderir. Akıllı, büyük bir modelin trendleri kendisi değerlendirebilmesi için tam kilo ve yemek geçmişinizi gönderir. Otomatik, model adına göre seçim yapar.</string>
     <string name="goal_tier_auto">Otomatik</string>
@@ -2271,6 +2290,8 @@ makrolar yeni kalori toplamına göre yeniden dengelenir</string>
     <string name="progress_log_scale_metrics_title">Tartı ölçümlerini kaydet</string>
     <string name="progress_estimated_smm">Tahmini iskelet kası (Lee)</string>
     <string name="progress_estimated_smm_note">Kol, uyluk ve baldırdan antropometrik tahmin · ± ~3 kg</string>
+    <string name="progress_scale_metrics_muscle_estimated">Kas kütlesi (tahmini)</string>
+    <string name="progress_estimated_smm_body_note">Kilo, boy, yaş ve cinsiyetten antropometrik tahmin · ± ~3 kg</string>
     <string name="progress_overlay_off">Kapalı</string>
     <string name="progress_no_entries_in_range">Bu aralıkta kayıt yok</string>
     <string name="progress_no_series_selected">Burada göstermek için yukarıdaki bir metriğe dokunun</string>
@@ -2842,15 +2863,21 @@ makrolar yeni kalori toplamına göre yeniden dengelenir</string>
         <item>sıfırla</item>
         <item>fabrika ayarları</item>
     </string-array>
-    <string name="ai_provider_chatgpt">ChatGPT planı</string>
-    <string name="ai_provider_subtitle_chatgpt">Uygun bir ChatGPT Plus veya Pro planı kullanın</string>
-    <string name="settings_chatgpt_account">ChatGPT hesabı</string>
-    <string name="settings_chatgpt_continue">ChatGPT ile devam et</string>
-    <string name="settings_chatgpt_connecting">Bağlanıyor…</string>
-    <string name="settings_chatgpt_plan_enabled">Yemek analizi için ChatGPT planı kullanımı etkin. Kullanım, ChatGPT planınızla paylaşılır.</string>
-    <string name="settings_chatgpt_plan_footer">Yemek analizi için uygun bir ChatGPT Plus veya Pro planını kullanmak üzere oturum açın. API anahtarı gerekmez.</string>
-    <string name="settings_chatgpt_plan_disabled">Oturum açıldı ancak ChatGPT planı kullanımı etkin değil. Yetki vermek için hesap satırına dokunun.</string>
-    <string name="settings_chatgpt_revoke_unconfirmed">Yerel olarak bağlantı kesildi. Uzaktan iptal doğrulanamadı; Chompass’ı ChatGPT ayarlarından da kaldırabilirsiniz.</string>
-    <string name="settings_chatgpt_manage_usage">ChatGPT kullanımını yönet</string>
-    <string name="settings_chatgpt_disconnect">ChatGPT bağlantısını kes</string>
-</resources>
+
+    <string name="settings_nav_bar">Gezinme çubuğu</string>
+    <string name="settings_nav_bar_subtitle">Alta sabitlenen klasik çubuk ya da yüzen cam hap.</string>
+    <string name="settings_nav_bar_pill">Yüzen hap</string>
+    <string name="settings_nav_bar_classic">Klasik çubuk</string>
+    <string name="export_settings_section">Ayar yedeği</string>
+    <string name="export_settings_row">Ayarları dışa aktar</string>
+    <string name="export_settings_summary">Tercimleri JSON dosyasına kaydeder. API anahtarları dahil değildir.</string>
+    <string name="export_settings_success">Ayarlar dışa aktarıldı.</string>
+    <string name="export_settings_failed">Ayarlar dışa aktarılamadı: %1$s</string>
+    <string name="progress_sync_scale_metrics">Tartıdan senkronize et</string>
+    <string name="progress_sync_scale_rationale">Chompass\'un tartınızla konuşması için yakındaki cihazlar izni gerekiyor.</string>
+    <string name="progress_sync_scale_grant">İzin ver</string>
+    <string name="progress_sync_scale_scanning">Tartınız aranıyor… üstüne çıkın</string>
+    <string name="progress_sync_scale_reading">%1$s cihazından okunuyor…</string>
+    <string name="progress_sync_scale_done">%1$d yeni tartım içe aktarıldı</string>
+    <string name="progress_sync_scale_failed">Tartı senkronizasyonu başarısız: %1$s</string>
+    </resources>

@@ -1204,6 +1204,15 @@
     <string name="home_calories_goal_plus_active">Цель %1$s + %2$s активных</string>
     <string name="home_calories_left">Осталось %1$s</string>
     <string name="home_calories_eaten_a11y">Съедено %1$s</string>
+    <string name="home_a11y_prev_day">Предыдущий день</string>
+    <string name="home_a11y_next_day">Следующий день</string>
+    <string name="home_planned_caption">+%1$s запланировано</string>
+    <string name="home_budget_legend_title">Как читать шкалу</string>
+    <string name="home_budget_legend_eaten">Съедено</string>
+    <string name="home_budget_legend_estimated_active">Расчетный активный расход</string>
+    <string name="home_budget_legend_live_burn">Активный расход прямо сейчас</string>
+    <string name="home_budget_legend_over_typical">Сверх обычного</string>
+    <string name="home_macro_card_summary">%1$s ккал · %2$s Белок · %3$s Углеводы · %4$s Жиры · %5$s Клетчатка</string>
     <string name="home_display_calorie_mode">Шкала калорий</string>
     <string name="home_display_group_calorie">Шкала калорий</string>
     <string name="home_display_calorie_mode_pointer">Режим шкалы калорий</string>
@@ -1394,7 +1403,6 @@
     <string name="ai_provider_subtitle_ollama_cloud">Облачные модели Ollama</string>
     <string name="settings_section_ai_profile">Профиль</string>
     <string name="settings_section_ai_connection">Подключение</string>
-    <string name="settings_section_ai_advanced">Дополнительно</string>
     <string name="settings_ai_key_test">Проверить</string>
     <string name="settings_ai_key_test_failed">Ключ отклонён: %1$s</string>
     <string name="settings_ai_key_remove_title">Удалить ключ API?</string>
@@ -1462,6 +1470,18 @@
     <string name="settings_gemini_google_search_footer">Если включено, Gemini может искать в интернете, когда это помогает ответить на запрос. Поисковые запросы отправляются в Google. Google выставляет счёт твоему проекту Gemini API. В моделях Gemini 3 каждый выполненный поисковый запрос учитывается в использовании; в Gemini 2.5 и старше оплата за каждый запрос с поиском.</string>
     <string name="settings_health_unavailable_platform">Health Connect недоступен для приложений на этом устройстве. На Android 14 и новее это системный модуль. Если в настройках есть Health Connect, но Chompass не может подключиться, прошивка может не предоставлять службу Health Connect (часто на de-Googled сборках). Chompass не требует Play Store или sandboxed Play. Используй экспорт/импорт дневника и показателей тела или необязательный WebDAV.</string>
     <string name="settings_meal_constituents_footer_on_device">Недоступно для Gemma на устройстве: разбор ингредиентов требует более мощной модели. Переключись на облачного провайдера, чтобы включить.</string>
+    <string name="settings_offline_index_section">Автономные данные о продуктах</string>
+    <string name="settings_offline_pack_usda_name">Фирменные продукты USDA (GTIN)</string>
+    <string name="settings_offline_pack_usda_desc">Необязательная загрузка: штрихкод → название, бренд и калории для американских упакованных продуктов (USDA FoodData Central, общественное достояние).</string>
+    <string name="settings_offline_pack_offde_name">Open Food Facts Германия</string>
+    <string name="settings_offline_pack_offde_desc">Необязательная загрузка: штрихкод → название, бренд и калории для продуктов, продаваемых в Германии (Open Food Facts, ODbL).</string>
+    <string name="settings_offline_pack_download">Нажмите, чтобы загрузить</string>
+    <string name="settings_offline_pack_downloading">Downloading %1$d%%</string>
+    <string name="settings_offline_pack_installed">v%1$s · %2$s MB</string>
+    <string name="settings_offline_pack_failed">Не удалось загрузить — нажмите, чтобы повторить</string>
+    <string name="settings_offline_index_wifi_only">Загружать только по Wi-Fi</string>
+    <string name="settings_offline_index_wifi_only_desc">Загрузки пакетов ждут соединения без тарификации, если вы не отключите это.</string>
+    <string name="settings_offline_index_license_footer">Данные пакетов: Open Food Facts (Open Database Licence) и USDA FoodData Central (общественное достояние). Пакеты загружаются один раз со страницы релизов проекта; сканирование больше никуда не обращается. Нажмите на загруженный пакет, чтобы удалить его.</string>
     <string name="settings_photo_note_prompt">Спрашивать заметку к фото</string>
     <string name="settings_photo_note_prompt_footer">Если включено, при записи по фото поле заметки выделяется перед «Анализ». Можно подтвердить и продолжить без заметки.</string>
     <string name="settings_progress_default_range">Диапазон по умолчанию в «Прогресс»</string>
@@ -1736,7 +1756,6 @@
     <string name="settings_ai_privacy_ondevice">Полностью приватно: анализ еды, «А что если?» и оценка целей работают на устройстве. Ничего не отправляется на сервер.</string>
     <string name="settings_ai_read_timeout">Таймаут чтения ИИ</string>
     <string name="settings_ai_read_timeout_unit">с</string>
-    <string name="settings_ai_read_timeout_value">%1$d с</string>
     <string name="settings_goal_tier">Промпт пересчёта целей</string>
     <string name="settings_goal_tier_footer">Сколько данных пересчёт целей отправляет модели. Безопасный отправляет краткие сводки — подходит для маленьких или локальных моделей. Умный отправляет всю твою историю веса и еды, чтобы большая модель сама оценила тренды. Авто выбирает по названию модели.</string>
     <string name="goal_tier_auto">Авто</string>
@@ -2346,6 +2365,8 @@
     <string name="progress_log_scale_metrics_title">Записать данные весов</string>
     <string name="progress_estimated_smm">Оценка скелетных мышц (Lee)</string>
     <string name="progress_estimated_smm_note">Антропометрическая оценка по плечу, бедру и голени · ± ~3 кг</string>
+    <string name="progress_scale_metrics_muscle_estimated">Мышечная масса (оценка)</string>
+    <string name="progress_estimated_smm_body_note">Антропометрическая оценка по весу, росту, возрасту и полу · ± ~3 кг</string>
     <string name="progress_overlay_off">Выкл.</string>
     <string name="progress_no_entries_in_range">Нет записей за этот период</string>
     <string name="progress_no_series_selected">Нажмите на показатель выше, чтобы отобразить его здесь</string>
@@ -2918,15 +2939,21 @@
         <item>сброс</item>
         <item>заводские</item>
     </string-array>
-    <string name="ai_provider_chatgpt">Тариф ChatGPT</string>
-    <string name="ai_provider_subtitle_chatgpt">Использовать подходящий тариф ChatGPT Plus или Pro</string>
-    <string name="settings_chatgpt_account">Аккаунт ChatGPT</string>
-    <string name="settings_chatgpt_continue">Продолжить с ChatGPT</string>
-    <string name="settings_chatgpt_connecting">Подключение…</string>
-    <string name="settings_chatgpt_plan_enabled">Использование тарифа ChatGPT включено для анализа еды. Лимит использования общий с вашим тарифом ChatGPT.</string>
-    <string name="settings_chatgpt_plan_footer">Войдите, чтобы использовать подходящий тариф ChatGPT Plus или Pro для анализа еды. Ключ API не требуется.</string>
-    <string name="settings_chatgpt_plan_disabled">Вы вошли, но использование тарифа ChatGPT не включено. Нажмите на строку аккаунта, чтобы разрешить его.</string>
-    <string name="settings_chatgpt_revoke_unconfirmed">Локальное подключение отключено. Удалённый отзыв не подтверждён; Chompass также можно удалить в настройках ChatGPT.</string>
-    <string name="settings_chatgpt_manage_usage">Управлять использованием ChatGPT</string>
-    <string name="settings_chatgpt_disconnect">Отключить ChatGPT</string>
-</resources>
+
+    <string name="settings_nav_bar">Панель навигации</string>
+    <string name="settings_nav_bar_subtitle">Классическая панель внизу экрана или плавающая стеклянная пилюля.</string>
+    <string name="settings_nav_bar_pill">Плавающая пилюля</string>
+    <string name="settings_nav_bar_classic">Классическая панель</string>
+    <string name="export_settings_section">Резервная копия настроек</string>
+    <string name="export_settings_row">Экспорт настроек</string>
+    <string name="export_settings_summary">Сохраняет настройки в файл JSON. Ключи API не включаются.</string>
+    <string name="export_settings_success">Настройки экспортированы.</string>
+    <string name="export_settings_failed">Не удалось экспортировать настройки: %1$s</string>
+    <string name="progress_sync_scale_metrics">Синхронизировать с весами</string>
+    <string name="progress_sync_scale_rationale">Chompass нужен доступ к ближайшим устройствам, чтобы связаться с вашими весами.</string>
+    <string name="progress_sync_scale_grant">Разрешить</string>
+    <string name="progress_sync_scale_scanning">Ищем ваши весы… встаньте на них</string>
+    <string name="progress_sync_scale_reading">Чтение с %1$s…</string>
+    <string name="progress_sync_scale_done">Импортировано новых взвешиваний: %1$d</string>
+    <string name="progress_sync_scale_failed">Не удалось синхронизироваться с весами: %1$s</string>
+    </resources>

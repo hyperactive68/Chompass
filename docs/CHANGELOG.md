@@ -4,21 +4,109 @@ All notable changes to Chompass are documented here.
 
 Style: entries follow the release-text style guide (maintainer-local, not published; user-visible first, no internals). The version section is pasted verbatim onto the Codeberg release.
 
-## Unreleased
+## Fork 6.3.0-beta.2
 
-### Added
+### Retained fork features
 
-- **Use an eligible ChatGPT plan for AI analysis** (Android): Settings → AI Provider now offers OpenAI's official Continue with ChatGPT flow. Plus and Pro users who grant plan access can run eligible analysis requests without an API key, inspect their shared usage in ChatGPT settings, and disconnect again. Credentials stay encrypted on the device; the PWA and Coach are unchanged.
+- **Fixed AI instructions** remain available under Settings → Coach and are sent with every AI request, while app rules, schema, safety and confirmed data keep priority.
+- **ChatGPT sign-in/Responses**, privacy-limited **Google Drive sync**, per-profile reasoning controls and the optional metric serving display remain enabled.
+- The launcher-alias repair remains included so updates and downgrades enforce exactly one active Chompass launcher icon.
 
-## [5.11.8] - 2026-10-25
+## [6.3.0] - 2026-11-06
 
-### Added
+### Changed
 
-- **Google Drive app-data sync uses the official Android authorization flow** (Android): Google Drive authorization is requested through Google Play services with the limited `drive.appdata` scope. Chompass stores only the privacy-limited sync JSON in Drive's private app-data area; photos, API keys, passwords, and OAuth tokens are excluded.
+- **The calorie ring reads calmer** (Android): the thin tick mark that crossed the ring and the bar at your base budget is gone. The color change between your eaten budget and the burn shades marks that spot now; the planned stretch keeps its marker.
+- **Bluetooth scale sync now binds to your scale's saved user profile** (Android): when the scale asks who is weighing, the sync sheet lists the scale's saved slots to pick from, with a register-as-new-user option, and asks for the slot's 4-digit PIN when the scale wants one. The picked slot and PIN are remembered, so later syncs run without asking again. **Not yet verified on a real scale**: this beta ships the handshake ahead of the next hardware test session, so scale sync stays experimental for now; if your scale stalls or refuses the bind, tell the tracker what it did.
+- **The meal review sheet opens with just the essentials** (Android): the ingredient list and the full macro table now start collapsed behind one-line summaries, so name, meal, portion and calories come first when you log a meal. Tapping a summary opens the editable rows exactly as before.
+- **Planned meals now read on the calorie gauge** (Android): on days with planned meals, the ring shows the planned stretch beyond what you have already eaten, with a "+X planned" caption beside your remaining calories. The ⓘ budget breakdown now explains every color of the ring, including the planned stretch and the burn shades, and the planned stretch is spoken by screen readers.
+- **Days flip with a subtle animation** (Android): the date caption now cross-fades when you swipe to another day, and screen readers get previous-day and next-day actions on the calorie card.
+- **An empty food log offers Add food** (Android): a day with nothing logged or planned shows an Add food button right on the empty card, instead of text only.
 
 ### Fixed
 
-- **Drive connection state requires the requested scope** (Android): the app no longer treats an access token as a valid connection when Google granted a different or partial scope. Expired access tokens are discarded so the next authorization request can obtain a fresh token.
+- **The plan-building screen can be left while it works** (Android): during onboarding, your nutrition plan is built while an animated checklist plays. When the AI answer takes a while, the back arrow at the top now stays available, so you can go back to the previous step instead of waiting — continuing afterwards restarts the build cleanly.
+
+## [6.2.0] - 2026-11-04
+
+### Added
+
+- **Offline product data packs** (Android): Settings → Food & Entry → Offline product data can download two optional barcode packs — USDA branded foods (GTIN) and Open Food Facts Germany. When Open Food Facts doesn't know a barcode, or the network is down, the scan answers from the pack with name, brand and calories for the serving. Downloads come straight from this project's release page, Wi-Fi-only by default, and scans themselves never query anywhere new. Pack data: USDA FoodData Central (public domain) and Open Food Facts (ODbL).
+- **Pick a classic docked bottom bar** (Android): Settings → Display gains a Navigation bar row with two styles: the floating pill (still the default) and a classic docked bar pinned to the screen edge. Both run the same tabs, so the update badge and back behavior are identical either way. Closes Codeberg [#158](https://codeberg.org/fitguy/Chompass/issues/158)
+- **Export settings to a file** (Android): Settings → Data & Backup gains a Settings backup section. Export settings writes your preferences to a Chompass-settings.json document you pick, then reads it back to confirm the copy. Export only: there is no import path, and anything key-shaped (API keys) never leaves the device. Closes Codeberg [#117](https://codeberg.org/fitguy/Chompass/issues/117)
+- **Sync weigh-ins straight from your Bluetooth scale** (Android, **WIP**): Progress → Scale metrics gains a Sync from scale action. Chompass asks for the nearby-devices permission once, finds your scale over Bluetooth (step on it to wake it), and imports the new weigh-ins it reads — no CSV export detour. Works with a range of Beurer, Sanitas, SilverCrest, Crane and Medisana scales on Android 12 or newer. **WIP:** the first device test found the scale but the sync never bound to the scale's saved user profile (the scale-side user/PIN handshake is not wired yet), so treat the import as experimental until the follow-up lands.
+
+### Changed
+
+- **Anthropic starts on the Claude 5.5 models** (Android and web app): the Anthropic provider now defaults to Claude Haiku 5.5, with Claude Sonnet 5.5 next; the earlier Claude models stay in the list. The web app carries the same defaults. Closes Codeberg [#147](https://codeberg.org/fitguy/Chompass/issues/147)
+- **Coach quick prompts, your way** (Android): Settings → Coach → Quick prompts can reorder the chips above the Coach input, remove the ones you never use, add your own one-tap prompts, or hide the strip entirely. Custom prompts are plain text sends, so the editor works with AI features off. Closes Codeberg [#155](https://codeberg.org/fitguy/Chompass/issues/155)
+- **A separate Food model for logging** (Android): Settings → AI's Model overrides gains a Food model row beside Vision model and Coach model. Pin a cheap, fast model for meal logging, What if? and goal recalculation while Coach stays on a stronger one — useful when logging runs through dozens of calls a day. Unset, every feature keeps using the profile's main model as before. Closes Codeberg [#148](https://codeberg.org/fitguy/Chompass/issues/148)
+- **A launcher icon that follows the system theme** (Android): in system dark mode the home-screen tile switches to the plum tile with the glow mark; in light mode it stays the cream brand tile. Themed icons, the fixed-icon switch and shortcuts are unaffected.
+- **AI provider switching asks first** (Android): switching the provider now confirms before it clears the profile's API key, endpoint and vision, Coach and Food model picks, instead of dropping them without a word.
+- **A clearer AI settings screen** (Android): the Advanced section splits into Model overrides and AI features, the read-timeout row shows when a profile override is active, the model list shows loading and error notes for providers that read their catalog live with a Refresh button, and the fallback profile gets a row on the AI screen.
+- **Steady rounded corners on growable cards** (Android): multi-row cards, note boxes and the coach input keep fixed rounded corners as they grow, so expanded content no longer clips under oversized circular corners.
+
+### Fixed
+
+- **Scrolling to the bottom of the diary leaves breathing room above the Add button** (Android): at the end of the food log the last entry's bottom edge touched the floating Add button. The gap there now matches the gap between the navigation pill and the button, so the button floats clear of both.
+- **Repeat barcode scans are quick again** (Android): the product photo was re-downloaded from Open Food Facts on every scan of the same code even though the nutrition data was already cached on-device. The first scan now stores the photo too, and later scans render it from disk with no network request. Closes Codeberg [#160](https://codeberg.org/fitguy/Chompass/issues/160)
+- **Connection errors name the host that failed** (Android): when the AI host's name doesn't resolve, the error now names it and points at VPN, private DNS and ad-blocking DNS filters as the usual causes. Closes Codeberg [#116](https://codeberg.org/fitguy/Chompass/issues/116)
+- **Settings search finds Saved foods** (Android): searching settings for "favorites" or "saved foods" turned up nothing because the Saved foods row was missing from the offline search index. Closes Codeberg [#161](https://codeberg.org/fitguy/Chompass/issues/161)
+- **A deleted planned meal can be undone** (Android): long-pressing a chip on the Plan week canvas now shows an Undo note that puts the meal back in its place.
+- **The Progress tab no longer flashes placeholders when you return** (Android): charts render immediately again on tab switches instead of empty frames.
+- **The goal wheel matches the other pickers** (Android): the goal phase wheels used narrower rows than every other picker in the app; they now share the same row height.
+- **The fasting card gets its own accent** (Android): the fasting tracker's icon, progress bar and button use a plum accent of their own, like the water and caffeine cards, instead of the theme primary.
+
+## [6.1.1] - 2026-11-03
+
+### Changed
+
+- **The calorie hero takes its color from your theme** (Android and web app): the eaten arc and the compact bar now run from your theme color to a slightly lighter tint of it instead of one flat band, so the ring gains depth as it fills. Every theme color gets its own ramp, and the web app's light theme uses the deeper accent for the arc instead of the pale one.
+- **The site hero glows in brand colors** (site): the live-demo backdrop behind the phone was still tinted with the old teal-green; it now glows with the plum and peach brand tones.
+
+### Fixed
+
+- **Scale metrics can be logged before any scale reading exists** (Android): the log action lived inside the Scale metrics card, and that card only appeared once a reading had arrived from Health Connect, a scale export, or sync. The card now shows the log action and the estimated muscle mass even with no readings, so a fresh install or a weight-only profile can log bone mass, body water, muscle mass and the visceral-fat rating by hand. Closes Codeberg [#153](https://codeberg.org/fitguy/Chompass/issues/153)
+- **The Add button no longer covers the last diary entry** (Android): at the bottom of the food log the last row's nutrition chips sat behind the floating Add button. The list now scrolls past it. Closes Codeberg [#156](https://codeberg.org/fitguy/Chompass/issues/156) by [@Spacellary](https://codeberg.org/Spacellary)
+- **New food entries scroll into view after logging** (Android): with the standard food log order a newly logged row could land off-screen, so the entry just saved stayed invisible until a manual scroll. Logging now scrolls the new row into view. The edit sheet brings the serving card into view when it would open below the fold, and the manual entry dialog lifts above the keyboard so its fields stay reachable while typing. Closes Codeberg [#159](https://codeberg.org/fitguy/Chompass/issues/159) by [@NiklasMM](https://codeberg.org/NiklasMM)
+- **Derived body-fat estimates show one decimal** (Android): the US Navy and relative fat mass estimates on the measurements screen rounded to whole percent while the other body metrics show decimals. They now show one decimal too.
+
+## [6.1.0] - 2026-11-02
+
+### Added
+
+- **A new Chompass mark** (Android, web app and site): the compass ring now has a bite taken out of it, and the needle points into the bite. It is the launcher icon, the splash screen and the welcome screen. On the welcome screen it draws itself, spins the needle three turns, and settles into a gentle sway. About gains the mark above the wordmark, whose "o" is a bite of its own, and the line every compass needs: "Every bite, on course."
+- **Plum, the new default theme** (Android and web app): a warm plum accent replaces teal as the default, with Peach beside it in Settings → Display → Theme Color for anyone who prefers the warmer end of the palette. Every existing theme color is still there.
+
+### Changed
+
+- **A warmer palette across the app** (Android and web app): light mode is cream instead of lavender-white, dark mode is plum instead of gray-violet, and text is ink on cream or blush on plum. A fixed theme color now keeps those warm surfaces. Only System still follows your wallpaper's colors. The launcher icon is a cream tile with the mark, shown with your launcher's themed-icon treatment when that is on.
+- **Fixed Launcher Icon** (Android): the switch still keeps the brand icon, and its description now says so instead of naming teal.
+- **A smoother ambient background** (Android and site): the wax keeps drifting at about 24 frames a second once you stop touching the screen, instead of dropping to 15, so it stops looking stepped. Battery saver and animations-off still freeze it.
+
+### Fixed
+
+- **Bitten "o"** (Android): the bitten "o" in the About wordmark now sits on the baseline like it does on the website, instead of riding a little high.
+- **The web app and site now carry the new brand properly** (web app and site): the web app's welcome screen plays the same draw, needle spin and chomp as the app, and its About page shows the mark above the bitten "o" wordmark. In the light theme, links, icons, the selected day and the main buttons used the pale pink accent on cream and were hard to read. They now use the deeper plum. The browser toolbar follows the page instead of showing the old teal band. On the site, the header mark is drawn as crisp vector art, the wordmark uses the brand type, and the glow behind the page is plum and peach instead of the old teal-green.
+
+## [6.0.1] - 2026-11-02
+
+### Added
+
+- **Back up to a local folder** (Android): Settings → Health & Data → Sync gains a Local backup section where you pick a folder. Chompass writes Chompass-sync.json there, and replaces the previous backup only after the new copy is written and checked. Back up on open does that once a day when you start the app. Enable local backup turns the whole feature off at any time without losing the chosen folder. Photos stay out of the file. Closes Codeberg [#150](https://codeberg.org/fitguy/Chompass/issues/150) by [@DontBlameMe](https://codeberg.org/DontBlameMe)
+- **Save a photo to favorites without logging it** (Android): a photo review now has the same Save to favorites action as a barcode review, so a packaged food the scanner misses can be kept for later and logged when you eat it. Follows Codeberg [#126](https://codeberg.org/fitguy/Chompass/issues/126) by [@burdick-ryan](https://codeberg.org/burdick-ryan)
+- **Muscle mass from your profile when your scale can't send it** (Android and PWA): Health Connect has no muscle-mass record, so a scale that measures muscle — a Beurer BF 105, for example — can never deliver it. Progress now shows an estimated muscle mass next to the other scale readings, worked out from your weight, height, age and sex, whenever your scale has never sent a real muscle reading. It is within about 3 kg, reads in kilograms and as a share of your body weight, and never changes your calorie or protein targets. A muscle mass you log or import still wins over the estimate.
+- **A separate model for Coach** (Android): Settings → AI → Advanced gains a Coach model row beside Vision model, so you can pin one model for conversations and keep another for everything else. Food logging, What if and goal recalculation stay on your main model. Leave it unset and Coach uses the main model exactly as before; switching to another provider or AI host clears it along with the vision model.
+
+### Changed
+
+- **Coach input lines up with the navigation pill** (Android): the message field is the same height as the bottom pill, and the space under it matches the space above it, between the field and the suggestion chips. The update mark on Settings sits on the corner of the gear, and the gear's center no longer shows the background through as a pink speck. Closes Codeberg [#149](https://codeberg.org/fitguy/Chompass/issues/149) by [@Spacellary](https://codeberg.org/Spacellary)
+
+### Fixed
+
+- **Scale body-composition readings from Health Connect show up** (Android): bone mass, total body water and lean mass that your scale already wrote to Health Connect were never readable, so Progress stayed empty for them. The next time you open Chompass, Health Connect asks for those reads if you were already connected. Muscle mass and the visceral-fat rating still only arrive from a scale export or manual entry. Health Connect has no record for either.
+- **A deleted day type no longer shows as a long id** (Android): under Progress → Adherence → By day type, a row could be labelled with the day type's internal id once that day type had been removed from your plan and the journal had no name for it. That row now reads Day type, and the colored dot beside it still tells the day types apart. Rows for day types that still exist, or that kept their name in your journal, are unchanged.
+
 ## [6.0.0] - 2026-11-01
 
 ### Added
@@ -91,6 +179,7 @@ Style: entries follow the release-text style guide (maintainer-local, not publis
 - **Onboarding no longer crashes on strict devices** (Android): opening "Manage Health Connect access" from the onboarding Health Connect step on devices that refuse to open Health Connect settings shows a message instead of crashing the app.
 - **Coach chat survives slow replies** (Android): chats against slow or self-hosted models no longer fail with a generic "Chat failed" when the answer arrives in small pieces, and a failed send now records why in the device log for support.
 - **Saves show up everywhere immediately** (Android): a value saved in one screen now appears right away on other screens opened just after the save, for example the water total after logging a sip, instead of showing the old number until something else saves.
+
 ## [5.11.0] - 2026-10-22
 
 ### Added

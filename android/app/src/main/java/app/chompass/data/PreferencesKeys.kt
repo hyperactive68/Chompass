@@ -12,6 +12,10 @@ import java.time.YearMonth
 
 internal const val FOOD_ENTRIES_BUCKET_PREFIX = "foodEntries_"
 
+/** Bottom navigation style values for [Keys.NAV_BAR_STYLE] (Codeberg #158). */
+internal const val NAV_BAR_STYLE_PILL = "pill"
+internal const val NAV_BAR_STYLE_CLASSIC = "classic"
+
 internal object Keys {
         val USER_PROFILE = stringPreferencesKey("userProfile")
         /** Per-day goal journal (Codeberg #60, MACRO-CYCLE-D); see models/GoalJournal.kt. */
@@ -174,10 +178,14 @@ internal object Keys {
         val APP_LANGUAGE = stringPreferencesKey("appLanguage")
         /** Codeberg #20 (phase 1): View-only coach-tab toggle; default ON. */
         val COACH_TAB_ENABLED = booleanPreferencesKey("coachTabEnabled")
+        /** Codeberg #155: stored coach quick-prompt strip (JSON; null = goal defaults). */
+        val COACH_QUICK_PROMPTS = stringPreferencesKey("coachQuickPrompts")
         /** Codeberg #20 (phase 2): master AI-features switch; default ON. When off,
          *  no data is sent to any LLM provider and AI entry points are hidden. */
         val AI_FEATURES_ENABLED = booleanPreferencesKey("aiFeaturesEnabled")
         val APP_THEME_COLOR = stringPreferencesKey("appThemeColor")
+        /** Codeberg #158: bottom navigation style — pill (default) or classic docked bar. */
+        val NAV_BAR_STYLE = stringPreferencesKey("navBarStyle")
         /** Frosted-glass blur behind floating panels (Morphe traits); default ON.
          *  Key survives from the iOS era, so stored `true` simply means enabled. */
         val GLASS_BLUR_ENABLED = booleanPreferencesKey("glassBlurEnabled")
@@ -329,6 +337,8 @@ internal object Keys {
         /** Debug-only: hold the demo analysis overlay this many ms (demo_ai_hold_ms; screenshot capture). */
         val DEBUG_DEMO_ANALYSIS_HOLD_MS = intPreferencesKey("debugDemoAnalysisHoldMs")
         val BARCODE_CACHE = stringPreferencesKey("barcodeLookupCache")
+        val OFFLINE_INDEX_PACKS = stringPreferencesKey("offlineIndexPacks")
+        val OFFLINE_INDEX_WIFI_ONLY = booleanPreferencesKey("offlineIndexWifiOnly")
         val ON_DEVICE_MODEL_DOWNLOADED_VERSION = stringPreferencesKey("onDeviceModelDownloadedVersion")
         val ON_DEVICE_DOWNLOAD_OVER_WIFI_ONLY = booleanPreferencesKey("onDeviceDownloadOverWifiOnly")
         /** #46: adjustable on-device memory reserve percent (0 = default 5%, clamped 0..20 at the setter). */

@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -45,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -80,7 +80,10 @@ import app.chompass.ui.navigation.LocalEnergyUnit
 import app.chompass.ui.components.pressScale
 import app.chompass.ui.components.AnimatedNumberText
 import app.chompass.ui.theme.AppMotion
+import app.chompass.ui.theme.CapsuleShape
+import app.chompass.ui.theme.heroGradientEnd
 import app.chompass.ui.theme.success
+import app.chompass.ui.progress.LegendSwatch
 
 // ── Calorie hero ─────────────────────────────────────────────────────
 
@@ -195,6 +198,8 @@ private data class CalorieHeroDerived(
     val fillRatio: Float,
     val plannedFillRatio: Float,
     val shadesActive: Boolean,
+    /** Planned kcal for the "+X planned" caption; 0 hides caption, segment, and legend row. */
+    val planned: Int,
 )
 
 private fun calorieHeroDerived(input: CalorieHeroInput): CalorieHeroDerived = with(input) {
@@ -236,6 +241,7 @@ private fun calorieHeroDerived(input: CalorieHeroInput): CalorieHeroDerived = wi
         fillRatio = fillRatio,
         plannedFillRatio = plannedFillRatio,
         shadesActive = shadesActive,
+        planned = planned,
     )
 }
 
@@ -266,11 +272,19 @@ private fun rememberArcAnimation(
 }
 
 /**
+ * Planned fill-end→planned-end band over the 0.35 ghost. 0.50 sits above the
+ * ghost and below the 0.55 consumed-over-burn overlay so the same primary hue
+ * never collides with either stack (peach/fig/plum: 0.55-on-tertiary is burn;
+ * 0.50-on-ghost is planned). Estimated-active is tertiary@0.45, a different hue.
+ */
+private const val PlannedSegmentAlpha = 0.50f
+
+/**
  * The hero's 180° arc as one shared canvas: a circle at 2:1 or a shallow
  * ellipse on wider canvases. The oval spans the width minus the stroke and
  * exactly twice the height, so the diameter sits on the canvas's bottom edge.
- * Fills, the planned ghost, burn shades, the ADD_ACTIVE bonus tail, and the
- * base-boundary notch are angle-based and identical for every variant; only
+ * Fills, the planned ghost, burn shades, and the ADD_ACTIVE bonus tail are
+ * angle-based and identical for every variant; only
  * the canvas size and stroke differ.
  */
 @Composable
@@ -283,6 +297,7 @@ private fun CalorieArcCanvas(
     animatedRatio: Animatable<Float, AnimationVector1D>,
     trackColor: Color,
     progressColor: Color,
+    progressEndColor: Color,
     bonusColor: Color,
     liveBurnColor: Color,
     successColor: Color,
@@ -294,12 +309,22 @@ private fun CalorieArcCanvas(
     displayMode: HomeCalorieDisplayMode,
     activeCalories: Int,
     semanticsRatio: Float,
+    semanticsDescription: String? = null,
 ) {
+    // Accent ramp for the eaten stroke: the theme color at the base, 20%
+    // toward white at the tip, so the hero reads as the theme color with
+    // depth instead of one flat band on every accent. Built once per color
+    // pair: the shader resolves against each draw's bounds, so every frame
+    // reuses the same brush.
+    val eatenBrush = remember(progressColor, progressEndColor) {
+        Brush.horizontalGradient(listOf(progressColor, progressEndColor))
+    }
     Canvas(
         modifier = modifier.semantics {
             // The budget sheet carries the exact numbers; the arc still
             // reports its fill so TalkBack users get progress (UI-audit 2.7).
             progressBarRangeInfo = ProgressBarRangeInfo(semanticsRatio, 0f..1f, 0)
+            semanticsDescription?.let { contentDescription = it }
         }
     ) {
         val strokePx = stroke.toPx()
@@ -308,7 +333,7 @@ private fun CalorieArcCanvas(
         val topLeft = Offset(inset, inset)
         val cx = size.width / 2f
         val cy = size.height
-        // Notch endpoints ride the ellipse's stroke band: semi-axes at the
+        // Tick endpoints ride the ellipse's stroke band: semi-axes at the
         // mid-radius, pulled 2dp inside the band edges.
         val aMid = arcSize.width / 2f
         val bMid = arcSize.height / 2f
@@ -327,8 +352,13 @@ private fun CalorieArcCanvas(
         )
         // Eaten fill first so live/typical shades (and the ADD_ACTIVE
         // bonus tail) paint on top and stay readable when intake covers
-        // the active zone. Notch still last.
-        var notchAngle: Float? = null
+        // the active zone. The consumed stretch gets a translucent eaten
+        // pass back over the shades (below), so the burn still reads as
+        // partly eaten instead of one solid band.
+        val eatenRatio = if (freezeProgress) fillRatio else animatedRatio.value
+        val eatenDegrees = 180f * eatenRatio
+        // Activity-zone start (the base boundary) for the consumed re-pass.
+        var zoneStartAngle: Float? = null
         if (plannedFillRatio > fillRatio) {
             drawArc(
                 color = progressColor.copy(alpha = 0.35f),
@@ -339,11 +369,24 @@ private fun CalorieArcCanvas(
                 size = arcSize,
                 style = Stroke(width = strokePx, cap = StrokeCap.Round),
             )
+            val plannedDegrees = 180f * plannedFillRatio.coerceIn(0f, 1f)
+            val plannedSweep = (plannedDegrees - eatenDegrees).coerceAtLeast(0f)
+            if (plannedSweep > 0f) {
+                drawArc(
+                    color = progressColor.copy(alpha = PlannedSegmentAlpha),
+                    startAngle = 180f + eatenDegrees,
+                    sweepAngle = plannedSweep,
+                    useCenter = false,
+                    topLeft = topLeft,
+                    size = arcSize,
+                    style = Stroke(width = strokePx),
+                )
+            }
         }
         drawArc(
-            color = progressColor,
+            brush = eatenBrush,
             startAngle = 180f,
-            sweepAngle = 180f * (if (freezeProgress) fillRatio else animatedRatio.value),
+            sweepAngle = eatenDegrees,
             useCenter = false,
             topLeft = topLeft,
             size = arcSize,
@@ -397,7 +440,7 @@ private fun CalorieArcCanvas(
                     style = Stroke(width = strokePx, cap = StrokeCap.Round)
                 )
             }
-            notchAngle = 180f + baseAngle
+            zoneStartAngle = 180f + baseAngle
         } else if (displayMode == HomeCalorieDisplayMode.ADD_ACTIVE && activeCalories > 0 && effectiveGoal > 0) {
             // Activity-earned zone: [baseGoal → effectiveGoal], a fixed-tint
             // segment on the same budget axis. Drawn after the eaten fill so
@@ -415,24 +458,45 @@ private fun CalorieArcCanvas(
                     size = arcSize,
                     style = Stroke(width = strokePx, cap = StrokeCap.Round)
                 )
-                notchAngle = 180f + baseSweep
+                zoneStartAngle = 180f + baseSweep
             }
         }
-        // Base-boundary notch, drawn on top of the eaten fill: where your
-        // sedentary budget ends and the activity-earned zone begins. Riding
-        // above the fill keeps the boundary readable even when eaten crosses
-        // it — the fill visibly extends past the notch into the activity zone.
-        notchAngle?.let { angle ->
-            val notchRad = Math.toRadians(angle.toDouble())
+        // Consumed stretch of the activity zone: the shades above sit over the
+        // eaten fill, so a translucent eaten pass is re-applied from the base
+        // boundary to the eaten tip. Burn bands stay readable, and eating into
+        // the burn visibly shades it instead of leaving one solid band. Kept
+        // flat rather than the accent ramp: the 55% tint's separation from each
+        // burn band is calibrated per accent in the backlog's tint row, and a
+        // ramp here would make that separation vary along the band.
+        // eatenDegrees is the visible fill tip (frozen or animated); reused above
+        // for the planned segment so that band starts where eaten ends.
+        zoneStartAngle?.let { zoneStart ->
+            val zoneStartDegrees = zoneStart - 180f
+            val consumedSweep = (eatenDegrees - zoneStartDegrees).coerceIn(0f, 180f - zoneStartDegrees)
+            if (consumedSweep > 0f) {
+                drawArc(
+                    color = progressColor.copy(alpha = 0.55f),
+                    startAngle = zoneStart,
+                    sweepAngle = consumedSweep,
+                    useCenter = false,
+                    topLeft = topLeft,
+                    size = arcSize,
+                    style = Stroke(width = strokePx),
+                )
+            }
+        }
+        if (plannedFillRatio > fillRatio) {
+            val plannedEndAngle = 180f + 180f * plannedFillRatio.coerceIn(0f, 1f)
+            val tickRad = Math.toRadians(plannedEndAngle.toDouble())
             drawLine(
                 color = muted,
                 start = Offset(
-                    cx + (aIn * Math.cos(notchRad)).toFloat(),
-                    cy + (bIn * Math.sin(notchRad)).toFloat(),
+                    cx + (aIn * Math.cos(tickRad)).toFloat(),
+                    cy + (bIn * Math.sin(tickRad)).toFloat(),
                 ),
                 end = Offset(
-                    cx + (aOut * Math.cos(notchRad)).toFloat(),
-                    cy + (bOut * Math.sin(notchRad)).toFloat(),
+                    cx + (aOut * Math.cos(tickRad)).toFloat(),
+                    cy + (bOut * Math.sin(tickRad)).toFloat(),
                 ),
                 strokeWidth = 2.dp.toPx(),
             )
@@ -519,6 +583,69 @@ private fun calorieBudgetDescription(input: CalorieHeroInput): String? = with(in
     }
 }
 
+/** "+X planned" using the same formatted quantity as the eaten number. */
+@Composable
+private fun plannedCaptionText(planned: Int): String? {
+    if (planned <= 0) return null
+    val unit = LocalEnergyUnit.current
+    return stringResource(
+        R.string.home_planned_caption,
+        LocaleFormat.integer(EnergyFormat.quantity(planned, unit)),
+    )
+}
+
+@Composable
+private fun PlannedCaptionText(
+    text: String,
+    color: Color,
+    fontSize: androidx.compose.ui.unit.TextUnit,
+    maxTextWidth: Dp,
+    modifier: Modifier = Modifier,
+    fontWeight: FontWeight = FontWeight.Medium,
+) {
+    Text(
+        text = text,
+        modifier = modifier.widthIn(max = maxTextWidth),
+        fontSize = fontSize,
+        fontWeight = fontWeight,
+        color = color,
+        maxLines = 1,
+        autoSize = TextAutoSize.StepBased(
+            minFontSize = 8.sp,
+            maxFontSize = fontSize,
+            stepSize = 0.5.sp,
+        ),
+    )
+}
+
+@Composable
+private fun burnShadeA11y(burn: ActiveBurnShade): String {
+    val unit = LocalEnergyUnit.current
+    val liveQ = EnergyFormat.quantity(burn.live, unit)
+    val typicalQ = EnergyFormat.quantity(burn.typical, unit)
+    val overQ = EnergyFormat.quantity(burn.live - burn.typical, unit)
+    val over = HomeCalorieDisplay.isActiveBurnOverTypical(burn.live, burn.typical)
+    val dayType = burn.typicalDayTypeName.takeIf { burn.typicalIsDayType && !it.isNullOrBlank() }
+    return if (over) {
+        stringResource(R.string.home_active_burn_over_a11y, liveQ, overQ)
+    } else if (dayType != null) {
+        stringResource(R.string.home_active_burn_progress_day_type_a11y, liveQ, typicalQ, dayType)
+    } else {
+        stringResource(R.string.home_active_burn_progress_a11y, liveQ, typicalQ)
+    }
+}
+
+@Composable
+private fun calorieArcContextDescription(input: CalorieHeroInput, d: CalorieHeroDerived): String? {
+    if (d.planned <= 0 && !d.shadesActive) return null
+    val parts = ArrayList<String>(2)
+    plannedCaptionText(d.planned)?.let { parts += it }
+    if (d.shadesActive) {
+        input.burnShade?.let { parts += burnShadeA11y(it) }
+    }
+    return parts.joinToString(". ").ifEmpty { null }
+}
+
 /** Burn caption line: shades when active, else the live burn the user asked to see. */
 @Composable
 private fun CalorieBurnCaption(input: CalorieHeroInput, shadesActive: Boolean) {
@@ -543,16 +670,22 @@ private fun DefaultCalorieHero(input: CalorieHeroInput, modifier: Modifier = Mod
         val d = calorieHeroDerived(input)
         val animatedRatio = rememberArcAnimation(d.fillRatio, freezeProgress)
         val budgetDescription = calorieBudgetDescription(input)
+        val plannedCaption = plannedCaptionText(d.planned)
+        val ringA11y = calorieArcContextDescription(input, d)
         val unitLabel = energyUnitLabel()
         var showBudgetSheet by remember { mutableStateOf(false) }
         // Ring color roles, one meaning per hue across every mode:
         // - trackColor (neutral) = unfilled budget, always.
-        // - progressColor (primary, opaque) = consumed/eaten. Never reused elsewhere.
+        // - progressColor (primary) = consumed/eaten, ramped 20% toward white
+        //   along the stroke. The flat primary is reused only by the
+        //   consumed-tint pass over the burn bands. Planned stays on primary
+        //   (0.35 ghost, 0.50 fill-end→planned-end); it does not get its own hue.
         // - tertiary = activity-derived calories, exclusively — the estimate zone
         //   (fixed tint) and the live burn shade (opaque) share it.
         // - success = over-typical active burn.
         val trackColor = MaterialTheme.colorScheme.surfaceVariant
         val progressColor = MaterialTheme.colorScheme.primary
+        val progressEndColor = heroGradientEnd(progressColor)
         val bonusColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.45f)
         val liveBurnColor = MaterialTheme.colorScheme.tertiary
         val muted = MaterialTheme.colorScheme.onSurfaceVariant
@@ -584,6 +717,7 @@ private fun DefaultCalorieHero(input: CalorieHeroInput, modifier: Modifier = Mod
                 animatedRatio = animatedRatio,
                 trackColor = trackColor,
                 progressColor = progressColor,
+                progressEndColor = progressEndColor,
                 bonusColor = bonusColor,
                 liveBurnColor = liveBurnColor,
                 successColor = successColor,
@@ -595,6 +729,7 @@ private fun DefaultCalorieHero(input: CalorieHeroInput, modifier: Modifier = Mod
                 displayMode = displayMode,
                 activeCalories = activeCalories,
                 semanticsRatio = animatedRatio.value,
+                semanticsDescription = ringA11y,
             )
 
             // Chips sit under the section's "Today" label, in the empty wedge at
@@ -676,39 +811,53 @@ private fun DefaultCalorieHero(input: CalorieHeroInput, modifier: Modifier = Mod
                 CalorieBurnCaption(input = input, shadesActive = d.shadesActive)
             }
 
-            // Calories left, top-right wedge.
-            Row(
+            // Calories left, top-right wedge. Planned caption stacks under it
+            // inside the same 48dp so the hero stays height-neutral.
+            Column(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(end = 16.dp)
                     .height(48.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.Top,
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
-                Icon(
-                    Icons.Filled.LocalFireDepartment,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .padding(top = 1.dp)
-                        .size(13.dp),
-                )
-                Text(
-                    text = stringResource(
-                        R.string.home_calories_left,
-                        LocaleFormat.integer(EnergyFormat.quantity(d.remaining, unit)),
-                    ),
-                    modifier = Modifier.widthIn(max = (cornerWidth - 17.dp).coerceAtLeast(48.dp)),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary,
-                    maxLines = 1,
-                    autoSize = TextAutoSize.StepBased(
-                        minFontSize = 8.sp,
-                        maxFontSize = 12.sp,
-                        stepSize = 0.5.sp,
-                    ),
-                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.Top,
+                ) {
+                    Icon(
+                        Icons.Filled.LocalFireDepartment,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .padding(top = 1.dp)
+                            .size(13.dp),
+                    )
+                    Text(
+                        text = stringResource(
+                            R.string.home_calories_left,
+                            LocaleFormat.integer(EnergyFormat.quantity(d.remaining, unit)),
+                        ),
+                        modifier = Modifier.widthIn(max = (cornerWidth - 17.dp).coerceAtLeast(48.dp)),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1,
+                        autoSize = TextAutoSize.StepBased(
+                            minFontSize = 8.sp,
+                            maxFontSize = 12.sp,
+                            stepSize = 0.5.sp,
+                        ),
+                    )
+                }
+                plannedCaption?.let { caption ->
+                    PlannedCaptionText(
+                        text = caption,
+                        color = muted,
+                        fontSize = 12.sp,
+                        maxTextWidth = (cornerWidth - 16.dp).coerceAtLeast(48.dp),
+                    )
+                }
             }
         }
         if (showBudgetSheet) {
@@ -725,6 +874,7 @@ private fun DefaultCalorieHero(input: CalorieHeroInput, modifier: Modifier = Mod
                 recalcDetailsAvailable = recalcDetailsAvailable && onShowRecalcDetails != null,
                 onShowRecalcDetails = onShowRecalcDetails,
                 goalDerivation = goalDerivation,
+                planned = planned,
             )
         }
     }
@@ -738,11 +888,14 @@ private fun SideGaugeCalorieHero(input: CalorieHeroInput, modifier: Modifier = M
         val d = calorieHeroDerived(input)
         val animatedRatio = rememberArcAnimation(d.fillRatio, freezeProgress)
         val budgetDescription = calorieBudgetDescription(input)
+        val plannedCaption = plannedCaptionText(d.planned)
+        val ringA11y = calorieArcContextDescription(input, d)
         val unitLabel = energyUnitLabel()
         val eatenA11y = stringResource(R.string.home_calories_eaten_a11y, energyText(current))
         var showBudgetSheet by remember { mutableStateOf(false) }
         val trackColor = MaterialTheme.colorScheme.surfaceVariant
         val progressColor = MaterialTheme.colorScheme.primary
+        val progressEndColor = heroGradientEnd(progressColor)
         val bonusColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.45f)
         val liveBurnColor = MaterialTheme.colorScheme.tertiary
         val muted = MaterialTheme.colorScheme.onSurfaceVariant
@@ -770,6 +923,7 @@ private fun SideGaugeCalorieHero(input: CalorieHeroInput, modifier: Modifier = M
                     animatedRatio = animatedRatio,
                     trackColor = trackColor,
                     progressColor = progressColor,
+                    progressEndColor = progressEndColor,
                     bonusColor = bonusColor,
                     liveBurnColor = liveBurnColor,
                     successColor = successColor,
@@ -781,6 +935,7 @@ private fun SideGaugeCalorieHero(input: CalorieHeroInput, modifier: Modifier = M
                     displayMode = displayMode,
                     activeCalories = activeCalories,
                     semanticsRatio = animatedRatio.value,
+                    semanticsDescription = ringA11y,
                 )
             }
             Column(
@@ -864,6 +1019,14 @@ private fun SideGaugeCalorieHero(input: CalorieHeroInput, modifier: Modifier = M
                         ),
                         color = MaterialTheme.colorScheme.primary,
                     )
+                    plannedCaption?.let { caption ->
+                        PlannedCaptionText(
+                            text = caption,
+                            color = muted,
+                            fontSize = 12.sp,
+                            maxTextWidth = 130.dp,
+                        )
+                    }
                     if (dayTypeLabel != null && onDayTypeClick != null) {
                         DayTypeChip(label = dayTypeLabel, color = dayTypeColor, onClick = onDayTypeClick)
                     }
@@ -888,6 +1051,7 @@ private fun SideGaugeCalorieHero(input: CalorieHeroInput, modifier: Modifier = M
                 recalcDetailsAvailable = recalcDetailsAvailable && onShowRecalcDetails != null,
                 onShowRecalcDetails = onShowRecalcDetails,
                 goalDerivation = goalDerivation,
+                planned = planned,
             )
         }
     }
@@ -901,11 +1065,14 @@ private fun CompactArcCalorieHero(input: CalorieHeroInput, modifier: Modifier = 
         val d = calorieHeroDerived(input)
         val animatedRatio = rememberArcAnimation(d.fillRatio, freezeProgress)
         val budgetDescription = calorieBudgetDescription(input)
+        val plannedCaption = plannedCaptionText(d.planned)
+        val ringA11y = calorieArcContextDescription(input, d)
         val unitLabel = energyUnitLabel()
         val eatenA11y = stringResource(R.string.home_calories_eaten_a11y, energyText(current))
         var showBudgetSheet by remember { mutableStateOf(false) }
         val trackColor = MaterialTheme.colorScheme.surfaceVariant
         val progressColor = MaterialTheme.colorScheme.primary
+        val progressEndColor = heroGradientEnd(progressColor)
         val bonusColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.45f)
         val liveBurnColor = MaterialTheme.colorScheme.tertiary
         val muted = MaterialTheme.colorScheme.onSurfaceVariant
@@ -936,6 +1103,7 @@ private fun CompactArcCalorieHero(input: CalorieHeroInput, modifier: Modifier = 
                 animatedRatio = animatedRatio,
                 trackColor = trackColor,
                 progressColor = progressColor,
+                progressEndColor = progressEndColor,
                 bonusColor = bonusColor,
                 liveBurnColor = liveBurnColor,
                 successColor = successColor,
@@ -947,6 +1115,7 @@ private fun CompactArcCalorieHero(input: CalorieHeroInput, modifier: Modifier = 
                 displayMode = displayMode,
                 activeCalories = activeCalories,
                 semanticsRatio = animatedRatio.value,
+                semanticsDescription = ringA11y,
             )
 
             if (showsChips) {
@@ -1027,38 +1196,51 @@ private fun CompactArcCalorieHero(input: CalorieHeroInput, modifier: Modifier = 
                 CalorieBurnCaption(input = input, shadesActive = d.shadesActive)
             }
 
-            Row(
+            Column(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(end = 16.dp)
                     .height(44.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.Top,
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
-                Icon(
-                    Icons.Filled.LocalFireDepartment,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .padding(top = 1.dp)
-                        .size(12.dp),
-                )
-                Text(
-                    text = stringResource(
-                        R.string.home_calories_left,
-                        LocaleFormat.integer(EnergyFormat.quantity(d.remaining, unit)),
-                    ),
-                    modifier = Modifier.widthIn(max = (cornerWidth - 15.dp).coerceAtLeast(40.dp)),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary,
-                    maxLines = 1,
-                    autoSize = TextAutoSize.StepBased(
-                        minFontSize = 8.sp,
-                        maxFontSize = 12.sp,
-                        stepSize = 0.5.sp,
-                    ),
-                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.Top,
+                ) {
+                    Icon(
+                        Icons.Filled.LocalFireDepartment,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .padding(top = 1.dp)
+                            .size(12.dp),
+                    )
+                    Text(
+                        text = stringResource(
+                            R.string.home_calories_left,
+                            LocaleFormat.integer(EnergyFormat.quantity(d.remaining, unit)),
+                        ),
+                        modifier = Modifier.widthIn(max = (cornerWidth - 15.dp).coerceAtLeast(40.dp)),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1,
+                        autoSize = TextAutoSize.StepBased(
+                            minFontSize = 8.sp,
+                            maxFontSize = 12.sp,
+                            stepSize = 0.5.sp,
+                        ),
+                    )
+                }
+                plannedCaption?.let { caption ->
+                    PlannedCaptionText(
+                        text = caption,
+                        color = muted,
+                        fontSize = 12.sp,
+                        maxTextWidth = (cornerWidth - 16.dp).coerceAtLeast(40.dp),
+                    )
+                }
             }
         }
         if (showBudgetSheet) {
@@ -1075,6 +1257,7 @@ private fun CompactArcCalorieHero(input: CalorieHeroInput, modifier: Modifier = 
                 recalcDetailsAvailable = recalcDetailsAvailable && onShowRecalcDetails != null,
                 onShowRecalcDetails = onShowRecalcDetails,
                 goalDerivation = goalDerivation,
+                planned = planned,
             )
         }
     }
@@ -1087,6 +1270,7 @@ private fun CompactHorizontalCalorieHero(input: CalorieHeroInput, modifier: Modi
         val d = calorieHeroDerived(input)
         val trackColor = MaterialTheme.colorScheme.surfaceVariant
         val progressColor = MaterialTheme.colorScheme.primary
+        val progressEndColor = heroGradientEnd(progressColor)
         val activeColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.45f)
         val muted = MaterialTheme.colorScheme.onSurfaceVariant
         val tertiary = MaterialTheme.colorScheme.tertiary
@@ -1094,7 +1278,13 @@ private fun CompactHorizontalCalorieHero(input: CalorieHeroInput, modifier: Modi
         val unitLabel = energyUnitLabel()
         val eatenA11y = stringResource(R.string.home_calories_eaten_a11y, energyText(current))
         val budgetDescription = calorieBudgetDescription(input)
+        val plannedCaption = plannedCaptionText(d.planned)
+        val ringA11y = calorieArcContextDescription(input, d)
         var showBudgetSheet by remember { mutableStateOf(false) }
+
+        val eatenBrush = remember(progressColor, progressEndColor) {
+            Brush.horizontalGradient(listOf(progressColor, progressEndColor))
+        }
 
         Column(
             modifier = modifier
@@ -1108,6 +1298,7 @@ private fun CompactHorizontalCalorieHero(input: CalorieHeroInput, modifier: Modi
                     .height(12.dp)
                     .semantics {
                         progressBarRangeInfo = ProgressBarRangeInfo(d.fillRatio, 0f..1f, 0)
+                        ringA11y?.let { contentDescription = it }
                     }
             ) {
                 val radius = size.height / 2f
@@ -1118,12 +1309,25 @@ private fun CompactHorizontalCalorieHero(input: CalorieHeroInput, modifier: Modi
                         size = Size(size.width * d.plannedFillRatio, size.height),
                         cornerRadius = CornerRadius(radius, radius),
                     )
+                    val fillX = size.width * d.fillRatio
+                    val plannedX = size.width * d.plannedFillRatio
+                    val segW = plannedX - fillX
+                    if (segW > 0f) {
+                        drawRect(
+                            progressColor.copy(alpha = PlannedSegmentAlpha),
+                            topLeft = Offset(fillX, 0f),
+                            size = Size(segW, size.height),
+                        )
+                    }
                 }
                 drawRoundRect(
-                    progressColor,
+                    brush = eatenBrush,
                     size = Size(size.width * d.fillRatio, size.height),
                     cornerRadius = CornerRadius(radius, radius),
                 )
+                // Where the active zone starts; the consumed pass below keys
+                // off it.
+                var boundaryX: Float? = null
                 if (d.shadesActive && burnShade != null) {
                     val shade = burnShade!!
                     val baseX = size.width * HomeCalorieDisplay.burnShadeBaseFraction(baseGoal, shade.typical, shade.live)
@@ -1162,12 +1366,10 @@ private fun CompactHorizontalCalorieHero(input: CalorieHeroInput, modifier: Modi
                             cornerRadius = CornerRadius(radius, radius),
                         )
                     }
-                    if (baseX > 0f) {
-                        drawLine(muted, Offset(baseX, 0f), Offset(baseX, size.height), strokeWidth = 2.dp.toPx())
-                    }
+                    boundaryX = baseX
                 } else if (displayMode == HomeCalorieDisplayMode.ADD_ACTIVE && d.target > baseGoal) {
-                    // Existing flat activity-earned zone, plus the same base notch
-                    // the arc draws in this state.
+                    // Existing flat activity-earned zone, mirroring the arc's
+                    // zone in this state.
                     val baseX = size.width * (baseGoal.toFloat() / d.target).coerceIn(0f, 1f)
                     drawRoundRect(
                         activeColor,
@@ -1175,9 +1377,26 @@ private fun CompactHorizontalCalorieHero(input: CalorieHeroInput, modifier: Modi
                         size = Size(size.width - baseX, size.height),
                         cornerRadius = CornerRadius(radius, radius),
                     )
-                    if (baseX > 0f) {
-                        drawLine(muted, Offset(baseX, 0f), Offset(baseX, size.height), strokeWidth = 2.dp.toPx())
+                    boundaryX = baseX
+                }
+                boundaryX?.let { baseX ->
+                    // Consumed stretch of the activity zone: the shades sit over
+                    // the eaten bar, so re-apply the eaten color from the base
+                    // boundary to the eaten tip. The burn bands stay readable and
+                    // eating into them visibly shades instead of one solid band.
+                    val consumedW = (size.width * d.fillRatio - baseX).coerceIn(0f, size.width - baseX)
+                    if (consumedW > 0f) {
+                        drawRoundRect(
+                            progressColor.copy(alpha = 0.55f),
+                            topLeft = Offset(baseX, 0f),
+                            size = Size(consumedW, size.height),
+                            cornerRadius = CornerRadius(radius, radius),
+                        )
                     }
+                }
+                if (d.plannedFillRatio > d.fillRatio) {
+                    val plannedX = size.width * d.plannedFillRatio
+                    drawLine(muted, Offset(plannedX, 0f), Offset(plannedX, size.height), strokeWidth = 2.dp.toPx())
                 }
             }
             // FlowRow: one line at 1x, wraps instead of squeezing to zero width
@@ -1258,6 +1477,15 @@ private fun CompactHorizontalCalorieHero(input: CalorieHeroInput, modifier: Modi
                         stepSize = 0.5.sp,
                     ),
                 )
+                // Planned caption parity with the arc heroes: only drawn when planned > 0.
+                plannedCaption?.let { caption ->
+                    PlannedCaptionText(
+                        text = caption,
+                        color = muted,
+                        fontSize = 13.sp,
+                        maxTextWidth = 120.dp,
+                    )
+                }
                 // Chips are capped so their labels shrink instead of pushing the
                 // row past the width on narrow screens at 1.3x.
                 if (dayTypeLabel != null && onDayTypeClick != null) {
@@ -1289,6 +1517,7 @@ private fun CompactHorizontalCalorieHero(input: CalorieHeroInput, modifier: Modi
                 recalcDetailsAvailable = recalcDetailsAvailable && onShowRecalcDetails != null,
                 onShowRecalcDetails = onShowRecalcDetails,
                 goalDerivation = goalDerivation,
+                planned = planned,
             )
         }
     }
@@ -1306,7 +1535,7 @@ private fun UntrackedChip(untracked: Boolean, onClick: () -> Unit) {
     val chipInteraction = remember { MutableInteractionSource() }
     Surface(
         onClick = onClick,
-        shape = CircleShape,
+        shape = CapsuleShape,
         color = if (untracked) MaterialTheme.colorScheme.tertiaryContainer
             else MaterialTheme.colorScheme.surfaceVariant,
         interactionSource = chipInteraction,
@@ -1349,7 +1578,7 @@ private fun DayTypeChip(label: String, color: Color? = null, onClick: () -> Unit
     val chipInteraction = remember { MutableInteractionSource() }
     Surface(
         onClick = onClick,
-        shape = CircleShape,
+        shape = CapsuleShape,
         color = container,
         interactionSource = chipInteraction,
         modifier = Modifier
@@ -1427,13 +1656,7 @@ private fun BurnShadeCaption(burn: ActiveBurnShade) {
     val overQ = EnergyFormat.quantity(burn.live - burn.typical, unit)
     val over = HomeCalorieDisplay.isActiveBurnOverTypical(burn.live, burn.typical)
     val dayType = burn.typicalDayTypeName.takeIf { burn.typicalIsDayType && !it.isNullOrBlank() }
-    val a11y = if (over) {
-        stringResource(R.string.home_active_burn_over_a11y, liveQ, overQ)
-    } else if (dayType != null) {
-        stringResource(R.string.home_active_burn_progress_day_type_a11y, liveQ, typicalQ, dayType)
-    } else {
-        stringResource(R.string.home_active_burn_progress_a11y, liveQ, typicalQ)
-    }
+    val a11y = burnShadeA11y(burn)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -1480,6 +1703,7 @@ private fun BudgetExplanationDialog(
     recalcDetailsAvailable: Boolean = false,
     onShowRecalcDetails: (() -> Unit)? = null,
     goalDerivation: GoalDerivation? = null,
+    planned: Int = 0,
 ) {
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val unit = LocalEnergyUnit.current
@@ -1540,6 +1764,65 @@ private fun BudgetExplanationDialog(
                     stringResource(R.string.home_budget_burned_today, EnergyFormat.quantity(burnedToday, unit), unitLabel),
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+            HorizontalDivider(Modifier.padding(vertical = 2.dp))
+            Text(
+                stringResource(R.string.home_budget_legend_title),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = muted,
+            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics(mergeDescendants = true) {},
+            ) {
+                val eaten = MaterialTheme.colorScheme.primary
+                val rampEnd = heroGradientEnd(eaten)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Canvas(Modifier.width(18.dp).height(3.dp)) {
+                        drawLine(
+                            brush = Brush.horizontalGradient(listOf(eaten, rampEnd)),
+                            start = Offset(0f, size.height / 2f),
+                            end = Offset(size.width, size.height / 2f),
+                            strokeWidth = size.height,
+                        )
+                    }
+                    Text(
+                        stringResource(R.string.home_budget_legend_eaten),
+                        fontSize = 12.sp,
+                        color = muted,
+                        maxLines = 1,
+                        autoSize = TextAutoSize.StepBased(
+                            minFontSize = 8.sp,
+                            maxFontSize = 12.sp,
+                            stepSize = 0.5.sp,
+                        ),
+                        modifier = Modifier.widthIn(max = 280.dp),
+                    )
+                }
+                if (planned > 0) {
+                    LegendSwatch(
+                        color = eaten.copy(alpha = PlannedSegmentAlpha),
+                        label = stringResource(R.string.diary_planned),
+                    )
+                }
+                LegendSwatch(
+                    color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.45f),
+                    label = stringResource(R.string.home_budget_legend_estimated_active),
+                )
+                LegendSwatch(
+                    color = MaterialTheme.colorScheme.tertiary,
+                    label = stringResource(R.string.home_budget_legend_live_burn),
+                )
+                LegendSwatch(
+                    color = MaterialTheme.colorScheme.success,
+                    label = stringResource(R.string.home_budget_legend_over_typical),
                 )
             }
             // Standing goal derivation (checkable chain): where today's target

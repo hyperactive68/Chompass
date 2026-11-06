@@ -222,6 +222,18 @@ fun AppThemeColor.widgetAccentColors(context: Context, dark: Boolean): Pair<Colo
 fun AppThemeColor.widgetAccentColors(context: Context): Pair<Color, Color> =
     widgetAccentColors(context, appearanceIsDark(null, context))
 
+/**
+ * End stop of the hero's accent ramp: [primary] blended 20% toward white.
+ *
+ * The hero arc and bar are wide progress strokes, so the ramp has to stay a
+ * tint of the accent, not a second color, and its tip still carries progress
+ * information. 20% is the largest delta that keeps every fixed accent's tip
+ * above the 3:1 non-text floor on the cream ground (worst: peach 3.41:1;
+ * the widget's 28% blend puts peach at 2.97:1). On the plum ground the scheme
+ * primary is already lightened, so the same blend only adds glow.
+ */
+fun heroGradientEnd(primary: Color): Color = lerp(primary, Color.White, 0.2f)
+
 object AppColors {
     private var activeThemeColor: AppThemeColor = AppThemeColor.SYSTEM
     private var primaryOverride: Color? = null
@@ -322,6 +334,11 @@ object AppColors {
     val CaffeineLight = Color(0xFF9A6700)
     val CaffeineDark = Color(0xFFFFC14D)
 
+    /** Semantic fasting-tracker accent (icon + value caption; bar stays primary). */
+    // Fig ramp mid steps (BrandPalette Fig500 light / Fig300 dark) — the one unused brand ramp.
+    val FastingLight = Color(0xFF8F4B78)
+    val FastingDark = Color(0xFFD6A2BE)
+
     /** Semantic warning tone (non-destructive caution states). */
     val WarningLight = Color(0xFF8B5000)
     val WarningDark = Color(0xFFFFB77C)
@@ -363,6 +380,10 @@ val androidx.compose.material3.ColorScheme.water: Color
 /** Resolves [AppColors.CaffeineLight]/[AppColors.CaffeineDark] against the active theme. */
 val androidx.compose.material3.ColorScheme.caffeine: Color
     get() = if (background.luminance() < 0.5f) AppColors.CaffeineDark else AppColors.CaffeineLight
+
+/** Resolves [AppColors.FastingLight]/[AppColors.FastingDark] against the active theme. */
+val androidx.compose.material3.ColorScheme.fasting: Color
+    get() = if (background.luminance() < 0.5f) AppColors.FastingDark else AppColors.FastingLight
 
 /** Canonical muted neutral base — warm (not gray), one literal (UI-audit 2.4). */
 val MutedNeutral: Color = Color(0xFF6E5C63)

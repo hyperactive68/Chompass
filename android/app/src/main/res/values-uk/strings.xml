@@ -100,7 +100,6 @@
     <string name="ai_provider_subtitle_ollama_cloud">Хмарні моделі Ollama</string>
     <string name="settings_section_ai_profile">Профіль</string>
     <string name="settings_section_ai_connection">З\'єднання</string>
-    <string name="settings_section_ai_advanced">Додатково</string>
     <string name="settings_ai_key_test">Перевірити</string>
     <string name="settings_ai_key_test_failed">Ключ відхилено: %1$s</string>
     <string name="settings_ai_key_remove_title">Видалити ключ API?</string>
@@ -574,6 +573,18 @@
     <string name="settings_clear_key">Очистити ключ</string>
     <string name="settings_gemini_google_search_footer">Увімкнувши, Gemini може шукати в інтернеті, якщо це допомагає відповісти. Пошукові запити надсилаються в Google. Google тарифікує це у твоєму Gemini API-проєкті. На моделях Gemini 3 кожен пошуковий запит враховується в ліміті; на Gemini 2.5 і старіших оплата за промпт, що використовує пошук.</string>
     <string name="settings_meal_constituents_footer_on_device">Недоступно для пристроєвої Gemma: розбір інгредієнтів потребує потужнішої моделі. Перемкнися на хмарного провайдера, щоб увімкнути.</string>
+    <string name="settings_offline_index_section">Автономні дані про продукти</string>
+    <string name="settings_offline_pack_usda_name">Фірмові продукти USDA (GTIN)</string>
+    <string name="settings_offline_pack_usda_desc">Необов\'язкове завантаження: штрихкод → назва, бренд і калорії для американських упакованих продуктів (USDA FoodData Central, суспільне надбання).</string>
+    <string name="settings_offline_pack_offde_name">Open Food Facts Німеччина</string>
+    <string name="settings_offline_pack_offde_desc">Необов\'язкове завантаження: штрихкод → назва, бренд і калорії для продуктів, що продаються в Німеччині (Open Food Facts, ODbL).</string>
+    <string name="settings_offline_pack_download">Торкніться, щоб завантажити</string>
+    <string name="settings_offline_pack_downloading">Downloading %1$d%%</string>
+    <string name="settings_offline_pack_installed">v%1$s · %2$s MB</string>
+    <string name="settings_offline_pack_failed">Завантаження не вдалося — торкніться, щоб повторити</string>
+    <string name="settings_offline_index_wifi_only">Завантажувати лише через Wi-Fi</string>
+    <string name="settings_offline_index_wifi_only_desc">Завантаження пакетів чекають на з\'єднання без тарифікації, якщо ви не вимкнете це.</string>
+    <string name="settings_offline_index_license_footer">Дані пакетів: Open Food Facts (Open Database Licence) і USDA FoodData Central (суспільне надбання). Пакети завантажуються один раз зі сторінки релізів проєкту; сканування нікуди більше не звертається. Торкніться завантаженого пакета, щоб видалити його.</string>
     <string name="on_device_model_privacy_notice">Працює повністю на цьому пристрої. Нічого з написаного чи сфотографованого не надсилається на сервер. Завантаження отримує файл моделі безпосередньо від Hugging Face (%1$s), стороннього хоста, який інакше не використовується цим застосунком.</string>
     <string name="on_device_model_device_notice">Перевірено на Pixel 9a (GrapheneOS). Інші пристрої, особливо слабші або не Tensor, ще не перевірені й можуть працювати повільніше або не підтримуватися; там безпечніше обрати хмарного провайдера.</string>
     <string name="on_device_model_accuracy_notice">Ці моделі не такі точні, як хмарний ШІ. Очікуй помилкових калорій, пропущених страв або слабкого розпізнавання фото, особливо з меншою моделлю E2B. Для надійного внесення рекомендовано хмарних провайдерів.</string>
@@ -1042,6 +1053,15 @@
     <string name="home_calories_goal_plus_active">Ціль %1$s + %2$s активних</string>
     <string name="home_calories_left">Залишилось %1$s</string>
     <string name="home_calories_eaten_a11y">З\'їдено %1$s</string>
+    <string name="home_a11y_prev_day">Попередній день</string>
+    <string name="home_a11y_next_day">Наступний день</string>
+    <string name="home_planned_caption">+%1$s заплановано</string>
+    <string name="home_budget_legend_title">Як читати шкалу</string>
+    <string name="home_budget_legend_eaten">З\'їдено</string>
+    <string name="home_budget_legend_estimated_active">Розрахункові активні витрати</string>
+    <string name="home_budget_legend_live_burn">Активні витрати просто зараз</string>
+    <string name="home_budget_legend_over_typical">Понад звичайне</string>
+    <string name="home_macro_card_summary">%1$s ккал · %2$s Білок · %3$s Вуглеводи · %4$s Жири · %5$s Клітковина</string>
     <string name="home_display_calorie_mode">Шкала калорій</string>
     <string name="home_display_group_calorie">Шкала калорій</string>
     <string name="home_display_calorie_mode_pointer">Режим шкали калорій</string>
@@ -1352,7 +1372,6 @@
     <string name="settings_ai_privacy_ondevice">Повністю приватно: аналіз їжі, «Що як?» та оцінка цілей працюють на цьому пристрої. Нічого не надсилається на сервер.</string>
     <string name="settings_ai_read_timeout">Таймаут читання ШІ</string>
     <string name="settings_ai_read_timeout_unit">с</string>
-    <string name="settings_ai_read_timeout_value">%1$d с</string>
     <string name="settings_goal_tier">Промпт перерахунку цілей</string>
     <string name="settings_goal_tier_footer">Скільки даних перерахунок цілей надсилає моделі. Безпечний надсилає компактні підсумки — підходить для малих чи локальних моделей. Розумний надсилає повну історію твоєї ваги та харчування, щоб велика модель сама оцінила тренди. Авто обирає за назвою моделі.</string>
     <string name="goal_tier_auto">Авто</string>
@@ -2198,6 +2217,8 @@ LBM = вага × (1 − %жиру)</string>
     <string name="progress_log_scale_metrics_title">Записати дані ваги</string>
     <string name="progress_estimated_smm">Оцінка скелетних м\'язів (Lee)</string>
     <string name="progress_estimated_smm_note">Антропометрична оцінка за плечем, стегном і гомілкою · ± ~3 кг</string>
+    <string name="progress_scale_metrics_muscle_estimated">М\'язова маса (оцінка)</string>
+    <string name="progress_estimated_smm_body_note">Антропометрична оцінка за вагою, зростом, віком і статтю · ± ~3 кг</string>
     <string name="progress_overlay_off">Вимк.</string>
     <string name="progress_no_entries_in_range">Немає записів за цей період</string>
     <string name="progress_no_series_selected">Торкніться показника вище, щоб відобразити його тут</string>
@@ -2769,15 +2790,21 @@ LBM = вага × (1 − %жиру)</string>
         <item>скинути</item>
         <item>заводські</item>
     </string-array>
-    <string name="ai_provider_chatgpt">План ChatGPT</string>
-    <string name="ai_provider_subtitle_chatgpt">Використовуйте відповідний план ChatGPT Plus або Pro</string>
-    <string name="settings_chatgpt_account">Обліковий запис ChatGPT</string>
-    <string name="settings_chatgpt_continue">Продовжити з ChatGPT</string>
-    <string name="settings_chatgpt_connecting">Підключення…</string>
-    <string name="settings_chatgpt_plan_enabled">Використання плану ChatGPT увімкнено для аналізу їжі. Ліміт використання спільний із вашим планом ChatGPT.</string>
-    <string name="settings_chatgpt_plan_footer">Увійдіть, щоб використовувати відповідний план ChatGPT Plus або Pro для аналізу їжі. Ключ API не потрібен.</string>
-    <string name="settings_chatgpt_plan_disabled">Ви ввійшли, але використання плану ChatGPT не ввімкнено. Торкніться рядка облікового запису, щоб надати дозвіл.</string>
-    <string name="settings_chatgpt_revoke_unconfirmed">Локально від’єднано. Віддалене відкликання не підтверджено; Chompass також можна видалити в налаштуваннях ChatGPT.</string>
-    <string name="settings_chatgpt_manage_usage">Керувати використанням ChatGPT</string>
-    <string name="settings_chatgpt_disconnect">Від’єднати ChatGPT</string>
-</resources>
+
+    <string name="settings_nav_bar">Панель навігації</string>
+    <string name="settings_nav_bar_subtitle">Класична панель унизу екрана або плаваюча скляна пігулка.</string>
+    <string name="settings_nav_bar_pill">Плаваюча пігулка</string>
+    <string name="settings_nav_bar_classic">Класична панель</string>
+    <string name="export_settings_section">Резервна копія налаштувань</string>
+    <string name="export_settings_row">Експорт налаштувань</string>
+    <string name="export_settings_summary">Зберігає налаштування у файл JSON. Ключі API не включаються.</string>
+    <string name="export_settings_success">Налаштування експортовано.</string>
+    <string name="export_settings_failed">Не вдалося експортувати налаштування: %1$s</string>
+    <string name="progress_sync_scale_metrics">Синхронізувати з вагами</string>
+    <string name="progress_sync_scale_rationale">Chompass потрібен дозвіл на пристрої поблизу, щоб зв\'язатися з вашими вагами.</string>
+    <string name="progress_sync_scale_grant">Дозволити</string>
+    <string name="progress_sync_scale_scanning">Шукаємо ваші ваги… станьте на них</string>
+    <string name="progress_sync_scale_reading">Читання з %1$s…</string>
+    <string name="progress_sync_scale_done">Імпортовано %1$d нових зважувань</string>
+    <string name="progress_sync_scale_failed">Не вдалося синхронізуватися з вагами: %1$s</string>
+    </resources>

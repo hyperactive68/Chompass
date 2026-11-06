@@ -717,7 +717,6 @@
     <string name="ai_provider_subtitle_ollama_cloud">Ollama のクラウドモデル</string>
     <string name="settings_section_ai_profile">プロファイル</string>
     <string name="settings_section_ai_connection">接続</string>
-    <string name="settings_section_ai_advanced">詳細設定</string>
     <string name="settings_ai_key_test">テスト</string>
     <string name="settings_ai_key_test_failed">キーが拒否されました: %1$s</string>
     <string name="settings_ai_key_remove_title">APIキーを削除しますか？</string>
@@ -789,6 +788,18 @@
     <string name="settings_gemini_google_search_footer">有効にすると、Gemini はプロンプトへの回答に役立つ場合、ウェブ検索を行うことがあります。検索クエリは Google に送信されます。Google は Gemini API プロジェクトに課金します。Gemini 3 モデルでは実行された各検索クエリが使用量にカウントされます。Gemini 2.5 以前は検索を使ったプロンプトごとに課金されます。</string>
     <string name="settings_health_unavailable_platform">この端末ではアプリから Health Connect を利用できません。Android 14 以降はシステムモジュールです。設定に Health Connect が表示されるのに Chompass が接続できない場合、ROM が Health Connect サービスを公開していない可能性があります（de-Googled ビルドでよくあります）。Chompass は Play ストアやサンドボックス化 Play を必要としません。代わりに食事日記と体組成のエクスポート/インポート、または任意の WebDAV を使ってください。</string>
     <string name="settings_meal_constituents_footer_on_device">オンデバイスの Gemma では利用不可: 食材の内訳にはより強力なモデルが必要です。クラウドプロバイダーに切り替えて有効にしてください。</string>
+    <string name="settings_offline_index_section">オフライン製品データ</string>
+    <string name="settings_offline_pack_usda_name">USDAブランド食品（GTIN）</string>
+    <string name="settings_offline_pack_usda_desc">任意のダウンロード：バーコード → 米国のパッケージ食品の名前・ブランド・カロリー（USDA FoodData Central、パブリックドメイン）。</string>
+    <string name="settings_offline_pack_offde_name">Open Food Facts ドイツ</string>
+    <string name="settings_offline_pack_offde_desc">任意のダウンロード：バーコード → ドイツで販売されている製品の名前・ブランド・カロリー（Open Food Facts、ODbL）。</string>
+    <string name="settings_offline_pack_download">タップしてダウンロード</string>
+    <string name="settings_offline_pack_downloading">Downloading %1$d%%</string>
+    <string name="settings_offline_pack_installed">v%1$s · %2$s MB</string>
+    <string name="settings_offline_pack_failed">ダウンロードに失敗しました — タップで再試行</string>
+    <string name="settings_offline_index_wifi_only">Wi-Fiのみでダウンロード</string>
+    <string name="settings_offline_index_wifi_only_desc">オフにしない限り、パックのダウンロードは従量制でない接続を待ちます。</string>
+    <string name="settings_offline_index_license_footer">パックのデータ：Open Food Facts（オープンデータベースライセンス）とUSDA FoodData Central（パブリックドメイン）。パックはこのプロジェクトのリリースページから一度だけダウンロードされます。スキャン自体が新しい問い合わせを送ることはありません。削除するにはダウンロード済みのパックをタップしてください。</string>
     <string name="settings_photo_note_prompt">写真メモを求める</string>
     <string name="settings_photo_note_prompt_footer">オンにすると、分析前に写真入力でメモ欄が強調表示されます。メモなしでも確認して続行できます。</string>
     <string name="settings_progress_default_range">進捗のデフォルト期間</string>
@@ -1101,6 +1112,15 @@
     <string name="home_calories_goal_plus_active">目標 %1$s + 活動 %2$s</string>
     <string name="home_calories_left">残り %1$s</string>
     <string name="home_calories_eaten_a11y">摂取 %1$s</string>
+    <string name="home_a11y_prev_day">前日</string>
+    <string name="home_a11y_next_day">翌日</string>
+    <string name="home_planned_caption">+%1$s 予定</string>
+    <string name="home_budget_legend_title">リングの見方</string>
+    <string name="home_budget_legend_eaten">摂取</string>
+    <string name="home_budget_legend_estimated_active">推定活動消費</string>
+    <string name="home_budget_legend_live_burn">今の活動消費</string>
+    <string name="home_budget_legend_over_typical">通常より多い</string>
+    <string name="home_macro_card_summary">%1$s kcal · %2$s タンパク質 · %3$s 炭水化物 · %4$s 脂質 · %5$s 食物繊維</string>
     <string name="home_display_calorie_mode">カロリーゲージ</string>
     <string name="home_display_group_calorie">カロリーゲージ</string>
     <string name="home_display_calorie_mode_pointer">カロリーゲージのモード</string>
@@ -1400,7 +1420,6 @@
     <string name="settings_ai_privacy_ondevice">完全プライベート：食品分析、「どうなる？」、目標推定はこのデバイスで動作し、サーバーには何も送信されません。</string>
     <string name="settings_ai_read_timeout">AI 読み取りタイムアウト</string>
     <string name="settings_ai_read_timeout_unit">秒</string>
-    <string name="settings_ai_read_timeout_value">%1$d 秒</string>
     <string name="settings_goal_tier">目標再計算プロンプト</string>
     <string name="settings_goal_tier_footer">目標の再計算でモデルに送るデータの量です。安全はコンパクトな要約を送り、小さいモデルやローカルモデルに向いています。スマートは体重と食事の全履歴を送るので、大きなモデルが傾向を自ら判断できます。自動はモデル名で選びます。</string>
     <string name="goal_tier_auto">自動</string>
@@ -2250,6 +2269,8 @@
     <string name="progress_log_scale_metrics_title">体重計の指標を記録</string>
     <string name="progress_estimated_smm">推定骨格筋量（Lee）</string>
     <string name="progress_estimated_smm_note">上腕・大腿・下腿からの人体計測推定 · ± ~3 kg</string>
+    <string name="progress_scale_metrics_muscle_estimated">筋肉量（推定）</string>
+    <string name="progress_estimated_smm_body_note">体重・身長・年齢・性別からの人体計測推定 · ± ~3 kg</string>
     <string name="progress_overlay_off">オフ</string>
     <string name="progress_no_entries_in_range">この期間の記録はありません</string>
     <string name="progress_no_series_selected">表示するには上の項目をタップしてください</string>
@@ -2821,15 +2842,21 @@
         <item>リセット</item>
         <item>初期化</item>
     </string-array>
-    <string name="ai_provider_chatgpt">ChatGPT プラン</string>
-    <string name="ai_provider_subtitle_chatgpt">対象の ChatGPT Plus または Pro プランを使用</string>
-    <string name="settings_chatgpt_account">ChatGPT アカウント</string>
-    <string name="settings_chatgpt_continue">ChatGPT で続行</string>
-    <string name="settings_chatgpt_connecting">接続中…</string>
-    <string name="settings_chatgpt_plan_enabled">食品分析で ChatGPT プランを使用できます。使用量は ChatGPT プランと共有されます。</string>
-    <string name="settings_chatgpt_plan_footer">対象の ChatGPT Plus または Pro プランを食品分析に使用するにはサインインしてください。API キーは不要です。</string>
-    <string name="settings_chatgpt_plan_disabled">サインイン済みですが、ChatGPT プランの使用が有効ではありません。アカウント行をタップして許可してください。</string>
-    <string name="settings_chatgpt_revoke_unconfirmed">端末上では切断しました。リモートでの取り消しを確認できませんでした。ChatGPT の設定から Chompass を削除することもできます。</string>
-    <string name="settings_chatgpt_manage_usage">ChatGPT の使用量を管理</string>
-    <string name="settings_chatgpt_disconnect">ChatGPT を切断</string>
-</resources>
+
+    <string name="settings_nav_bar">ナビゲーションバー</string>
+    <string name="settings_nav_bar_subtitle">下部に固定するクラシックバー、または浮かぶガラスピル。</string>
+    <string name="settings_nav_bar_pill">フローティングピル</string>
+    <string name="settings_nav_bar_classic">クラシックバー</string>
+    <string name="export_settings_section">設定のバックアップ</string>
+    <string name="export_settings_row">設定をエクスポート</string>
+    <string name="export_settings_summary">設定をJSONファイルに保存します。APIキーは含まれません。</string>
+    <string name="export_settings_success">設定をエクスポートしました。</string>
+    <string name="export_settings_failed">設定のエクスポートに失敗しました: %1$s</string>
+    <string name="progress_sync_scale_metrics">スケールから同期</string>
+    <string name="progress_sync_scale_rationale">Chompass がスケールと通信するには付近のデバイスの権限が必要です。</string>
+    <string name="progress_sync_scale_grant">許可</string>
+    <string name="progress_sync_scale_scanning">スケールを探しています…乗ってください</string>
+    <string name="progress_sync_scale_reading">%1$s から読み込み中…</string>
+    <string name="progress_sync_scale_done">%1$d 件の新しい計測を取り込みました</string>
+    <string name="progress_sync_scale_failed">スケール同期に失敗しました: %1$s</string>
+    </resources>

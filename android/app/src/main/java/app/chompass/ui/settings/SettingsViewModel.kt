@@ -66,6 +66,7 @@ import app.chompass.data.GoalRecalcTierOverride
 import app.chompass.data.OpenRouterReasoningEffort
 import app.chompass.data.WeatherRepository
 import app.chompass.data.readSettingsHydration
+import app.chompass.data.NAV_BAR_STYLE_PILL
 import app.chompass.services.ondevice.ModelCatalog
 import app.chompass.services.ondevice.OnDeviceCapability
 import app.chompass.models.WeightGoal
@@ -238,6 +239,8 @@ data class SettingsUiState(
     val runtimeModels: List<String>? = null,
     /** Ollama Cloud sheet is empty until this clears; other providers keep their curated list. */
     val runtimeModelsLoading: Boolean = false,
+    /** Last runtime lineup fetch failed; the model sheet footer surfaces it. */
+    val runtimeModelsFailed: Boolean = false,
     val appearanceMode: String = "system",
     /** "" = system default, or locale tag like "de", "zh-CN". */
     val appLanguage: String = "",
@@ -248,6 +251,8 @@ data class SettingsUiState(
     /** Issue #8 follow-up: release cleartext opt-in for user-entered endpoints; default OFF. */
     val allowInsecureHttp: Boolean = false,
     val appThemeColor: AppThemeColor = AppThemeColor.PLUM,
+    /** Codeberg #158: bottom bar style — pill (default) or classic docked bar. */
+    val navBarStyle: String = NAV_BAR_STYLE_PILL,
     /** Opt-in: launcher icon stays the brand teal and never swaps aliases (#21). */
     val fixedLauncherIcon: Boolean = false,
     /** Codeberg #77: meal date/time uses the system pickers. */
@@ -289,6 +294,7 @@ data class SettingsUiState(
     val foodSearchOpenFoodFactsEnabled: Boolean = true,
     val foodSearchUsdaEnabled: Boolean = true,
     val foodSearchSwissEnabled: Boolean = true,
+    val offlineIndexWifiOnly: Boolean = true,
     /** Inverted in UI: “Ask for a photo note” = !skipPhotoNotePrompt. */
     val skipPhotoNotePrompt: Boolean = false,
     val optionalNutrientGoals: OptionalNutrientGoals = OptionalNutrientGoals.Default,
@@ -484,12 +490,14 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
             combine(
                 container.prefs.appThemeColor,
                 container.prefs.appearanceMode,
-            ) { theme, appearance -> theme to appearance }
-                .collect { (theme, appearance) ->
+                container.prefs.navBarStyle,
+            ) { theme, appearance, navStyle -> Triple(theme, appearance, navStyle) }
+                .collect { (theme, appearance, navStyle) ->
                     _ui.update {
                         it.copy(
                             appThemeColor = AppThemeColor.fromKey(theme),
                             appearanceMode = appearance,
+                            navBarStyle = navStyle,
                         )
                     }
                 }
@@ -692,6 +700,7 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
                     aiFeaturesEnabled = snap.aiFeaturesEnabled,
                     allowInsecureHttp = snap.allowInsecureHttp,
                     appThemeColor = AppThemeColor.fromKey(snap.appThemeColorKey),
+                    navBarStyle = snap.navBarStyleKey,
                     fixedLauncherIcon = snap.fixedLauncherIcon,
                     useSystemDateTimePickers = snap.useSystemDateTimePickers,
                     glassBlurEnabled = snap.glassBlurEnabled,
@@ -721,6 +730,7 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
                     foodSearchOpenFoodFactsEnabled = snap.foodSearchOpenFoodFactsEnabled,
                     foodSearchUsdaEnabled = snap.foodSearchUsdaEnabled,
                     foodSearchSwissEnabled = snap.foodSearchSwissEnabled,
+                    offlineIndexWifiOnly = snap.offlineIndexWifiOnly,
                     skipPhotoNotePrompt = snap.skipPhotoNotePrompt,
                     optionalNutrientGoals = snap.optionalNutrientGoals,
                     homeDisplay = snap.homeDisplay,
@@ -1049,6 +1059,19 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
         { copy(foodSearchSwissEnabled = v) },
     )
 
+    fun setOfflineIndexWifiOnly(v: Boolean) = updateUiPref(
+        { container.prefs.setOfflineIndexWifiOnly(v) },
+        { copy(offlineIndexWifiOnly = v) },
+    )
+
+    fun downloadOfflinePack(packId: String) {
+        container.offlineIndexManager.requestDownload(packId)
+    }
+
+    fun removeOfflinePack(packId: String) {
+        container.offlineIndexManager.remove(packId)
+    }
+
     fun setServingUnitInferenceMode(mode: ServingUnitInferenceMode) = updateUiPref(
         { container.prefs.setServingUnitInferenceMode(mode) },
         { copy(servingUnitInferenceMode = mode) },
@@ -1124,6 +1147,12 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
     fun setAppThemeColor(themeColor: AppThemeColor) = updateUiPref(
         { container.prefs.setAppThemeColor(themeColor.key) },
         { copy(appThemeColor = themeColor) },
+    )
+
+    /** Codeberg #158: switch the bottom bar between floating pill and classic docked bar. */
+    fun setNavBarStyle(style: String) = updateUiPref(
+        { container.prefs.setNavBarStyle(style) },
+        { copy(navBarStyle = style) },
     )
 
     fun setFixedLauncherIcon(enabled: Boolean) = updateUiPref(
@@ -1274,6 +1303,7 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
             ollamaModelsError = false,
             runtimeModels = null,
             runtimeModelsLoading = false,
+            runtimeModelsFailed = false,
         )
     }
 
@@ -1530,6 +1560,16 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
         }
     }
 
+    /** Sets the per-profile meal-analysis slot (#148); null/blank clears it back to "same as Model". */
+    fun setProfileAnalysisModel(m: String?) {
+        viewModelScope.launch {
+            val active = _ui.value.activeProfile ?: return@launch
+            val model = m?.takeIf { it.isNotBlank() }?.let { active.provider.supportedModelOrDefault(it) }
+            container.prefs.editActiveProfile { it.copy(analysisModel = model) }
+            refreshAiState()
+        }
+    }
+
     /** E4B is the OOM-risk model; 6 GB devices get E2B only. */
     private fun supportedOnDeviceModels(): List<String> =
         AIProvider.ON_DEVICE.models.filter { modelId ->
@@ -1644,14 +1684,18 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
         val key = container.keyStore.profileApiKey(active.id)
         val publicCatalog = provider == AIProvider.OLLAMA_CLOUD
         if (key.isNullOrBlank() && provider != AIProvider.CHATGPT && !publicCatalog) {
-            _ui.value = _ui.value.copy(runtimeModels = null, runtimeModelsLoading = false)
+            // No key: the curated starter lineup is the correct fallback, not an
+            // error — keep the footer quiet.
+            _ui.value = _ui.value.copy(
+                runtimeModels = null,
+                runtimeModelsLoading = false,
+                runtimeModelsFailed = false,
+            )
             return
         }
         val profileId = active.id
         viewModelScope.launch {
-            if (publicCatalog) {
-                _ui.value = _ui.value.copy(runtimeModelsLoading = true)
-            }
+            _ui.value = _ui.value.copy(runtimeModelsLoading = true, runtimeModelsFailed = false)
             val result = withContext(Dispatchers.IO) {
                 runCatching {
                     if (provider == AIProvider.CHATGPT) {
@@ -1681,6 +1725,7 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
             _ui.value = _ui.value.copy(
                 runtimeModels = result.getOrNull(),
                 runtimeModelsLoading = false,
+                runtimeModelsFailed = result.isFailure,
             )
         }
     }

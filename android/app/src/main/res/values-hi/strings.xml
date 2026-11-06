@@ -719,7 +719,6 @@
     <string name="ai_provider_subtitle_ollama_cloud">Ollama के होस्टेड मॉडल</string>
     <string name="settings_section_ai_profile">प्रोफ़ाइल</string>
     <string name="settings_section_ai_connection">कनेक्शन</string>
-    <string name="settings_section_ai_advanced">उन्नत</string>
     <string name="settings_ai_key_test">टेस्ट</string>
     <string name="settings_ai_key_test_failed">कुंजी अस्वीकृत: %1$s</string>
     <string name="settings_ai_key_remove_title">API कुंजी हटाएं?</string>
@@ -791,6 +790,18 @@
     <string name="settings_gemini_google_search_footer">चालू होने पर Gemini प्रॉम्प्ट का जवाब देने में मदद के लिए वेब खोज सकता है। खोज क्वेरी Google को जाती हैं। Google आपके Gemini API प्रोजेक्ट को बिल करता है। Gemini 3 मॉडल में हर चलाई गई खोज क्वेरी उपयोग में गिनती है; Gemini 2.5 और पुराने में खोज वाले प्रत्येक प्रॉम्प्ट पर बिलिंग।</string>
     <string name="settings_health_unavailable_platform">इस डिवाइस पर Health Connect ऐप्स के लिए उपलब्ध नहीं है। Android 14 और उसके बाद यह सिस्टम मॉड्यूल है। यदि सेटिंग्स में Health Connect दिखे पर Chompass कनेक्ट न हो, तो ROM Health Connect सेवा न दे रहा हो (कुछ de-Googled बिल्ड में आम)। Chompass को Play Store या sandboxed Play की ज़रूरत नहीं। डायरी और बॉडी-मेट्रिक्स निर्यात/आयात, या वैकल्पिक WebDAV उपयोग करें।</string>
     <string name="settings_meal_constituents_footer_on_device">ऑन-डिवाइस Gemma के लिए उपलब्ध नहीं: सामग्री विभाजन के लिए मज़बूत मॉडल चाहिए। इसे चालू करने के लिए क्लाउड प्रदाता पर जाएँ।</string>
+    <string name="settings_offline_index_section">ऑफ़लाइन उत्पाद डेटा</string>
+    <string name="settings_offline_pack_usda_name">USDA ब्रांडेड खाद्य (GTIN)</string>
+    <string name="settings_offline_pack_usda_desc">वैकल्पिक डाउनलोड: बारकोड → अमेरिकी पैकेज्ड खाद्य के नाम, ब्रांड और कैलोरी (USDA FoodData Central, सार्वजनिक डोमेन)।</string>
+    <string name="settings_offline_pack_offde_name">Open Food Facts जर्मनी</string>
+    <string name="settings_offline_pack_offde_desc">वैकल्पिक डाउनलोड: बारकोड → जर्मनी में बिकने वाले उत्पादों के नाम, ब्रांड और कैलोरी (Open Food Facts, ODbL)।</string>
+    <string name="settings_offline_pack_download">डाउनलोड के लिए टैप करें</string>
+    <string name="settings_offline_pack_downloading">Downloading %1$d%%</string>
+    <string name="settings_offline_pack_installed">v%1$s · %2$s MB</string>
+    <string name="settings_offline_pack_failed">डाउनलोड विफल — पुनः प्रयास हेतु टैप करें</string>
+    <string name="settings_offline_index_wifi_only">केवल Wi-Fi पर डाउनलोड करें</string>
+    <string name="settings_offline_index_wifi_only_desc">इसे बंद करने तक पैक डाउनलोड असीमित कनेक्शन की प्रतीक्षा करते हैं।</string>
+    <string name="settings_offline_index_license_footer">पैक डेटा: Open Food Facts (ओपन डेटाबेस लाइसेंस) और USDA FoodData Central (सार्वजनिक डोमेन)। पैक इस परियोजना के रिलीज़ पृष्ठ से एक बार डाउनलोड होते हैं; स्कैन कहीं नया क्वेरी नहीं करते। हटाने के लिए डाउनलोड किए पैक पर टैप करें।</string>
     <string name="settings_photo_note_prompt">फ़ोटो नोट पूछें</string>
     <string name="settings_photo_note_prompt_footer">चालू होने पर फ़ोटो एंट्री विश्लेषण से पहले नोट फ़ील्ड हाइलाइट करती है। बिना नोट के भी पुष्टि और जारी रख सकते हैं।</string>
     <string name="settings_progress_default_range">प्रगति डिफ़ॉल्ट रेंज</string>
@@ -1102,6 +1113,15 @@
     <string name="home_calories_goal_plus_active">लक्ष्य %1$s + %2$s सक्रिय</string>
     <string name="home_calories_left">%1$s शेष</string>
     <string name="home_calories_eaten_a11y">खाया %1$s</string>
+    <string name="home_a11y_prev_day">पिछला दिन</string>
+    <string name="home_a11y_next_day">अगला दिन</string>
+    <string name="home_planned_caption">+%1$s नियोजित</string>
+    <string name="home_budget_legend_title">गेज कैसे पढ़ें</string>
+    <string name="home_budget_legend_eaten">खाया</string>
+    <string name="home_budget_legend_estimated_active">अनुमानित सक्रिय खर्च</string>
+    <string name="home_budget_legend_live_burn">अभी का सक्रिय खर्च</string>
+    <string name="home_budget_legend_over_typical">सामान्य से अधिक</string>
+    <string name="home_macro_card_summary">%1$s kcal · %2$s प्रोटीन · %3$s कार्ब्स · %4$s फैट · %5$s फ़ाइबर</string>
     <string name="home_display_calorie_mode">कैलोरी गेज</string>
     <string name="home_display_group_calorie">कैलोरी गेज</string>
     <string name="home_display_calorie_mode_pointer">कैलोरी गेज मोड</string>
@@ -1401,7 +1421,6 @@
     <string name="settings_ai_privacy_ondevice">पूरी तरह निजी: खाद्य विश्लेषण, "क्या होगा अगर?" और लक्ष्य अनुमान इस डिवाइस पर चलते हैं। कुछ भी सर्वर को नहीं भेजा जाता।</string>
     <string name="settings_ai_read_timeout">AI रीड टाइमआउट</string>
     <string name="settings_ai_read_timeout_unit">से</string>
-    <string name="settings_ai_read_timeout_value">%1$d से</string>
     <string name="settings_goal_tier">लक्ष्य पुनः गणना प्रॉम्प्ट</string>
     <string name="settings_goal_tier_footer">लक्ष्य पुनः गणना मॉडल को कितना डेटा भेजती है। सुरक्षित कॉम्पैक्ट सारांश भेजता है, जो छोटे या लोकल मॉडल के लिए सही है। स्मार्ट आपका पूरा वज़न और भोजन इतिहास भेजता है ताकि बड़ा मॉडल रुझान खुद आँक सके। ऑटो मॉडल नाम से चुनता है।</string>
     <string name="goal_tier_auto">ऑटो</string>
@@ -2251,6 +2270,8 @@
     <string name="progress_log_scale_metrics_title">स्केल मेट्रिक्स लॉग करें</string>
     <string name="progress_estimated_smm">अनुमानित कंकाल मांसपेशी (Lee)</string>
     <string name="progress_estimated_smm_note">बांह, जांघ और पिंडली से एंथ्रोपोमेट्रिक अनुमान · ± ~3 किग्रा</string>
+    <string name="progress_scale_metrics_muscle_estimated">मांसपेशी द्रव्यमान (अनुमानित)</string>
+    <string name="progress_estimated_smm_body_note">वज़न, लंबाई, उम्र और लिंग से एंथ्रोपोमेट्रिक अनुमान · ± ~3 किग्रा</string>
     <string name="progress_overlay_off">बंद</string>
     <string name="progress_no_entries_in_range">इस अवधि में कोई एंट्री नहीं</string>
     <string name="progress_no_series_selected">इसे यहाँ दिखाने के लिए ऊपर किसी मीट्रिक पर टैप करें</string>
@@ -2823,15 +2844,21 @@
         <item>रीसेट</item>
         <item>फ़ैक्टरी</item>
     </string-array>
-    <string name="ai_provider_chatgpt">ChatGPT प्लान</string>
-    <string name="ai_provider_subtitle_chatgpt">योग्य ChatGPT Plus या Pro प्लान का उपयोग करें</string>
-    <string name="settings_chatgpt_account">ChatGPT खाता</string>
-    <string name="settings_chatgpt_continue">ChatGPT के साथ जारी रखें</string>
-    <string name="settings_chatgpt_connecting">कनेक्ट हो रहा है…</string>
-    <string name="settings_chatgpt_plan_enabled">खाद्य विश्लेषण के लिए ChatGPT प्लान का उपयोग चालू है। उपयोग आपके ChatGPT प्लान के साथ साझा होता है।</string>
-    <string name="settings_chatgpt_plan_footer">खाद्य विश्लेषण के लिए योग्य ChatGPT Plus या Pro प्लान का उपयोग करने हेतु साइन इन करें। API कुंजी की आवश्यकता नहीं है।</string>
-    <string name="settings_chatgpt_plan_disabled">आप साइन इन हैं, लेकिन ChatGPT प्लान का उपयोग चालू नहीं है। अनुमति देने के लिए खाते की पंक्ति पर टैप करें।</string>
-    <string name="settings_chatgpt_revoke_unconfirmed">स्थानीय रूप से डिस्कनेक्ट किया गया। रिमोट निरस्तीकरण की पुष्टि नहीं हो सकी; आप ChatGPT सेटिंग में Chompass को हटा भी सकते हैं।</string>
-    <string name="settings_chatgpt_manage_usage">ChatGPT उपयोग प्रबंधित करें</string>
-    <string name="settings_chatgpt_disconnect">ChatGPT डिस्कनेक्ट करें</string>
-</resources>
+
+    <string name="settings_nav_bar">नेविगेशन बार</string>
+    <string name="settings_nav_bar_subtitle">नीचे टिकी क्लासिक बार या फ्लोटिंग ग्लास पिल।</string>
+    <string name="settings_nav_bar_pill">फ्लोटिंग पिल</string>
+    <string name="settings_nav_bar_classic">क्लासिक बार</string>
+    <string name="export_settings_section">सेटिंग बैकअप</string>
+    <string name="export_settings_row">सेटिंग निर्यात करें</string>
+    <string name="export_settings_summary">प्राथमिकताओं को JSON फ़ाइल में सहेजता है। कोई API कुँजी शामिल नहीं है।</string>
+    <string name="export_settings_success">सेटिंग निर्यात हो गईं।</string>
+    <string name="export_settings_failed">सेटिंग निर्यात विफल: %1$s</string>
+    <string name="progress_sync_scale_metrics">स्केल से सिंक करें</string>
+    <string name="progress_sync_scale_rationale">Chompass को आपके स्केल से बात करने के लिए नज़दीकी डिवाइस अनुमति चाहिए।</string>
+    <string name="progress_sync_scale_grant">अनुमति दें</string>
+    <string name="progress_sync_scale_scanning">आपका स्केल खोजा जा रहा है… उस पर चढ़ जाइए</string>
+    <string name="progress_sync_scale_reading">%1$s से पढ़ा जा रहा है…</string>
+    <string name="progress_sync_scale_done">%1$d नई वज़न माप आयात की गईं</string>
+    <string name="progress_sync_scale_failed">स्केल सिंक विफल: %1$s</string>
+    </resources>

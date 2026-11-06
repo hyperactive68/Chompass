@@ -109,10 +109,9 @@ jobs:
           body: |
             ## Chompass ${{ github.ref_name }}
 
-            - Adds **Fixed AI instructions** under Settings → Coach. They are sent with every AI request and can contain persistent assumptions, portion rules, and response preferences.
-            - Keeps app rules, required JSON/schema, safety constraints, and confirmed data above those user-configured instructions.
-            - Shows recognized liquid foods such as soup as approximate `ml` in metric serving display, even when the AI stored `serving`, `bowl`, or `cup`.
-            - Leaves parser units, stored entries, and nutrition calculations unchanged.
+            - Syncs this fork with Codeberg Chompass `6.3.0-beta.2`, including offline barcode packs, Coach quick prompts, provider/model routing updates, UI refinements, and experimental Bluetooth scale sync.
+            - Retains this fork's ChatGPT sign-in/Responses integration, privacy-limited Google Drive sync, fixed AI instructions, metric serving display, and launcher-alias repair.
+            - Uses Android `versionCode 120`, above upstream code 119, while keeping application ID `app.chompass` and the existing release signing lineage for direct upgrades.
 
             This APK is release-signed with the project keystore and is intended to update earlier Chompass builds signed with the same key.
           files: dist/Chompass-*-universal.apk

@@ -8,6 +8,7 @@ import androidx.compose.material.icons.automirrored.outlined.ShowChart
 import androidx.compose.material.icons.outlined.Brightness6
 import androidx.compose.material.icons.outlined.Calculate
 import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material.icons.outlined.Chat
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.Equalizer
@@ -257,6 +258,8 @@ internal val SETTINGS_INDEX: List<SettingsIndexEntry> = listOf(
         R.array.settings_search_kw_ai_vision_model, ChompassRoutes.SETTINGS_AI, Icons.Outlined.Tune),
     SettingsIndexEntry(R.string.settings_group_ai, R.string.settings_ai_coach_model,
         R.array.settings_search_kw_ai_model, ChompassRoutes.SETTINGS_AI, Icons.Outlined.Tune),
+    SettingsIndexEntry(R.string.settings_group_ai, R.string.settings_ai_analysis_model,
+        R.array.settings_search_kw_ai_model, ChompassRoutes.SETTINGS_AI, Icons.Outlined.Tune),
     SettingsIndexEntry(R.string.settings_group_ai, R.string.settings_api_key,
         R.array.settings_search_kw_api_key, ChompassRoutes.SETTINGS_AI, Icons.Outlined.Key),
     SettingsIndexEntry(R.string.settings_group_ai, R.string.settings_base_url,
@@ -281,6 +284,8 @@ internal val SETTINGS_INDEX: List<SettingsIndexEntry> = listOf(
         R.array.settings_search_kw_show_coach_tab, ChompassRoutes.SETTINGS_COACH, Icons.Outlined.Forum),
     SettingsIndexEntry(R.string.settings_group_coach, R.string.settings_section_custom_instructions,
         R.array.settings_search_kw_section_custom_instructions, ChompassRoutes.SETTINGS_COACH, Icons.Outlined.SmartToy),
+    SettingsIndexEntry(R.string.settings_group_coach, R.string.settings_coach_quick_prompts,
+        R.array.settings_search_kw_coach_quick_prompts, ChompassRoutes.SETTINGS_COACH, Icons.Outlined.Chat),
 
     // — Health Data —
     SettingsIndexEntry(R.string.settings_section_health, R.string.settings_health_connect,
@@ -299,6 +304,8 @@ internal val SETTINGS_INDEX: List<SettingsIndexEntry> = listOf(
         R.array.settings_search_kw_import_body_metrics, ChompassRoutes.SETTINGS_DATA, Icons.Outlined.MonitorWeight),
     SettingsIndexEntry(R.string.settings_group_data, R.string.settings_sync_section,
         R.array.settings_search_kw_sync, ChompassRoutes.syncRoute("search"), Icons.Outlined.Sync),
+    SettingsIndexEntry(R.string.settings_group_data, R.string.settings_saved_foods,
+        R.array.settings_search_kw_saved_foods, ChompassRoutes.SETTINGS_FOOD_LIBRARY, Icons.Outlined.Restaurant),
     SettingsIndexEntry(R.string.settings_danger_zone, R.string.settings_clear_food_log,
         R.array.settings_search_kw_clear_food_log, ChompassRoutes.SETTINGS_DATA, Icons.Outlined.DeleteForever),
     SettingsIndexEntry(R.string.settings_danger_zone, R.string.settings_delete_all_data,

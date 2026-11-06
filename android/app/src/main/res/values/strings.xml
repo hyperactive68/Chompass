@@ -28,6 +28,7 @@
     <string name="action_ok">OK</string>
     <string name="action_info">Info</string>
     <string name="action_clear">Clear</string>
+    <string name="action_refresh">Refresh</string>
     <string name="action_delete">Delete</string>
     <string name="action_continue">Continue</string>
     <string name="action_get_started">Get started</string>
@@ -206,7 +207,8 @@
 
     <string name="settings_section_ai_profile">Profile</string>
     <string name="settings_section_ai_connection">Connection</string>
-    <string name="settings_section_ai_advanced">Advanced</string>
+    <string name="settings_section_ai_model_overrides">Model overrides</string>
+    <string name="settings_section_ai_features">AI features</string>
     <string name="settings_ai_key_test">Test</string>
     <string name="settings_ai_key_test_failed">Key rejected: %1$s</string>
     <string name="settings_ai_key_remove_title">Remove API key?</string>
@@ -404,6 +406,7 @@
     <string name="onboarding_building_finalizing">Finalizing results...</string>
     <string name="onboarding_building_recommendation">Daily recommendation for</string>
     <string name="onboarding_building_bullet">•</string>
+    <string name="onboarding_building_skip">Skip</string>
 
     <string name="onboarding_plan_title">Your Plan</string>
     <string name="onboarding_plan_subtitle">Tap any value to edit</string>
@@ -1023,6 +1026,16 @@
     <string name="coach_chip_doing_this_week">How am I doing this week?</string>
     <string name="coach_chip_log_advice">Any advice based on my log?</string>
 
+    <string name="settings_coach_quick_prompts">Quick prompts</string>
+    <string name="settings_coach_quick_prompts_footer">Choose which prompts appear in Coach, reorder them, or add your own.</string>
+    <string name="settings_coach_quick_prompts_help">These chips appear above the Coach input. Reorder, remove, or add your own; saving an empty list hides the strip.</string>
+    <string name="settings_coach_quick_prompts_shown">%1$d shown</string>
+    <string name="settings_coach_quick_prompts_empty">Quick prompts are hidden. Add some, or save to keep them hidden.</string>
+    <string name="settings_coach_quick_prompts_add_builtin">Add built-in</string>
+    <string name="settings_coach_quick_prompts_add_custom">Add custom</string>
+    <string name="settings_coach_quick_prompts_custom_label">Label</string>
+    <string name="settings_coach_quick_prompts_custom_prompt">Prompt</string>
+
     <!-- Progress -->
     <string name="progress_range_week">1W</string>
     <string name="progress_range_month">1M</string>
@@ -1495,6 +1508,11 @@
         <item>tab</item>
         <item>hide</item>
     </string-array>
+    <string-array name="settings_search_kw_coach_quick_prompts">
+        <item>coach</item>
+        <item>prompts</item>
+        <item>chips</item>
+    </string-array>
     <string-array name="settings_search_kw_ai_provider">
         <item>gemini</item>
         <item>openai</item>
@@ -1615,6 +1633,13 @@
         <item>auto sync</item>
         <item>server</item>
     </string-array>
+    <string-array name="settings_search_kw_saved_foods">
+        <item>favorites</item>
+        <item>favorite</item>
+        <item>library</item>
+        <item>food library</item>
+        <item>hidden</item>
+    </string-array>
     <string-array name="settings_search_kw_clear_food_log">
         <item>delete</item>
         <item>erase</item>
@@ -1674,6 +1699,15 @@
     <string name="settings_appearance_dark">Dark</string>
     <string name="settings_appearance_oled">OLED</string>
     <string name="settings_theme_color">Theme Color</string>
+    <string name="settings_nav_bar">Navigation bar</string>
+    <string name="settings_nav_bar_subtitle">Docked classic bar or floating glass pill at the bottom.</string>
+    <string name="settings_nav_bar_pill">Floating pill</string>
+    <string name="settings_nav_bar_classic">Classic bar</string>
+    <string name="export_settings_section">Settings backup</string>
+    <string name="export_settings_row">Export settings</string>
+    <string name="export_settings_summary">Saves preferences to a JSON file. No API keys are included.</string>
+    <string name="export_settings_success">Settings exported.</string>
+    <string name="export_settings_failed">Settings export failed: %1$s</string>
     <string name="settings_fixed_launcher_icon">Fixed Launcher Icon</string>
     <string name="settings_fixed_launcher_icon_subtitle">Keeps the brand icon. It stops following the theme color and wallpaper.</string>
     <string name="settings_system_date_time_pickers">System date and time pickers</string>
@@ -1842,7 +1876,7 @@
     <string name="settings_ai_provider">Provider</string>
     <string name="settings_ai_model">Model</string>
     <string name="settings_ai_reasoning_effort">Reasoning effort</string>
-    <string name="settings_ai_reasoning_effort_footer">ChatGPT-plan models: uses the selected Responses API reasoning level when supported. OpenRouter, custom and Ollama providers send their supported reasoning setting. Auto uses the model default.</string>
+    <string name="settings_ai_reasoning_effort_footer">Models that expose a thinking budget: sets how hard they think. ChatGPT-plan, OpenRouter, custom and Ollama providers send their supported reasoning setting. Auto uses the model default.</string>
     <string name="ai_reasoning_effort_auto">Auto</string>
     <string name="ai_reasoning_effort_low">Low</string>
     <string name="ai_reasoning_effort_medium">Medium</string>
@@ -1852,9 +1886,13 @@
     <string name="ai_reasoning_effort_disabled">Off (no thinking)</string>
     <string name="settings_ai_vision_model">Vision model</string>
     <string name="settings_ai_vision_model_unset">(same as Model)</string>
-    <string name="settings_ai_vision_model_footer">Photos use this model; text uses the main model. Leave unset to use the main model for everything.</string>
+    <string name="settings_ai_vision_model_footer">Photos use this model; text uses the main model, or the Food model when one is set.</string>
     <string name="settings_ai_coach_model">Coach model</string>
-    <string name="settings_ai_coach_model_footer">Coach uses this model. Food logging and goal recalculation keep the main model. Leave unset to use the main model for Coach too.</string>
+    <string name="settings_ai_coach_model_unset">(same as Model)</string>
+    <string name="settings_ai_coach_model_footer">Coach uses this model. Food logging follows the Food model. Leave unset to use the main model for Coach too.</string>
+    <string name="settings_ai_analysis_model">Food model</string>
+    <string name="settings_ai_analysis_model_unset">(same as Model)</string>
+    <string name="settings_ai_analysis_model_footer">Food logging, What if? and goal recalculation use this model. Leave unset to use the main model for all of them.</string>
     <string name="settings_speech_language">Language</string>
     <string name="settings_ai_model_unset">(set one below)</string>
     <string name="ai_model_tier_paid">Paid-only model (free tier no longer includes Pro)</string>
@@ -1886,6 +1924,18 @@
     <string name="settings_meal_constituents">Meal ingredient breakdown</string>
     <string name="settings_meal_constituents_footer">When enabled, the AI may split composite meals into editable ingredients with grams and units. Per-ingredient micronutrients are asked only of stronger cloud models; smaller models still return the ingredient list with macros.</string>
     <string name="settings_meal_constituents_footer_on_device">Unavailable for on-device Gemma: ingredient breakdown needs a stronger model. Switch to a cloud provider to enable this.</string>
+    <string name="settings_offline_index_section">Offline product data</string>
+    <string name="settings_offline_pack_usda_name">USDA branded foods (GTIN)</string>
+    <string name="settings_offline_pack_usda_desc">Optional download: barcode → name, brand and calories for US packaged foods (USDA FoodData Central, public domain).</string>
+    <string name="settings_offline_pack_offde_name">Open Food Facts Germany</string>
+    <string name="settings_offline_pack_offde_desc">Optional download: barcode → name, brand and calories for products sold in Germany (Open Food Facts, ODbL).</string>
+    <string name="settings_offline_pack_download">Tap to download</string>
+    <string name="settings_offline_pack_downloading">Downloading %1$d%%</string>
+    <string name="settings_offline_pack_installed">v%1$s · %2$s MB</string>
+    <string name="settings_offline_pack_failed">Download failed — tap to retry</string>
+    <string name="settings_offline_index_wifi_only">Download over Wi-Fi only</string>
+    <string name="settings_offline_index_wifi_only_desc">Pack downloads wait for an unmetered connection unless you turn this off.</string>
+    <string name="settings_offline_index_license_footer">Pack data: Open Food Facts (Open Database Licence) and USDA FoodData Central (public domain). Packs download once from this project\'s release page; scans never query anywhere new. Tap a downloaded pack to remove it.</string>
     <string name="on_device_model_privacy_notice">Runs entirely on this device. Nothing you type or photograph is sent to a server. Downloading fetches the model file directly from Hugging Face (%1$s), a third-party host not otherwise used by this app.</string>
     <string name="on_device_model_device_notice">Tested on Pixel 9a (GrapheneOS). Other devices, especially lower-tier or non-Tensor hardware, haven\'t been validated yet and may be slower or unsupported; a cloud provider is a safer default there.</string>
     <string name="on_device_model_accuracy_notice">These models are not as accurate as cloud-hosted AI. Expect wrong calories, missed items, or weak photo reads, especially with the smaller E2B model. Cloud providers remain the recommended default for reliable logging.</string>
@@ -1932,6 +1982,9 @@
     <string name="settings_profile_rename">Rename profile</string>
     <string name="settings_profile_delete">Delete profile</string>
     <string name="settings_profile_delete_confirm">Delete this profile? Its API key is removed too.</string>
+    <string name="settings_ai_switch_provider_title">Switch provider?</string>
+    <string name="settings_ai_switch_provider_body">Switching clears this profile\'s API key, endpoint, and vision, Coach, and Food model settings. They belong to the old host.</string>
+    <string name="settings_ai_switch_provider_confirm">Switch</string>
     <string name="settings_profile_fallback">Fallback profile</string>
     <string name="settings_profile_fallback_none">None</string>
     <string name="sheet_profile_name">Profile name</string>
@@ -2442,6 +2495,15 @@
     <string name="home_display_show_active_calories_desc">Show today’s active burn in the calorie gauge.</string>
     <string name="home_calories_left">%1$s left</string>
     <string name="home_calories_eaten_a11y">Eaten %1$s</string>
+    <string name="home_a11y_prev_day">Previous day</string>
+    <string name="home_a11y_next_day">Next day</string>
+    <string name="home_planned_caption">+%1$s planned</string>
+    <string name="home_budget_legend_title">How to read the ring</string>
+    <string name="home_budget_legend_eaten">Eaten</string>
+    <string name="home_budget_legend_estimated_active">Estimated active burn</string>
+    <string name="home_budget_legend_live_burn">Active burn right now</string>
+    <string name="home_budget_legend_over_typical">Above typical burn</string>
+    <string name="home_macro_card_summary">%1$s kcal · %2$s protein · %3$s carbs · %4$s fat · %5$s fiber</string>
     <string name="home_calorie_budget_sheet_title">Today’s calorie budget</string>
     <string name="home_calorie_budget_source_measured">Active calories from Health Connect</string>
     <string name="home_calorie_budget_day_type_typical">Typical active burn for %1$s days is %2$d %4$s (14-day average is %3$d %4$s).</string>
@@ -2592,7 +2654,8 @@
     <string name="settings_max_tokens_unit" tools:ignore="MissingTranslation">tokens</string>
     <string name="settings_ai_read_timeout">AI read timeout</string>
     <string name="settings_ai_read_timeout_unit">s</string>
-    <string name="settings_ai_read_timeout_value">%1$d s</string>
+    <string name="settings_ai_timeout_override">%1$d s · profile override</string>
+
     <string name="settings_goal_tier">Goal recalc prompt</string>
     <string name="settings_goal_tier_footer">How much data the goals recalculation sends the model. Safe sends compact summaries, right for small or local models. Smart sends your full weight and food history so a large model can judge trends itself. Auto picks by model name.</string>
     <string name="goal_tier_auto">Auto</string>
@@ -2940,4 +3003,16 @@
     <string name="settings_chatgpt_revoke_unconfirmed">Disconnected locally. Remote revocation could not be confirmed; you can also remove Chompass in ChatGPT settings.</string>
     <string name="settings_chatgpt_manage_usage">Manage ChatGPT usage</string>
     <string name="settings_chatgpt_disconnect">Disconnect ChatGPT</string>
+    <!-- Native BLE scale sync (vendored openScale drivers) -->
+    <string name="progress_sync_scale_metrics">Sync from scale</string>
+    <string name="progress_sync_scale_rationale">Chompass needs the nearby-devices permission to talk to your scale.</string>
+    <string name="progress_sync_scale_grant">Grant</string>
+    <string name="progress_sync_scale_scanning">Looking for your scale… step on it</string>
+    <string name="progress_sync_scale_reading">Reading from %1$s…</string>
+    <string name="progress_sync_scale_done">Imported %1$d new weigh-ins</string>
+    <string name="progress_sync_scale_failed">Scale sync failed: %1$s</string>
+    <string name="progress_sync_scale_user_title">Your scale asked who is weighing. Pick your profile:</string>
+    <string name="progress_sync_scale_user_new">Register as new user</string>
+    <string name="progress_sync_scale_consent_slot">Slot %1$d on %2$s needs the 4-digit PIN set on the scale.</string>
+    <string name="progress_sync_scale_consent_hint">PIN (4 digits)</string>
 </resources>

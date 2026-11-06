@@ -1,5 +1,6 @@
 package app.chompass.ui.progress
 
+import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
@@ -108,6 +110,7 @@ fun ProgressScreen(container: AppContainer, onOpenCustomize: (() -> Unit)? = nul
     var showAddDialog by remember { mutableStateOf(false) }
     var showAddBodyFatDialog by remember { mutableStateOf(false) }
     var showAddCompositionDialog by remember { mutableStateOf(false) }
+    var showScaleSyncSheet by remember { mutableStateOf(false) }
     // Collected at screen level so the history sheets compose with data
     // already present: collected inside the `if` they start empty, the sheet
     // anchors to the header-only height, and the later emission never
@@ -120,7 +123,10 @@ fun ProgressScreen(container: AppContainer, onOpenCustomize: (() -> Unit)? = nul
     var editingMeasurementSite by remember { mutableStateOf<BodyMeasurement.Site?>(null) }
     var showAllWeights by remember { mutableStateOf(false) }
     var showAllBodyFats by remember { mutableStateOf(false) }
-    var heavySectionsReady by remember { mutableStateOf(false) }
+    // rememberSaveable: the destination leaves composition on tab switch, so
+    // returning to the tab skips the two-frame defer; cold start still defers
+    // once (the original heavy-section jank guard).
+    var heavySectionsReady by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         repeat(2) { withFrameNanos { } }
         heavySectionsReady = true
@@ -239,9 +245,10 @@ fun ProgressScreen(container: AppContainer, onOpenCustomize: (() -> Unit)? = nul
                     }
             }
 
-            // Scale composition: renders nothing at all when the range holds no
-            // composition rows, so users without such a scale see no change.
-            if (heavySectionsReady && ui.filteredCompositions.isNotEmpty()) {
+            // Scale composition: metric blocks stay reading-gated, but the card
+            // itself now renders with the log action whenever a profile exists
+            // (#153 — the entry point must not require a first composition row).
+            if (heavySectionsReady && ui.profile != null) {
                 item {
                     CompositionSection(
                         compositions = ui.filteredCompositions,
@@ -253,6 +260,11 @@ fun ProgressScreen(container: AppContainer, onOpenCustomize: (() -> Unit)? = nul
                         untrackedDays = ui.untrackedDays,
                         typeColorOf = typeColorOf,
                         onLog = { showAddCompositionDialog = true },
+                        onSyncScale = if (Build.VERSION.SDK_INT >= 31) {
+                            { showScaleSyncSheet = true }
+                        } else {
+                            null
+                        },
                     )
                 }
             }
@@ -386,6 +398,20 @@ fun ProgressScreen(container: AppContainer, onOpenCustomize: (() -> Unit)? = nul
             showAddCompositionDialog = false
         }
     }
+    if (showScaleSyncSheet) {
+        val syncState by vm.scaleSyncState.collectAsState()
+        ScaleSyncSheet(
+            syncState = syncState,
+            onStart = { vm.startScaleSync() },
+            onCancel = { vm.cancelScaleSync() },
+            onUserSelected = { vm.onScaleUserSelected(it) },
+            onConsentEntered = { vm.onScaleConsentEntered(it) },
+            onDismiss = {
+                vm.cancelScaleSync()
+                showScaleSyncSheet = false
+            },
+        )
+    }
     if (showAllWeights) {
         AllWeightHistorySheet(
             entries = allWeights.sortedByDescending { it.date },
@@ -494,7 +520,7 @@ internal fun ProgressScreenPreviewContent(
                         )
                     }
                 }
-            if (ui.filteredCompositions.isNotEmpty()) {
+            if (ui.profile != null) {
                 item {
                     CompositionSection(
                         compositions = ui.filteredCompositions,

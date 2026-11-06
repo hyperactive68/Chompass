@@ -6,6 +6,7 @@ import app.chompass.services.ai.ProviderDirectory
 import app.chompass.services.ai.ProviderDirectoryEntry
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.Instant
@@ -29,7 +30,13 @@ class OpenAiEndpointWriteTest {
 
     @Test
     fun geminiToDirectoryHost_switchesAndClearsKey() {
-        val active = profile(AIProvider.GEMINI, model = "gemini-3.8-flash")
+        val active = profile(
+            AIProvider.GEMINI,
+            model = "gemini-3.8-flash",
+            visionModel = "gemini-3.8-flash-vision",
+            coachModel = "gemini-3.8-pro",
+            analysisModel = "gemini-3.5-flash",
+        )
         val write = planOpenAiEndpointWrite(active, "https://api.302.ai/v1/", directory)
         assertTrue(write.changed)
         assertEquals(AIProvider.CUSTOM_OPENAI, write.provider)
@@ -37,6 +44,11 @@ class OpenAiEndpointWriteTest {
         assertEquals("glm-5.3-flash", write.model)
         assertTrue(write.clearKey)
         assertTrue(write.clearVision)
+        // Per-feature slots name models on the old host, so they all go.
+        val applied = active.withOpenAiEndpointWrite(write)
+        assertNull(applied.visionModel)
+        assertNull(applied.coachModel)
+        assertNull(applied.analysisModel)
     }
 
     @Test
@@ -61,6 +73,9 @@ class OpenAiEndpointWriteTest {
             AIProvider.CUSTOM_OPENAI,
             baseUrl = "https://api.302.ai/v1",
             model = "kept-model",
+            visionModel = "kept-vision",
+            coachModel = "kept-coach",
+            analysisModel = "kept-food",
         )
         val write = planOpenAiEndpointWrite(active, "https://api.302.ai/v1/openai", directory)
         assertTrue(write.changed)
@@ -68,6 +83,11 @@ class OpenAiEndpointWriteTest {
         assertEquals("kept-model", write.model)
         assertFalse(write.clearKey)
         assertFalse(write.clearVision)
+        // Same host: the slots still point at this host, so they survive.
+        val applied = active.withOpenAiEndpointWrite(write)
+        assertEquals("kept-vision", applied.visionModel)
+        assertEquals("kept-coach", applied.coachModel)
+        assertEquals("kept-food", applied.analysisModel)
     }
 
     @Test
@@ -85,12 +105,18 @@ class OpenAiEndpointWriteTest {
         provider: AIProvider,
         baseUrl: String? = null,
         model: String? = null,
+        visionModel: String? = null,
+        coachModel: String? = null,
+        analysisModel: String? = null,
     ) = AiProfile(
         id = UUID.randomUUID(),
         name = "Test",
         provider = provider,
         model = model,
         baseUrl = baseUrl,
+        visionModel = visionModel,
+        coachModel = coachModel,
+        analysisModel = analysisModel,
         createdAt = Instant.EPOCH,
     )
 }

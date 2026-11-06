@@ -32,7 +32,7 @@
             <span class="platform-card__tag">android</span>
             <span class="platform-card__name">Get it on Obtainium</span>
             <span class="platform-card__desc">Keeps you updated straight from Codeberg releases.</span>
-            <span class="platform-card__link">{{ .Site.Params.apkArm64Note }} arm64 APK</span>
+            <span class="platform-card__link">{{ .Site.Params.apkSizeNote }} APK</span>
           </a>
           <a class="platform-card" href="{{ .Site.Params.releases }}">
             <span class="platform-card__tag">apk</span>
@@ -43,7 +43,7 @@
           <a class="platform-card" href="{{ .Site.Params.fdroid }}">
             <span class="platform-card__tag">f-droid</span>
             <span class="platform-card__name">Get it on F-Droid</span>
-            <span class="platform-card__desc">Now live. Open-source app store, no account needed.</span>
+            <span class="platform-card__desc">Open-source app store, no account needed.</span>
             <span class="platform-card__link">app.chompass</span>
           </a>
         </div>
@@ -146,7 +146,7 @@
           </li>
           <li>
             <span class="feature-list__mark">[*]</span>
-            <div><strong>Open data, published accuracy.</strong> FOSS barcode on Android, open export and import, and published AI accuracy notes instead of a single marketing number.</div>
+            <div><strong>Open data, published accuracy.</strong> FOSS barcode on Android, open JSON export and import.</div>
           </li>
         </ul>
         <a class="read-more" href="{{ "features/" | relURL }}">
@@ -160,17 +160,6 @@
       <section class="lander__stats" aria-labelledby="stats-heading">
         <div class="section-title">
           <h2 id="stats-heading">The numbers</h2>
-          <div>
-            <span class="section-title__mark">[*]</span>
-            <p>
-              Small app, honest claims: <strong>18</strong> languages,
-              <strong>4.6M+</strong> Open Food Facts products cached offline,
-              <strong>~90%</strong> of typed entries with a stated portion within 20% of
-              true calories, and a <strong>~17&nbsp;MiB</strong> arm64 APK, about
-              <strong>14%</strong> of upstream Fud AI's 122&nbsp;MiB build. Zero ads, analytics, or
-              accounts.
-            </p>
-          </div>
         </div>
         <div class="stats-grid">
           <div class="stat">
@@ -195,7 +184,7 @@
               <span class="stat__name">Typed entry within 20%</span>
               <strong class="stat__value">~90%</strong>
             </div>
-            <p class="stat__desc">Measured against labeled datasets; the methodology is published, not a vendor claim.</p>
+            <p class="stat__desc">Measured against labeled datasets; methodology is public.</p>
           </div>
           <div class="stat">
             <span class="stat__mark">[*]</span>
@@ -208,16 +197,16 @@
           <div class="stat stat--wide">
             <span class="stat__mark">[*]</span>
             <div class="stat__label">
-              <span class="stat__name">arm64 APK vs upstream Fud AI</span>
-              <strong class="stat__value">~14%</strong>
+              <span class="stat__name">Universal APK vs upstream Fud AI</span>
+              <strong class="stat__value">~25%</strong>
             </div>
-            <p class="stat__desc">Chompass is a fork of Fud AI, so your diary JSON carries over. The 3.8.0 arm64 APK is 17&nbsp;MiB, about 14% of upstream v6.1's 122&nbsp;MiB universal build (29&nbsp;MiB universal ≈ 23%).</p>
+            <p class="stat__desc">Chompass is a fork of Fud AI, so diary JSON carries over. The v{{ .Site.Params.version }} universal APK is 21.5&nbsp;MiB; upstream v8.1 is 87&nbsp;MiB.</p>
           </div>
         </div>
         <p class="stats-note">
           Accuracy figures come from our published
-          <a href="https://codeberg.org/fitguy/chompass/src/branch/main/docs/ACCURACY.md">AI accuracy write-up</a>,
-          not a vendor claim. Product count as listed by Open Food Facts.
+          <a href="https://codeberg.org/fitguy/chompass/src/branch/main/docs/ACCURACY.md">accuracy write-up</a>.
+          Product count as listed by Open Food Facts.
         </p>
       </section>
 
@@ -276,7 +265,7 @@
               <span class="faq-item__question-text">How accurate is food logging?</span>
             </button>
             <div class="faq-item__answer" hidden>
-              We test against labeled datasets and publish the results instead of quoting a single number. Typed entry with a stated portion lands within 20% about 90% of the time; photo entry is harder and that gap is true across the industry. Full methodology in the <a href="https://codeberg.org/fitguy/chompass/src/branch/main/docs/ACCURACY.md">published accuracy notes</a>
+              We test against labeled datasets and publish the results. Typed entry with a stated portion lands within 20% about 90% of the time; photo entry is harder, and that gap is industry-wide. Full methodology: <a href="https://codeberg.org/fitguy/chompass/src/branch/main/docs/ACCURACY.md">accuracy write-up</a>.
             </div>
           </li>
           <li class="faq-item">

@@ -51,6 +51,21 @@ fun planOpenAiEndpointWrite(
     )
 }
 
+/**
+ * Applies [write] to the active profile. A host change drops the per-feature
+ * model slots ([AiProfile.visionModel], [AiProfile.coachModel],
+ * [AiProfile.analysisModel]) — they name models on the old host — while a
+ * same-host path change keeps them.
+ */
+internal fun AiProfile.withOpenAiEndpointWrite(write: OpenAiEndpointWrite): AiProfile = copy(
+    provider = write.provider,
+    baseUrl = write.baseUrl,
+    model = write.model,
+    visionModel = if (write.clearVision) null else visionModel,
+    coachModel = if (write.clearVision) null else coachModel,
+    analysisModel = if (write.clearVision) null else analysisModel,
+)
+
 private fun unchanged(active: AiProfile) = OpenAiEndpointWrite(
     changed = false,
     provider = active.provider,

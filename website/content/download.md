@@ -63,21 +63,15 @@ Package `app.chompass` ([listing](https://f-droid.org/packages/app.chompass/)). 
 
 [![Get it on Obtainium](https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png)](https://apps.obtainium.imranr.dev/redirect?r=obtainium%3A%2F%2Fadd%2Fhttps%3A%2F%2Fcodeberg.org%2Ffitguy%2Fchompass)
 
-That confirms the Codeberg app source, then keeps you updated from releases.
+It installs from Codeberg releases and keeps the app updated automatically.
 
 Or paste `https://codeberg.org/fitguy/chompass` into Obtainium’s **Add App** screen.
 
 ## Android: Direct APK
 
-Latest **arm64** (most phones): [Chompass-fdroid-{{< site_version >}}-arm64-v8a.apk]({{< arm64_apk_url >}}) ({{< apk_arm64_note >}}).
+One universal APK (64- and 32-bit ARM, no x86): [Chompass-fdroid-{{< site_version >}}.apk]({{< apk_url >}}) ({{< apk_size_note >}}).
 
-All builds, checksums, and release notes: [Codeberg Releases](https://codeberg.org/fitguy/chompass/releases) (v{{< site_version >}}).
-
-| APK             | Use when                 | Size (v{{< site_version >}}) |
-| --------------- | ------------------------ | ---------------------------- |
-| **arm64-v8a**   | Most modern phones       | {{< apk_arm64_note >}}       |
-| **armeabi-v7a** | Older 32-bit devices     | ~6 MiB                       |
-| **universal**   | ARM phones (64 and 32 bit). No Intel/x86. | {{< apk_universal_note >}}   |
+Checksums and release notes: [Codeberg Releases](https://codeberg.org/fitguy/chompass/releases) (v{{< site_version >}}).
 
 Package ID: `app.chompass`
 

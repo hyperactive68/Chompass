@@ -1,12 +1,14 @@
 package app.chompass.data
 
 import android.content.Context
+import androidx.datastore.preferences.core.Preferences
 import app.chompass.models.AIProvider
 import app.chompass.models.AiProfile
 import app.chompass.models.BodyFatEntry
 import app.chompass.models.BodyCompositionEntry
 import app.chompass.models.BodyMeasurement
 import app.chompass.models.ChatMessage
+import app.chompass.models.CoachQuickPrompts
 import app.chompass.models.DailyFoodTotals
 import app.chompass.models.DailyNote
 import app.chompass.models.FoodEntry
@@ -34,6 +36,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 
@@ -421,6 +424,9 @@ class PreferencesStore(private val appContext: Context) : NutritionSyncStore {
     suspend fun setAppLanguage(v: String) = setAppLanguageImpl(v)
     val coachTabEnabled: Flow<Boolean> get() = coachTabEnabledImpl
     suspend fun setCoachTabEnabled(v: Boolean) = setCoachTabEnabledImpl(v)
+    /** Codeberg #155: coach quick-prompt strip; null = per-goal defaults. */
+    val coachQuickPrompts: Flow<CoachQuickPrompts?> get() = coachQuickPromptsImpl
+    suspend fun setCoachQuickPrompts(prompts: CoachQuickPrompts?) = setCoachQuickPromptsImpl(prompts)
     /** Codeberg #20 phase 2: master AI-features switch; default ON. */
     val aiFeaturesEnabled: Flow<Boolean> get() = aiFeaturesEnabledImpl
     suspend fun setAiFeaturesEnabled(v: Boolean) = setAiFeaturesEnabledImpl(v)
@@ -429,6 +435,14 @@ class PreferencesStore(private val appContext: Context) : NutritionSyncStore {
     suspend fun setAllowInsecureHttp(v: Boolean) = setAllowInsecureHttpImpl(v)
     val appThemeColor: Flow<String> get() = appThemeColorImpl
     suspend fun setAppThemeColor(v: String) = setAppThemeColorImpl(v)
+
+    /** Codeberg #158: bottom navigation style — pill (default) or classic docked bar. */
+    val navBarStyle: Flow<String> get() = navBarStyleImpl
+    suspend fun setNavBarStyle(v: String) = setNavBarStyleImpl(v)
+
+    /** Codeberg #117: one raw snapshot for the settings export; no caching, no filtering. */
+    suspend fun rawSnapshot(): Preferences = dataStore.data.first()
+
     val fixedLauncherIcon: Flow<Boolean> get() = fixedLauncherIconImpl
     suspend fun setFixedLauncherIcon(v: Boolean) = setFixedLauncherIconImpl(v)
     val useSystemDateTimePickers: Flow<Boolean> get() = useSystemDateTimePickersImpl
@@ -625,6 +639,12 @@ class PreferencesStore(private val appContext: Context) : NutritionSyncStore {
     val barcodeCache: Flow<Map<String, CachedBarcodeProduct>> get() = barcodeCacheImpl
     suspend fun cacheBarcodeLookup(barcode: String, analysis: app.chompass.services.ai.FoodAnalysis) =
         cacheBarcodeLookupImpl(barcode, analysis)
+    val offlineIndexPacks: Flow<Map<String, InstalledOfflinePack>> get() = offlineIndexPacksImpl
+    suspend fun setOfflineIndexPacks(packs: Map<String, InstalledOfflinePack>) = setOfflineIndexPacksImpl(packs)
+    /** One-pack write: null removes the entry (removed / dropped at startup). */
+    suspend fun updateOfflineIndexPack(id: String, pack: InstalledOfflinePack?) = updateOfflineIndexPackImpl(id, pack)
+    val offlineIndexWifiOnly: Flow<Boolean> get() = offlineIndexWifiOnlyImpl
+    suspend fun setOfflineIndexWifiOnly(enabled: Boolean) = setOfflineIndexWifiOnlyImpl(enabled)
     val pendingFoodInputDraft: Flow<PendingFoodInputDraft?> get() = pendingFoodInputDraftImpl
     suspend fun setPendingFoodInputDraft(draft: PendingFoodInputDraft?) = setPendingFoodInputDraftImpl(draft)
     suspend fun foodImageReferenceFilenames(): Set<String>? = foodImageReferenceFilenamesImpl()

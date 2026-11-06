@@ -12,6 +12,7 @@ import androidx.compose.material.icons.outlined.Key
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Numbers
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.SmartToy
 import androidx.compose.material.icons.outlined.Speed
@@ -36,6 +37,7 @@ import app.chompass.data.OpenRouterReasoningEffort
 import app.chompass.models.AIProvider
 import app.chompass.models.LocaleFormat
 import app.chompass.services.FillGapsFeature
+import app.chompass.services.ai.OpenAICompatibleClient
 import app.chompass.services.ondevice.OnDeviceDownloadState
 
 private fun leftoverGb(bytes: Long): String =
@@ -92,6 +94,20 @@ internal fun SettingsAiSection(
                     HorizontalDivider()
                     SettingRow(stringResource(R.string.settings_profile_delete), "", icon = Icons.Outlined.Delete) { confirmDeleteProfile = true }
                 }
+                HorizontalDivider()
+                // Failure fallback (#644 slice): row into the existing fallback sheet;
+                // subtitle names the fallback profile and its provider, or None.
+                val fallback = ui.profiles.firstOrNull { it.id.toString() == ui.fallbackProfileId }
+                val fallbackSubtitle = fallback?.let { p ->
+                    val name = vm.container.providerDirectory.matchedName(p.provider, p.baseUrl)
+                        ?: stringResource(p.provider.displayNameRes)
+                    "${p.name} · $name"
+                } ?: stringResource(R.string.settings_profile_fallback_none)
+                SettingRow(
+                    stringResource(R.string.settings_profile_fallback),
+                    fallbackSubtitle,
+                    icon = Icons.Outlined.Person,
+                ) { onOpenSheet(SettingsSheet.FALLBACK_PROFILE) }
                 val downloadManager = vm.container.onDeviceModelDownloadManager
                 val storageEpoch by downloadManager.storageEpoch.collectAsState()
                 val leftoverBytes = remember(storageEpoch) { downloadManager.occupiedBytes() }
@@ -235,25 +251,34 @@ internal fun SettingsAiSection(
                     SettingFootnote(stringResource(R.string.settings_ai_allow_insecure_http_footer))
                 }
     }
-    SectionCard(title = stringResource(R.string.settings_section_ai_advanced)) {
-                // Advanced knobs are stored per profile; subtitles show the
-                // effective value with "(default)" while the profile has no override.
-                // Max response length is not a setting: every provider gets the
-                // built-in 4096 cap (a low cap truncates JSON replies and reads
-                // like a model bug), and the read timeout only applies to
-                // self-hosted endpoints — cloud budgets are fixed cold-start
-                // windows (AiHttp.effectiveReadTimeoutSeconds).
+    // The overrides card only carries per-provider slots and knobs; on-device
+    // (and any provider with none of them) it would render as an empty titled
+    // card, so it hides entirely there.
+    if (ui.activeProvider != AIProvider.ON_DEVICE
+        || OpenAICompatibleClient.usesReasoningEffort(ui.activeProvider)
+        || (ui.activeProvider.usesConfigurableRequestTimeout && ui.directoryEntry == null)
+    ) {
+    SectionCard(title = stringResource(R.string.settings_section_ai_model_overrides)) {
+                // Per-provider model slots and knobs, stored on the profile;
+                // subtitles show the effective value. Max response length is not
+                // a setting: every provider gets the built-in 4096 cap (a low cap
+                // truncates JSON replies and reads like a model bug), and the
+                // read timeout only applies to self-hosted endpoints — cloud
+                // budgets are fixed cold-start windows
+                // (AiHttp.effectiveReadTimeoutSeconds).
                 val showVisionModel = ui.activeProvider != AIProvider.ON_DEVICE
                 val showMaxTokens = ui.activeProvider.apiFormat != AIProvider.ApiFormat.GEMINI &&
                     ui.activeProvider.apiFormat != AIProvider.ApiFormat.CHATGPT_RESPONSES &&
                     ui.activeProvider != AIProvider.ON_DEVICE
-                val showReadTimeout = ui.activeProvider != AIProvider.ON_DEVICE
+                val showReasoningEffort = OpenAICompatibleClient.usesReasoningEffort(ui.activeProvider)
+                val showReadTimeout = ui.activeProvider.usesConfigurableRequestTimeout && ui.directoryEntry == null
                 val showGoalTier = ui.activeProvider.usesConfigurableRequestTimeout
                 val showGeminiSearch = ui.activeProvider == AIProvider.GEMINI
                 val showFillMissing = FillGapsFeature.ENABLED && ui.aiFeaturesEnabled
                 // Per-feature model slots: routing is provider-generic
                 // (resolveModelForRequest / coachSelectedModel), so any
-                // non-on-device provider can pin a vision and a Coach model.
+                // non-on-device provider can pin a vision, a Coach, and a
+                // meal-analysis model.
                 if (showVisionModel) {
                     SettingRow(
                         stringResource(R.string.settings_ai_vision_model),
@@ -265,9 +290,18 @@ internal fun SettingsAiSection(
                     HorizontalDivider()
                     SettingRow(
                         stringResource(R.string.settings_ai_coach_model),
-                        ui.activeProfile?.coachModel.orEmpty().ifEmpty { stringResource(R.string.settings_ai_vision_model_unset) },
+                        ui.activeProfile?.coachModel.orEmpty().ifEmpty { stringResource(R.string.settings_ai_coach_model_unset) },
                         icon = Icons.Outlined.Tune,
                     ) { onOpenSheet(SettingsSheet.COACH_MODEL) }
+                    // Meal-analysis slot (#148): the other half of the same
+                    // trade — pin a cheap model for high-volume logging while
+                    // Coach keeps the strong one.
+                    HorizontalDivider()
+                    SettingRow(
+                        stringResource(R.string.settings_ai_analysis_model),
+                        ui.activeProfile?.analysisModel.orEmpty().ifEmpty { stringResource(R.string.settings_ai_analysis_model_unset) },
+                        icon = Icons.Outlined.Tune,
+                    ) { onOpenSheet(SettingsSheet.ANALYSIS_MODEL) }
                 }
                 // Only OpenAI-compatible + Anthropic send a token cap; Gemini is left
                 // uncapped and on-device dispatch doesn't take one at all.
@@ -283,23 +317,37 @@ internal fun SettingsAiSection(
                         icon = Icons.Outlined.Numbers
                     ) { onOpenSheet(SettingsSheet.MAX_TOKENS) }
                 }
-                if (showReadTimeout) {
+                if (showReasoningEffort) {
                     if (showVisionModel || showMaxTokens) HorizontalDivider()
                     SettingRow(
+                        stringResource(R.string.settings_ai_reasoning_effort),
+                        stringResource(ui.openRouterReasoningEffort.displayNameRes),
+                        icon = Icons.Outlined.Tune,
+                    ) { onOpenSheet(SettingsSheet.AI_REASONING_EFFORT) }
+                }
+                if (showReadTimeout) {
+                    if (showVisionModel || showReasoningEffort) HorizontalDivider()
+                    val profileTimeout = ui.activeProfile?.readTimeoutSeconds
+                    SettingRow(
                         stringResource(R.string.settings_ai_read_timeout),
-                        if (ui.activeProfile?.readTimeoutSeconds == null) {
+                        if (profileTimeout == null) {
                             stringResource(R.string.settings_ai_timeout_default, ui.aiReadTimeoutSeconds)
                         } else {
-                            stringResource(R.string.settings_ai_read_timeout_value, ui.aiReadTimeoutSeconds)
+                            stringResource(R.string.settings_ai_timeout_override, profileTimeout)
                         },
                         icon = Icons.Outlined.Speed
                     ) { onOpenSheet(SettingsSheet.AI_READ_TIMEOUT) }
                 }
+    }
+    }
+    SectionCard(title = stringResource(R.string.settings_section_ai_features)) {
+                val showGoalTier = ui.activeProvider.usesConfigurableRequestTimeout
+                val showGeminiSearch = ui.activeProvider == AIProvider.GEMINI
+                val showFillMissing = FillGapsFeature.ENABLED && ui.aiFeaturesEnabled
                 // #123: only the user-entered endpoints (Ollama / Custom
                 // OpenAI-compatible) host models the AUTO tier rules can't
                 // classify by name, so the manual override row shows there.
                 if (showGoalTier) {
-                    if (showVisionModel || showMaxTokens || showReadTimeout) HorizontalDivider()
                     SettingRow(
                         stringResource(R.string.settings_goal_tier),
                         stringResource(ui.goalRecalcTier.displayNameRes),
@@ -307,7 +355,7 @@ internal fun SettingsAiSection(
                     ) { onOpenSheet(SettingsSheet.GOAL_RECALC_TIER) }
                 }
                 if (showGeminiSearch) {
-                    if (showVisionModel || showMaxTokens || showReadTimeout || showGoalTier) HorizontalDivider()
+                    if (showGoalTier) HorizontalDivider()
                     ToggleRow(
                         stringResource(R.string.settings_gemini_google_search),
                         ui.geminiGoogleSearchEnabled,
@@ -322,7 +370,7 @@ internal fun SettingsAiSection(
                 if (showFillMissing) {
                     val gapScan by vm.container.fillGapsEngine.scan.collectAsState(initial = null)
                     val gapCount = gapScan?.count ?: 0
-                    if (showVisionModel || showMaxTokens || showReadTimeout || showGoalTier || showGeminiSearch) HorizontalDivider()
+                    if (showGoalTier || showGeminiSearch) HorizontalDivider()
                     ToggleRow(
                         stringResource(R.string.settings_fill_missing_reminders),
                         ui.fillMissingRemindersEnabled,

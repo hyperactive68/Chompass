@@ -7,6 +7,13 @@ import android.content.pm.PackageManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.combinedClickable
@@ -24,9 +31,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.Reply
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -69,7 +78,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
@@ -122,7 +133,10 @@ import app.chompass.ui.components.WeekEnergyStrip
 import app.chompass.ui.components.isDarkTheme
 import app.chompass.ui.util.formatClockMillis
 import app.chompass.ui.navigation.BottomNavScrollPadding
+import app.chompass.ui.navigation.BottomFabScrollClearance
 import app.chompass.ui.navigation.BottomOverlayPadding
+import app.chompass.ui.theme.AppMotion
+import app.chompass.ui.theme.CapsuleShape
 import app.chompass.ui.theme.dayTypeColor
 import app.chompass.ui.theme.nutrientAccentColor
 import kotlinx.coroutines.flow.first
@@ -465,6 +479,40 @@ fun HomeScreen(
         ui.todayEntries.filter { it.id in selectedEntryIds }
     }
     val inSelectionMode = selectedEntryIds.isNotEmpty()
+
+    // #159: a freshly logged row can land off-screen (standard sort appends at
+    // the bottom), so the entry the user just saved is invisible. Scroll it
+    // into view once — single additions only (batch imports must not yank the
+    // list), and only when the row is not already composed (a top-side
+    // insertion under "latest meals first" must not move the scroll position).
+    val foodLogListState = rememberLazyListState()
+    var seenEntryIds by remember { mutableStateOf<Set<UUID>?>(null) }
+    LaunchedEffect(ui.todayEntries, mealGroups) {
+        val ids = ui.todayEntries.mapTo(mutableSetOf()) { it.id }
+        val previous = seenEntryIds
+        seenEntryIds = ids
+        if (previous == null || inSelectionMode) return@LaunchedEffect
+        val added = ids - previous
+        if (added.size != 1) return@LaunchedEffect
+        // Flat item index mirrors the fixed items above the food log: week
+        // strip, hero block, spacer, plus the optional seeding notice and the
+        // optional daily-note pair; each meal group then contributes its
+        // header + rows. Keep in sync with the item list below.
+        var index = 3 + (if (seedingSampleData) 1 else 0) + (if (ui.dailyNotesEnabled) 2 else 0)
+        var target: Int? = null
+        for (group in mealGroups) {
+            val position = group.entries.indexOfFirst { it.id in added }
+            if (position >= 0) {
+                target = index + 1 + position
+                break
+            }
+            index += 1 + group.entries.size
+        }
+        val flat = target ?: return@LaunchedEffect
+        if (foodLogListState.layoutInfo.visibleItemsInfo.any { it.index == flat }) return@LaunchedEffect
+        runCatching { foodLogListState.animateScrollToItem(flat) }
+    }
+
     val scope = rememberCoroutineScope()
     val foodRemovedMessage = stringResource(R.string.home_food_removed)
     val undoLabel = stringResource(R.string.action_undo)
@@ -513,6 +561,17 @@ fun HomeScreen(
         }
     }
 
+    fun openAddFoodHub() {
+        // Warm the hub recents while the sheet animates open.
+        if (PerfLog.enabled) hubOpenedAtNs = System.nanoTime()
+        vm.prefetchAddFoodIndex()
+        // Codeberg #30: "+" always opens the grid (a last-tool restore
+        // was tried and removed on the maintainer device pass
+        // 2026-08-18); backing out of a destination returns here.
+        addFoodFlowActive = true
+        showAddFoodSheet = true
+    }
+
     // No topBar: the empty TopAppBar used to act as the status-bar spacer, but the
     // ad strip above this screen (TabWithBanner) now owns that inset.
     Scaffold(
@@ -528,11 +587,15 @@ fun HomeScreen(
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
         LazyColumn(
+            state = foodLogListState,
             modifier = Modifier
                 .contentMaxWidth(),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(
                 top = if (inSelectionMode) 72.dp else 8.dp,
-                bottom = BottomNavScrollPadding
+                // #156: the Add FAB docks above the pill, so the list must
+                // scroll past it — BottomNavScrollPadding alone left the last
+                // row's trailing chips behind the button at max scroll.
+                bottom = BottomNavScrollPadding + BottomFabScrollClearance
             )
         ) {
             // Week strip — 52 past weeks + current + 8 future (Codeberg #96).
@@ -569,90 +632,138 @@ fun HomeScreen(
             // this top region, not the food log below "View More". Swipe left/right to change day;
             // the horizontal-only detector lets the LazyColumn keep scrolling vertically.
             item {
+                val canSwipeForward = canAdvanceDiaryDay(selectedDate, today)
+                val prevDayLabel = stringResource(R.string.home_a11y_prev_day)
+                val nextDayLabel = stringResource(R.string.home_a11y_next_day)
                 Column(
-                    modifier = Modifier.pointerInput(selectedDate) {
-                        var accum = 0f
-                        var horizontalLocked = false
-                        val threshold = 120.dp.toPx()
-                        val deadZone = 16.dp.toPx()
-                        detectHorizontalDragGestures(
-                            onDragStart = {
-                                accum = 0f
-                                horizontalLocked = false
-                            },
-                            onDragCancel = {
-                                accum = 0f
-                                horizontalLocked = false
-                            },
-                            onHorizontalDrag = { change, amount ->
-                                accum += amount
-                                if (!horizontalLocked && kotlin.math.abs(accum) > deadZone) {
-                                    horizontalLocked = true
+                    modifier = Modifier
+                        .pointerInput(selectedDate) {
+                            var accum = 0f
+                            var horizontalLocked = false
+                            val threshold = 120.dp.toPx()
+                            val deadZone = 16.dp.toPx()
+                            detectHorizontalDragGestures(
+                                onDragStart = {
+                                    accum = 0f
+                                    horizontalLocked = false
+                                },
+                                onDragCancel = {
+                                    accum = 0f
+                                    horizontalLocked = false
+                                },
+                                onHorizontalDrag = { change, amount ->
+                                    accum += amount
+                                    if (!horizontalLocked && kotlin.math.abs(accum) > deadZone) {
+                                        horizontalLocked = true
+                                    }
+                                    if (horizontalLocked) {
+                                        change.consume()
+                                    }
+                                },
+                                onDragEnd = {
+                                    if (accum > threshold) {
+                                        vm.setSelectedDate(selectedDate.minusDays(1))
+                                    } else if (accum < -threshold) {
+                                        val next = selectedDate.plusDays(1)
+                                        if (canAdvanceDiaryDay(selectedDate, today)) vm.setSelectedDate(next)
+                                    }
+                                    accum = 0f
+                                    horizontalLocked = false
                                 }
-                                if (horizontalLocked) {
-                                    change.consume()
-                                }
-                            },
-                            onDragEnd = {
-                                if (accum > threshold) {
-                                    vm.setSelectedDate(selectedDate.minusDays(1))
-                                } else if (accum < -threshold) {
-                                    val next = selectedDate.plusDays(1)
-                                    if (canAdvanceDiaryDay(selectedDate, today)) vm.setSelectedDate(next)
-                                }
-                                accum = 0f
-                                horizontalLocked = false
-                            }
-                        )
-                    }
-                ) {
-                    Spacer(Modifier.height(4.dp))
-                    if (isToday) {
-                        Text(
-                            stringResource(R.string.home_today),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                        )
-                    } else {
-                        val jumpCd = stringResource(R.string.home_jump_to_today)
-                        // Date plus a Today pill: the whole strip jumps back,
-                        // not just the date text.
-                        Row(
-                            Modifier
-                                .padding(horizontal = 16.dp)
-                                .clickable { vm.setSelectedDate(LocalDate.now()) }
-                                .semantics { contentDescription = jumpCd },
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                selectedDate.format(LocaleFormat.mediumDate()),
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.primary,
                             )
-                            Spacer(Modifier.width(6.dp))
-                            Surface(
-                                shape = CircleShape,
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                            ) {
-                                Row(
-                                    Modifier.padding(start = 8.dp, end = 6.dp, top = 2.dp, bottom = 2.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    Text(
-                                        stringResource(R.string.home_today),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    )
-                                    Icon(
-                                        Icons.AutoMirrored.Outlined.Reply,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        modifier = Modifier.size(14.dp),
+                        }
+                        .semantics {
+                            customActions = buildList {
+                                add(
+                                    CustomAccessibilityAction(prevDayLabel) {
+                                        vm.setSelectedDate(selectedDate.minusDays(1))
+                                        true
+                                    },
+                                )
+                                if (canSwipeForward) {
+                                    add(
+                                        CustomAccessibilityAction(nextDayLabel) {
+                                            vm.setSelectedDate(selectedDate.plusDays(1))
+                                            true
+                                        },
                                     )
                                 }
                             }
                         }
+                ) {
+                    Spacer(Modifier.height(4.dp))
+                    // Decorative day-swipe affordance: the chevrons fade with the
+                    // hero drag handler's reachability (backward is always allowed;
+                    // forward stops at the diary's today limit). Decorative only —
+                    // TalkBack prev/next-day actions live on the hero region.
+                    Row(
+                        Modifier.padding(horizontal = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        DaySwipeChevron(backward = true, visible = true)
+                        Spacer(Modifier.width(2.dp))
+                        AnimatedContent(
+                            targetState = selectedDate,
+                            transitionSpec = {
+                                val dir = if (targetState > initialState) 1 else -1
+                                (fadeIn(animationSpec = AppMotion.spatialSpring()) +
+                                    slideInHorizontally(animationSpec = AppMotion.spatialSpring()) { dir * it / 8 })
+                                    .togetherWith(
+                                        fadeOut(animationSpec = AppMotion.spatialSpring()) +
+                                            slideOutHorizontally(animationSpec = AppMotion.spatialSpring()) { -dir * it / 8 },
+                                    )
+                            },
+                            label = "dayCaption",
+                            contentAlignment = Alignment.CenterStart,
+                        ) { date ->
+                            if (date == today) {
+                                Text(
+                                    stringResource(R.string.home_today),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            } else {
+                                val jumpCd = stringResource(R.string.home_jump_to_today)
+                                // Date plus a Today pill: the whole strip jumps back,
+                                // not just the date text.
+                                Row(
+                                    Modifier
+                                        .clickable { vm.setSelectedDate(LocalDate.now()) }
+                                        .semantics { contentDescription = jumpCd },
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text(
+                                        date.format(LocaleFormat.mediumDate()),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
+                                    Spacer(Modifier.width(6.dp))
+                                    Surface(
+                                        shape = CapsuleShape,
+                                        color = MaterialTheme.colorScheme.primaryContainer,
+                                    ) {
+                                        Row(
+                                            Modifier.padding(start = 8.dp, end = 6.dp, top = 2.dp, bottom = 2.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            Text(
+                                                stringResource(R.string.home_today),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                            )
+                                            Icon(
+                                                Icons.AutoMirrored.Outlined.Reply,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                modifier = Modifier.size(14.dp),
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Spacer(Modifier.width(2.dp))
+                        DaySwipeChevron(backward = false, visible = canSwipeForward)
                     }
                     val baseGoal = ui.gaugeBaseCalorieGoal
                     val activeCalories = ui.displayActiveCalories
@@ -856,7 +967,7 @@ fun HomeScreen(
                 item { SectionHeader(if (isToday) stringResource(R.string.home_todays_food) else stringResource(R.string.home_food_log)) }
                 item {
                     SectionCardWrapper(isFirst = true, isLast = true) {
-                        Box(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
+                        Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
                             Text(
                                 stringResource(
                                     if (selectedDate.isAfter(today)) R.string.home_no_foods_planned
@@ -865,6 +976,9 @@ fun HomeScreen(
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+                            TextButton(onClick = { openAddFoodHub() }) {
+                                Text(stringResource(R.string.home_add_food))
+                            }
                         }
                     }
                 }
@@ -991,16 +1105,7 @@ fun HomeScreen(
         // bar, so the Scaffold FAB slot would sit hidden underneath it. Mirrors the iOS
         // ContentView FAB: .overlay(alignment: .bottomTrailing) + .padding(.bottom).
         FloatingActionButton(
-            onClick = {
-                // Warm the hub recents while the sheet animates open.
-                if (PerfLog.enabled) hubOpenedAtNs = System.nanoTime()
-                vm.prefetchAddFoodIndex()
-                // Codeberg #30: "+" always opens the grid (a last-tool restore
-                // was tried and removed on the maintainer device pass
-                // 2026-08-18); backing out of a destination returns here.
-                addFoodFlowActive = true
-                showAddFoodSheet = true
-            },
+            onClick = { openAddFoodHub() },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .navigationBarsPadding()
@@ -2318,7 +2423,7 @@ internal fun HomeScreenPreviewContent(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(
                     top = 8.dp,
-                    bottom = BottomNavScrollPadding,
+                    bottom = BottomNavScrollPadding + BottomFabScrollClearance,
                 ),
             ) {
                 item {
@@ -2493,4 +2598,25 @@ private fun Context.findComponentActivity(): ComponentActivity? {
         current = current.baseContext
     }
     return current as? ComponentActivity
+}
+
+/**
+ * Decorative day-swipe affordance beside the date caption: fades in only when
+ * the adjacent day is reachable by the hero drag handler. Decorative only —
+ * no semantics; the horizontal swipe path is unchanged.
+ */
+@Composable
+private fun DaySwipeChevron(backward: Boolean, visible: Boolean) {
+    val alpha by animateFloatAsState(
+        targetValue = if (visible) 1f else 0f,
+        label = "daySwipeChevron",
+    )
+    Icon(
+        if (backward) Icons.AutoMirrored.Filled.KeyboardArrowLeft else Icons.AutoMirrored.Filled.KeyboardArrowRight,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier
+            .size(16.dp)
+            .alpha(alpha),
+    )
 }
