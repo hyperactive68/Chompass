@@ -429,6 +429,7 @@
     <string name="food_search_placeholder">np. jogurt grecki, mleko, twaróg</string>
     <string name="food_search_source_off">Open Food Facts</string>
     <string name="add_food_off_unreachable">Open Food Facts jest teraz niedostępny. Zapisane i offline wyniki nadal się wyświetlają.</string>
+    <string name="add_food_off_no_match">Open Food Facts nie zwróciło wyników dla tego wyszukiwania.</string>
     <string name="food_search_source_usda">USDA</string>
     <string name="food_search_source_swiss">Szwajcarska</string>
     <string name="shortcut_camera_short">Aparat</string>

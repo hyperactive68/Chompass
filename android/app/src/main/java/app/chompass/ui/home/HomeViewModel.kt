@@ -273,6 +273,13 @@ data class HomeUiState(
     /** True when the last packaged leg ended without reaching Open Food Facts at all. */
     val addFoodSuggestNetworkUnreachable: Boolean = false,
     /**
+     * True when the last packaged leg reached Open Food Facts and it answered
+     * with zero hits. Only meaningful once [addFoodSuggestNetworkPending] is
+     * false: the Add Food sheet says so explicitly rather than letting the
+     * remaining local rows read as "the app only has USDA / Swiss data".
+     */
+    val addFoodSuggestNetworkEmpty: Boolean = false,
+    /**
      * Whether the packaged-product (Open Food Facts) leg may run. Saved foods
      * come from the local index and USDA / Swiss from bundled SQLite on every
      * keystroke; this is the only leg that leaves the phone.
@@ -761,6 +768,7 @@ data class HomeUiState(
             addFoodSavedRows == other.addFoodSavedRows &&
             addFoodSuggestNetworkPending == other.addFoodSuggestNetworkPending &&
             addFoodSuggestNetworkUnreachable == other.addFoodSuggestNetworkUnreachable &&
+            addFoodSuggestNetworkEmpty == other.addFoodSuggestNetworkEmpty &&
             addFoodPackagedSearchEnabled == other.addFoodPackagedSearchEnabled &&
             pendingIdentityName == other.pendingIdentityName &&
             queueEntries == other.queueEntries &&
@@ -872,6 +880,7 @@ data class HomeUiState(
         result = 31 * result + addFoodSavedRows.hashCode()
         result = 31 * result + addFoodSuggestNetworkPending.hashCode()
         result = 31 * result + addFoodSuggestNetworkUnreachable.hashCode()
+        result = 31 * result + addFoodSuggestNetworkEmpty.hashCode()
         result = 31 * result + addFoodPackagedSearchEnabled.hashCode()
         result = 31 * result + (pendingIdentityName?.hashCode() ?: 0)
         result = 31 * result + queueEntries.hashCode()
@@ -2354,6 +2363,7 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
                     addFoodSuggestions = emptyList(),
                     addFoodSuggestNetworkPending = false,
                     addFoodSuggestNetworkUnreachable = false,
+                    addFoodSuggestNetworkEmpty = false,
                 )
             }
             return
@@ -2409,10 +2419,14 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
             FoodSuggestionRanker.rank(state.query, state.index, state.recipes, database)
         }
         if (gen != suggestGeneration) return
+        // True only while the packaged leg has finished and found nothing; a
+        // still-outstanding leg (pending) keeps this from claiming an OFF miss.
+        val networkEmpty = !state.onlineUnreachable && state.online.isEmpty()
         _ui.update {
             if (it.addFoodSuggestions == ranked &&
                 it.addFoodSuggestNetworkPending == networkPending &&
-                it.addFoodSuggestNetworkUnreachable == state.onlineUnreachable
+                it.addFoodSuggestNetworkUnreachable == state.onlineUnreachable &&
+                it.addFoodSuggestNetworkEmpty == networkEmpty
             ) {
                 it
             } else {
@@ -2420,6 +2434,7 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
                     addFoodSuggestions = ranked,
                     addFoodSuggestNetworkPending = networkPending,
                     addFoodSuggestNetworkUnreachable = state.onlineUnreachable,
+                    addFoodSuggestNetworkEmpty = networkEmpty,
                 )
             }
         }

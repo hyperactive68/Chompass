@@ -499,6 +499,8 @@ internal fun AddFoodSuggestionList(
     networkPending: Boolean,
     /** True when the last packaged leg ended without reaching Open Food Facts. */
     networkUnreachable: Boolean = false,
+    /** True when the last packaged leg reached Open Food Facts and found nothing. */
+    networkEmpty: Boolean = false,
     /** False renders the zero-query saved-meals rows. */
     searching: Boolean,
     /**
@@ -682,6 +684,15 @@ internal fun AddFoodSuggestionList(
                 if (networkUnreachable && !networkPending) {
                     item(key = "off_unreachable") {
                         AddFoodEmptyLine(R.string.add_food_off_unreachable)
+                    }
+                }
+                // The quiet sibling of the unreachable note: Open Food Facts
+                // answered and found nothing, so the rows above are everything
+                // there is. Without it the sheet reads as "the app only has
+                // USDA / Swiss data" whenever OFF's own index comes up empty.
+                if (packagedSearchEnabled && !networkPending && !networkUnreachable && networkEmpty) {
+                    item(key = "off_no_match") {
+                        AddFoodEmptyLine(R.string.add_food_off_no_match)
                     }
                 }
                 items(databaseRows, key = { it.key }, contentType = { it.kind }) { suggestion ->
