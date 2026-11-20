@@ -8,6 +8,7 @@ Style: entries follow the release-text style guide (maintainer-local, not publis
 
 ### Fixed
 
+- **A prescribed calorie target is reachable** (Android): a target outside the automatic floor and ceiling, such as a clinician's 1,700 kcal, can now be set on the Calories wheel, in the onboarding plan editor, and from the Recalculate result sheet. A value under the safety floor still asks for confirmation first. Closes Codeberg [#162](https://codeberg.org/fitguy/Chompass/issues/162)
 - **Add Food now says when Open Food Facts had no match** (Android): the search sheet always showed which database a row came from, but when the Open Food Facts search came back empty the sheet stayed silent, so results from the bundled USDA ("US") and Swiss databases read as if those were all the app has. An explicit "no matches in Open Food Facts" note now appears under the databases heading whenever that source answered and found nothing (its separate "unreachable" note for outages already existed). Relevant right now: Open Food Facts' own search service has been returning empty results for products added after late 2024 — an upstream outage on their side, not in the app; barcode scans are unaffected because they use a different, live endpoint.
 
 ## [6.3.0] - 2026-11-06
