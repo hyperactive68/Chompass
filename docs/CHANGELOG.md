@@ -6,6 +6,10 @@ Style: entries follow the release-text style guide (maintainer-local, not publis
 
 ## [Unreleased]
 
+### Added
+
+- **Trackers get a Progress card** (Android and web app): turn on water, nicotine, or caffeine tracking and Progress shows their average per logged day for the chosen 1W, 1M, 3M, 6M, 1Y, or All range. Caffeine follows the Home total, including caffeine from food entries. Settings → Display → Customize progress controls which rows appear, offering only trackers that are on now or have past logs. Closes Codeberg [#154](https://codeberg.org/fitguy/Chompass/issues/154)
+
 ### Fixed
 
 - **A prescribed calorie target is reachable** (Android): a target outside the automatic floor and ceiling, such as a clinician's 1,700 kcal, can now be set on the Calories wheel, in the onboarding plan editor, and from the Recalculate result sheet. A value under the safety floor still asks for confirmation first. Closes Codeberg [#162](https://codeberg.org/fitguy/Chompass/issues/162)

@@ -222,6 +222,8 @@ internal object Keys {
         val PROGRESS_NUTRIENT_AVERAGES = booleanPreferencesKey("progressNutrientAverages")
         /** Codeberg #75: which nutrients Progress averages (HomeTopNutrient storage keys, macros excluded). */
         val PROGRESS_NUTRIENT_AVERAGES_SELECTION = stringSetPreferencesKey("progressNutrientAveragesSelection")
+        /** #154: tracker rows hidden from the Progress card; empty = show all available. */
+        val PROGRESS_HIDDEN_TRACKED_ITEMS = stringSetPreferencesKey("progressHiddenTrackedItems")
 
         val MEAL_BREAKFAST_START = intPreferencesKey("mealBreakfastStart")
         val MEAL_LUNCH_START = intPreferencesKey("mealLunchStart")

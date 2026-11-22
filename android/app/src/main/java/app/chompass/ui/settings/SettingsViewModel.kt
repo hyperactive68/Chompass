@@ -273,6 +273,8 @@ data class SettingsUiState(
     /** #75: which nutrients the Progress averages card shows (non-macro storage keys). */
     val progressNutrientAveragesSelection: Set<String> =
         app.chompass.models.HomeTopNutrient.DefaultAveragesStorage,
+    /** #154: tracker rows hidden from the Progress averages card. */
+    val progressHiddenTrackedItems: Set<String> = emptySet(),
 
     val userContext: String = "",
     val fallbackEnabled: Boolean = true,
@@ -697,6 +699,7 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
                     progressMeasurementSites = snap.progressMeasurementSites,
                     progressNutrientAverages = snap.progressNutrientAverages,
                     progressNutrientAveragesSelection = snap.progressNutrientAveragesSelection,
+                    progressHiddenTrackedItems = snap.progressHiddenTrackedItems,
 
                     userContext = snap.userContext,
                     fallbackEnabled = snap.fallbackEnabled,
@@ -1209,6 +1212,11 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
         { container.prefs.setProgressNutrientAveragesSelection(keys) },
         { copy(progressNutrientAveragesSelection = keys) },
     )
+    fun setProgressHiddenTrackedItems(keys: Set<String>) = updateUiPref(
+        { container.prefs.setProgressHiddenTrackedItems(keys) },
+        { copy(progressHiddenTrackedItems = keys) },
+    )
+
 
     fun setMealSchedule(schedule: app.chompass.models.MealSchedule) {
         val validated = schedule.validatedOrDefault()

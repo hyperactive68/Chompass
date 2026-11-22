@@ -331,6 +331,16 @@ fun ProgressScreen(container: AppContainer, onOpenCustomize: (() -> Unit)? = nul
                 item { CardSection { ChartPlaceholder(height = 120.dp) } }
             }
 
+            if (ui.trackerAverages.isNotEmpty()) {
+                item {
+                    CardSection {
+                        TrackedItemsSection(
+                            averages = ui.trackerAverages,
+                            useMetricWater = weightMetric,
+                        )
+                    }
+                }
+            }
             if (activity.isNotEmpty()) {
                 item {
                     CardSection { ActivitySection(days = activity) }
@@ -588,6 +598,16 @@ internal fun ProgressScreenPreviewContent(
                     }
                 }
 
+            }
+            if (ui.trackerAverages.isNotEmpty()) {
+                item {
+                    CardSection {
+                        TrackedItemsSection(
+                            averages = ui.trackerAverages,
+                            useMetricWater = weightMetric,
+                        )
+                    }
+                }
             }
             if (activity.isNotEmpty()) {
                 item {

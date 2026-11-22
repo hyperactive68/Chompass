@@ -1088,6 +1088,8 @@
 
     <string name="progress_macro_averages">Macro Averages</string>
     <string name="progress_nutrient_averages">Nutrient averages</string>
+    <string name="progress_trackers_title">Tracked items</string>
+    <string name="progress_trackers_subtitle">Average per logged day</string>
 
     <string name="progress_macro_progress_format">%1$dg / %2$dg</string>
 

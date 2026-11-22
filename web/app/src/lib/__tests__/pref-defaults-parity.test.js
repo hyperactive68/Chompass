@@ -83,6 +83,7 @@ describe("pref defaults (parity fixture)", () => {
     assert.equal(DEFAULT_PREFS.progressDefaultRangeId, fixture.progressDefaultRangeId);
     assert.equal(DEFAULT_PREFS.progressNutrientAverages, fixture.progressNutrientAverages);
     assert.equal(DEFAULT_PREFS.progressNutrientAverages, false);
+    assert.deepEqual(DEFAULT_PREFS.progressHiddenTrackedItems, fixture.progressHiddenTrackedItems);
     // Codeberg #75: the averages selection defaults to the original trio.
     assert.deepEqual(
       normalizeAveragesSelection(DEFAULT_PREFS.progressNutrientAveragesSelection),
