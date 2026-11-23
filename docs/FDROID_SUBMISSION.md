@@ -20,7 +20,7 @@ Chompass is **live on F-Droid**: [f-droid.org/packages/app.chompass](https://f-d
 
 1. Bump `versionCode` / `versionName` in `android/app/build.gradle.kts`
 2. Update `docs/CHANGELOG.md` and **add** `metadata/en-US/changelogs/<versionCode>.txt` (F-Droid's `checkupdates` copies this file into the fdroiddata repo when it builds the new version; without it the version ships with no changelog)
-3. Sync [`fdroid/app.chompass.yml`](fdroid/app.chompass.yml): replace the previous `Builds:` entry with the new version, set `commit:` to the **full** release commit hash (not the `vX.Y.Z` tag), update `CurrentVersion` / `CurrentVersionCode`
+3. Sync [`fdroid/app.chompass.yml`](fdroid/app.chompass.yml): replace the previous `Builds:` entry with the new version, set `commit:` to the **full** release commit hash (not the `vX.Y.Z` tag), update `CurrentVersion` / `CurrentVersionCode`. **Trap:** a release commit only referenced by `main` dies in any history rewrite — the #166 gc (2026-11-15) orphaned the 6.2.0 pin (`e2de9821` → 404) and kept F-Droid's 117 build failing at `git checkout` for 16 days (fdroiddata fixed it 2026-11-23 by repointing to the tag commit `6f1ebf2b`, the only surviving reference). Tags survive rewrites; after any rewrite, re-verify the pin still resolves **on Codeberg** before the next build cycle.
 4. Run `devenv tasks run release:check-metadata` (verifies gradle / changelog / fdroid yml / hugo.toml agree)
 5. Tag `v<version>` on Codeberg and publish APKs
 6. Push upstream `metadata/en-US/` to Codeberg `main` before F-Droid picks up the tag

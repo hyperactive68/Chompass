@@ -17,7 +17,10 @@ Repo: https://codeberg.org/fitguy/chompass.git
 Builds:
   - versionName: 6.2.0
     versionCode: 117
-    commit: e2de9821da2d14d6adf2f64825f54b11af348b11
+    # fdroiddata pins 6f1ebf2b (the v6.2.0 tag commit); the original e2de9821
+    # release-commit pin died in the #166 history rewrite (2026-11-15) and was
+    # 404 on Codeberg, which is why F-Droid's 117 build failed for 16 days.
+    commit: 6f1ebf2b6d43d20c48dd4b011a0f4785c0f5dc50
     subdir: android/app
     gradle:
       - yes
