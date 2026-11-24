@@ -770,8 +770,21 @@ object OpenFoodFactsService {
         val nutriments = product.optJSONObject("nutriments")
             ?: throw LookupException("This barcode was found, but nutrition data is incomplete. Scan the nutrition label instead.")
 
+        // Some labels give prepared values only; OFF then stores the product's
+        // nutrition under `<nutrient>_prepared*` keys alone (Codeberg #176).
+        // With no as-sold macro on record, those keys are the one basis
+        // (mirrors the PWA off-client mapProduct).
+        val macroKeys = listOf("energy-kcal", "energy", "proteins", "carbohydrates", "carbohydrates-total", "fat")
+        fun hasMacro(key: String, suffix: String): Boolean = nutriments.flexibleDouble("$key$suffix") != null
+        val preparedOnly =
+            macroKeys.none { hasMacro(it, "_serving") || hasMacro(it, "_100g") } &&
+                macroKeys.any { hasMacro(it, "_prepared_serving") || hasMacro(it, "_prepared_100g") }
+        val basis = if (preparedOnly) "_prepared" else ""
+
         val labeledGrams = labeledServingGrams(product)
-        val packageGramsValue = packageGrams(product)
+        // A prepared-only product's package weight is the as-sold weight:
+        // neither a portion basis nor a unit for prepared nutrients.
+        val packageGramsValue = if (preparedOnly) null else packageGrams(product)
         // Portion basis: the labeled serving when OFF publishes one, else the
         // whole package — the only portion a barcode proves. The old bare
         // 100 g guess desynced the review sheet (Codeberg #168): the unit card
@@ -781,9 +794,12 @@ object OpenFoodFactsService {
         val scale = servingGrams / 100.0
 
         fun servingValue(key: String): Double? {
-            nutriments.flexibleDouble("${key}_serving")?.let { return it }
-            return nutriments.flexibleDouble("${key}_100g")?.let { it * scale }
+            nutriments.flexibleDouble("${key}${basis}_serving")?.let { return it }
+            return nutriments.flexibleDouble("${key}${basis}_100g")?.let { it * scale }
         }
+
+        /** Per-100 g value on the product's basis, for the plausibility bounds. */
+        fun per100(key: String): Double? = nutriments.flexibleDouble("${key}${basis}_100g")
 
         val calories = servingValue("energy-kcal")
             ?: servingValue("energy")?.let { it * 0.23900573614 }
@@ -827,12 +843,10 @@ object OpenFoodFactsService {
             fat = fat,
             servingGrams = servingGrams,
             sodiumMg = milligrams(servingValue("sodium")),
-            caloriesPer100g = nutriments.flexibleDouble("energy-kcal_100g")
-                ?: nutriments.flexibleDouble("energy_100g")?.let { it * 0.23900573614 },
-            proteinPer100g = nutriments.flexibleDouble("proteins_100g"),
-            carbsPer100g = nutriments.flexibleDouble("carbohydrates_100g")
-                ?: nutriments.flexibleDouble("carbohydrates-total_100g"),
-            fatPer100g = nutriments.flexibleDouble("fat_100g"),
+            caloriesPer100g = per100("energy-kcal") ?: per100("energy")?.let { it * 0.23900573614 },
+            proteinPer100g = per100("proteins"),
+            carbsPer100g = per100("carbohydrates") ?: per100("carbohydrates-total"),
+            fatPer100g = per100("fat"),
         )
         return FoodAnalysis(
             name = name,

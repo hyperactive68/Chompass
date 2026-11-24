@@ -176,6 +176,16 @@ function writeLookupCache(cache) {
  */
 export function mapProduct(product, barcode) {
   const n = product.nutriments || {};
+  // Some labels give prepared values only; OFF then stores the product's
+  // nutrition under `<nutrient>_prepared*` keys alone (Codeberg #176). With
+  // no as-sold macro on record, those keys are the product's one basis
+  // (mirrors Android OpenFoodFactsService.analysis).
+  const MACRO_KEYS = ["energy-kcal", "energy", "proteins", "carbohydrates", "carbohydrates-total", "fat"];
+  const has = (key, suffix) => flexibleNumber(n[key + suffix]) != null;
+  const preparedOnly =
+    !MACRO_KEYS.some((k) => has(k, "_serving") || has(k, "_100g")) &&
+    MACRO_KEYS.some((k) => has(k, "_prepared_serving") || has(k, "_prepared_100g"));
+  const basis = preparedOnly ? "_prepared" : "";
   // Portion basis: the labeled serving when OFF publishes one, else the whole
   // package — the only portion a barcode proves. The old bare 100 g guess
   // desynced the review form (Codeberg #168): "1 package" opened with 100 g
@@ -184,15 +194,17 @@ export function mapProduct(product, barcode) {
   const labeledGrams =
     positiveNumber(flexibleNumber(product.serving_quantity)) ??
     positiveNumber(gramsFromServingSize(product.serving_size));
-  const pkgGrams = packageGrams(product);
+  // A prepared-only product's package weight is the as-sold weight: neither a
+  // portion basis nor a unit for prepared nutrients.
+  const pkgGrams = preparedOnly ? null : packageGrams(product);
   const servingGrams = Math.max(labeledGrams ?? pkgGrams ?? 100, 1);
   const scale = servingGrams / 100;
 
   /** @param {string} key */
   function servingValue(key) {
-    const serving = flexibleNumber(n[`${key}_serving`]);
+    const serving = flexibleNumber(n[`${key}${basis}_serving`]);
     if (serving != null) return serving;
-    const per100 = flexibleNumber(n[`${key}_100g`]);
+    const per100 = flexibleNumber(n[`${key}${basis}_100g`]);
     return per100 != null ? per100 * scale : null;
   }
 
@@ -278,7 +290,7 @@ export function mapProduct(product, barcode) {
     folateMcg: micrograms(servingValue("folates")),
     omega3G: round1(servingValue("omega-3-fat")),
     caffeineMg: round1(servingValue("caffeine")),
-    note: `Open Food Facts · barcode ${barcode} · values for ${Math.round(servingGrams)}g serving; adjust if needed`,
+    note: `Open Food Facts · barcode ${barcode} · values ${preparedOnly ? "as prepared " : ""}for ${Math.round(servingGrams)}g serving; adjust if needed`,
     productMetadata: buildProductMetadata(product, barcode),
     source: "barcode",
   };

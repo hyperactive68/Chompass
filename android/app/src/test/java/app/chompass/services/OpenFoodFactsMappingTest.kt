@@ -251,6 +251,96 @@ class OpenFoodFactsMappingTest {
     }
 
     @Test
+    fun analysis_preparedOnlyNutrients_useThePreparedBasis() {
+        // Codeberg #176: the label gives prepared values only, so OFF stores
+        // the product's nutrition under `<nutrient>_prepared*` keys alone.
+        val product = JSONObject(
+            """
+            {
+              "product_name": "Instant Noedels Kipsmaak",
+              "brands": "YumYum",
+              "quantity": "60g",
+              "product_quantity": 60,
+              "serving_quantity": 380,
+              "nutriments": {
+                "energy-kcal_prepared_serving": 289,
+                "energy-kcal_prepared_100g": 76,
+                "proteins_prepared_serving": 4.94,
+                "proteins_prepared_100g": 1.3,
+                "carbohydrates_prepared_serving": 38,
+                "carbohydrates_prepared_100g": 10,
+                "fat_prepared_serving": 12.5,
+                "fat_prepared_100g": 3.3,
+                "sodium_prepared_serving": 1.22,
+                "sodium_prepared_100g": 0.32
+              }
+            }
+            """.trimIndent(),
+        )
+
+        val food = OpenFoodFactsService.analysis(product, "8852018101024")
+        assertEquals("YumYum Instant Noedels Kipsmaak", food.name)
+        assertEquals(380.0, food.servingSizeGrams!!, 0.001)
+        assertEquals(289, food.calories)
+        assertEquals(4.94, food.protein, 0.001)
+        assertEquals(38.0, food.carbs, 0.001)
+        assertEquals(12.5, food.fat, 0.001)
+        assertEquals(1220.0, food.sodium!!, 0.001)
+        // The 60 g package is the as-sold weight: not a unit for prepared values.
+        assertEquals(listOf("serving"), food.servingUnitOptions.map { it.unit })
+        assertEquals("serving", food.selectedServingUnit)
+    }
+
+    @Test
+    fun analysis_preparedPer100gOnly_portionIs100gNotThePackage() {
+        // No labeled serving: the package weight is the as-sold weight, so the
+        // portion falls back to 100 g of the prepared food, never to the package.
+        val product = JSONObject(
+            """
+            {
+              "product_name": "Pudding mix",
+              "product_quantity": 60,
+              "nutriments": {
+                "energy-kcal_prepared_100g": 76,
+                "proteins_prepared_100g": 1.3,
+                "carbohydrates_prepared_100g": 10,
+                "fat_prepared_100g": 3.3
+              }
+            }
+            """.trimIndent(),
+        )
+
+        val food = OpenFoodFactsService.analysis(product, "5449000000996")
+        assertEquals(100.0, food.servingSizeGrams!!, 0.001)
+        assertEquals(76, food.calories)
+        assertTrue(food.servingUnitOptions.isEmpty())
+    }
+
+    @Test
+    fun analysis_bothBases_prefersAsSold() {
+        val product = JSONObject(
+            """
+            {
+              "product_name": "Noodles",
+              "serving_quantity": 60,
+              "product_quantity": 60,
+              "nutriments": {
+                "energy-kcal_100g": 450,
+                "proteins_100g": 9,
+                "carbohydrates_100g": 60,
+                "fat_100g": 15,
+                "energy-kcal_prepared_100g": 76
+              }
+            }
+            """.trimIndent(),
+        )
+
+        val food = OpenFoodFactsService.analysis(product, "3017620422003")
+        assertEquals(270, food.calories)
+        assertEquals(5.4, food.protein, 0.001)
+    }
+
+    @Test
     fun analysis_fallsBackToBarcodeName() {
         val product = JSONObject(
             """

@@ -434,3 +434,83 @@ test("lookupBarcode_nonProductTextReturnsNullWithoutFetch", async () => {
     globalThis.fetch = originalFetch;
   }
 });
+
+/** Stub the OFF product endpoint for one lookup; restores fetch afterwards. */
+async function lookupWithProduct(code, product) {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = /** @type {typeof fetch} */ (
+    async () => new Response(JSON.stringify({ status: 1, product }), { status: 200 })
+  );
+  try {
+    return await lookupBarcode(code);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+test("lookupBarcode_preparedOnlyNutrients_useThePreparedBasis", async () => {
+  // Codeberg #176: the label gives prepared values only, so OFF stores the
+  // product's nutrition under `<nutrient>_prepared*` keys alone.
+  const prefill = await lookupWithProduct(ean13(901), {
+    product_name: "Instant Noedels Kipsmaak",
+    brands: "YumYum",
+    quantity: "60g",
+    product_quantity: 60,
+    serving_quantity: 380,
+    nutriments: {
+      "energy-kcal_prepared_serving": 289,
+      "energy-kcal_prepared_100g": 76,
+      "proteins_prepared_serving": 4.94,
+      "proteins_prepared_100g": 1.3,
+      "carbohydrates_prepared_serving": 38,
+      "carbohydrates_prepared_100g": 10,
+      "fat_prepared_serving": 12.5,
+      "fat_prepared_100g": 3.3,
+      "sodium_prepared_serving": 1.22,
+      "sodium_prepared_100g": 0.32,
+    },
+  });
+  assert.ok(prefill);
+  assert.equal(prefill.calories, 289);
+  assert.equal(prefill.quantityG, 380);
+  assert.deepEqual(prefill.servingUnitOptions.map((u) => u.unit), ["serving"]);
+  assert.match(prefill.note, /as prepared for 380g serving/);
+});
+
+test("lookupBarcode_preparedPer100gOnly_portionIs100gNotThePackage", async () => {
+  // No labeled serving: the package weight is the as-sold weight, so the
+  // portion falls back to 100 g of the prepared food, never to the package.
+  const prefill = await lookupWithProduct(ean13(902), {
+    product_name: "Pudding mix",
+    product_quantity: 60,
+    nutriments: {
+      "energy-kcal_prepared_100g": 76,
+      "proteins_prepared_100g": 1.3,
+      "carbohydrates_prepared_100g": 10,
+      "fat_prepared_100g": 3.3,
+    },
+  });
+  assert.ok(prefill);
+  assert.equal(prefill.calories, 76);
+  assert.equal(prefill.quantityG, 100);
+  assert.deepEqual(prefill.servingUnitOptions.map((u) => u.unit), []);
+  assert.match(prefill.note, /as prepared for 100g serving/);
+});
+
+test("lookupBarcode_bothBases_prefersAsSold", async () => {
+  const prefill = await lookupWithProduct(ean13(903), {
+    product_name: "Noodles",
+    serving_quantity: 60,
+    product_quantity: 60,
+    nutriments: {
+      "energy-kcal_100g": 450,
+      "proteins_100g": 9,
+      "carbohydrates_100g": 60,
+      "fat_100g": 15,
+      "energy-kcal_prepared_100g": 76,
+    },
+  });
+  assert.ok(prefill);
+  assert.equal(prefill.calories, 270);
+  assert.doesNotMatch(prefill.note, /as prepared/);
+});
