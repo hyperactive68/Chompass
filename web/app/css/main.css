@@ -167,7 +167,11 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html, body { height: 100%; }
+/* The body only needs a floor. With a fixed 100% height its bottom padding
+   (the nav, banner and FAB-zone reserves) stays inside the first screen and
+   never follows overflowing content (Codeberg #182). */
+html { height: 100%; }
+body { min-height: 100%; }
 
 body {
   margin: 0;
@@ -1523,6 +1527,15 @@ main.view {
 }
 
 .fab[aria-expanded="true"] { transform: rotate(45deg); }
+
+/* Home reserves the FAB zone (its 1rem lift + 3.4rem size) so the last entry
+   scrolls clear of the add button, not only of the nav (Android parity with
+   the #156 fix; PWA half of #182). diary-view is an inline custom element:
+   block is what gives its bottom padding a place in flow. */
+diary-view {
+  display: block;
+  padding-bottom: 4.4rem;
+}
 
 .toast {
   position: fixed;
