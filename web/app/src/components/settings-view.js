@@ -1416,6 +1416,11 @@ export class SettingsView extends HTMLElement {
           .filter((el) => el.checked)
           .map((el) => el.value),
       );
+      const hiddenAfterSave = new Set(hiddenTrackers);
+      for (const toggle of trackerToggles) {
+        if (shownTrackedItems.has(toggle.id)) hiddenAfterSave.delete(toggle.id);
+        else hiddenAfterSave.add(toggle.id);
+      }
       await prefs.save({
         energyUnit: /** @type {"kcal"|"kj"} */ (fd.get("energyUnit") || "kcal"),
         weightUnit: /** @type {any} */ (fd.get("weightUnit")),
@@ -1433,9 +1438,7 @@ export class SettingsView extends HTMLElement {
             )
           ),
         ].filter((el) => el.checked).map((el) => el.value),
-        progressHiddenTrackedItems: trackerToggles
-          .map((toggle) => toggle.id)
-          .filter((id) => !shownTrackedItems.has(id)),
+        progressHiddenTrackedItems: [...hiddenAfterSave],
         mealBreakfastStart: timeInputToMinutes(String(fd.get("mealBreakfastStart"))),
         mealLunchStart: timeInputToMinutes(String(fd.get("mealLunchStart"))),
         mealDinnerStart: timeInputToMinutes(String(fd.get("mealDinnerStart"))),

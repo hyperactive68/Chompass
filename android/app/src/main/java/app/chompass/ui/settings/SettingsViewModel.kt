@@ -1217,7 +1217,6 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
         { copy(progressHiddenTrackedItems = keys) },
     )
 
-
     fun setMealSchedule(schedule: app.chompass.models.MealSchedule) {
         val validated = schedule.validatedOrDefault()
         updateUiPref(
