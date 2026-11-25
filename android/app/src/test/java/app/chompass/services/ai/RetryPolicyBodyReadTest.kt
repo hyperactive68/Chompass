@@ -12,6 +12,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.net.SocketTimeoutException
 import java.util.concurrent.TimeUnit
 
 /**
@@ -128,21 +129,22 @@ class RetryPolicyBodyReadTest {
         server.start()
         try {
             val client = OkHttpClient.Builder()
-                .readTimeout(500, TimeUnit.MILLISECONDS)
+                .readTimeout(1, TimeUnit.SECONDS)
                 .build()
             server.enqueue(
                 MockResponse()
                     .setResponseCode(200)
                     .setBody("should never finish")
-                    .setBodyDelay(2, TimeUnit.SECONDS)
+                    .setBodyDelay(3, TimeUnit.SECONDS)
             )
             val error = runCatching {
                 RetryPolicy.executeText(callFactory = postCall(server, client))
             }.exceptionOrNull()
             assertTrue("expected AiError.Network, got $error", error is AiError.Network)
+            val causeChain = generateSequence(error) { it.cause }.toList()
             assertTrue(
-                "expected timeout cause in ${error?.message}",
-                error?.message?.contains("timeout") == true,
+                "expected SocketTimeoutException cause, got ${causeChain.map { it::class.java.simpleName to it.message }}",
+                causeChain.any { it is SocketTimeoutException },
             )
         } finally {
             server.shutdown()
