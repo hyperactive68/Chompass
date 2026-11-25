@@ -68,10 +68,13 @@ class BodyCompositionRepositoryTest {
     fun `inserting a lean mass stamps the profile and marks auto goals stale`() = runBlocking {
         // Auto-sourced goal so the re-clamp path is live.
         profiles.save(profiles.current()!!.copy(goalSource = GoalSource.FORMULA))
-        repo.upsert(BodyCompositionEntry(date = at(2), leanMassKg = 61.0))
+        // Keep this measurement fresh as the system clock advances; UserProfile
+        // intentionally ignores lean-mass readings older than its recency window.
+        val measuredAt = Instant.now().minusSeconds(2 * 3_600L)
+        repo.upsert(BodyCompositionEntry(date = measuredAt, leanMassKg = 61.0))
         val profile = profiles.current()!!
         assertEquals(61.0, profile.measuredLeanMassKg!!, 0.0001)
-        assertEquals(at(2), profile.leanMassUpdatedAt)
+        assertEquals(measuredAt, profile.leanMassUpdatedAt)
         // Katch-McArdle now runs on the measured reading.
         assertTrue(profile.usesMeasuredLeanMassForBMR)
         assertEquals(370.0 + 21.6 * 61.0, profile.bmr, 0.0001)
