@@ -66,10 +66,9 @@ android {
         applicationId = "app.chompass"
         minSdk = 26
         targetSdk = 36
-        // Upstream 6.3.0-beta.2 uses code 119; the fork stays above it so
-        // installed fork builds remain directly upgradeable.
-        versionCode = 120
-        versionName = "6.3.0-beta.2"
+        // Fork-only beta.2.1 remains directly upgradeable from beta.2.
+        versionCode = 121
+        versionName = "6.3.0-beta.2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         if (releaseAbi != null) {

@@ -4472,6 +4472,7 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
     suspend fun reprocessFoodEntry(
         entry: FoodEntry,
         updatedNote: String,
+        previousEstimate: FoodEntry? = null,
         onProgress: (FoodAnalysisProgress) -> Unit = {},
     ): FoodAnalysis {
         val imageBytes = entry.imageFilename?.let {
@@ -4483,15 +4484,12 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
         // keeps its food context instead of re-analyzing the bare note; a photo entry
         // gets the name/note as extra grounding on top of the image.
         val description = reprocessDescription(entry, updatedNote)
-        val result = if (imageBytes != null) {
-            container.foodAnalysis.analyzeFood(
-                imageBytes,
-                description.takeIf { it.isNotBlank() },
-                onProgress = onProgress,
-            )
-        } else {
-            container.foodAnalysis.analyzeText(description, onProgress = onProgress)
-        }
+        val result = container.foodAnalysis.reanalyzeEntry(
+            imageBytes = imageBytes,
+            description = description,
+            previousEstimate = previousEstimate,
+            onProgress = onProgress,
+        )
         return result.copy(customNote = updatedNote.takeIf { it.isNotBlank() })
     }
 

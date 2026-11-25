@@ -956,6 +956,7 @@
     <string name="edit_reprocess_diff_row">%1$s: %2$s → %3$s</string>
     <string name="edit_reprocess_diff_title">Wat is er veranderd</string>
     <string name="edit_reprocess_explain">AI herberekent naam, portie, calorieën en macro\'s op basis van je notitie. Bekijk de wijzigingen en tik op Opslaan.</string>
+    <string name="edit_reprocess_send_existing_macros">Macro’s meesturen naar AI</string>
     <string name="edit_reprocess_review_hint">Bekijk de bijgewerkte waarden hierboven en tik op Opslaan om ze te behouden.</string>
     <!-- Edit sheet: AI fill-missing modes -->
     <string name="edit_ai_mode_fill">Ontbrekende aanvullen</string>

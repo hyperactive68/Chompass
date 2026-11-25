@@ -1757,9 +1757,17 @@ fun HomeScreen(
             optionalGoals = ui.optionalNutrientGoals,
             displayMode = ui.servingUnitDisplayMode,
             aiFeaturesEnabled = aiFeaturesEnabled,
-            onReprocess = { updatedNote, editedMix, onProgress ->
+            onReprocess = { updatedNote, editedMix, reanalyzeEntry, sendExistingMacros, onProgress ->
                 if (editedMix != null) vm.reestimateFoodEntry(editedMix, onProgress)
-                else vm.reprocessFoodEntry(favorite, updatedNote, onProgress)
+                else {
+                    val sourceEntry = reanalyzeEntry ?: favorite
+                    vm.reprocessFoodEntry(
+                        sourceEntry,
+                        updatedNote,
+                        previousEstimate = reanalyzeEntry.takeIf { sendExistingMacros },
+                        onProgress = onProgress,
+                    )
+                }
             },
             onFill = { onProgress ->
                 vm.fillFoodEntry(favorite, onProgress)
@@ -2027,9 +2035,17 @@ fun HomeScreen(
             useSystemDateTimePickers = useSystemDateTimePickers,
             dayEntries = ui.todayEntries,
             mealTimesEnabled = ui.mealTimesEnabled,
-            onReprocess = { updatedNote, editedMix, onProgress ->
+            onReprocess = { updatedNote, editedMix, reanalyzeEntry, sendExistingMacros, onProgress ->
                 if (editedMix != null) vm.reestimateFoodEntry(editedMix, onProgress)
-                else vm.reprocessFoodEntry(entry, updatedNote, onProgress)
+                else {
+                    val sourceEntry = reanalyzeEntry ?: entry
+                    vm.reprocessFoodEntry(
+                        sourceEntry,
+                        updatedNote,
+                        previousEstimate = reanalyzeEntry.takeIf { sendExistingMacros },
+                        onProgress = onProgress,
+                    )
+                }
             },
             onFill = { onProgress ->
                 vm.fillFoodEntry(entry, onProgress)

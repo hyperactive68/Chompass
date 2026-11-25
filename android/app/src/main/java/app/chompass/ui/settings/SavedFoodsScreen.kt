@@ -293,7 +293,7 @@ fun SavedFoodsScreen(container: AppContainer, onBack: () -> Unit) {
             aiFeaturesEnabled = false,
             // Unreachable: the sheet hides its AI actions when
             // aiFeaturesEnabled is off (and double-guards its own handlers).
-            onReprocess = { _, _, _ -> error("AI actions are off in the library browser") },
+            onReprocess = { _, _, _, _, _ -> error("AI actions are off in the library browser") },
             onFill = { _ -> error("AI actions are off in the library browser") },
             onSave = { updated ->
                 scope.launch {

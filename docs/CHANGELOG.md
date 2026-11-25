@@ -12,6 +12,16 @@ Style: entries follow the release-text style guide (maintainer-local, not publis
 - **ChatGPT sign-in/Responses**, privacy-limited **Google Drive sync**, per-profile reasoning controls and the optional metric serving display remain enabled.
 - The launcher-alias repair remains included so updates and downgrades enforce exactly one active Chompass launcher icon.
 
+## [6.3.0-beta.2.1] - 2026-11-25
+
+### Upstream changes
+
+- Serving-unit switches now keep amounts on the quantity wheel's 0.1 step, preventing small unintended changes to the stored gram weight.
+
+### Fork changes
+
+- Food reanalysis can send the previous calories, macros, and saved ingredient breakdown to the AI as a correction reference. This option is on by default and can be turned off for a fresh estimate.
+
 ## [6.3.0] - 2026-11-06
 
 ### Changed

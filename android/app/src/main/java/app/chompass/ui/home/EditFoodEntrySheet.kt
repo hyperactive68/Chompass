@@ -150,6 +150,9 @@ fun EditFoodEntrySheet(
         updatedNote: String,
         /** RECALCULATE only: the sheet's current edited mix the estimate runs over; null = Reanalyze (stored entry + note). */
         editedMix: FoodEntry?,
+        /** REANALYZE only: the current sheet snapshot; its macros are sent only when [sendExistingMacros] is true. */
+        reanalyzeEntry: FoodEntry?,
+        sendExistingMacros: Boolean,
         onProgress: (FoodAnalysisProgress) -> Unit,
     ) -> FoodAnalysis,
     /** Fill-missing analysis: text-only, no photo, no note; result merges into empty fields only. */
@@ -162,6 +165,7 @@ fun EditFoodEntrySheet(
 ) {
     var currentBaseEntry by remember(entry) { mutableStateOf(entry) }
     var noteText by remember(entry) { mutableStateOf(entry.customNote ?: "") }
+    var sendExistingMacros by remember(entry) { mutableStateOf(true) }
     var isReprocessing by remember { mutableStateOf(false) }
     var reprocessPhase by remember { mutableStateOf<EntryAnalysisPhase?>(null) }
     var reprocessPartial by remember { mutableStateOf<app.chompass.services.ai.PartialFoodAnalysis?>(null) }
@@ -413,7 +417,13 @@ fun EditFoodEntrySheet(
             val before = currentBaseEntry
             try {
                 val editedMix = if (aiActionMode == AiActionMode.RECALCULATE) buildUpdated() else null
-                val newAnalysis = onReprocess(noteText, editedMix) { progress ->
+                val reanalyzeEntry = if (aiActionMode == AiActionMode.REANALYZE) buildUpdated() else null
+                val newAnalysis = onReprocess(
+                    noteText,
+                    editedMix,
+                    reanalyzeEntry,
+                    aiActionMode == AiActionMode.REANALYZE && sendExistingMacros,
+                ) { progress ->
                     when (progress) {
                         is FoodAnalysisProgress.Phase -> reprocessPhase = progress.phase
                         is FoodAnalysisProgress.Partial -> {
@@ -812,7 +822,7 @@ fun EditFoodEntrySheet(
                         resolveServingDraft()
                         selectedServingUnitId = optionId
                         val option = ServingUnitOption.optionMatching(optionId, servingUnitOptions)
-                        val quantity = if (option.gramsPerUnit > 0) servingGrams / option.gramsPerUnit else servingGrams
+                        val quantity = ServingUnitOption.quantityForGrams(servingGrams, option)
                         servingQuantityText = ServingUnitOption.formatQuantity(quantity)
                     },
                     servingSizeGrams = servingGrams,
@@ -828,11 +838,7 @@ fun EditFoodEntrySheet(
                         servingUnitOptions = options
                         selectedServingUnitId = newId
                         val option = ServingUnitOption.optionMatching(newId, options)
-                        val quantity = if (option.gramsPerUnit > 0) {
-                            gramsBefore / option.gramsPerUnit
-                        } else {
-                            gramsBefore
-                        }
+                        val quantity = ServingUnitOption.quantityForGrams(gramsBefore, option)
                         servingQuantityText = ServingUnitOption.formatQuantity(quantity)
                     },
                     onQuantityEditingDone = resolveServingDraft,
@@ -1150,6 +1156,26 @@ fun EditFoodEntrySheet(
                                     shape = MaterialTheme.shapes.large,
                                     modifier = Modifier.fillMaxWidth().heightIn(min = 90.dp)
                                 )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                ) {
+                                    Checkbox(
+                                        checked = sendExistingMacros,
+                                        onCheckedChange = { sendExistingMacros = it },
+                                        enabled = !isReprocessing,
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.edit_reprocess_send_existing_macros),
+                                        fontSize = 14.sp,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clickable(enabled = !isReprocessing) {
+                                                sendExistingMacros = !sendExistingMacros
+                                            },
+                                    )
+                                }
                             } else if (!isReprocessing) {
                                 Text(
                                     stringResource(

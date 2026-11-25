@@ -24,6 +24,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.UnfoldMore
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -112,6 +113,9 @@ fun EditFavoriteSheet(
         updatedNote: String,
         /** RECALCULATE only: the sheet's current edited mix the estimate runs over; null = Reanalyze (stored entry + note). */
         editedMix: FoodEntry?,
+        /** REANALYZE only: the current sheet snapshot; its macros are sent only when [sendExistingMacros] is true. */
+        reanalyzeEntry: FoodEntry?,
+        sendExistingMacros: Boolean,
         onProgress: (FoodAnalysisProgress) -> Unit,
     ) -> FoodAnalysis,
     /** Fill-missing analysis: text-only; result merges into empty fields only. */
@@ -125,6 +129,7 @@ fun EditFavoriteSheet(
 ) {
     var currentBaseEntry by remember(entry) { mutableStateOf(entry) }
     var noteText by remember(entry) { mutableStateOf(entry.customNote ?: "") }
+    var sendExistingMacros by remember(entry) { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
 
@@ -336,7 +341,13 @@ fun EditFavoriteSheet(
             val before = currentBaseEntry
             try {
                 val editedMix = if (aiActionMode == AiActionMode.RECALCULATE) buildUpdated() else null
-                val newAnalysis = onReprocess(noteText, editedMix) { progress ->
+                val reanalyzeEntry = if (aiActionMode == AiActionMode.REANALYZE) buildUpdated() else null
+                val newAnalysis = onReprocess(
+                    noteText,
+                    editedMix,
+                    reanalyzeEntry,
+                    aiActionMode == AiActionMode.REANALYZE && sendExistingMacros,
+                ) { progress ->
                     when (progress) {
                         is FoodAnalysisProgress.Phase -> reprocessPhase = progress.phase
                         is FoodAnalysisProgress.Partial -> {
@@ -1065,6 +1076,28 @@ fun EditFavoriteSheet(
                                 shape = MaterialTheme.shapes.large,
                                 modifier = Modifier.fillMaxWidth().heightIn(min = 90.dp)
                             )
+                            if (aiFeaturesEnabled && aiActionMode == AiActionMode.REANALYZE) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                ) {
+                                    Checkbox(
+                                        checked = sendExistingMacros,
+                                        onCheckedChange = { sendExistingMacros = it },
+                                        enabled = !isReprocessing,
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.edit_reprocess_send_existing_macros),
+                                        fontSize = 14.sp,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clickable(enabled = !isReprocessing) {
+                                                sendExistingMacros = !sendExistingMacros
+                                            },
+                                    )
+                                }
+                            }
                         }
                     }
                 }

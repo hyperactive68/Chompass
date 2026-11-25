@@ -2596,6 +2596,7 @@
     <string name="edit_icon_photo_failed">Couldn\'t read that photo</string>
     <string name="edit_reprocess_hint">Describe the correction, e.g. large bowl, cooked in butter, oat milk instead of dairy</string>
     <string name="edit_reprocess_explain">AI will recalculate name, serving, calories, and macros from your note. Review the changes, then tap Save.</string>
+    <string name="edit_reprocess_send_existing_macros">Send macros to AI</string>
     <string name="edit_reprocess">Correct with AI</string>
     <string name="edit_reprocessing">Correcting…</string>
     <string name="edit_reprocessing_failed">Correction failed</string>
