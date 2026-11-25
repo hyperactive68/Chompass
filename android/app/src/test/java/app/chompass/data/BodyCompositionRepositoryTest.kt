@@ -70,7 +70,7 @@ class BodyCompositionRepositoryTest {
         profiles.save(profiles.current()!!.copy(goalSource = GoalSource.FORMULA))
         // Keep this measurement fresh as the system clock advances; UserProfile
         // intentionally ignores lean-mass readings older than its recency window.
-        val measuredAt = Instant.now().minusSeconds(2 * 3_600L)
+        val measuredAt = Instant.ofEpochMilli(Instant.now().toEpochMilli() - 2 * 3_600_000L)
         repo.upsert(BodyCompositionEntry(date = measuredAt, leanMassKg = 61.0))
         val profile = profiles.current()!!
         assertEquals(61.0, profile.measuredLeanMassKg!!, 0.0001)
