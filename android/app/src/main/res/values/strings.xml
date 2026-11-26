@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Chompass</string>
 
     <!-- Widgets -->
@@ -3030,4 +3030,46 @@
     <string name="notif_scale_sync_reading">Syncing with %1$s…</string>
     <string name="notif_scale_sync_awaiting_user">Pick the profile slot on your phone</string>
     <string name="notif_scale_sync_awaiting_consent">Enter the scale\'s 4-digit code on your phone</string>
-    </resources>
+        <string name="settings_ai_value_default" tools:ignore="MissingTranslation">%1$,d (default)</string>
+    <string-array name="settings_search_kw_serving_unit_display_mode"><item>grams</item><item>milliliters</item><item>metric</item><item>units</item></string-array>
+    <string name="ai_reasoning_effort_xhigh" tools:ignore="MissingTranslation">Extra high</string>
+    <string name="ai_reasoning_effort_max" tools:ignore="MissingTranslation">Maximum</string>
+    <string name="settings_google_drive_backup" tools:ignore="MissingTranslation">Back up to Google Drive</string>
+    <string name="settings_google_drive_backup_desc" tools:ignore="MissingTranslation">Sign in with Google to sync this app\'s private backup area. Chompass never handles your Google password.</string>
+    <string name="settings_google_drive_backup_success" tools:ignore="MissingTranslation">Backup saved. Check the selected Google Drive location.</string>
+    <string name="settings_google_drive_backup_cancelled" tools:ignore="MissingTranslation">Backup cancelled.</string>
+    <string name="settings_google_drive_backup_no_stream" tools:ignore="MissingTranslation">The selected location cannot be written.</string>
+    <string name="settings_google_drive_backup_failed" tools:ignore="MissingTranslation">Could not save the Google Drive backup: %1$s</string>
+    <string name="settings_google_drive_connect" tools:ignore="MissingTranslation">Connect Google Drive</string>
+    <string name="settings_google_drive_connected" tools:ignore="MissingTranslation">Google Drive connected · Sync now</string>
+    <string name="settings_google_drive_sync_on_food_log" tools:ignore="MissingTranslation">Sync after logging food</string>
+    <string name="settings_google_drive_sync_on_food_log_desc" tools:ignore="MissingTranslation">Upload the updated backup after each food log, edit, or deletion when authorized.</string>
+    <string name="settings_google_drive_auth_cancelled" tools:ignore="MissingTranslation">Google Drive connection cancelled.</string>
+    <string name="settings_google_drive_auth_failed" tools:ignore="MissingTranslation">Google Drive authorization failed. Try again while online.</string>
+    <string name="settings_google_drive_syncing" tools:ignore="MissingTranslation">Syncing with Google Drive…</string>
+    <string name="settings_google_drive_sync_success" tools:ignore="MissingTranslation">Google Drive backup synced.</string>
+    <string name="settings_google_drive_sync_failed" tools:ignore="MissingTranslation">Google Drive sync failed: %1$s</string>
+    <string name="settings_google_drive_not_connected" tools:ignore="MissingTranslation">Connect Google Drive before syncing.</string>
+    <string name="paste_n_entries">Paste %1$d entries</string>
+    <string name="paste_busy">Pasting…</string>
+    <string name="edit_reprocess_send_existing_macros">Send macros to AI</string>
+    <string name="settings_max_tokens" tools:ignore="MissingTranslation">Max response length</string>
+    <string name="settings_max_tokens_unit" tools:ignore="MissingTranslation">tokens</string>
+    <string name="settings_serving_unit_display_mode">Serving units shown</string>
+    <string name="sheet_serving_unit_display_mode">Serving units shown</string>
+    <string name="serving_unit_display_mode_ai_units">AI units</string>
+    <string name="serving_unit_display_mode_ai_units_subtitle">Shows the unit returned or inferred by the AI, such as cup, tbsp, or pinch.</string>
+    <string name="serving_unit_display_mode_metric">Grams/ml</string>
+    <string name="serving_unit_display_mode_metric_subtitle">Shows the portion as grams, or approximate ml for recognized liquid foods. The AI unit remains stored internally.</string>
+    <string name="ai_provider_chatgpt">ChatGPT plan</string>
+    <string name="ai_provider_subtitle_chatgpt">Use an eligible ChatGPT Plus or Pro plan</string>
+    <string name="settings_chatgpt_account">ChatGPT account</string>
+    <string name="settings_chatgpt_continue">Continue with ChatGPT</string>
+    <string name="settings_chatgpt_connecting">Connecting…</string>
+    <string name="settings_chatgpt_plan_enabled">ChatGPT plan usage is enabled for food analysis. Usage is shared with your ChatGPT plan.</string>
+    <string name="settings_chatgpt_plan_footer">Sign in to use an eligible ChatGPT Plus or Pro plan for food analysis. No API key is required.</string>
+    <string name="settings_chatgpt_plan_disabled">Signed in, but ChatGPT plan usage is not enabled. Tap the account row to authorize it.</string>
+    <string name="settings_chatgpt_revoke_unconfirmed">Disconnected locally. Remote revocation could not be confirmed; you can also remove Chompass in ChatGPT settings.</string>
+    <string name="settings_chatgpt_manage_usage">Manage ChatGPT usage</string>
+    <string name="settings_chatgpt_disconnect">Disconnect ChatGPT</string>
+</resources>
