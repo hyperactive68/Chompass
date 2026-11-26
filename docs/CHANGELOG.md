@@ -10,6 +10,10 @@ Style: entries follow the release-text style guide (maintainer-local, not publis
 
 - **The weight chart can hide the goal line** (Android and web app): the chart stretches to include the goal, so small changes look flat while the goal is far away. A new *Show goal line* switch turns the line off; the chart then zooms to the logged weights. Find it in *Settings → Display → Customize progress* on Android and under *Settings → App & Display → Units & schedule* in the web app. It is on by default. Closes Codeberg [#190](https://codeberg.org/fitguy/Chompass/issues/190) by @NiklasMM
 
+### Changed
+
+- **Tapping a saved food in Add Food opens the amount right away** (Android): the row is logged at its last or default amount and its edit sheet opens with the serving amount focused, so correcting it is one tap on the keyboard instead of finding the row, opening it and scrolling to the amount. Save applies the change to that row; closing the sheet keeps the logged amount. The Saved Meals sheet behind More options still logs on tap without opening a sheet, and a long-press still reviews first. By DontBlameMe. Closes Codeberg [#159](https://codeberg.org/fitguy/Chompass/issues/159)
+
 ### Fixed
 
 - **The last diary entry no longer hides under the bottom bar** (web app): the page reserved the bottom chrome (nav, install banner, add button) inside the first screenful only, so with enough entries the last row ended under the bottom navigation and the floating add button covered part of it. The page now grows with its content and Home reserves the add-button zone, so every entry scrolls fully clear — on phones and on the wide layout alike. Closes Codeberg [#182](https://codeberg.org/fitguy/Chompass/issues/182)

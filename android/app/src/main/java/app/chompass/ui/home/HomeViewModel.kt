@@ -2615,7 +2615,9 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
      * always behaved that way), then Home opens the edit sheet on the new row
      * with its amount focused (Codeberg #159); recipes log every ingredient;
      * database rows go through the review sheet because their portion still
-     * needs confirming.
+     * needs confirming. Only [onSavedFoodLogged] is passed for this sheet:
+     * the Saved Meals sheet calls [relogMeal] without it and keeps plain
+     * tap-to-log.
      */
     fun pickSuggestion(
         suggestion: FoodSuggestion,
