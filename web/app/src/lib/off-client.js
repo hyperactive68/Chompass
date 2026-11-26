@@ -188,12 +188,25 @@ export function mapProduct(product, barcode) {
   const servingGrams = Math.max(labeledGrams ?? pkgGrams ?? 100, 1);
   const scale = servingGrams / 100;
 
+  const preparedOnly = !hasPlainNutrientBasis(n);
+
+  /** @param {string} key */
+  function per100(key) {
+    return flexibleNumber(n[preparedOnly ? `${key}_prepared_100g` : `${key}_100g`]);
+  }
+
   /** @param {string} key */
   function servingValue(key) {
+    // Prepared-only products have no plain serving values. Scale their
+    // prepared per-100g data by the same labeled serving basis.
+    if (preparedOnly) {
+      const value = per100(key);
+      return value != null ? value * scale : null;
+    }
     const serving = flexibleNumber(n[`${key}_serving`]);
     if (serving != null) return serving;
-    const per100 = flexibleNumber(n[`${key}_100g`]);
-    return per100 != null ? per100 * scale : null;
+    const value = per100(key);
+    return value != null ? value * scale : null;
   }
 
   const calories =
@@ -278,7 +291,7 @@ export function mapProduct(product, barcode) {
     folateMcg: micrograms(servingValue("folates")),
     omega3G: round1(servingValue("omega-3-fat")),
     caffeineMg: round1(servingValue("caffeine")),
-    note: `Open Food Facts · barcode ${barcode} · values for ${Math.round(servingGrams)}g serving; adjust if needed`,
+    note: `Open Food Facts · barcode ${barcode} · ${preparedOnly ? "prepared per 100 g values scaled to" : "values for"} ${Math.round(servingGrams)}g serving; adjust if needed`,
     productMetadata: buildProductMetadata(product, barcode),
     source: "barcode",
   };
@@ -289,6 +302,19 @@ function flexibleNumber(v) {
   if (v == null || v === "") return null;
   const n = typeof v === "number" ? v : Number(String(v).replace(",", "."));
   return Number.isFinite(n) ? n : null;
+}
+
+/**
+ * Pick one basis for the whole product so prepared and plain values never mix.
+ * @param {Record<string, any>} nutriments
+ */
+function hasPlainNutrientBasis(nutriments) {
+  return Object.keys(nutriments).some(
+    (key) =>
+      !key.includes("_prepared_") &&
+      /_(100g|serving)$/.test(key) &&
+      flexibleNumber(nutriments[key]) != null
+  );
 }
 
 /** @param {number|null|undefined} v */

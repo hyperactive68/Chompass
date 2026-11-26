@@ -193,6 +193,69 @@ test("offMapProduct_prefersServingKeys", () => {
   assert.equal(mapped.fiberG, 0.5);
 });
 
+test("offMapProduct_preparedOnlyUsesPreparedPer100gAtLabeledServing", () => {
+  const mapped = mapProduct(
+    {
+      product_name: "Instant Noedels Kipsmaak",
+      brands: "YumYum",
+      quantity: "60g",
+      product_quantity: 60,
+      product_quantity_unit: "g",
+      serving_quantity: 380,
+      serving_size: "380 gram",
+      nutriments: {
+        "energy-kcal_prepared_100g": 76,
+        proteins_prepared_100g: 1.3,
+        carbohydrates_prepared_100g: 10,
+        fat_prepared_100g: 3.3,
+        sugars_prepared_100g: 0.4,
+        fiber_prepared_100g: 1.6,
+        sodium_prepared_100g: 0.32,
+      },
+    },
+    "8852018101024"
+  );
+  assert.ok(mapped);
+  assert.equal(mapped.quantityG, 380);
+  assert.equal(mapped.calories, 289);
+  assert.equal(mapped.proteinG, 4.9);
+  assert.equal(mapped.carbsG, 38);
+  assert.equal(mapped.fatG, 12.5);
+  assert.equal(mapped.sugarG, 1.5);
+  assert.equal(mapped.sodiumMg, 1216);
+  assert.equal(mapped.selectedServingUnit, "serving");
+  assert.match(mapped.note ?? "", /prepared per 100 g values scaled to 380g serving/);
+});
+
+test("offMapProduct_plainFieldsStayOnPlainBasis", () => {
+  const mapped = mapProduct(
+    {
+      product_name: "Mixed Basis Bar",
+      serving_quantity: 100,
+      nutriments: {
+        "energy-kcal_100g": 80,
+        proteins_100g: 8,
+        carbohydrates_100g: 6,
+        fat_100g: 2,
+        "energy-kcal_prepared_100g": 999,
+        proteins_prepared_100g: 99,
+        carbohydrates_prepared_100g: 99,
+        fat_prepared_100g: 99,
+      },
+    },
+    "123"
+  );
+  assert.ok(mapped);
+  assert.equal(mapped.calories, 80);
+  assert.equal(mapped.proteinG, 8);
+  assert.equal(mapped.carbsG, 6);
+  assert.equal(mapped.fatG, 2);
+  assert.equal(
+    mapped.note,
+    "Open Food Facts · barcode 123 · values for 100g serving; adjust if needed"
+  );
+});
+
 test("offMapProduct_fallsBackToCarbohydratesTotal", () => {
   const mapped = mapProduct(
     {

@@ -217,6 +217,72 @@ class OpenFoodFactsMappingTest {
     }
 
     @Test
+    fun analysis_preparedOnlyScalesPer100gAtLabeledServing() {
+        val product = JSONObject(
+            """
+            {
+              "product_name": "Instant Noedels Kipsmaak",
+              "brands": "YumYum",
+              "quantity": "60g",
+              "product_quantity": 60,
+              "product_quantity_unit": "g",
+              "serving_quantity": 380,
+              "serving_size": "380 gram",
+              "nutriments": {
+                "energy-kcal_prepared_100g": 76,
+                "proteins_prepared_100g": 1.3,
+                "carbohydrates_prepared_100g": 10,
+                "fat_prepared_100g": 3.3,
+                "sugars_prepared_100g": 0.4,
+                "fiber_prepared_100g": 1.6,
+                "sodium_prepared_100g": 0.32
+              }
+            }
+            """.trimIndent(),
+        )
+
+        val food = OpenFoodFactsService.analysis(product, "8852018101024")
+        assertEquals(380.0, food.servingSizeGrams!!, 0.001)
+        assertEquals(289, food.calories)
+        assertEquals(4.94, food.protein, 0.001)
+        assertEquals(38.0, food.carbs, 0.001)
+        assertEquals(12.54, food.fat, 0.001)
+        assertEquals(1.5, food.sugar!!, 0.001)
+        assertEquals(1216.0, food.sodium!!, 0.001)
+        assertEquals("serving", food.selectedServingUnit)
+        assertTrue(food.grounding!!.validationNotes.any { it.contains("prepared per 100 g") })
+    }
+
+    @Test
+    fun analysis_plainFieldsWinWhenPreparedFieldsAreAlsoPresent() {
+        val product = JSONObject(
+            """
+            {
+              "product_name": "Mixed Basis Bar",
+              "serving_quantity": 100,
+              "nutriments": {
+                "energy-kcal_100g": 80,
+                "proteins_100g": 8,
+                "carbohydrates_100g": 6,
+                "fat_100g": 2,
+                "energy-kcal_prepared_100g": 999,
+                "proteins_prepared_100g": 99,
+                "carbohydrates_prepared_100g": 99,
+                "fat_prepared_100g": 99
+              }
+            }
+            """.trimIndent(),
+        )
+
+        val food = OpenFoodFactsService.analysis(product, "123")
+        assertEquals(80, food.calories)
+        assertEquals(8.0, food.protein, 0.001)
+        assertEquals(6.0, food.carbs, 0.001)
+        assertEquals(2.0, food.fat, 0.001)
+        assertTrue(food.grounding!!.validationNotes.none { it.contains("prepared") })
+    }
+
+    @Test
     fun analysis_rejectsMissingNutriments() {
         try {
             OpenFoodFactsService.analysis(

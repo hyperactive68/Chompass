@@ -576,15 +576,31 @@ object OpenFoodFactsService {
         val carbs: Double?,
         val fat: Double?,
     )
+    private fun macrosPer100g(nutriments: JSONObject?): MacroPer100g {
+        val preparedOnly = isPreparedOnly(nutriments)
+        fun per100(key: String) =
+            nutriments?.flexibleDouble(if (preparedOnly) "${key}_prepared_100g" else "${key}_100g")
+        return MacroPer100g(
+            calories = per100("energy-kcal") ?: per100("energy")?.let { it * 0.23900573614 },
+            protein = per100("proteins"),
+            carbs = per100("carbohydrates") ?: per100("carbohydrates-total"),
+            fat = per100("fat"),
+        )
+    }
 
-    private fun macrosPer100g(nutriments: JSONObject?): MacroPer100g = MacroPer100g(
-        calories = nutriments?.flexibleDouble("energy-kcal_100g")
-            ?: nutriments?.flexibleDouble("energy_100g")?.let { it * 0.23900573614 },
-        protein = nutriments?.flexibleDouble("proteins_100g"),
-        carbs = nutriments?.flexibleDouble("carbohydrates_100g")
-            ?: nutriments?.flexibleDouble("carbohydrates-total_100g"),
-        fat = nutriments?.flexibleDouble("fat_100g"),
-    )
+    /** Pick one basis for the whole product so prepared and plain values never mix. */
+    private fun isPreparedOnly(nutriments: JSONObject?): Boolean {
+        if (nutriments == null) return false
+        val keys = nutriments.keys()
+        while (keys.hasNext()) {
+            val key = keys.next()
+            if (key.contains("_prepared_")) continue
+            if ((key.endsWith("_100g") || key.endsWith("_serving")) && nutriments.flexibleDouble(key) != null) {
+                return false
+            }
+        }
+        return true
+    }
 
     private fun searchHit(
         code: String,
@@ -770,6 +786,7 @@ object OpenFoodFactsService {
         val nutriments = product.optJSONObject("nutriments")
             ?: throw LookupException("This barcode was found, but nutrition data is incomplete. Scan the nutrition label instead.")
 
+        val preparedOnly = isPreparedOnly(nutriments)
         val labeledGrams = labeledServingGrams(product)
         val packageGramsValue = packageGrams(product)
         // Portion basis: the labeled serving when OFF publishes one, else the
@@ -780,9 +797,15 @@ object OpenFoodFactsService {
         val servingGrams = maxOf(labeledGrams ?: packageGramsValue ?: 100.0, 1.0)
         val scale = servingGrams / 100.0
 
+        fun per100(key: String) =
+            nutriments.flexibleDouble(if (preparedOnly) "${key}_prepared_100g" else "${key}_100g")
+
+        // Prepared-only products have no plain serving values. Scale their
+        // prepared per-100g data by the same labeled serving basis.
         fun servingValue(key: String): Double? {
+            if (preparedOnly) return per100(key)?.let { it * scale }
             nutriments.flexibleDouble("${key}_serving")?.let { return it }
-            return nutriments.flexibleDouble("${key}_100g")?.let { it * scale }
+            return per100(key)?.let { it * scale }
         }
 
         val calories = servingValue("energy-kcal")
@@ -827,12 +850,11 @@ object OpenFoodFactsService {
             fat = fat,
             servingGrams = servingGrams,
             sodiumMg = milligrams(servingValue("sodium")),
-            caloriesPer100g = nutriments.flexibleDouble("energy-kcal_100g")
-                ?: nutriments.flexibleDouble("energy_100g")?.let { it * 0.23900573614 },
-            proteinPer100g = nutriments.flexibleDouble("proteins_100g"),
-            carbsPer100g = nutriments.flexibleDouble("carbohydrates_100g")
-                ?: nutriments.flexibleDouble("carbohydrates-total_100g"),
-            fatPer100g = nutriments.flexibleDouble("fat_100g"),
+            caloriesPer100g = per100("energy-kcal")
+                ?: per100("energy")?.let { it * 0.23900573614 },
+            proteinPer100g = per100("proteins"),
+            carbsPer100g = per100("carbohydrates") ?: per100("carbohydrates-total"),
+            fatPer100g = per100("fat"),
         )
         return FoodAnalysis(
             name = name,
@@ -878,7 +900,11 @@ object OpenFoodFactsService {
                 identityEvidence = "barcode:$barcode",
                 portionEvidence = "serving_quantity=${servingGrams}g",
                 identityConfirmed = true,
-                validationNotes = validation.notes,
+                validationNotes = if (preparedOnly) {
+                    validation.notes + "Values scaled from OFF prepared per 100 g data."
+                } else {
+                    validation.notes
+                },
             ),
             productMetadata = metadata,
         )
