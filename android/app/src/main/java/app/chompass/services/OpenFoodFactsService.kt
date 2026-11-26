@@ -576,30 +576,26 @@ object OpenFoodFactsService {
         val carbs: Double?,
         val fat: Double?,
     )
+
+    private val MACRO_KEYS = listOf("energy-kcal", "energy", "proteins", "carbohydrates", "carbohydrates-total", "fat")
+
+    /** Pick one basis for the whole product so prepared and plain values never mix (Codeberg #176). */
+    private fun isPreparedOnly(nutriments: JSONObject?): Boolean {
+        if (nutriments == null) return false
+        fun hasMacro(key: String, suffix: String): Boolean = nutriments.flexibleDouble("$key$suffix") != null
+        return MACRO_KEYS.none { hasMacro(it, "_serving") || hasMacro(it, "_100g") } &&
+            MACRO_KEYS.any { hasMacro(it, "_prepared_serving") || hasMacro(it, "_prepared_100g") }
+    }
+
     private fun macrosPer100g(nutriments: JSONObject?): MacroPer100g {
-        val preparedOnly = isPreparedOnly(nutriments)
-        fun per100(key: String) =
-            nutriments?.flexibleDouble(if (preparedOnly) "${key}_prepared_100g" else "${key}_100g")
+        val suffix = if (isPreparedOnly(nutriments)) "_prepared_100g" else "_100g"
+        fun per100(key: String) = nutriments?.flexibleDouble("$key$suffix")
         return MacroPer100g(
             calories = per100("energy-kcal") ?: per100("energy")?.let { it * 0.23900573614 },
             protein = per100("proteins"),
             carbs = per100("carbohydrates") ?: per100("carbohydrates-total"),
             fat = per100("fat"),
         )
-    }
-
-    /** Pick one basis for the whole product so prepared and plain values never mix. */
-    private fun isPreparedOnly(nutriments: JSONObject?): Boolean {
-        if (nutriments == null) return false
-        val keys = nutriments.keys()
-        while (keys.hasNext()) {
-            val key = keys.next()
-            if (key.contains("_prepared_")) continue
-            if ((key.endsWith("_100g") || key.endsWith("_serving")) && nutriments.flexibleDouble(key) != null) {
-                return false
-            }
-        }
-        return true
     }
 
     private fun searchHit(
@@ -790,11 +786,7 @@ object OpenFoodFactsService {
         // nutrition under `<nutrient>_prepared*` keys alone (Codeberg #176).
         // With no as-sold macro on record, those keys are the one basis
         // (mirrors the PWA off-client mapProduct).
-        val macroKeys = listOf("energy-kcal", "energy", "proteins", "carbohydrates", "carbohydrates-total", "fat")
-        fun hasMacro(key: String, suffix: String): Boolean = nutriments.flexibleDouble("$key$suffix") != null
-        val preparedOnly =
-            macroKeys.none { hasMacro(it, "_serving") || hasMacro(it, "_100g") } &&
-                macroKeys.any { hasMacro(it, "_prepared_serving") || hasMacro(it, "_prepared_100g") }
+        val preparedOnly = isPreparedOnly(nutriments)
         val basis = if (preparedOnly) "_prepared" else ""
 
         val labeledGrams = labeledServingGrams(product)
