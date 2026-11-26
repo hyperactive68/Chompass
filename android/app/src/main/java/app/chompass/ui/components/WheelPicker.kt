@@ -635,12 +635,13 @@ fun SplitDecimalWheelPicker(
     unit: String? = null,
     modifier: Modifier = Modifier,
     showSelectionHighlight: Boolean = true,
+    initialTyped: Boolean = false,
 ) {
     val (intPart, tenthsPart) = splitDecimalParts(value, min, max)
     val ints = remember(min, max) { (min..max).toList() }
     val tenths = remember { (0..9).toList() }
     val decimalSeparator = remember { LocaleFormat.decimalSeparator() }
-    val (typed, setTyped) = rememberMagnitudePickerMode()
+    val (typed, setTyped) = rememberMagnitudePickerMode(initialTyped)
     val typeCd = stringResource(R.string.picker_type_value)
     if (typed) {
         val display = buildString {

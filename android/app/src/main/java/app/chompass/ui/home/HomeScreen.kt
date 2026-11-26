@@ -224,6 +224,8 @@ fun HomeScreen(
     var editingManualActive by remember { mutableStateOf<app.chompass.models.ManualActiveEntry?>(null) }
     var showGroundedEntry by rememberSaveable { mutableStateOf(false) }
     var editingEntry by remember { mutableStateOf<FoodEntry?>(null) }
+    /** #159: only a saved-food tap focuses the amount when its edit sheet opens. */
+    var focusServingOnEdit by remember { mutableStateOf(false) }
     var editingRecipe by remember { mutableStateOf<app.chompass.models.Recipe?>(null) }
     // Codeberg #66: favorite currently open in the saved-food editor.
     var editingFavorite by remember { mutableStateOf<FoodEntry?>(null) }
@@ -1664,7 +1666,10 @@ fun HomeScreen(
             onOpenFoodSettings = { onOpenFoodSettings?.invoke() },
             onPickSuggestion = {
                 addFoodFlowActive = false
-                vm.pickSuggestion(it)
+                vm.pickSuggestion(it) { entry ->
+                    focusServingOnEdit = true
+                    editingEntry = entry
+                }
                 vm.clearAddFoodQuery()
             },
             onReviewSuggestion = {
@@ -2258,6 +2263,7 @@ fun HomeScreen(
             useSystemDateTimePickers = useSystemDateTimePickers,
             dayEntries = ui.todayEntries,
             mealTimesEnabled = ui.mealTimesEnabled,
+            focusServingAmountOnOpen = focusServingOnEdit,
             onReprocess = { updatedNote, editedMix, onProgress ->
                 if (editedMix != null) vm.reestimateFoodEntry(editedMix, onProgress)
                 else vm.reprocessFoodEntry(entry, updatedNote, onProgress)
@@ -2268,12 +2274,14 @@ fun HomeScreen(
             onSave = { updated, applyTimeToMeal ->
                 vm.updateEntry(entry, updated, applyTimeToMeal)
                 editingEntry = null
+                focusServingOnEdit = false
             },
             onLogNow = { updated ->
                 vm.logPlannedEntryNow(updated)
                 editingEntry = null
+                focusServingOnEdit = false
             },
-            onDismiss = { editingEntry = null }
+            onDismiss = { editingEntry = null; focusServingOnEdit = false }
         )
     }
 
