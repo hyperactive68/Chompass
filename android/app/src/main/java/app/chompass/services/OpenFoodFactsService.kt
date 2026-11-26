@@ -576,15 +576,31 @@ object OpenFoodFactsService {
         val carbs: Double?,
         val fat: Double?,
     )
+    private fun macrosPer100g(nutriments: JSONObject?): MacroPer100g {
+        val preparedOnly = isPreparedOnly(nutriments)
+        fun per100(key: String) =
+            nutriments?.flexibleDouble(if (preparedOnly) "${key}_prepared_100g" else "${key}_100g")
+        return MacroPer100g(
+            calories = per100("energy-kcal") ?: per100("energy")?.let { it * 0.23900573614 },
+            protein = per100("proteins"),
+            carbs = per100("carbohydrates") ?: per100("carbohydrates-total"),
+            fat = per100("fat"),
+        )
+    }
 
-    private fun macrosPer100g(nutriments: JSONObject?): MacroPer100g = MacroPer100g(
-        calories = nutriments?.flexibleDouble("energy-kcal_100g")
-            ?: nutriments?.flexibleDouble("energy_100g")?.let { it * 0.23900573614 },
-        protein = nutriments?.flexibleDouble("proteins_100g"),
-        carbs = nutriments?.flexibleDouble("carbohydrates_100g")
-            ?: nutriments?.flexibleDouble("carbohydrates-total_100g"),
-        fat = nutriments?.flexibleDouble("fat_100g"),
-    )
+    /** Pick one basis for the whole product so prepared and plain values never mix. */
+    private fun isPreparedOnly(nutriments: JSONObject?): Boolean {
+        if (nutriments == null) return false
+        val keys = nutriments.keys()
+        while (keys.hasNext()) {
+            val key = keys.next()
+            if (key.contains("_prepared_")) continue
+            if ((key.endsWith("_100g") || key.endsWith("_serving")) && nutriments.flexibleDouble(key) != null) {
+                return false
+            }
+        }
+        return true
+    }
 
     private fun searchHit(
         code: String,

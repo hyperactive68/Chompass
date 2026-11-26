@@ -150,6 +150,26 @@ class OpenFoodFactsSearchTest {
     }
 
     @Test
+    fun search_mapsPreparedOnlyPer100gNutriments() {
+        server.enqueue(
+            jsonResponse(
+                """{"hits":[{"code":"8852018101024","product_name":"Instant Noedels Kipsmaak",
+                    "brands":["YumYum"],"serving_quantity":380,
+                    "nutriments":{"energy-kcal_prepared_100g":76,"proteins_prepared_100g":1.3,
+                        "carbohydrates_prepared_100g":10,"fat_prepared_100g":3.3}}],
+                   "count":1,"page":1,"page_size":6,"is_count_exact":true}"""
+            ),
+        )
+
+        val hit = search("yumyum").single()
+        assertEquals("8852018101024", hit.barcode)
+        assertEquals(76.0, hit.caloriesPer100g!!, 0.0)
+        assertEquals(1.3, hit.proteinPer100g!!, 0.0)
+        assertEquals(10.0, hit.carbsPer100g!!, 0.0)
+        assertEquals(3.3, hit.fatPer100g!!, 0.0)
+        assertEquals(380.0, hit.servingGrams!!, 0.0)
+    }
+    @Test
     fun search_sendsOffUserAgentOnSalRequests() {
         server.enqueue(jsonResponse(salHitsJson("Laugen Brezen" to "Aldi")))
 
