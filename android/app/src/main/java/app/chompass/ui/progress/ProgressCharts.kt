@@ -524,6 +524,13 @@ internal data class OverlayChartModel(
 }
 
 /**
+ * The goal a series' draw scale and rule use: none while the goal rule is
+ * hidden, so the scale follows the data alone (Codeberg #190).
+ */
+internal fun chartGoal(goalDisplayValue: Double?, showGoalRules: Boolean): Double? =
+    if (showGoalRules) goalDisplayValue else null
+
+/**
  * Per-series draw scale: min–max over that series' own data. A goal outside
  * the data range extends the scale so the goal rule sits 5% inset from the
  * edge instead of on it; a constant series maps to the vertical mid-line
@@ -708,6 +715,7 @@ internal fun OverlayChartCanvas(
     /** Section title for the TalkBack inspection description. */
     title: String,
     untrackedDays: Set<String> = emptySet(),
+    showGoalRules: Boolean = true,
 ) {
     val zone = remember { ZoneId.systemDefault() }
     val untrackedSpans = rememberUntrackedSpans(model.xFromMs, model.tRange, untrackedDays)
@@ -723,11 +731,11 @@ internal fun OverlayChartCanvas(
     val trimDst = remember { Path() }
 
     // Per-series draw scales (min–max ∪ goal clamp), keyed for O(1) lookups.
-    val scales = remember(model) {
+    val scales = remember(model, showGoalRules) {
         model.series.associate { s ->
             s.key to OverlayScale.of(
                 values = s.trendPoints.map { it.value } + s.points.map { it.value },
-                goal = s.goalDisplayValue,
+                goal = chartGoal(s.goalDisplayValue, showGoalRules),
             )
         }
     }
@@ -839,7 +847,7 @@ internal fun OverlayChartCanvas(
             drawUntrackedBands(untrackedSpans, model.xFromMs, model.tRange, bandColor)
             // Per-series goal rules, right above the data.
             for (s in model.series) {
-                val goal = s.goalDisplayValue ?: continue
+                val goal = chartGoal(s.goalDisplayValue, showGoalRules) ?: continue
                 val y = yOf(s, goal)
                 drawLine(
                     color = s.color.copy(alpha = 0.7f),

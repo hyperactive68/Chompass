@@ -945,6 +945,7 @@
     <string name="cd_new_recipe">नई रेसिपी</string>
     <string name="cd_open_camera">कैमरा खोलें</string>
     <string name="cd_open_gallery">गैलरी खोलें</string>
+    <string name="cd_camera_shutter">फ़ोटो लें</string>
     <string name="cd_quantity_operator">%1$s को मात्रा में डालें</string>
     <string name="cd_remove_image">छवि हटाएं</string>
     <string name="cd_selected">चयनित</string>
@@ -1092,9 +1093,19 @@
     <string name="grounding_validation_notes">नोट: %1$s</string>
     <string name="home_active_burn_a11y">सक्रिय खर्च %1$d</string>
     <string name="home_active_burn_caption">%1$d सक्रिय</string>
-    <string name="home_active_burn_caption_progress">%1$d / %2$d सक्रिय</string>
-    <string name="home_active_burn_caption_progress_day_type">%1$d of %2$d active · %3$s</string>
-    <string name="home_active_burn_over">+%1$d सामान्य से अधिक</string>
+    <string name="home_active_burn_caption_progress">%1$d/%2$d सक्रिय</string>
+    <string name="home_budget_class_usual">सामान्य दिन</string>
+    <string name="home_budget_class_lean_lighter">हल्का झुकाव</string>
+    <string name="home_budget_class_lean_harder">भारी झुकाव</string>
+    <string name="home_budget_class_lighter">हल्का दिन</string>
+    <string name="home_budget_class_harder">भारी दिन</string>
+    <string name="home_budget_class_lean_type">%1$s की ओर</string>
+    <string name="home_budget_class_type">%1$s दिन</string>
+    <string name="home_budget_class_sheet_hourly">एक ही घंटे का इतिहास अभी कम है. लक्ष्य सामान्य दिन रहता है.</string>
+    <string name="home_budget_class_sheet_usual">अभी वर्गीकृत नहीं. लक्ष्य सामान्य दिन है, अनुमानित ट्रेनिंग दिन नहीं.</string>
+    <string name="home_budget_class_sheet_moved">पिछले 28 दिनों से वर्गीकृत. सहेजा लक्ष्य नहीं बदला.</string>
+    <string name="home_active_burn_caption_progress_day_type">%1$d/%2$d सक्रिय · %3$s</string>
+    <string name="home_active_burn_over">+%1$d अधिक</string>
     <string name="home_active_burn_over_a11y">सक्रिय खर्च %1$d, सामान्य दिन से %2$d अधिक</string>
     <string name="home_active_burn_progress_a11y">सक्रिय खर्च %1$d, सामान्य %2$d</string>
     <string name="home_active_burn_progress_day_type_a11y">Active burn %1$d, %2$d typical for %3$s days</string>
@@ -1343,8 +1354,16 @@
     <string name="onboarding_safety_settings_hint">पूर्ण सुरक्षा और चिकित्सा मार्गदर्शन सेटिंग्स में देखा जा सकता है।</string>
     <string name="onboarding_safety_title">सुरक्षा सूचना</string>
     <string name="onboarding_safety_water">हाइड्रेशन लक्ष्य और पेय रिमाइंडर मोटे अनुमान हैं, चिकित्सीय सलाह नहीं। प्यास किसी भी ऐप से बेहतर मार्गदर्शक है, और आपका डॉक्टर जानता है कि आपके लिए क्या सही है।</string>
-    <string name="paste_busy">पेस्ट हो रहा है…</string>
-    <string name="paste_n_entries">%1$d प्रविष्टियां पेस्ट करें</string>
+    <plurals name="paste_n_entries">
+        <item quantity="one">1 प्रविष्टि पेस्ट करें</item>
+        <item quantity="other">%1$d प्रविष्टियां पेस्ट करें</item>
+    </plurals>
+    <plurals name="paste_complete_n">
+        <item quantity="one">1 प्रविष्टि पेस्ट की गई</item>
+        <item quantity="other">%1$d प्रविष्टियाँ पेस्ट की गईं</item>
+    </plurals>
+    <string name="paste_at_original_times">मूल समय पर पेस्ट करें</string>
+    <string name="paste_at_current_time">वर्तमान समय पर पेस्ट करें</string>
     <string name="placeholder_hour">घंटा</string>
     <string name="placeholder_minute">मिनट</string>
     <string name="progress_activity_exercise_week">कसरत (7दि)</string>
@@ -1897,6 +1916,7 @@
     <string name="feet_inches_format">%1$d\' %2$d\"</string>
     <string name="food_search_source_off">Open Food Facts</string>
     <string name="add_food_off_unreachable">Open Food Facts अभी उपलब्ध नहीं है। सहेजे गए और ऑफ़लाइन परिणाम अभी भी दिखते हैं।</string>
+    <string name="add_food_off_no_match">Open Food Facts ने इस खोज के लिए कोई मैच नहीं दिया।</string>
     <string name="food_search_source_usda">USDA</string>
     <string name="ft_label_format">%1$d ft</string>
     <string name="grams_value_decimal_format">%1$sg</string>
@@ -2115,6 +2135,9 @@
     <string name="home_day_type_chip_a11y">आज का दिन-प्रकार: %1$s। बदलने के लिए टैप करें।</string>
     <string name="day_type_sheet_title">दिन-प्रकार</string>
     <string name="day_type_sheet_subtitle">आज के लक्ष्यों को दूसरे दिन-प्रकार में बदलें।</string>
+    <string name="home_day_type_diverge_named">यह घंटा %2$s से ज़्यादा %1$s जैसा है।</string>
+    <string name="home_day_type_diverge_unnamed">यह घंटा %1$s दिन जैसा नहीं लगता।</string>
+    <string name="cd_dismiss_day_type_prompt">दिन-प्रकार सुझाव बंद करें</string>
     <string name="day_type_base_goals">मूल लक्ष्य</string>
     <string name="day_type_clear_override">आज का ओवरराइड हटाएँ</string>
     <string name="day_type_edit_settings">दिन-प्रकार संपादित करें</string>
@@ -2489,6 +2512,9 @@
         <item>कैलोरी</item>
         <item>kcal</item>
         <item>कैलोरी लक्ष्य</item>
+        <item>सीमा</item>
+        <item>मैनुअल</item>
+        <item>कस्टम</item>
     </string-array>
     <string-array name="settings_search_kw_macro_protein">
         <item>मैक्रो</item>

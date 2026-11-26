@@ -27,6 +27,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -63,6 +66,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -468,6 +472,10 @@ internal fun ServingQuantityCard(
     /** Fired when the expanded quantity editor collapses (input blur) so hosts
      *  on the draft-while-typing model can resolve the pending draft. */
     onQuantityEditingDone: (() -> Unit)? = null,
+    /** #159: expand the card and focus the typed amount on first open. */
+    focusAmountOnOpen: Boolean = false,
+    /** Collapsed summary insets. Ingredient cards pass a tighter value; meal-level callers keep the default. */
+    summaryPadding: PaddingValues = PaddingValues(horizontal = 18.dp, vertical = 12.dp),
 ) {
     val pickerOptions = ServingUnitOption.pickerOptions(unitOptions)
     val selectedOption = ServingUnitOption.optionMatching(selectedUnitId, unitOptions)
@@ -496,7 +504,7 @@ internal fun ServingQuantityCard(
         focusManager.clearFocus(force = true)
         keyboardController?.hide()
     }
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(focusAmountOnOpen) }
     // Per-entry custom serving: rename / re-weight the selected unit inline.
     // Available on any unit — including plain grams — so a dish without a
     // heuristic or analyzed unit (homemade curry, a stew, ...) can still get a
@@ -580,6 +588,9 @@ internal fun ServingQuantityCard(
             animationSpec = AppMotion.pressSpring(),
         )
 
+        val layoutDirection = LocalLayoutDirection.current
+        val summaryStart = summaryPadding.calculateStartPadding(layoutDirection)
+        val summaryEnd = summaryPadding.calculateEndPadding(layoutDirection)
         Row(
             Modifier
                 .fillMaxWidth()
@@ -591,7 +602,7 @@ internal fun ServingQuantityCard(
                         onQuantityEditingDone?.invoke()
                     }
                 }
-                .padding(horizontal = 18.dp, vertical = 12.dp),
+                .padding(summaryPadding),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -650,7 +661,7 @@ internal fun ServingQuantityCard(
                 Box(
                     Modifier
                         .fillMaxWidth()
-                        .padding(start = 18.dp, end = 18.dp, bottom = 12.dp),
+                        .padding(start = summaryStart, end = summaryEnd, bottom = 12.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     if (showUnitWheel) {
@@ -670,6 +681,7 @@ internal fun ServingQuantityCard(
                             max = maxQuantity.toInt(),
                             unit = if (showUnitWheel) null else selectedUnitLabel,
                             showSelectionHighlight = !showUnitWheel,
+                            initialTyped = focusAmountOnOpen,
                             modifier = if (showUnitWheel) Modifier.weight(1.4f) else Modifier.fillMaxWidth(),
                         )
                         if (showUnitWheel) {

@@ -10,6 +10,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.widget.RemoteViews
+import android.view.View
 import app.chompass.services.update.AndroidUpdateChecker
 import app.chompass.utils.LocaleHelper
 import android.os.Build
@@ -23,9 +25,14 @@ import app.chompass.ChompassApp
 import app.chompass.R
 import app.chompass.debug.DebugTrace
 import app.chompass.models.WaterAmountFormat
+import app.chompass.models.EnergyFormat
+import app.chompass.models.EnergyUnit
+import app.chompass.models.LocaleFormat
+import app.chompass.models.WidgetSnapshot
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import kotlin.math.roundToInt
 
 /**
  * Schedules + fires the local reminders the app supports:
@@ -68,6 +75,16 @@ class NotificationService(private val context: Context) {
             localizedContext.getString(R.string.notif_channel_daily),
             NotificationManager.IMPORTANCE_LOW
         ).apply { description = localizedContext.getString(R.string.notif_channel_daily_desc) }
+
+        val ongoing = NotificationChannel(
+            CHANNEL_ONGOING,
+            localizedContext.getString(R.string.notif_channel_ongoing),
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            description = localizedContext.getString(R.string.notif_channel_ongoing_desc)
+            setSound(null, null)
+            setShowBadge(false)
+        }
 
         val goal = NotificationChannel(
             CHANNEL_WEIGHT_GOAL,
@@ -114,7 +131,7 @@ class NotificationService(private val context: Context) {
             setSound(null, null)
         }
 
-        mgr.createNotificationChannels(listOf(streak, daily, goal, weight, bodyFat, appUpdate, water, fasting, modelDownload))
+        mgr.createNotificationChannels(listOf(streak, daily, ongoing, goal, weight, bodyFat, appUpdate, water, fasting, modelDownload))
     }
 
     fun canPostNotifications(): Boolean {
@@ -221,6 +238,95 @@ class NotificationService(private val context: Context) {
         }
         NotificationManagerCompat.from(context).notifySafely(request, builder.build())
     }
+
+    /**
+     * Ongoing today-at-a-glance notification (issue #169): calories eaten out of
+     * the display goal, a progress bar, and the macro totals. Updated from the
+     * same [WidgetSnapshot] the widgets read, so Home, widget, and shade agree.
+     */
+    fun showOngoingSummary(snapshot: WidgetSnapshot) {
+        if (!canPostNotifications()) return
+        val unit = snapshot.resolvedEnergyUnit
+        val unitLabel = localizedContext.getString(
+            if (unit == EnergyUnit.KJ) R.string.unit_kj else R.string.unit_kcal
+        )
+        val eaten = EnergyFormat.quantity(snapshot.calories, unit)
+        val goal = EnergyFormat.quantity(snapshot.resolvedDisplayGoalTarget, unit)
+        val remaining = EnergyFormat.quantity(snapshot.caloriesRemaining, unit)
+        val over = (eaten - goal).coerceAtLeast(0)
+        val title = localizedContext.getString(
+            R.string.notif_ongoing_title,
+            LocaleFormat.integer(eaten),
+            LocaleFormat.integer(goal),
+            unitLabel,
+        )
+        val status = when {
+            remaining > 0 -> localizedContext.getString(
+                R.string.notif_ongoing_remaining,
+                LocaleFormat.integer(remaining),
+                unitLabel,
+            )
+            over > 0 -> localizedContext.getString(
+                R.string.notif_ongoing_over,
+                LocaleFormat.integer(over),
+                unitLabel,
+            )
+            else -> localizedContext.getString(R.string.notif_ongoing_goal_reached)
+        }
+        val macros = RemoteViews(context.packageName, R.layout.notification_ongoing).apply {
+            setTextViewText(R.id.ongoing_title, title)
+            setTextViewText(R.id.ongoing_status, status)
+            setTextViewText(
+                R.id.ongoing_macro_protein,
+                macroText(R.string.macro_glyph_protein, snapshot.protein, snapshot.proteinGoal),
+            )
+            setTextViewText(
+                R.id.ongoing_macro_carbs,
+                macroText(R.string.macro_glyph_carbs, snapshot.carbs, snapshot.carbsGoal),
+            )
+            setTextViewText(
+                R.id.ongoing_macro_fat,
+                macroText(R.string.macro_glyph_fat, snapshot.fat, snapshot.fatGoal),
+            )
+            setTextViewText(R.id.ongoing_macro_unit, " ${localizedContext.getString(R.string.unit_g)}")
+
+            if (goal > 0) {
+                setProgressBar(R.id.ongoing_progress, goal, eaten.coerceIn(0, goal), false)
+            } else {
+                setViewVisibility(R.id.ongoing_progress, View.GONE)
+            }
+        }
+        val open = PendingIntent.getActivity(
+            context, REQUEST_ONGOING,
+            ChompassLaunchIntents.openApp(context, destination = null),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        val builder = NotificationCompat.Builder(context, CHANNEL_ONGOING)
+            .setSmallIcon(R.drawable.ic_launcher_monochrome)
+            .setContentTitle(title)
+            .setContentText(status)
+            .setCustomBigContentView(macros)
+            .setContentIntent(open)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setSilent(true)
+            .setShowWhen(false)
+            .setCategory(NotificationCompat.CATEGORY_STATUS)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+        if (goal > 0) {
+            builder.setProgress(goal, eaten.coerceIn(0, goal), false)
+        }
+        NotificationManagerCompat.from(context)
+            .notifySafely(ONGOING_NOTIFICATION_ID, builder.build())
+    }
+
+    fun cancelOngoingSummary() {
+        runCatching { NotificationManagerCompat.from(context).cancel(ONGOING_NOTIFICATION_ID) }
+    }
+
+    /** Whole-gram macros, each in a notification-shade-safe accent for the current mode. */
+    private fun macroText(glyphRes: Int, value: Double, goal: Int): String =
+        "${localizedContext.getString(glyphRes)} ${LocaleFormat.integer(value.roundToInt())}/${LocaleFormat.integer(goal)}"
 
     fun scheduleWeightReminder(hour: Int = 8, minute: Int = 0) = schedule(
         REQUEST_WEIGHT, hour, minute, CHANNEL_WEIGHT_LOG,
@@ -367,6 +473,7 @@ class NotificationService(private val context: Context) {
     fun cancelRemindersForDataWipe() {
         cancelStreakReminder()
         cancelDailySummary()
+        cancelOngoingSummary()
         cancelWeightReminder()
         cancelBodyFatReminder()
         cancelWaterReminder()
@@ -441,6 +548,7 @@ class NotificationService(private val context: Context) {
     companion object {
         const val CHANNEL_STREAK = "streak_reminder"
         const val CHANNEL_DAILY = "daily_summary"
+        const val CHANNEL_ONGOING = "daily_progress"
         const val CHANNEL_WEIGHT_GOAL = "weight_goal"
         const val CHANNEL_WEIGHT_LOG = "weight_log_reminder"
         const val CHANNEL_BODY_FAT_LOG = "body_fat_log_reminder"
@@ -470,6 +578,7 @@ class NotificationService(private val context: Context) {
         const val EXTRA_REQUEST = "request"
         private const val GOAL_NOTIFICATION_ID = 4242
         private const val APP_UPDATE_NOTIFICATION_ID = 5555
+        private const val ONGOING_NOTIFICATION_ID = 4343
         private const val REQUEST_STREAK = 1001
         private const val REQUEST_DAILY = 1002
         private const val REQUEST_WEIGHT = 1003
@@ -482,6 +591,7 @@ class NotificationService(private val context: Context) {
         internal const val REQUEST_FASTING_AUTO_END = 1012
         private const val REQUEST_WIDGET_MIDNIGHT = 1007
         private const val REQUEST_GOAL = 1008
+        private const val REQUEST_ONGOING = 1013
     }
 }
 
@@ -570,6 +680,9 @@ class ReminderReceiver : BroadcastReceiver() {
                         FastingReminderPlanner.rearmStartReminder(container)
                         FastingAutoPlanner.rearm(container)
                         FastingAutoPlanner.heal(container)
+                        // Reboot clears posted notifications; rewrite today's
+                        // snapshot so the ongoing summary (issue #169) returns.
+                        container.widgetSnapshotWriter.refresh()
                     }
                 } finally {
                     pendingResult.finish()
@@ -789,7 +902,7 @@ class ReminderReceiver : BroadcastReceiver() {
                         } else {
                             ctx.getString(
                                 R.string.water_amount_fl_oz,
-                                WaterAmountFormat.flOzFromMl(waterPlan.drinkMl),
+                                WaterAmountFormat.flOzFromMl(waterPlan.drinkMl).coerceAtLeast(1),
                             )
                         }
                         val interval = waterPlan.intervalMinutes

@@ -262,10 +262,12 @@ internal fun ActivityLevelSettingRow(
 }
 
 /**
- * A goal row (calories or a macro). Tapping the row opens the value picker. The
- * trailing chip is a Locked / Auto toggle. Tapping the chip pins or releases
- * the current number; tapping the row still opens the value picker. Saving a
- * picker value also locks it; the picker's "Reset to Auto-balance" snaps.
+ * A goal row (calories or a macro). Tapping the row opens the value picker; the
+ * trailing UnfoldMore glyph mirrors [SettingRow]'s picker affordance so the row
+ * reads as editable. The chip is a Locked / Auto toggle. Tapping the chip pins
+ * or releases the current number; tapping the row still opens the value picker.
+ * Saving a picker value also locks it; the picker's "Reset to Auto-balance"
+ * snaps.
  */
 @Composable
 internal fun LockableGoalRow(
@@ -300,6 +302,16 @@ internal fun LockableGoalRow(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
+        )
+        Spacer(Modifier.width(10.dp))
+        // Same picker glyph SettingRow uses for wheel/menu rows (Gender, Weight
+        // Goal, Activity Level), so the row body reads as editable at a glance
+        // instead of a static value next to the lock chip (#162).
+        Icon(
+            Icons.Filled.UnfoldMore,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.outline,
+            modifier = Modifier.size(18.dp)
         )
         Spacer(Modifier.width(10.dp))
         GoalStatusChip(locked = locked, onClick = onToggleLock)
@@ -401,6 +413,7 @@ internal fun ToggleRow(
     checked: Boolean,
     icon: ImageVector? = null,
     enabled: Boolean = true,
+    description: String? = null,
     onChange: (Boolean) -> Unit
 ) {
     Row(
@@ -411,17 +424,29 @@ internal fun ToggleRow(
             ChompassIconBubble(icon = icon, size = 22.dp, iconSize = 14.dp)
             Spacer(Modifier.width(14.dp))
         }
-        Text(
-            label,
-            modifier = Modifier.weight(1f),
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium,
-            color = if (enabled) {
-                MaterialTheme.colorScheme.onSurface
-            } else {
-                MaterialTheme.colorScheme.outline
-            },
-        )
+        Column(Modifier.weight(1f)) {
+            Text(
+                label,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                color = if (enabled) {
+                    MaterialTheme.colorScheme.onSurface
+                } else {
+                    MaterialTheme.colorScheme.outline
+                },
+            )
+            if (description != null) {
+                Text(
+                    description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (enabled) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    } else {
+                        MaterialTheme.colorScheme.outline
+                    },
+                )
+            }
+        }
         Switch(checked = checked, onCheckedChange = onChange, enabled = enabled)
     }
 }

@@ -78,6 +78,24 @@ class OverlayModelTest {
     }
 
     @Test
+    fun hiddenGoalRuleKeepsTheScaleOnTheData() {
+        // Codeberg #190: with the goal rule hidden the scale follows the
+        // logged values alone, so small changes stay visible.
+        val scale = OverlayScale.of(listOf(97.2, 97.6), chartGoal(85.0, false))
+        assertEquals(97.2, scale.min, 1e-12)
+        assertEquals(97.6, scale.max, 1e-12)
+    }
+
+    @Test
+    fun shownGoalRuleKeepsTheGoalInScale() {
+        // The existing 5% inset: a goal below the data stretches the bottom
+        // edge 5% of the data range past the goal.
+        val scale = OverlayScale.of(listOf(97.2, 97.6), chartGoal(85.0, true))
+        assertEquals(84.98, scale.min, 1e-12)
+        assertEquals(97.6, scale.max, 1e-12)
+    }
+
+    @Test
     fun emptyInputsYieldEmptyModel() {
         val model = buildOverlayChartModel(
             weights = emptyList(),

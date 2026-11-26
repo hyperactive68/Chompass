@@ -535,6 +535,8 @@ export const profile = {
  * @property {string} [progressDefaultRangeId] Settings default Progress range (1W…All)
  * @property {boolean} [progressNutrientAverages] Progress nutrient averages (off by default)
  * @property {string[]} [progressNutrientAveragesSelection] Which non-macro nutrients Progress averages (#75)
+ * @property {boolean} [progressShowGoalRule] Show the goal line in the Progress weight chart (on by default)
+ * @property {string[]} [progressHiddenTrackedItems] Tracker rows hidden on Progress (#154)
 
  * @property {string} [progressRangeId] Last Progress range chip selection (unset until first pick)
  * @property {Record<string, { updatedAt: string, deletedAt?: string|null, kind?: string }>} [syncRevisions]
@@ -599,6 +601,8 @@ export const DEFAULT_PREFS = /** @type {AppPrefs} */ ({
   progressNutrientAverages: false,
   progressDefaultRangeId: "1W",
   progressNutrientAveragesSelection: DEFAULT_AVERAGES_SELECTION,
+  progressShowGoalRule: true,
+  progressHiddenTrackedItems: [],
 
 
 });

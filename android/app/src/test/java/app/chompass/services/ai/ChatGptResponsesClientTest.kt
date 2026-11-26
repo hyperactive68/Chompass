@@ -117,11 +117,11 @@ class ChatGptResponsesClientTest {
                 .setBody(
                     """
                     data: {"type":"response.output_text.delta","delta":"Coach antwoord"}
-                    
+
                     data: {"type":"response.completed","response":{"status":"completed"}}
-                    
+
                     data: [DONE]
-                    
+
                     """.trimIndent(),
                 ),
         )
@@ -242,4 +242,3 @@ data: [DONE]
         assertEquals("function_call_output", secondInput.getJSONObject(secondInput.length() - 1).getString("type"))
     }
 }
-

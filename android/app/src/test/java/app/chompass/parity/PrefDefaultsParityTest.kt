@@ -63,6 +63,7 @@ class PrefDefaultsParityTest {
         // Body-measurement plots are off by default (empty enabled-site set).
         assertEquals(0, f.getJSONArray("progressMeasurementSites").length())
         assertFalse(f.getBoolean("progressNutrientAverages"))
+        assertTrue(f.getBoolean("progressShowGoalRule"))
         // Codeberg #75: unset selection renders the original fiber/sugar/sodium trio.
         assertEquals(
             f.getJSONArray("progressNutrientAveragesSelection").toStringList(),

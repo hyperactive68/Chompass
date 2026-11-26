@@ -217,6 +217,8 @@ class PreferencesStore(private val appContext: Context) : NutritionSyncStore {
     suspend fun setDailySummaryHour(v: Int) = setDailySummaryHourImpl(v)
     val dailySummaryMinute: Flow<Int> get() = dailySummaryMinuteImpl
     suspend fun setDailySummaryMinute(v: Int) = setDailySummaryMinuteImpl(v)
+    val ongoingSummaryEnabled: Flow<Boolean> get() = ongoingSummaryEnabledImpl
+    suspend fun setOngoingSummaryEnabled(v: Boolean) = setOngoingSummaryEnabledImpl(v)
     val weightReminderEnabled: Flow<Boolean> get() = weightReminderEnabledImpl
     suspend fun setWeightReminderEnabled(v: Boolean) = setWeightReminderEnabledImpl(v)
     val weightReminderHour: Flow<Int> get() = weightReminderHourImpl
@@ -390,6 +392,8 @@ class PreferencesStore(private val appContext: Context) : NutritionSyncStore {
     suspend fun clearHealthEnergyMeasuredActive() = clearHealthEnergyMeasuredActiveImpl()
     val healthEnergyActiveByDay: Flow<Map<String, Int>> get() = healthEnergyActiveByDayImpl
     suspend fun setHealthEnergyActiveByDay(map: Map<String, Int>) = setHealthEnergyActiveByDayImpl(map)
+    val healthEnergyActiveByHour: Flow<Map<String, List<Int>>> get() = healthEnergyActiveByHourImpl
+    suspend fun setHealthEnergyActiveByHour(map: Map<String, List<Int>>) = setHealthEnergyActiveByHourImpl(map)
     val healthBackgroundSyncEnabled: Flow<Boolean> get() = healthBackgroundSyncEnabledImpl
     suspend fun setHealthBackgroundSyncEnabled(v: Boolean) = setHealthBackgroundSyncEnabledImpl(v)
     val healthEnergyGoalsLastAutoRefreshDay: Flow<String?> get() = healthEnergyGoalsLastAutoRefreshDayImpl
@@ -484,6 +488,11 @@ class PreferencesStore(private val appContext: Context) : NutritionSyncStore {
     val progressNutrientAveragesSelection: Flow<Set<String>> get() = progressNutrientAveragesSelectionImpl
     suspend fun setProgressNutrientAveragesSelection(keys: Set<String>) =
         setProgressNutrientAveragesSelectionImpl(keys)
+    val progressShowGoalRule: Flow<Boolean> get() = progressShowGoalRuleImpl
+    suspend fun setProgressShowGoalRule(v: Boolean) = setProgressShowGoalRuleImpl(v)
+    val progressHiddenTrackedItems: Flow<Set<String>> get() = progressHiddenTrackedItemsImpl
+    suspend fun setProgressHiddenTrackedItems(keys: Set<String>) =
+        setProgressHiddenTrackedItemsImpl(keys)
 
     val mealSchedule: Flow<app.chompass.models.MealSchedule> get() = mealScheduleImpl
     suspend fun setMealSchedule(schedule: app.chompass.models.MealSchedule) = setMealScheduleImpl(schedule)
@@ -585,6 +594,8 @@ class PreferencesStore(private val appContext: Context) : NutritionSyncStore {
     suspend fun setSkipPhotoNotePrompt(v: Boolean) = setSkipPhotoNotePromptImpl(v)
     val photoNoteSkipCount: Flow<Int> get() = photoNoteSkipCountImpl
     suspend fun setPhotoNoteSkipCount(v: Int) = setPhotoNoteSkipCountImpl(v)
+    val photoAnalyzeConfirmAcknowledged: Flow<Boolean> get() = photoAnalyzeConfirmAcknowledgedImpl
+    suspend fun setPhotoAnalyzeConfirmAcknowledged(v: Boolean) = setPhotoAnalyzeConfirmAcknowledgedImpl(v)
     val photoAccuracyGuideCount: Flow<Int> get() = photoAccuracyGuideCountImpl
     suspend fun setPhotoAccuracyGuideCount(v: Int) = setPhotoAccuracyGuideCountImpl(v)
     val mealConstituentsEnabled: Flow<Boolean> get() = mealConstituentsEnabledImpl

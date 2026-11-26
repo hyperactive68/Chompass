@@ -115,24 +115,54 @@ class AndroidAppIconManagerRobolectricTest {
     }
 
     @Test
-    fun apply_repairsStaleSecondAlias() {
-        val packageManager = context.packageManager
-        packageManager.setComponentEnabledSetting(
+    fun apply_staleSecondEnabledAlias_isSweptOnNextApply() {
+        // #173: a swap killed between enabling the new alias and disabling the old
+        // one (process death right after onStop, installer update mid-sweep) leaves
+        // two aliases enabled. The next apply must sweep the stale one instead of
+        // no-oping because the target alias is already enabled.
+        context.packageManager.setComponentEnabledSetting(
             component(AppThemeColor.PLUM),
             PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
             PackageManager.DONT_KILL_APP,
         )
-        packageManager.setComponentEnabledSetting(
+        context.packageManager.setComponentEnabledSetting(
             component(AppThemeColor.TEAL),
             PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
             PackageManager.DONT_KILL_APP,
         )
+        assertEquals(2, enabledCount())
 
         AndroidAppIconManager.apply(context, AppThemeColor.PLUM)
 
         assertEquals(1, enabledCount())
         assertTrue(isEnabled(AppThemeColor.PLUM))
         assertTrue(!isEnabled(AppThemeColor.TEAL))
+        assertEquals(
+            ComponentName(context.packageName, "app.chompass.LauncherPlum"),
+            AndroidAppIconManager.enabledLauncherComponent(context),
+        )
+    }
+
+    @Test
+    fun apply_staleSecondEnabledAlias_nightSwapAlsoSweeps() {
+        // Same leftover, night branch: the dark twin must still take over and
+        // sweep both stale color aliases away.
+        context.packageManager.setComponentEnabledSetting(
+            component(AppThemeColor.PLUM),
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+            PackageManager.DONT_KILL_APP,
+        )
+        context.packageManager.setComponentEnabledSetting(
+            component(AppThemeColor.TEAL),
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+            PackageManager.DONT_KILL_APP,
+        )
+
+        setNight(true)
+        AndroidAppIconManager.apply(context, AppThemeColor.PLUM)
+
+        assertTrue(isBrandDarkEnabled())
+        assertEquals(0, enabledCount())
     }
 
     @Test

@@ -38,8 +38,14 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.Reply
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Today
+import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -67,6 +73,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -120,10 +127,12 @@ import app.chompass.services.OpenFoodFactsService
 import app.chompass.services.PerfLog
 import app.chompass.services.ShortcutEntryAction
 import app.chompass.services.grounding.GroundedEntryFeature
+import app.chompass.ui.components.ChompassBottomSheet
 import app.chompass.ui.components.ChompassDialog
 import app.chompass.ui.components.ChompassDialogActions
 import app.chompass.ui.components.ChompassSnackbarHost
 import app.chompass.ui.components.contentMaxWidth
+import app.chompass.ui.components.rememberChompassSheetState
 import app.chompass.ui.settings.RecalcResultSheet
 import app.chompass.ui.components.ChompassSurface
 import app.chompass.ui.components.InAppCameraCaptureDialog
@@ -132,6 +141,7 @@ import app.chompass.ui.components.StepsCard
 import app.chompass.ui.components.WeekEnergyStrip
 import app.chompass.ui.components.isDarkTheme
 import app.chompass.ui.util.formatClockMillis
+import app.chompass.ui.util.formatMinutesOfDay
 import app.chompass.ui.navigation.BottomNavScrollPadding
 import app.chompass.ui.navigation.BottomFabScrollClearance
 import app.chompass.ui.navigation.BottomOverlayPadding
@@ -139,6 +149,7 @@ import app.chompass.ui.theme.AppMotion
 import app.chompass.ui.theme.CapsuleShape
 import app.chompass.ui.theme.dayTypeColor
 import app.chompass.ui.theme.nutrientAccentColor
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -193,6 +204,8 @@ fun HomeScreen(
     var savedMealsTab by rememberSaveable { mutableStateOf<SavedTab?>(null) }
     var showBarcodeScannerLocal by rememberSaveable { mutableStateOf(false) }
     var showCopyFromDay by rememberSaveable { mutableStateOf(false) }
+    var showPasteActions by rememberSaveable { mutableStateOf(false) }
+    var completingPasteAction by remember { mutableStateOf<String?>(null) }
     var showAddFoodSheet by rememberSaveable { mutableStateOf(false) }
     // AI fill-missing gaps sheet (Batch 2); session state lives in the engine singleton.
     var showFillGapsSheet by rememberSaveable { mutableStateOf(false) }
@@ -211,6 +224,8 @@ fun HomeScreen(
     var editingManualActive by remember { mutableStateOf<app.chompass.models.ManualActiveEntry?>(null) }
     var showGroundedEntry by rememberSaveable { mutableStateOf(false) }
     var editingEntry by remember { mutableStateOf<FoodEntry?>(null) }
+    /** #159: only a saved-food tap focuses the amount when its edit sheet opens. */
+    var focusServingOnEdit by remember { mutableStateOf(false) }
     var editingRecipe by remember { mutableStateOf<app.chompass.models.Recipe?>(null) }
     // Codeberg #66: favorite currently open in the saved-food editor.
     var editingFavorite by remember { mutableStateOf<FoodEntry?>(null) }
@@ -475,6 +490,10 @@ fun HomeScreen(
         }
     }
     var selectedEntryIds by remember(ui.date) { mutableStateOf<Set<UUID>>(emptySet()) }
+    var pasteTargetDate by remember { mutableStateOf(today) }
+    fun resetPasteTargets() {
+        pasteTargetDate = today
+    }
     val selectedEntries = remember(ui.todayEntries, selectedEntryIds) {
         ui.todayEntries.filter { it.id in selectedEntryIds }
     }
@@ -513,6 +532,7 @@ fun HomeScreen(
         runCatching { foodLogListState.animateScrollToItem(flat) }
     }
 
+    val copied = ui.copiedEntries
     val scope = rememberCoroutineScope()
     val foodRemovedMessage = stringResource(R.string.home_food_removed)
     val undoLabel = stringResource(R.string.action_undo)
@@ -578,10 +598,14 @@ fun HomeScreen(
         containerColor = Color.Transparent,
         snackbarHost = {
             // Custom docked bottom nav overlays the Scaffold; lift the host so
-            // snackbars (delete-undo, paste confirmation) are not hidden behind it.
+            // snackbars (delete-undo, paste confirmation) are not hidden behind
+            // the pill — and the docked Add FAB (audit R2, device 2026-11-10:
+            // the delete-undo action's tap zone sat under the FAB, so an Undo
+            // tap opened the hub). BottomFabScrollClearance is the same FAB
+            // footprint the food-log list already scrolls past (#156).
             ChompassSnackbarHost(
                 hostState = snackbarHostState,
-                modifier = Modifier.padding(bottom = BottomOverlayPadding),
+                modifier = Modifier.padding(bottom = BottomOverlayPadding + BottomFabScrollClearance),
             )
         },
     ) { padding ->
@@ -591,13 +615,14 @@ fun HomeScreen(
             modifier = Modifier
                 .contentMaxWidth(),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                top = if (inSelectionMode) 72.dp else 8.dp,
+                top = 8.dp,
                 // #156: the Add FAB docks above the pill, so the list must
                 // scroll past it — BottomNavScrollPadding alone left the last
                 // row's trailing chips behind the button at max scroll.
                 bottom = BottomNavScrollPadding + BottomFabScrollClearance
             )
         ) {
+
             // Week strip — 52 past weeks + current + 8 future (Codeberg #96).
             item {
                 Box(Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
@@ -691,7 +716,6 @@ fun HomeScreen(
                             }
                         }
                 ) {
-                    Spacer(Modifier.height(4.dp))
                     // Decorative day-swipe affordance: the chevrons fade with the
                     // hero drag handler's reachability (backward is always allowed;
                     // forward stops at the diary's today limit). Decorative only —
@@ -792,6 +816,8 @@ fun HomeScreen(
                         onShowRecalcDetails = { vm.openRecalcDetails() },
                             goalDerivation = ui.goalDerivation,
                             layout = ui.homeDisplay.calorieHeroLayout,
+                            displayTarget = ui.heroCalorieGoal,
+                            budgetClass = ui.budgetClassCue,
                         )
                     }
                     if (ui.homeDisplay.showSteps) {
@@ -810,7 +836,7 @@ fun HomeScreen(
                         }
                         Spacer(Modifier.height(4.dp))
                     } else {
-                        Spacer(Modifier.height(12.dp))
+                        Spacer(Modifier.height(4.dp))
                     }
                     // Current/goal resolved once per state change instead of
                     // per card per recomposition (current() scans the day's
@@ -848,7 +874,7 @@ fun HomeScreen(
                         Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         ui.homeTopNutrients.forEach { nutrient ->
                             val (current, planned, goal) = macroCardValues.getValue(nutrient)
@@ -895,7 +921,7 @@ fun HomeScreen(
                             } else {
                                 stringResource(
                                     R.string.water_amount_fl_oz,
-                                    WaterAmountFormat.flOzFromMl(plan.drinkMl),
+                                    WaterAmountFormat.flOzFromMl(plan.drinkMl).coerceAtLeast(1),
                                 )
                             }
                             val fireZone = Instant.ofEpochMilli(plan.nextFireMillis)
@@ -936,11 +962,11 @@ fun HomeScreen(
                             modifier = Modifier.padding(horizontal = 16.dp),
                         )
                     }
-                    Box(
+                    Row(
                         Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        contentAlignment = Alignment.Center
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.End,
                     ) {
                         Box(modifier = Modifier.clickable { nutritionDetailScope = "day" }) {
                             ViewMoreButton()
@@ -950,7 +976,7 @@ fun HomeScreen(
             }
 
             // Food log
-            item { Spacer(Modifier.height(8.dp)) }
+            item { Spacer(Modifier.height(4.dp)) }
             // Daily note (Codeberg #58a): day-scoped like the water card, so it
             // follows the selected day (today, past, or planned future). Only when the
             // optional tracker is enabled (Settings → Trackers & Reminders).
@@ -1080,7 +1106,9 @@ fun HomeScreen(
                                             val result = snackbarHostState.showSnackbar(
                                                 message = foodRemovedMessage,
                                                 actionLabel = undoLabel,
-                                                duration = SnackbarDuration.Short,
+                                                // Audit R2: Short expired before a
+                                                // user could react on-device.
+                                                duration = SnackbarDuration.Long,
                                             )
                                             if (result == SnackbarResult.ActionPerformed) {
                                                 haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
@@ -1100,23 +1128,230 @@ fun HomeScreen(
             }
         }
 
-        // Floating "+" add button — overlaid bottom-right and lifted above the docked
-        // bottom nav bar. The parent Scaffold renders content full-screen behind the
-        // bar, so the Scaffold FAB slot would sit hidden underneath it. Mirrors the iOS
-        // ContentView FAB: .overlay(alignment: .bottomTrailing) + .padding(.bottom).
-        FloatingActionButton(
-            onClick = { openAddFoodHub() },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .navigationBarsPadding()
-                .padding(end = 24.dp, bottom = BottomOverlayPadding),
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        ) {
-            Icon(
-                Icons.Filled.Add,
-                contentDescription = stringResource(R.string.cd_add_food),
+        // The docked FAB becomes a contextual action stack while diary rows are selected.
+        if (inSelectionMode) {
+            val pasteBusy = ui.saving
+            val originalTimes = remember(copied, ctx) {
+                copied.map { it.timestamp.toEpochMilli() }
+                    .sorted()
+                    .map { formatClockMillis(ctx, it) }
+                    .distinct()
+                    .joinToString(", ")
+            }
+            val loggingTime = ui.logTimeOverride ?: LocalTime.now()
+            val loggingTimeText = formatMinutesOfDay(
+                ctx,
+                loggingTime.hour * 60 + loggingTime.minute,
             )
+            val pasteStripDates = remember(weekStartDay) { weekStripDates(weekStartDay) }
+            val pasteStripMarkers = remember(ui.profile, pasteStripDates) {
+                dayTypeMarkerMaps(ui.profile, vm.weekDayTypes(pasteStripDates))
+            }
+            val pasteStripUntracked = remember(ui.untrackedDays) { isoToLocalDates(ui.untrackedDays) }
+            val pasteDateFormat = remember {
+                java.time.format.DateTimeFormatter.ofPattern("d MMM", LocaleFormat.displayLocale())
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomEnd)
+                    .navigationBarsPadding()
+                    .padding(start = 16.dp, end = 24.dp, bottom = BottomOverlayPadding),
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+
+                FloatingActionButton(
+                    onClick = {
+                        MealShare.share(ctx, selectedEntries)
+                        selectedEntryIds = emptySet()
+                        resetPasteTargets()
+                        showPasteActions = false
+                    }
+                ) {
+                    Icon(
+                        Icons.Filled.Share,
+                        contentDescription = stringResource(R.string.cd_share_meal),
+                    )
+                }
+                FloatingActionButton(
+                    onClick = {
+                        completingPasteAction = null
+                        vm.setCopiedEntries(selectedEntries)
+                        pasteTargetDate = today
+                        showPasteActions = true
+                    },
+                ) {
+                    Icon(
+                        Icons.Outlined.ContentCopy,
+                        contentDescription = stringResource(R.string.cd_copy_entries),
+                    )
+                }
+                FloatingActionButton(
+                    onClick = {
+                        vm.clearCopiedEntries()
+                        selectedEntryIds = emptySet()
+                        resetPasteTargets()
+                        showPasteActions = false
+                    },
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                ) {
+                    Icon(
+                        Icons.Filled.Close,
+                        contentDescription = stringResource(R.string.action_cancel),
+                    )
+                }
+                FloatingActionButton(
+                    onClick = {
+                        if (PerfLog.enabled) hubOpenedAtNs = System.nanoTime()
+                        vm.prefetchAddFoodIndex()
+                        addFoodFlowActive = true
+                        showAddFoodSheet = true
+                    },
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ) {
+                    Icon(
+                        Icons.Filled.Add,
+                        contentDescription = stringResource(R.string.cd_add_food),
+                    )
+                }
+            }
+            if (showPasteActions && copied.isNotEmpty()) {
+                val selectedDatesText = remember(pasteTargetDate) {
+                    pasteTargetDate.format(pasteDateFormat)
+                }
+                val pasteSheetState = rememberChompassSheetState()
+                fun finishPaste(actionId: String, action: () -> Unit) {
+                    if (completingPasteAction != null) return
+                    completingPasteAction = actionId
+                    scope.launch {
+                        delay(400)
+                        action()
+                        vm.clearCopiedEntries()
+                        selectedEntryIds = emptySet()
+                        resetPasteTargets()
+                        completingPasteAction = null
+                        // Wait for the sheet to finish hiding.
+                        pasteSheetState.hide()
+                        showPasteActions = false
+                        val result = snackbarHostState.showSnackbar(
+                            message = ctx.resources.getQuantityString(
+                                R.plurals.paste_complete_n, copied.size, copied.size,
+                            ),
+                            actionLabel = undoLabel,
+                            duration = SnackbarDuration.Short,
+                        )
+                        if (result == SnackbarResult.ActionPerformed) {
+                            haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                            vm.undoPaste()
+                        }
+                    }
+                }
+                ChompassBottomSheet(sheetState = pasteSheetState, onDismiss = {
+                    // Clear the clipboard when the sheet closes or is minimised.
+                    vm.clearCopiedEntries()
+                    resetPasteTargets()
+                    showPasteActions = false
+                }) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 24.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                pluralStringResource(R.plurals.paste_n_entries, copied.size, copied.size),
+                                modifier = Modifier.weight(1f),
+                                style = MaterialTheme.typography.titleLarge,
+                            )
+                            IconButton(onClick = {
+                                vm.clearCopiedEntries()
+                                selectedEntryIds = emptySet()
+                                resetPasteTargets()
+                                showPasteActions = false
+                            }) {
+                                Icon(
+                                    Icons.Filled.Close,
+                                    contentDescription = stringResource(R.string.cd_dismiss_paste),
+                                )
+                            }
+                        }
+                        WeekEnergyStrip(
+                            selectedDate = pasteTargetDate,
+                            onSelect = { pasteTargetDate = it },
+                            weekStartDay = weekStartDay,
+                            typeColorsByDate = pasteStripMarkers.first,
+                            typeNamesByDate = pasteStripMarkers.second,
+                            untrackedDates = pasteStripUntracked,
+                            showMonth = true,
+                        )
+                        Column(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            PasteQuickActionButton(
+                                destination = stringResource(R.string.paste_at_original_times),
+                                targetDate = selectedDatesText,
+                                times = originalTimes,
+                                icon = Icons.Filled.AddCircle,
+                                enabled = !pasteBusy && completingPasteAction == null,
+                                completed = completingPasteAction == "original",
+                                onClick = {
+                                    val target = pasteTargetDate
+                                    val rows = copied
+                                    finishPaste("original") {
+                                        vm.pasteEntriesAtOriginalTimes(rows, target)
+                                    }
+                                },
+                            )
+                            PasteQuickActionButton(
+                                destination = stringResource(R.string.paste_at_current_time),
+                                targetDate = selectedDatesText,
+                                times = loggingTimeText,
+                                icon = Icons.Filled.Today,
+                                enabled = !pasteBusy && completingPasteAction == null,
+                                completed = completingPasteAction == "current",
+                                onClick = {
+                                    val target = pasteTargetDate
+                                    val rows = copied
+                                    finishPaste("current") {
+                                        vm.copyEntriesToDate(rows, target)
+                                    }
+                                },
+                            )
+                        }
+                    }
+                }
+            }
+        } else {
+            // Normal add-food action.
+            FloatingActionButton(
+                onClick = {
+                    if (PerfLog.enabled) hubOpenedAtNs = System.nanoTime()
+                    vm.prefetchAddFoodIndex()
+                    addFoodFlowActive = true
+                    showAddFoodSheet = true
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .navigationBarsPadding()
+                    .padding(end = 24.dp, bottom = BottomOverlayPadding),
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            ) {
+                Icon(
+                    Icons.Filled.Add,
+                    contentDescription = stringResource(R.string.cd_add_food),
+                )
+            }
         }
         val draftForChip = ui.progressiveMeal
         val showProgressiveChip = !ui.showProgressiveMealSheet &&
@@ -1144,9 +1379,6 @@ fun HomeScreen(
                 )
             }
         }
-        // Paste chip: diary rows copied via the selection bar, ready to be
-        // pasted onto the viewed day (same or another day). In-memory clipboard.
-        val copied = ui.copiedEntries
         // Recovered review chip: a dismissed completed AI review, kept so the
         // analysis is not wasted. Tap reopens the review sheet; X discards.
         val recoveredReview = ui.recoveredReview
@@ -1169,23 +1401,75 @@ fun HomeScreen(
             !showCameraCapture &&
             !showMultiPhotoCapture &&
             !inSelectionMode
+        val dayTypePrompt = ui.dayTypePrompt
+        val showDayTypePrompt = dayTypePrompt != null &&
+            !showDayTypeSheet &&
+            !ui.showFoodResultSheet &&
+            !ui.showProgressiveMealSheet &&
+            !ui.showAnalysisQueue &&
+            !showAddFoodSheet &&
+            !showCameraCapture &&
+            !showMultiPhotoCapture &&
+            !inSelectionMode
         LaunchedEffect(fillGapsBanner != null) {
             if (FillGapsFeature.ENABLED && fillGapsBanner != null) vm.onFillGapsBannerShown()
         }
-        if ((copied.isNotEmpty() && !inSelectionMode && !showProgressiveChip) || showRecoveredChip || showFillGapsChip) {
-            val pasteBusy = ui.saving
-            val paste: () -> Unit = {
-                if (!pasteBusy) vm.copyEntriesToSelectedDay(copied)
-            }
+        if (showRecoveredChip || showFillGapsChip || showDayTypePrompt) {
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .navigationBarsPadding()
-                    .padding(start = 16.dp, end = 16.dp, bottom = BottomOverlayPadding)
+                    .padding(start = 16.dp, end = 16.dp, bottom = BottomOverlayPadding + 64.dp)
                     .zIndex(1f),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                if (showDayTypePrompt && dayTypePrompt != null) {
+                    val promptText = if (dayTypePrompt.suggestedName != null) {
+                        stringResource(
+                            R.string.home_day_type_diverge_named,
+                            dayTypePrompt.suggestedName,
+                            dayTypePrompt.currentName,
+                        )
+                    } else {
+                        stringResource(R.string.home_day_type_diverge_unnamed, dayTypePrompt.currentName)
+                    }
+                    ChompassSurface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showDayTypeSheet = true },
+                        cornerRadius = 16.dp,
+                        padding = 0.dp,
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 16.dp, end = 4.dp, top = 2.dp, bottom = 2.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                promptText,
+                                modifier = Modifier.weight(1f),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 14.sp,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            IconButton(
+                                onClick = vm::dismissDayTypePrompt,
+                                modifier = Modifier.size(44.dp),
+                            ) {
+                                Icon(
+                                    Icons.Filled.Close,
+                                    contentDescription = stringResource(R.string.cd_dismiss_day_type_prompt),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                            }
+                        }
+                    }
+                }
                 if (showFillGapsChip && fillGapsBanner != null) {
                     ChompassSurface(
                         modifier = Modifier
@@ -1267,67 +1551,7 @@ fun HomeScreen(
                         }
                     }
                 }
-                if (copied.isNotEmpty() && !inSelectionMode && !showProgressiveChip) {
-                    ChompassSurface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .alpha(if (pasteBusy) 0.55f else 1f)
-                            .clickable(enabled = !pasteBusy, onClick = paste),
-                        cornerRadius = 16.dp,
-                        padding = 0.dp
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 16.dp, end = 4.dp, top = 2.dp, bottom = 2.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                stringResource(
-                                    if (pasteBusy) R.string.paste_busy else R.string.paste_n_entries,
-                                    if (pasteBusy) 0 else copied.size
-                                ),
-                                modifier = Modifier.weight(1f, fill = false),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontWeight = FontWeight.Medium,
-                                fontSize = 14.sp,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                            IconButton(
-                                onClick = { vm.clearCopiedEntries() },
-                                modifier = Modifier.size(44.dp)
-                            ) {
-                                Icon(
-                                    Icons.Filled.Close,
-                                    contentDescription = stringResource(R.string.cd_dismiss_paste),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-                        }
-                    }
-                }
             }
-        }
-        if (inSelectionMode) {
-            SelectionActionBar(
-                selectedCount = selectedEntryIds.size,
-                onCancel = { selectedEntryIds = emptySet() },
-                onCopy = {
-                    vm.setCopiedEntries(selectedEntries)
-                    selectedEntryIds = emptySet()
-                },
-                onShare = {
-                    MealShare.share(ctx, selectedEntries)
-                    selectedEntryIds = emptySet()
-                },
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-                    .zIndex(2f)
-            )
         }
         }
     }
@@ -1439,12 +1663,16 @@ fun HomeScreen(
             suggestions = ui.addFoodSuggestions,
             suggestionsNetworkPending = ui.addFoodSuggestNetworkPending,
             suggestionsNetworkUnreachable = ui.addFoodSuggestNetworkUnreachable,
+            suggestionsNetworkEmpty = ui.addFoodSuggestNetworkEmpty,
             packagedSearchEnabled = ui.addFoodPackagedSearchEnabled,
             onPackagedSearchChange = vm::setAddFoodPackagedSearch,
             onOpenFoodSettings = { onOpenFoodSettings?.invoke() },
             onPickSuggestion = {
                 addFoodFlowActive = false
-                vm.pickSuggestion(it)
+                vm.pickSuggestion(it) { entry ->
+                    focusServingOnEdit = true
+                    editingEntry = entry
+                }
                 vm.clearAddFoodQuery()
             },
             onReviewSuggestion = {
@@ -1714,10 +1942,10 @@ fun HomeScreen(
                 savedMealsTab = null
                 returnToAddFoodGrid()
             },
-            // Tapping a Saved Meals row opens the FoodResultSheet for review
-            // instead of logging immediately — same UX as the photo flow.
-            // The sheet dismisses itself after every action, so each one ends
-            // the flow: only a plain back (no action) returns to the grid.
+            // Row tap quick-logs (same path as the + icon); long-press opens
+            // the FoodResultSheet for review. The sheet dismisses itself after
+            // every action, so each one ends the flow: only a plain back
+            // (no action) returns to the grid.
             onRelogEntry = { entry ->
                 addFoodFlowActive = false
                 vm.reviewSavedMeal(entry)
@@ -1808,6 +2036,19 @@ fun HomeScreen(
                     vm.copyEntriesToDate(entries, target)
                     showCopyFromDay = false
                     addFoodFlowActive = false
+                    scope.launch {
+                        val result = snackbarHostState.showSnackbar(
+                            message = ctx.resources.getQuantityString(
+                                R.plurals.paste_complete_n, entries.size, entries.size,
+                            ),
+                            actionLabel = undoLabel,
+                            duration = SnackbarDuration.Short,
+                        )
+                        if (result == SnackbarResult.ActionPerformed) {
+                            haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                            vm.undoPaste()
+                        }
+                    }
                 }
             },
             onDismiss = {
@@ -1939,6 +2180,7 @@ fun HomeScreen(
             showDontAskAgain = !ui.skipPhotoNotePrompt &&
                 ui.photoNoteSkipCount >= HomeViewModel.PHOTO_NOTE_SKIP_OFFER_THRESHOLD,
             showAccuracyGuide = ui.photoAccuracyGuideCount < HomeViewModel.PHOTO_ACCURACY_GUIDE_COUNT,
+            analyzeConfirmAcknowledged = ui.photoAnalyzeConfirmAcknowledged,
             recentPrompts = recentPrompts,
             onAddPhoto = { note ->
                 if (stagedPhotoBytes.size < FoodPhotoSession.MAX_IMAGES) {
@@ -1953,13 +2195,13 @@ fun HomeScreen(
             onRemove = { index ->
                 photoSession.removeAt(index)
             },
-            onAnalyze = { note, grams, dontAskAgain ->
+            onAnalyze = { note, grams, dontAskAgain, acknowledgeConfirm ->
                 val images = photoSession.stagedImages.value
                 photoSession.clear()
                 initialPhotoNote = ""
                 if (!ui.isEntryAnalysisBusy) {
                     addFoodFlowActive = false
-                    vm.analyzePhotosFromStaging(images, note, grams, dontAskAgain)
+                    vm.analyzePhotosFromStaging(images, note, grams, dontAskAgain, acknowledgeConfirm)
                 }
             },
             onQueueForLater = { note, grams ->
@@ -2035,6 +2277,7 @@ fun HomeScreen(
             useSystemDateTimePickers = useSystemDateTimePickers,
             dayEntries = ui.todayEntries,
             mealTimesEnabled = ui.mealTimesEnabled,
+            focusServingAmountOnOpen = focusServingOnEdit,
             onReprocess = { updatedNote, editedMix, reanalyzeEntry, sendExistingMacros, onProgress ->
                 if (editedMix != null) vm.reestimateFoodEntry(editedMix, onProgress)
                 else {
@@ -2053,12 +2296,14 @@ fun HomeScreen(
             onSave = { updated, applyTimeToMeal ->
                 vm.updateEntry(entry, updated, applyTimeToMeal)
                 editingEntry = null
+                focusServingOnEdit = false
             },
             onLogNow = { updated ->
                 vm.logPlannedEntryNow(updated)
                 editingEntry = null
+                focusServingOnEdit = false
             },
-            onDismiss = { editingEntry = null }
+            onDismiss = { editingEntry = null; focusServingOnEdit = false }
         )
     }
 
@@ -2373,6 +2618,48 @@ fun HomeScreen(
         RecalcResultSheet(data = sheet, onDismiss = { vm.dismissRecalcSheet() })
     }
 }
+
+@Composable
+private fun PasteQuickActionButton(
+    destination: String,
+    targetDate: String,
+    times: String,
+    icon: ImageVector,
+    enabled: Boolean,
+    completed: Boolean,
+    onClick: () -> Unit,
+) {
+    FilledTonalButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Icon(
+            if (completed) Icons.Filled.Check else icon,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+        )
+        Spacer(Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                destination,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(targetDate, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(
+                times,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
+}
+
 /**
  * Strip window in lockstep with WeekStrip's PAST_WEEKS (52) / FUTURE_WEEKS (8):
  * 61 week starts × 7 days around the current week.
@@ -2463,7 +2750,6 @@ internal fun HomeScreenPreviewContent(
                 }
                 item {
                     Column {
-                        Spacer(Modifier.height(4.dp))
                         Text(
                             stringResource(R.string.home_today),
                             style = MaterialTheme.typography.labelLarge,
@@ -2487,12 +2773,14 @@ internal fun HomeScreenPreviewContent(
                             freezeProgress = freezeAnimations,
                                 goalDerivation = ui.goalDerivation,
                                 layout = ui.homeDisplay.calorieHeroLayout,
+                                displayTarget = ui.heroCalorieGoal,
+                                budgetClass = ui.budgetClassCue,
                             )
                         }
                         val previewResolvedTargets = remember(ui.profile, ui.date, ui.goalJournal) { ui.resolvedDayTargets }
                         Row(
                             Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             if (ui.homeDisplay.showSteps) {
                                 StepsCard(
@@ -2527,15 +2815,15 @@ internal fun HomeScreenPreviewContent(
                                 )
                             }
                         }
-                        Box(
-                            Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                            contentAlignment = Alignment.Center,
+                        Row(
+                            Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.End,
                         ) {
                             ViewMoreButton()
                         }
                     }
                 }
-                item { Spacer(Modifier.height(8.dp)) }
+                item { Spacer(Modifier.height(4.dp)) }
                 if (ui.diaryLoaded && mealGroups.isEmpty()) {
                     item { SectionHeader(if (isToday) stringResource(R.string.home_todays_food) else stringResource(R.string.home_food_log)) }
                     item {

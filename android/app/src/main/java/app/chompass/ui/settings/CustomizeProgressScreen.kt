@@ -35,6 +35,7 @@ import app.chompass.ui.components.ChompassDialog
 import app.chompass.ui.components.ChompassDialogActions
 
 import app.chompass.ui.progress.TimeRange
+import app.chompass.ui.progress.TrackedItemType
 import java.util.Locale
 
 /**
@@ -62,6 +63,17 @@ fun CustomizeProgressScreen(
     val latest = entries.maxByOrNull { it.date }
     val selectedSites = ui.progressMeasurementSites
 
+    val waterTrackingEnabled by container.prefs.waterTrackingEnabled.collectAsState(initial = false)
+    val nicotineTrackingEnabled by container.prefs.nicotineTrackingEnabled.collectAsState(initial = false)
+    val caffeineTrackingEnabled by container.prefs.caffeineTrackingEnabled.collectAsState(initial = false)
+    val waterLogs by container.waterRepository.entries.collectAsState(initial = emptyList())
+    val nicotineLogs by container.nicotineRepository.entries.collectAsState(initial = emptyList())
+    val caffeineLogs by container.caffeineRepository.entries.collectAsState(initial = emptyList())
+    val availableTrackers = buildList {
+        if (waterTrackingEnabled || waterLogs.isNotEmpty()) add(TrackedItemType.WATER)
+        if (nicotineTrackingEnabled || nicotineLogs.isNotEmpty()) add(TrackedItemType.NICOTINE)
+        if (caffeineTrackingEnabled || caffeineLogs.isNotEmpty()) add(TrackedItemType.CAFFEINE)
+    }
     SettingsSubScreen(
         title = stringResource(R.string.settings_customize_progress),
         onBack = onBack,
@@ -83,6 +95,14 @@ fun CustomizeProgressScreen(
                     label = stringResource(R.string.settings_progress_default_range),
                     value = stringResource(TimeRange.fromStorageId(ui.progressDefaultRangeId).labelRes),
                     onClick = { sheet = SettingsSheet.PROGRESS_DEFAULT_RANGE },
+                )
+                HorizontalDivider()
+                ToggleRow(label = stringResource(R.string.settings_progress_show_goal_rule), checked = ui.progressShowGoalRule, onChange = vm::setProgressShowGoalRule)
+                Text(
+                    stringResource(R.string.settings_progress_show_goal_rule_subtitle),
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
                 )
                 HorizontalDivider()
                 ToggleRow(
@@ -125,6 +145,45 @@ fun CustomizeProgressScreen(
             }
         }
 
+        if (availableTrackers.isNotEmpty()) {
+            ChompassSurface(
+                modifier = Modifier.fillMaxWidth(),
+                cornerRadius = 16.dp,
+                padding = 0.dp,
+            ) {
+                Column {
+                    Text(
+                        stringResource(R.string.progress_trackers_title),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                    )
+                    availableTrackers.forEachIndexed { index, type ->
+                        NutrientToggleRow(
+                            label = stringResource(
+                                when (type) {
+                                    TrackedItemType.WATER -> R.string.water
+                                    TrackedItemType.NICOTINE -> R.string.nicotine
+                                    TrackedItemType.CAFFEINE -> R.string.caffeine
+                                }
+                            ),
+                            checked = type.storageId !in ui.progressHiddenTrackedItems,
+                            enabled = true,
+                            onChange = { on ->
+                                val hidden = ui.progressHiddenTrackedItems
+                                vm.setProgressHiddenTrackedItems(
+                                    if (on) hidden - type.storageId else hidden + type.storageId
+                                )
+                            },
+                        )
+                        if (index != availableTrackers.lastIndex) {
+                            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                        }
+                    }
+                }
+            }
+        }
         ChompassSurface(
             modifier = Modifier.fillMaxWidth(),
             cornerRadius = 16.dp,

@@ -29,16 +29,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.Text
@@ -140,7 +136,7 @@ internal fun MealSectionHeader(
         Row(
             Modifier
                 .fillMaxWidth()
-                .padding(start = 22.dp, end = 24.dp, top = 12.dp, bottom = if (summaryOnOwnLine) 0.dp else 6.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = if (summaryOnOwnLine) 0.dp else 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -176,7 +172,7 @@ internal fun MealSectionHeader(
                 mealMacroSummary(calories, macroChips, totalProtein, totalCarbs, totalFat, totalFiber, totalSugar),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 46.dp, end = 24.dp, bottom = 6.dp),
+                    .padding(start = 40.dp, end = 16.dp, bottom = 6.dp),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
                 maxLines = 2,
@@ -213,61 +209,6 @@ private fun mealMacroSummary(
                 ).roundToInt()
                 val color = chip.macroKind()?.color() ?: MaterialTheme.colorScheme.primary
                 withStyle(SpanStyle(color = color)) { append("${value}${chipGlyphs[chip]}") }
-            }
-        }
-    }
-}
-
-@Composable
-internal fun SelectionActionBar(
-    selectedCount: Int,
-    onCancel: () -> Unit,
-    onShare: () -> Unit,
-    onCopy: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    ChompassSurface(
-        modifier = modifier.fillMaxWidth(),
-        cornerRadius = 16.dp,
-        padding = 0.dp
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            IconButton(onClick = onCancel) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.action_cancel),
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(18.dp),
-                )
-            }
-            Text(
-                text = selectedCount.toString(),
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f)
-            )
-            IconButton(onClick = onCopy, enabled = selectedCount > 0) {
-                Icon(
-                    imageVector = Icons.Outlined.ContentCopy,
-                    contentDescription = stringResource(R.string.cd_copy_entries),
-                    tint = if (selectedCount > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-            IconButton(onClick = onShare, enabled = selectedCount > 0) {
-                Icon(
-                    imageVector = Icons.Filled.Share,
-                    contentDescription = stringResource(R.string.cd_share_meal),
-                    tint = if (selectedCount > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-                    modifier = Modifier.size(20.dp)
-                )
             }
         }
     }

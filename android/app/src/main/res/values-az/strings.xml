@@ -937,6 +937,7 @@ bilirsən?</string>
     <string name="cd_new_recipe">Yeni resept</string>
     <string name="cd_open_camera">Kameranı aç</string>
     <string name="cd_open_gallery">Qalereyanı aç</string>
+    <string name="cd_camera_shutter">Şəkil çək</string>
     <string name="cd_quantity_operator">%1$s kəmiyyətə daxil et</string>
     <string name="cd_remove_image">Şəkli sil</string>
     <string name="cd_selected">Seçilib</string>
@@ -1084,9 +1085,19 @@ bilirsən?</string>
     <string name="grounding_validation_notes">Qeydlər: %1$s</string>
     <string name="home_active_burn_a11y">Aktiv yanma %1$d</string>
     <string name="home_active_burn_caption">%1$d aktiv</string>
-    <string name="home_active_burn_caption_progress">%1$d / %2$d aktiv</string>
-    <string name="home_active_burn_caption_progress_day_type">%1$d of %2$d active · %3$s</string>
-    <string name="home_active_burn_over">+%1$d normadan çox</string>
+    <string name="home_active_burn_caption_progress">%1$d/%2$d aktiv</string>
+    <string name="home_budget_class_usual">Adi gün</string>
+    <string name="home_budget_class_lean_lighter">Yüngülə</string>
+    <string name="home_budget_class_lean_harder">Ağırına</string>
+    <string name="home_budget_class_lighter">Yüngül gün</string>
+    <string name="home_budget_class_harder">Ağır gün</string>
+    <string name="home_budget_class_lean_type">%1$s tərəfə</string>
+    <string name="home_budget_class_type">%1$s günü</string>
+    <string name="home_budget_class_sheet_hourly">Eyni saat tarixçəsi azdır. Hədəf adi gün olaraq qalır.</string>
+    <string name="home_budget_class_sheet_usual">Hələ təsnif olunmayıb. Hədəf adi gündür, təxmin edilən məşq günü deyil.</string>
+    <string name="home_budget_class_sheet_moved">Son 28 gündən təsnif olundu. Saxlanan hədəf dəyişməyib.</string>
+    <string name="home_active_burn_caption_progress_day_type">%1$d/%2$d aktiv · %3$s</string>
+    <string name="home_active_burn_over">+%1$d artıq</string>
     <string name="home_active_burn_over_a11y">Aktiv yanma %1$d, normal gündən %2$d çox</string>
     <string name="home_active_burn_progress_a11y">Aktiv yanma %1$d, normal %2$d</string>
     <string name="home_active_burn_progress_day_type_a11y">Active burn %1$d, %2$d typical for %3$s days</string>
@@ -1341,8 +1352,16 @@ bilirsən?</string>
     <string name="onboarding_safety_settings_hint">Tam Təhlükəsizlik və Tibb rəhbərliyini Parametrlərdə nəzərdən keçirə bilərsən.</string>
     <string name="onboarding_safety_title">Təhlükəsizlik bildirişi</string>
     <string name="onboarding_safety_water">Hidratasiya məqsədləri və içmə xatırlatmaları təxmini qiymətləndirmədir, tibbi məsləhət deyil. Susuzluq hər hansı tətbiqdən daha yaxşı bələdçidir və həkimin sənin üçün nəyin doğru olduğunu bilir.</string>
-    <string name="paste_busy">Yapışdırılır…</string>
-    <string name="paste_n_entries">%1$d qeyd yapışdır</string>
+    <plurals name="paste_n_entries">
+        <item quantity="one">1 qeyd yapışdır</item>
+        <item quantity="other">%1$d qeyd yapışdır</item>
+    </plurals>
+    <plurals name="paste_complete_n">
+        <item quantity="one">1 qeyd yapışdırıldı</item>
+        <item quantity="other">%1$d qeyd yapışdırıldı</item>
+    </plurals>
+    <string name="paste_at_original_times">Orijinal vaxtlarda yapışdır</string>
+    <string name="paste_at_current_time">Cari vaxtda yapışdır</string>
     <string name="placeholder_hour">Saat</string>
     <string name="placeholder_minute">Dəqiqə</string>
     <string name="progress_activity_exercise_week">Məşqlər (7g)</string>
@@ -1896,6 +1915,7 @@ bilirsən?</string>
     <string name="feet_inches_format">%1$d\' %2$d\"</string>
     <string name="food_search_source_off">Open Food Facts</string>
     <string name="add_food_off_unreachable">Open Food Facts hazırda əlçatan deyil. Saxlanmış və oflayn nəticələr yenə də göstərilir.</string>
+    <string name="add_food_off_no_match">Open Food Facts bu axtarışa uyğun nəticə tapmadı.</string>
     <string name="food_search_source_usda">USDA</string>
     <string name="ft_label_format">%1$d ft</string>
     <string name="grams_value_decimal_format">%1$sg</string>
@@ -2116,6 +2136,9 @@ bilirsən?</string>
     <string name="home_day_type_chip_a11y">Bugünkü gün tipi: %1$s. Dəyişmək üçün toxunun.</string>
     <string name="day_type_sheet_title">Gün tipi</string>
     <string name="day_type_sheet_subtitle">Bugünkü hədəfləri başqa gün tipinə keçirin.</string>
+    <string name="home_day_type_diverge_named">Bu saat daha çox %1$s kimi görünür, %2$s yox.</string>
+    <string name="home_day_type_diverge_unnamed">Bu saat %1$s günü kimi görünmür.</string>
+    <string name="cd_dismiss_day_type_prompt">Gün tipi təklifini bağla</string>
     <string name="day_type_base_goals">Əsas hədəflər</string>
     <string name="day_type_clear_override">Bugünkü istisnanı sil</string>
     <string name="day_type_edit_settings">Gün tiplərini redaktə et</string>
@@ -2490,6 +2513,9 @@ makrolar yeni kalori cəminə uyğun yenidən tarazlaşdırılır</string>
         <item>kalori</item>
         <item>kcal</item>
         <item>kalori hədəfi</item>
+        <item>limit</item>
+        <item>əl ilə</item>
+        <item>fərdi</item>
     </string-array>
     <string-array name="settings_search_kw_macro_protein">
         <item>makro</item>

@@ -1,0 +1,10 @@
+• Choose where copied entries go: copying diary rows opens a paste sheet. Pick the day on the week strip, then paste at the rows' original times or at the current time (Android).
+• More scales sync straight into Chompass: Bluetooth scale sync also understands generic SIG-standard scales, Xiaomi Mi Scale v1/v2 and Renpho scales, alongside the Beurer, Sanitas and Medisana families. These are verified against the driver test suite, not on physical hardware (Android).
+• A running scale sync survives the screen turning off: the sync runs as a foreground service with a progress notification, and a brief connection drop gets one automatic retry (Android).
+• Goal phases arrive in the web app: Settings → Goals gains Goal phases, matching the Android app. Plan a cut, maintain or bulk window with its own calorie and macro targets over a date range (web app).
+• Today's numbers stay in the shade: an Ongoing summary switch under Settings → Trackers & Reminders → Notifications keeps today's calories with a progress bar and your macros in a lasting notification (Android).
+• The Home screen fits more of your day: the calorie ring keeps its size but sheds the slack around it, so the food log starts higher up (Android).
+• The weight chart can hide the goal line: a new Show goal line switch under Settings → Display → Customize progress turns the line off so the chart zooms to the logged values. On by default; in the web app under Settings → App & Display → Units & schedule (Android and web app).
+• Trackers get a Progress card: with water, nicotine or caffeine tracking on, Progress shows their average per logged day for the chosen range (Android and web app).
+• Logging takes fewer taps: saved meals log on tap, dates can be typed, and tapping a saved food in Add Food opens the amount right away (Android).
+• Fixed: dialog buttons wrap in long languages, fluid ounces read right on the water card, burn bands shade correctly on the calorie arc, a prescribed calorie target such as 1700 kcal can be set, and Open Food Facts products that publish prepared values only now resolve (Android and web app).

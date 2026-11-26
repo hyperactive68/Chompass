@@ -75,12 +75,17 @@ internal object MagnitudeDrafts {
 private val MAGNITUDE_ROW_HEIGHT = 48.dp * 5
 
 @Composable
-internal fun rememberMagnitudePickerMode(): Pair<Boolean, (Boolean) -> Unit> {
+internal fun rememberMagnitudePickerMode(
+    initialTyped: Boolean = false,
+): Pair<Boolean, (Boolean) -> Unit> {
     val app = LocalContext.current.applicationContext as? ChompassApp
     val prefs = app?.container?.prefs
     val stored by (prefs?.numericPickerEntry ?: kotlinx.coroutines.flow.flowOf(PICKER_MODE_WHEEL))
         .collectAsState(initial = PICKER_MODE_WHEEL)
-    var override by remember { mutableStateOf<String?>(null) }
+    // One-shot focus does not write the user's numeric-picker preference.
+    var override by remember {
+        mutableStateOf<String?>(if (initialTyped) PICKER_MODE_TYPED else null)
+    }
     val typed = (override ?: stored) == PICKER_MODE_TYPED
     val scope = rememberCoroutineScope()
     val setTyped: (Boolean) -> Unit = { wantTyped ->

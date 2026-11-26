@@ -918,6 +918,7 @@
     <string name="cd_new_recipe">Nova receita</string>
     <string name="cd_open_camera">Abrir câmera</string>
     <string name="cd_open_gallery">Abrir galeria</string>
+    <string name="cd_camera_shutter">Tirar foto</string>
     <string name="cd_quantity_operator">Inserir %1$s na quantidade</string>
     <string name="cd_remove_image">Remover imagem</string>
     <string name="cd_selected">Selecionado</string>
@@ -1066,9 +1067,19 @@
     <string name="grounding_validation_notes">Notas: %1$s</string>
     <string name="home_active_burn_a11y">Gasto ativo %1$d</string>
     <string name="home_active_burn_caption">%1$d ativos</string>
-    <string name="home_active_burn_caption_progress">%1$d de %2$d ativos</string>
-    <string name="home_active_burn_caption_progress_day_type">%1$d of %2$d active · %3$s</string>
-    <string name="home_active_burn_over">+%1$d acima do normal</string>
+    <string name="home_active_burn_caption_progress">%1$d/%2$d ativos</string>
+    <string name="home_budget_class_usual">Dia usual</string>
+    <string name="home_budget_class_lean_lighter">Mais leve</string>
+    <string name="home_budget_class_lean_harder">Mais intenso</string>
+    <string name="home_budget_class_lighter">Dia leve</string>
+    <string name="home_budget_class_harder">Dia intenso</string>
+    <string name="home_budget_class_lean_type">Rumo a %1$s</string>
+    <string name="home_budget_class_type">Dia %1$s</string>
+    <string name="home_budget_class_sheet_hourly">Ainda falta histórico no mesmo horário. A meta continua seu dia usual.</string>
+    <string name="home_budget_class_sheet_usual">Ainda sem classe. A meta é seu dia usual, não um dia de treino adivinhado.</string>
+    <string name="home_budget_class_sheet_moved">Classificado pelos últimos 28 dias. Sua meta salva não muda.</string>
+    <string name="home_active_burn_caption_progress_day_type">%1$d/%2$d ativos · %3$s</string>
+    <string name="home_active_burn_over">+%1$d a mais</string>
     <string name="home_active_burn_over_a11y">Gasto ativo %1$d, %2$d acima de um dia normal</string>
     <string name="home_active_burn_progress_a11y">Gasto ativo %1$d, normal %2$d</string>
     <string name="home_active_burn_progress_day_type_a11y">Active burn %1$d, %2$d typical for %3$s days</string>
@@ -1319,8 +1330,16 @@
     <string name="onboarding_safety_settings_hint">Você pode rever as diretrizes completas de Segurança e Medicina em Configurações.</string>
     <string name="onboarding_safety_title">Aviso de segurança</string>
     <string name="onboarding_safety_water">Metas de hidratação e lembretes para beber são estimativas aproximadas, não conselhos médicos. A sede é um guia melhor que qualquer app, e seu médico sabe o que é certo para você.</string>
-    <string name="paste_busy">Colando…</string>
-    <string name="paste_n_entries">Colar %1$d registros</string>
+    <plurals name="paste_n_entries">
+        <item quantity="one">Colar 1 registro</item>
+        <item quantity="other">Colar %1$d registros</item>
+    </plurals>
+    <plurals name="paste_complete_n">
+        <item quantity="one">1 registro colado</item>
+        <item quantity="other">%1$d registros colados</item>
+    </plurals>
+    <string name="paste_at_original_times">Colar nos horários originais</string>
+    <string name="paste_at_current_time">Colar no horário atual</string>
     <string name="placeholder_hour">Hora</string>
     <string name="placeholder_minute">Minuto</string>
     <string name="progress_activity_exercise_week">Treinos (7d)</string>
@@ -1881,6 +1900,7 @@
     <string name="feet_inches_format">%1$d\' %2$d\"</string>
     <string name="food_search_source_off">Open Food Facts</string>
     <string name="add_food_off_unreachable">Open Food Facts está inacessível agora. Resultados salvos e offline ainda aparecem.</string>
+    <string name="add_food_off_no_match">Open Food Facts não retornou correspondências para esta busca.</string>
     <string name="food_search_source_usda">USDA</string>
     <string name="ft_label_format">%1$d ft</string>
     <string name="grams_value_decimal_format">%1$sg</string>
@@ -2118,6 +2138,9 @@
     <string name="home_day_type_chip_a11y">Tipo de dia de hoje: %1$s. Toque para trocar.</string>
     <string name="day_type_sheet_title">Tipo de dia</string>
     <string name="day_type_sheet_subtitle">Troque os objetivos de hoje para outro tipo de dia.</string>
+    <string name="home_day_type_diverge_named">Esta hora parece mais com %1$s, não com %2$s.</string>
+    <string name="home_day_type_diverge_unnamed">Esta hora não parece um dia de %1$s.</string>
+    <string name="cd_dismiss_day_type_prompt">Fechar a sugestão de tipo de dia</string>
     <string name="day_type_base_goals">Objetivos base</string>
     <string name="day_type_clear_override">Remover a exceção de hoje</string>
     <string name="day_type_edit_settings">Editar tipos de dia</string>
@@ -2490,6 +2513,9 @@ macros reequilibradas ao novo total calórico</string>
         <item>calorias</item>
         <item>kcal</item>
         <item>meta de calorias</item>
+        <item>limite</item>
+        <item>manual</item>
+        <item>personalizado</item>
     </string-array>
     <string-array name="settings_search_kw_macro_protein">
         <item>macro</item>

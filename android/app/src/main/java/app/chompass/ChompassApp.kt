@@ -43,8 +43,8 @@ import app.chompass.services.ShortcutEntryAction
 import app.chompass.services.TestDataSeeder
 import app.chompass.services.WaterReminderPlanner
 import app.chompass.services.WidgetSnapshotWriter
-import app.chompass.services.ai.ChatService
 import app.chompass.services.ai.ChatGptAuthManager
+import app.chompass.services.ai.ChatService
 import app.chompass.services.ai.FoodAnalysisService
 import app.chompass.services.ai.ProviderDirectory
 import app.chompass.services.grounding.FoodDatabaseSearch
@@ -59,8 +59,8 @@ import app.chompass.services.health.HealthSyncWorker
 import app.chompass.services.health.HomeActivityReader
 import app.chompass.services.offline.InstalledPackResolver
 import app.chompass.services.offline.OfflineIndexManager
-import app.chompass.sync.SyncRepository
 import app.chompass.sync.GoogleDriveSyncService
+import app.chompass.sync.SyncRepository
 import app.chompass.utils.LocaleHelper
 import app.chompass.services.ondevice.ModelCatalog
 import app.chompass.services.ondevice.ModelDownloadManager
@@ -394,7 +394,7 @@ class AppContainer(app: ChompassApp) {
         ProviderDirectory.load(appContext)
     }
 
-    val widgetSnapshotWriter = WidgetSnapshotWriter(app, prefs, foodRepository, profileRepository, homeActivityReader, waterRepository, weatherRepository, caffeineRepository)
+    val widgetSnapshotWriter = WidgetSnapshotWriter(app, prefs, foodRepository, profileRepository, homeActivityReader, waterRepository, weatherRepository, caffeineRepository, notifications)
     val testDataSeeder = TestDataSeeder(this)
 
     private val healthConnectReadSync = HealthConnectReadSync(

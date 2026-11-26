@@ -9,6 +9,7 @@ import "./components/analyze-view.js";
 import "./components/onboarding-view.js";
 import "./components/measurements-view.js";
 import "./components/add-meal-view.js";
+import { removeFillGapsBanner } from "./components/fill-gaps-view.js";
 import { maybeSeedFromUrl } from "./lib/dev-seed.js";
 import { prefs, profile } from "./lib/db.js";
 import { initInstallPrompt, maybeShowInstallBanner } from "./lib/install-prompt.js";
@@ -125,6 +126,9 @@ async function render() {
     }
   }
   document.body.classList.toggle("hide-nav", HIDE_NAV.has(route));
+  // The fill-gaps banner belongs to Home: left mounted, its fixed strip
+  // covers the Save button of subpages (Codeberg #181).
+  if (route !== "home" && route !== "diary") removeFillGapsBanner();
   view.innerHTML = ROUTES[route]();
   navLinks().forEach((a) => {
     const href = a.getAttribute("href") || "";

@@ -946,6 +946,7 @@
     <string name="cd_new_recipe">新建食谱</string>
     <string name="cd_open_camera">打开相机</string>
     <string name="cd_open_gallery">打开相册</string>
+    <string name="cd_camera_shutter">拍照</string>
     <string name="cd_quantity_operator">将 %1$s 插入数量</string>
     <string name="cd_remove_image">移除图片</string>
     <string name="cd_selected">已选择</string>
@@ -1093,9 +1094,19 @@
     <string name="grounding_validation_notes">备注：%1$s</string>
     <string name="home_active_burn_a11y">主动消耗 %1$d</string>
     <string name="home_active_burn_caption">%1$d 主动</string>
-    <string name="home_active_burn_caption_progress">%1$d / %2$d 主动</string>
-    <string name="home_active_burn_caption_progress_day_type">%1$d of %2$d active · %3$s</string>
-    <string name="home_active_burn_over">+%1$d 高于平常</string>
+    <string name="home_active_burn_caption_progress">%1$d/%2$d 主动</string>
+    <string name="home_budget_class_usual">平常的一天</string>
+    <string name="home_budget_class_lean_lighter">偏轻</string>
+    <string name="home_budget_class_lean_harder">偏重</string>
+    <string name="home_budget_class_lighter">较轻的一天</string>
+    <string name="home_budget_class_harder">较重的一天</string>
+    <string name="home_budget_class_lean_type">偏向%1$s</string>
+    <string name="home_budget_class_type">%1$s日</string>
+    <string name="home_budget_class_sheet_hourly">同时段记录还不够。目标保持平常的一天。</string>
+    <string name="home_budget_class_sheet_usual">尚未分类。目标是平常的一天，不是猜的训练日。</string>
+    <string name="home_budget_class_sheet_moved">根据近28天分类。已保存的目标不变。</string>
+    <string name="home_active_burn_caption_progress_day_type">%1$d/%2$d 主动 · %3$s</string>
+    <string name="home_active_burn_over">+%1$d 超</string>
     <string name="home_active_burn_over_a11y">主动消耗 %1$d，比平常一天多 %2$d</string>
     <string name="home_active_burn_progress_a11y">主动消耗 %1$d，平常 %2$d</string>
     <string name="home_active_burn_progress_day_type_a11y">Active burn %1$d, %2$d typical for %3$s days</string>
@@ -1344,8 +1355,15 @@
     <string name="onboarding_safety_settings_hint">可在设置中查看完整的安全与医疗指南。</string>
     <string name="onboarding_safety_title">安全提示</string>
     <string name="onboarding_safety_water">补水目标和饮水提醒是粗略估算，不是医疗建议。口渴比任何应用都更能指引你，而你的医生知道什么适合你。</string>
-    <string name="paste_busy">粘贴中…</string>
-    <string name="paste_n_entries">粘贴 %1$d 条记录</string>
+    <plurals name="paste_n_entries">
+        <item quantity="other">粘贴 %1$d 条记录</item>
+    </plurals>
+    <plurals name="paste_complete_n">
+        <item quantity="one">已粘贴 1 条记录</item>
+        <item quantity="other">已粘贴 %1$d 条记录</item>
+    </plurals>
+    <string name="paste_at_original_times">按原始时间粘贴</string>
+    <string name="paste_at_current_time">按当前时间粘贴</string>
     <string name="placeholder_hour">小时</string>
     <string name="placeholder_minute">分钟</string>
     <string name="progress_activity_exercise_week">锻炼（7天）</string>
@@ -1897,6 +1915,7 @@
     <string name="feet_inches_format">%1$d\' %2$d\"</string>
     <string name="food_search_source_off">Open Food Facts</string>
     <string name="add_food_off_unreachable">Open Food Facts 暂时无法访问。已保存和离线结果仍会显示。</string>
+    <string name="add_food_off_no_match">Open Food Facts 没有返回与该搜索匹配的结果。</string>
     <string name="food_search_source_usda">USDA</string>
     <string name="ft_label_format">%1$d ft</string>
     <string name="grams_value_decimal_format">%1$sg</string>
@@ -2114,6 +2133,9 @@
     <string name="home_day_type_chip_a11y">今日日类型：%1$s。点按切换。</string>
     <string name="day_type_sheet_title">日类型</string>
     <string name="day_type_sheet_subtitle">将今日目标切换到另一个日类型。</string>
+    <string name="home_day_type_diverge_named">这个时段更像%1$s，而不是%2$s。</string>
+    <string name="home_day_type_diverge_unnamed">这个时段不像%1$s日。</string>
+    <string name="cd_dismiss_day_type_prompt">关闭日类型建议</string>
     <string name="day_type_base_goals">基础目标</string>
     <string name="day_type_clear_override">清除今日覆盖</string>
     <string name="day_type_edit_settings">编辑日类型</string>
@@ -2487,6 +2509,9 @@
         <item>卡路里</item>
         <item>kcal</item>
         <item>卡路里目标</item>
+        <item>限制</item>
+        <item>手动</item>
+        <item>自定义</item>
     </string-array>
     <string-array name="settings_search_kw_macro_protein">
         <item>宏量营养素</item>

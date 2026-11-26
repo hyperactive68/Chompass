@@ -362,6 +362,8 @@ export async function maybeShowFillGapsBanner(appPrefs) {
     return;
   }
   const [favs, all] = await Promise.all([listFavorites(), foodEntries.all()]);
+  // The user left Home while the scan ran: the banner is Home-only.
+  if (!document.querySelector("diary-view")) return;
   const monthPrefix = todayIso().slice(0, 7);
   const scan = scanGaps({
     favorites: favs,

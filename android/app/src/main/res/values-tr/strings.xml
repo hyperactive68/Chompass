@@ -429,6 +429,7 @@
     <string name="food_search_placeholder">ör. Yunan yoğurdu, süt, lor</string>
     <string name="food_search_source_off">Open Food Facts</string>
     <string name="add_food_off_unreachable">Open Food Facts şu anda erişilemiyor. Kayıtlı ve çevrimdışı sonuçlar yine de görünüyor.</string>
+    <string name="add_food_off_no_match">Open Food Facts bu arama için eşleşme döndürmedi.</string>
     <string name="food_search_source_usda">USDA</string>
     <string name="food_search_source_swiss">İsviçre</string>
     <string name="shortcut_camera_short">Kamera</string>
@@ -1563,11 +1564,21 @@
     <string name="home_active_calories_label">Aktif %1$s</string>
     <string name="home_active_burn_caption">%1$d aktif</string>
     <string name="home_active_burn_a11y">Aktif yakım %1$d</string>
-    <string name="home_active_burn_caption_progress">%1$d / %2$d aktif</string>
-    <string name="home_active_burn_caption_progress_day_type">%1$d of %2$d active · %3$s</string>
+    <string name="home_active_burn_caption_progress">%1$d/%2$d aktif</string>
+    <string name="home_budget_class_usual">Olağan gün</string>
+    <string name="home_budget_class_lean_lighter">Daha hafif</string>
+    <string name="home_budget_class_lean_harder">Daha yoğun</string>
+    <string name="home_budget_class_lighter">Hafif gün</string>
+    <string name="home_budget_class_harder">Yoğun gün</string>
+    <string name="home_budget_class_lean_type">%1$s eğilimi</string>
+    <string name="home_budget_class_type">%1$s günü</string>
+    <string name="home_budget_class_sheet_hourly">Aynı saat geçmişi henüz az. Hedef olağan gün olarak kalır.</string>
+    <string name="home_budget_class_sheet_usual">Henüz sınıflanmadı. Hedef olağan gündür, tahmin edilen antrenman günü değil.</string>
+    <string name="home_budget_class_sheet_moved">Son 28 günden sınıflandı. Kayıtlı hedef değişmedi.</string>
+    <string name="home_active_burn_caption_progress_day_type">%1$d/%2$d aktif · %3$s</string>
     <string name="home_active_burn_progress_a11y">Aktif yakım %1$d, tipik %2$d</string>
     <string name="home_active_burn_progress_day_type_a11y">Active burn %1$d, %2$d typical for %3$s days</string>
-    <string name="home_active_burn_over">Tipikten +%1$d fazla</string>
+    <string name="home_active_burn_over">+%1$d fazla</string>
     <string name="home_active_burn_over_a11y">Aktif yakım %1$d, tipik bir günden %2$d fazla</string>
     <string name="home_budget_burned_today">Bugün yakılan: %1$d %2$s</string>
     <string name="home_display_show_active_calories">Aktif kalorileri göster</string>
@@ -1610,8 +1621,16 @@
     <string name="cd_share_meal">Öğünü paylaş</string>
     <string name="cd_copy_entries">Kayıtları kopyala</string>
     <string name="cd_dismiss_paste">Yapıştırmayı kapat</string>
-    <string name="paste_n_entries">%1$d kaydı yapıştır</string>
-    <string name="paste_busy">Yapıştırılıyor…</string>
+    <plurals name="paste_n_entries">
+        <item quantity="one">1 kaydı yapıştır</item>
+        <item quantity="other">%1$d kaydı yapıştır</item>
+    </plurals>
+    <plurals name="paste_complete_n">
+        <item quantity="one">1 kayıt yapıştırıldı</item>
+        <item quantity="other">%1$d kayıt yapıştırıldı</item>
+    </plurals>
+    <string name="paste_at_original_times">Orijinal saatlerde yapıştır</string>
+    <string name="paste_at_current_time">Geçerli saatte yapıştır</string>
     <string name="cd_favorited">Favorilere eklendi</string>
     <string name="cd_move_up">Yukarı taşı</string>
     <string name="cd_move_down">Aşağı taşı</string>
@@ -1636,6 +1655,7 @@
     <string name="cd_open_camera">Kamerayı aç</string>
     <string name="cd_close_camera">Kamerayı kapat</string>
     <string name="cd_open_gallery">Galeriyi aç</string>
+    <string name="cd_camera_shutter">Fotoğraf çek</string>
 
     <!-- Localization pass: previously hardcoded UI strings -->
     <string name="unit_mcg">mcg</string>
@@ -2135,6 +2155,9 @@
     <string name="home_day_type_chip_a11y">Bugünün gün tipi: %1$s. Değiştirmek için dokunun.</string>
     <string name="day_type_sheet_title">Gün tipi</string>
     <string name="day_type_sheet_subtitle">Bugünün hedeflerini başka bir gün tipine geçirin.</string>
+    <string name="home_day_type_diverge_named">Bu saat %2$s değil, daha çok %1$s gibi.</string>
+    <string name="home_day_type_diverge_unnamed">Bu saat bir %1$s günü gibi görünmüyor.</string>
+    <string name="cd_dismiss_day_type_prompt">Gün tipi önerisini kapat</string>
     <string name="day_type_base_goals">Temel hedefler</string>
     <string name="day_type_clear_override">Bugünün istisnasını kaldır</string>
     <string name="day_type_edit_settings">Gün tiplerini düzenle</string>
@@ -2508,6 +2531,9 @@ makrolar yeni kalori toplamına göre yeniden dengelenir</string>
         <item>kalori</item>
         <item>kcal</item>
         <item>kalori hedefi</item>
+        <item>sınır</item>
+        <item>manuel</item>
+        <item>özel</item>
     </string-array>
     <string-array name="settings_search_kw_macro_protein">
         <item>makro</item>

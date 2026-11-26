@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <string name="app_name">Chompass</string>
 
     <!-- Widgets -->
@@ -214,7 +214,6 @@
     <string name="settings_ai_key_remove_title">Remove API key?</string>
     <string name="settings_ai_key_remove_body">Saving an empty key clears the stored key for this profile.</string>
     <string name="settings_ai_get_key">Get API key</string>
-    <string name="settings_ai_value_default" tools:ignore="MissingTranslation">%1$,d (default)</string>
     <string name="settings_ai_timeout_default">%1$,ds (default)</string>
 
     <!-- AI Provider API key placeholders -->
@@ -446,6 +445,7 @@
     <string name="food_search_placeholder">e.g. Greek yogurt, Milch, quark</string>
     <string name="food_search_source_off">Open Food Facts</string>
     <string name="add_food_off_unreachable">Open Food Facts is unreachable right now. Saved and offline results still show.</string>
+    <string name="add_food_off_no_match">Open Food Facts returned no matches for this search.</string>
     <string name="food_search_source_usda">USDA</string>
     <string name="food_search_source_swiss">Swiss</string>
     <string name="shortcut_camera_short">Camera</string>
@@ -1054,12 +1054,12 @@
     <string name="progress_scale_metrics_visceral">Visceral fat</string>
     <string name="progress_scale_metrics_note">Consumer scale estimate — the trend is more reliable than the absolute value</string>
     <string name="progress_scale_metrics_tbw_percent">%1$.1f %% of body weight · typical range 45–65 %%</string>
-    <string name="progress_scale_metrics_muscle_estimated">Muscle mass (estimated)</string>
-    <string name="progress_estimated_smm_body_note">Anthropometric estimate from weight, height, age and sex · ± ~3 kg</string>
     <string name="progress_log_scale_metrics">Scale metrics</string>
     <string name="progress_log_scale_metrics_title">Log Scale Metrics</string>
     <string name="progress_estimated_smm">Estimated skeletal muscle (Lee)</string>
     <string name="progress_estimated_smm_note">Anthropometric estimate from arm, thigh and calf · ± ~3 kg</string>
+    <string name="progress_scale_metrics_muscle_estimated">Muscle mass (estimated)</string>
+    <string name="progress_estimated_smm_body_note">Anthropometric estimate from weight, height, age and sex · ± ~3 kg</string>
     <string name="progress_overlay_off">Off</string>
     <string name="progress_log_weight">Log Weight</string>
     <string name="progress_log_measurement_format">Log %1$s</string>
@@ -1089,6 +1089,8 @@
 
     <string name="progress_macro_averages">Macro Averages</string>
     <string name="progress_nutrient_averages">Nutrient averages</string>
+    <string name="progress_trackers_title">Tracked items</string>
+    <string name="progress_trackers_subtitle">Average per logged day</string>
 
     <string name="progress_macro_progress_format">%1$dg / %2$dg</string>
 
@@ -1281,6 +1283,10 @@
         <item>calories</item>
         <item>kcal</item>
         <item>calorie goal</item>
+        <item>target</item>
+        <item>limit</item>
+        <item>manual</item>
+        <item>custom</item>
     </string-array>
     <string-array name="settings_search_kw_macro_protein">
         <item>macro</item>
@@ -1373,12 +1379,6 @@
         <item>unit</item>
         <item>detection</item>
     </string-array>
-    <string-array name="settings_search_kw_serving_unit_display_mode">
-        <item>grams</item>
-        <item>milliliters</item>
-        <item>metric</item>
-        <item>units</item>
-    </string-array>
     <string-array name="settings_search_kw_serving_unit_heuristics">
         <item>serving</item>
         <item>rules</item>
@@ -1452,6 +1452,13 @@
         <item>averages</item>
 
     </string-array>
+    <string-array name="settings_search_kw_progress_show_goal_rule">
+        <item>goal</item>
+        <item>target</item>
+        <item>line</item>
+        <item>chart</item>
+        <item>weight</item>
+    </string-array>
     <string-array name="settings_search_kw_week_starts">
         <item>calendar</item>
         <item>monday</item>
@@ -1496,6 +1503,7 @@
         <item>reminders</item>
         <item>streak</item>
         <item>summary</item>
+        <item>persistent</item>
         <item>weight reminder</item>
         <item>battery</item>
     </string-array>
@@ -1726,25 +1734,25 @@
     <string name="ambient_intensity_subtle">Subtle</string>
     <string name="ambient_intensity_balanced">Balanced</string>
     <string name="ambient_intensity_vivid">Vivid</string>
-    <string name="settings_ambient_contrast" tools:ignore="MissingTranslation">Contrast</string>
-    <string name="settings_ambient_contrast_subtitle" tools:ignore="MissingTranslation">How sharply the field stands out. Strong eases the dim on OLED black.</string>
-    <string name="ambient_contrast_soft" tools:ignore="MissingTranslation">Soft</string>
-    <string name="ambient_contrast_balanced" tools:ignore="MissingTranslation">Balanced</string>
-    <string name="ambient_contrast_strong" tools:ignore="MissingTranslation">Strong</string>
-    <string name="settings_ambient_saturation" tools:ignore="MissingTranslation">Saturation</string>
-    <string name="settings_ambient_saturation_subtitle" tools:ignore="MissingTranslation">How far the colors sit from gray.</string>
-    <string name="ambient_saturation_muted" tools:ignore="MissingTranslation">Muted</string>
-    <string name="ambient_saturation_natural" tools:ignore="MissingTranslation">Natural</string>
-    <string name="ambient_saturation_rich" tools:ignore="MissingTranslation">Rich</string>
-    <string name="settings_ambient_speed" tools:ignore="MissingTranslation">Drift speed</string>
-    <string name="ambient_speed_calm" tools:ignore="MissingTranslation">Calm</string>
-    <string name="ambient_speed_standard" tools:ignore="MissingTranslation">Standard</string>
-    <string name="ambient_speed_lively" tools:ignore="MissingTranslation">Lively</string>
-    <string name="settings_ambient_palette" tools:ignore="MissingTranslation">Ambient palette</string>
-    <string name="ambient_palette_accent" tools:ignore="MissingTranslation">Accent</string>
-    <string name="ambient_palette_macro" tools:ignore="MissingTranslation">Macros</string>
-    <string name="settings_ambient_tilt" tools:ignore="MissingTranslation">Tilt parallax</string>
-    <string name="settings_ambient_tilt_subtitle" tools:ignore="MissingTranslation">The color field drifts as you tilt the phone. Uses the motion sensor only while a screen is open.</string>
+    <string name="settings_ambient_contrast">Contrast</string>
+    <string name="settings_ambient_contrast_subtitle">How sharply the field stands out. Strong eases the dim on OLED black.</string>
+    <string name="ambient_contrast_soft">Soft</string>
+    <string name="ambient_contrast_balanced">Balanced</string>
+    <string name="ambient_contrast_strong">Strong</string>
+    <string name="settings_ambient_saturation">Saturation</string>
+    <string name="settings_ambient_saturation_subtitle">How far the colors sit from gray.</string>
+    <string name="ambient_saturation_muted">Muted</string>
+    <string name="ambient_saturation_natural">Natural</string>
+    <string name="ambient_saturation_rich">Rich</string>
+    <string name="settings_ambient_speed">Drift speed</string>
+    <string name="ambient_speed_calm">Calm</string>
+    <string name="ambient_speed_standard">Standard</string>
+    <string name="ambient_speed_lively">Lively</string>
+    <string name="settings_ambient_palette">Ambient palette</string>
+    <string name="ambient_palette_accent">Accent</string>
+    <string name="ambient_palette_macro">Macros</string>
+    <string name="settings_ambient_tilt">Tilt parallax</string>
+    <string name="settings_ambient_tilt_subtitle">The color field drifts as you tilt the phone. Uses the motion sensor only while a screen is open.</string>
     <string name="sheet_theme_color">Theme Color</string>
     <string name="sheet_theme_color_footer">Changes the main accent used for buttons, charts, and progress indicators.</string>
     <string name="theme_color_system">System</string>
@@ -1843,6 +1851,8 @@
     <string name="settings_progress_nutrient_averages_warning_title">Not a complete picture</string>
     <string name="settings_progress_nutrient_averages_warning_body">Open Food Facts and photo analysis often omit or guess these values when the label does not list them. The average only includes what was logged, so it can be off.</string>
     <string name="settings_progress_nutrient_averages_confirm">Show them</string>
+    <string name="settings_progress_show_goal_rule">Show goal line</string>
+    <string name="settings_progress_show_goal_rule_subtitle">On stretches the weight chart to your goal weight. Off zooms it to your logged weights, so small changes are easier to see.</string>
 
 
     <string name="settings_meal_times_enabled">Suggest meals by time of day</string>
@@ -1878,13 +1888,11 @@
     <string name="settings_ai_provider">Provider</string>
     <string name="settings_ai_model">Model</string>
     <string name="settings_ai_reasoning_effort">Reasoning effort</string>
-    <string name="settings_ai_reasoning_effort_footer">Models that expose a thinking budget: sets how hard they think. ChatGPT-plan, OpenRouter, custom and Ollama providers send their supported reasoning setting. Auto uses the model default.</string>
+    <string name="settings_ai_reasoning_effort_footer">Models that expose a thinking budget: sets how hard they think. Custom and Ollama servers: sends reasoning_effort where the server supports it. If your server rejects the request, set Auto.</string>
     <string name="ai_reasoning_effort_auto">Auto</string>
     <string name="ai_reasoning_effort_low">Low</string>
     <string name="ai_reasoning_effort_medium">Medium</string>
     <string name="ai_reasoning_effort_high">High</string>
-    <string name="ai_reasoning_effort_xhigh" tools:ignore="MissingTranslation">Extra high</string>
-    <string name="ai_reasoning_effort_max" tools:ignore="MissingTranslation">Maximum</string>
     <string name="ai_reasoning_effort_disabled">Off (no thinking)</string>
     <string name="settings_ai_vision_model">Vision model</string>
     <string name="settings_ai_vision_model_unset">(same as Model)</string>
@@ -1967,9 +1975,9 @@
     <string name="notif_model_download_title">Downloading on-device model</string>
 
     <!-- Custom AI Instructions + Fallback Provider (v1.0.6) -->
-    <string name="settings_section_custom_instructions">Fixed AI instructions</string>
-    <string name="settings_custom_instructions_placeholder">e.g. Use metric units. State assumptions clearly. Do not invent a portion size; ask when the amount is unclear.</string>
-    <string name="settings_custom_instructions_footer">These instructions are sent with every AI request and should be followed consistently. App rules, required JSON/schema, safety, and confirmed data take priority. Leave empty to disable.</string>
+    <string name="settings_section_custom_instructions">Custom AI Instructions</string>
+    <string name="settings_custom_instructions_placeholder">e.g. I live in Germany, assume European portion sizes, prefer ALDI/REWE brands. I\'m on a bodybuilding cut.</string>
+    <string name="settings_custom_instructions_footer">Optional context sent with every AI request: region, diet, athletic goals, anything you\'d otherwise repeat each time. Leave empty to disable.</string>
     <string name="settings_save">Save</string>
     <string name="settings_saved">Saved</string>
 
@@ -2052,22 +2060,6 @@
     <string name="settings_webdav_auto_sync_desc">Once a day when you open the app, if WebDAV is configured. Off by default. Manual Sync now still works anytime.</string>
     <string name="export_sync_title">Export sync JSON</string>
     <string name="import_sync_title">Import sync JSON</string>
-    <string name="settings_google_drive_backup" tools:ignore="MissingTranslation">Back up to Google Drive</string>
-    <string name="settings_google_drive_backup_desc" tools:ignore="MissingTranslation">Sign in with Google to sync this app\'s private backup area. Chompass never handles your Google password.</string>
-    <string name="settings_google_drive_backup_success" tools:ignore="MissingTranslation">Backup saved. Check the selected Google Drive location.</string>
-    <string name="settings_google_drive_backup_cancelled" tools:ignore="MissingTranslation">Backup cancelled.</string>
-    <string name="settings_google_drive_backup_no_stream" tools:ignore="MissingTranslation">The selected location cannot be written.</string>
-    <string name="settings_google_drive_backup_failed" tools:ignore="MissingTranslation">Could not save the Google Drive backup: %1$s</string>
-    <string name="settings_google_drive_connect" tools:ignore="MissingTranslation">Connect Google Drive</string>
-    <string name="settings_google_drive_connected" tools:ignore="MissingTranslation">Google Drive connected · Sync now</string>
-    <string name="settings_google_drive_sync_on_food_log" tools:ignore="MissingTranslation">Sync after logging food</string>
-    <string name="settings_google_drive_sync_on_food_log_desc" tools:ignore="MissingTranslation">Upload the updated backup after each food log, edit, or deletion when authorized.</string>
-    <string name="settings_google_drive_auth_cancelled" tools:ignore="MissingTranslation">Google Drive connection cancelled.</string>
-    <string name="settings_google_drive_auth_failed" tools:ignore="MissingTranslation">Google Drive authorization failed. Try again while online.</string>
-    <string name="settings_google_drive_syncing" tools:ignore="MissingTranslation">Syncing with Google Drive…</string>
-    <string name="settings_google_drive_sync_success" tools:ignore="MissingTranslation">Google Drive backup synced.</string>
-    <string name="settings_google_drive_sync_failed" tools:ignore="MissingTranslation">Google Drive sync failed: %1$s</string>
-    <string name="settings_google_drive_not_connected" tools:ignore="MissingTranslation">Connect Google Drive before syncing.</string>
     <string name="settings_sync_now">Sync now</string>
     <string name="settings_local_backup_section">Local backup</string>
     <string name="settings_local_backup_blurb">Save a copy of your diary and body data to a file. Chompass writes Chompass-sync.json in the folder you choose and replaces it on each backup. Photos are not included. Use Import sync JSON to restore it.</string>
@@ -2196,6 +2188,12 @@
     <string name="notif_channel_streak_desc">Daily reminder to log a meal and keep your streak.</string>
     <string name="notif_channel_daily">Daily Summary</string>
     <string name="notif_channel_daily_desc">End-of-day summary of your calories + macros.</string>
+    <string name="notif_channel_ongoing">Ongoing Summary</string>
+    <string name="notif_channel_ongoing_desc">Today\'s calories and macros, kept in the notification shade.</string>
+    <string name="notif_ongoing_title">%1$s of %2$s %3$s</string>
+    <string name="notif_ongoing_remaining">%1$s %2$s left</string>
+    <string name="notif_ongoing_over">%1$s %2$s over</string>
+    <string name="notif_ongoing_goal_reached">Daily goal reached</string>
     <string name="notif_channel_weight_goal">Weight Goal</string>
     <string name="notif_channel_weight_goal_desc">Celebration when you reach your goal weight.</string>
     <string name="notif_streak_title">Don\'t forget to log your meals</string>
@@ -2389,6 +2387,9 @@
     <string name="untracked_sheet_kcal_optional">Rough calories (optional)</string>
     <string name="day_type_sheet_title">Day type</string>
     <string name="day_type_sheet_subtitle">Switch today’s targets to another day type.</string>
+    <string name="home_day_type_diverge_named">This hour looks more like %1$s, not %2$s.</string>
+    <string name="home_day_type_diverge_unnamed">This hour doesn\'t look like a %1$s day.</string>
+    <string name="cd_dismiss_day_type_prompt">Dismiss day type suggestion</string>
     <string name="day_type_targets_summary">%1$s %5$s · %2$dP %3$dC %4$dF</string>
     <string name="day_type_active_typical">≈ %1$d %2$s active typical</string>
     <string name="day_type_base_goals">Base goals</string>
@@ -2482,11 +2483,21 @@
     <string name="home_active_calories_label">Active %1$s</string>
     <string name="home_active_burn_caption">%1$d active</string>
     <string name="home_active_burn_a11y">Active burn %1$d</string>
-    <string name="home_active_burn_caption_progress">%1$d of %2$d active</string>
-    <string name="home_active_burn_caption_progress_day_type">%1$d of %2$d active · %3$s</string>
+    <string name="home_active_burn_caption_progress">%1$d/%2$d active</string>
+    <string name="home_budget_class_usual">Usual day</string>
+    <string name="home_budget_class_lean_lighter">Leaning lighter</string>
+    <string name="home_budget_class_lean_harder">Leaning harder</string>
+    <string name="home_budget_class_lighter">Lighter day</string>
+    <string name="home_budget_class_harder">Harder day</string>
+    <string name="home_budget_class_lean_type">Leaning %1$s</string>
+    <string name="home_budget_class_type">%1$s day</string>
+    <string name="home_budget_class_sheet_hourly">Not enough same-hour history yet. Goal stays your usual day.</string>
+    <string name="home_budget_class_sheet_usual">Not classified yet. Goal is your usual day, not a guessed training day.</string>
+    <string name="home_budget_class_sheet_moved">Classified from your last 28 days. Your saved goal is unchanged.</string>
+    <string name="home_active_burn_caption_progress_day_type">%1$d/%2$d active · %3$s</string>
     <string name="home_active_burn_progress_a11y">Active burn %1$d, %2$d typical</string>
     <string name="home_active_burn_progress_day_type_a11y">Active burn %1$d, %2$d typical for %3$s days</string>
-    <string name="home_active_burn_over">+%1$d over typical</string>
+    <string name="home_active_burn_over">+%1$d over</string>
     <string name="home_active_burn_over_a11y">Active burn %1$d, %2$d over a typical day</string>
     <string name="home_budget_burned_today">Burned today: %1$d %2$s</string>
     <string name="home_budget_clamped_row">Safety limit: formula says %1$s, goal stays at %2$s</string>
@@ -2533,8 +2544,16 @@
     <string name="cd_share_meal">Share meal</string>
     <string name="cd_copy_entries">Copy entries</string>
     <string name="cd_dismiss_paste">Dismiss paste</string>
-    <string name="paste_n_entries">Paste %1$d entries</string>
-    <string name="paste_busy">Pasting…</string>
+    <plurals name="paste_n_entries">
+        <item quantity="one">Paste 1 entry</item>
+        <item quantity="other">Paste %1$d entries</item>
+    </plurals>
+    <plurals name="paste_complete_n">
+        <item quantity="one">Pasted 1 entry</item>
+        <item quantity="other">Pasted %1$d entries</item>
+    </plurals>
+    <string name="paste_at_original_times">Paste at original times</string>
+    <string name="paste_at_current_time">Paste at current time</string>
     <string name="recovered_review_chip">Recovered analysis: %1$s</string>
     <string name="cd_discard_recovered_review">Discard recovered analysis</string>
     <string name="cd_favorited">Favorited</string>
@@ -2570,6 +2589,7 @@
     <string name="cd_open_camera">Open camera</string>
     <string name="cd_close_camera">Close camera</string>
     <string name="cd_open_gallery">Open gallery</string>
+    <string name="cd_camera_shutter">Take photo</string>
 
     <!-- Localization pass: previously hardcoded UI strings -->
     <string name="unit_mcg">mcg</string>
@@ -2596,7 +2616,6 @@
     <string name="edit_icon_photo_failed">Couldn\'t read that photo</string>
     <string name="edit_reprocess_hint">Describe the correction, e.g. large bowl, cooked in butter, oat milk instead of dairy</string>
     <string name="edit_reprocess_explain">AI will recalculate name, serving, calories, and macros from your note. Review the changes, then tap Save.</string>
-    <string name="edit_reprocess_send_existing_macros">Send macros to AI</string>
     <string name="edit_reprocess">Correct with AI</string>
     <string name="edit_reprocessing">Correcting…</string>
     <string name="edit_reprocessing_failed">Correction failed</string>
@@ -2653,8 +2672,6 @@
     <string name="export_failed">Export failed.</string>
     <string name="settings_tap_to_update">Tap to update</string>
     <string name="settings_calc_methods">Calculation Methods</string>
-    <string name="settings_max_tokens" tools:ignore="MissingTranslation">Max response length</string>
-    <string name="settings_max_tokens_unit" tools:ignore="MissingTranslation">tokens</string>
     <string name="settings_ai_read_timeout">AI read timeout</string>
     <string name="settings_ai_read_timeout_unit">s</string>
     <string name="settings_ai_timeout_override">%1$d s · profile override</string>
@@ -2665,10 +2682,8 @@
     <string name="goal_tier_safe">Safe (compact)</string>
     <string name="goal_tier_smart">Smart (full history)</string>
     <string name="settings_serving_unit_mode">Serving size detection</string>
-    <string name="settings_serving_unit_display_mode">Serving units shown</string>
     <string name="settings_serving_unit_heuristics">Serving size rules</string>
     <string name="sheet_serving_unit_mode">Serving unit inference</string>
-    <string name="sheet_serving_unit_display_mode">Serving units shown</string>
     <string name="sheet_serving_unit_heuristics">Customize heuristics</string>
     <string name="serving_unit_mode_grams_only">Grams only</string>
     <string name="serving_unit_mode_grams_only_subtitle">Fastest. Entries stay in grams, no extra step.</string>
@@ -2676,10 +2691,6 @@
     <string name="serving_unit_mode_heuristic_subtitle">Instant, approximate. Guesses common units (slice, ml, tbsp…) from the food name, no network call.</string>
     <string name="serving_unit_mode_ai_call">AI-inferred</string>
     <string name="serving_unit_mode_ai_call_subtitle">Slowest, most accurate. Asks the AI provider for the unit when needed.</string>
-    <string name="serving_unit_display_mode_ai_units">AI units</string>
-    <string name="serving_unit_display_mode_ai_units_subtitle">Shows the unit returned or inferred by the AI, such as cup, tbsp, or pinch.</string>
-    <string name="serving_unit_display_mode_metric">Grams/ml</string>
-    <string name="serving_unit_display_mode_metric_subtitle">Shows the portion as grams, or approximate ml for recognized liquid foods. The AI unit remains stored internally.</string>
     <string name="serving_unit_heuristics_footer">Toggle a category off to leave it in grams, or set a custom grams-per-unit (e.g. a 0.5 L beer can instead of the default 330 mL).</string>
     <string name="serving_unit_heuristics_reset">Reset to default</string>
     <string name="serving_unit_heuristics_default_value">Default: %1$s g / unit</string>
@@ -2693,6 +2704,7 @@
     <string name="settings_notif_body_fat_reminder">Body fat reminder</string>
     <string name="settings_notif_water_reminder">Water reminder</string>
     <string name="settings_notif_goal_alerts">Goal reached alerts</string>
+    <string name="settings_notif_ongoing">Ongoing summary</string>
     <string name="settings_notif_app_updates">App updates</string>
     <string name="settings_notif_none_selected">No notification type is selected. You can keep notifications allowed and all reminders off.</string>
     <string name="settings_calc_calorie_target">Calorie target for goal</string>
@@ -2995,17 +3007,6 @@
     <string name="settings_fill_missing_reminders">Missing-value reminders</string>
     <string name="settings_fill_missing_reminders_footer">Show the Home banner when logged meals or favorites have missing values</string>
     <string name="fill_gaps_never_remind">Don\'t remind me again</string>
-    <string name="ai_provider_chatgpt">ChatGPT plan</string>
-    <string name="ai_provider_subtitle_chatgpt">Use an eligible ChatGPT Plus or Pro plan</string>
-    <string name="settings_chatgpt_account">ChatGPT account</string>
-    <string name="settings_chatgpt_continue">Continue with ChatGPT</string>
-    <string name="settings_chatgpt_connecting">Connecting…</string>
-    <string name="settings_chatgpt_plan_enabled">ChatGPT plan usage is enabled for food analysis. Usage is shared with your ChatGPT plan.</string>
-    <string name="settings_chatgpt_plan_footer">Sign in to use an eligible ChatGPT Plus or Pro plan for food analysis. No API key is required.</string>
-    <string name="settings_chatgpt_plan_disabled">Signed in, but ChatGPT plan usage is not enabled. Tap the account row to authorize it.</string>
-    <string name="settings_chatgpt_revoke_unconfirmed">Disconnected locally. Remote revocation could not be confirmed; you can also remove Chompass in ChatGPT settings.</string>
-    <string name="settings_chatgpt_manage_usage">Manage ChatGPT usage</string>
-    <string name="settings_chatgpt_disconnect">Disconnect ChatGPT</string>
     <!-- Native BLE scale sync (vendored openScale drivers) -->
     <string name="progress_sync_scale_metrics">Sync from scale</string>
     <string name="progress_sync_scale_rationale">Chompass needs the nearby-devices permission to talk to your scale.</string>
@@ -3018,4 +3019,15 @@
     <string name="progress_sync_scale_user_new">Register as new user</string>
     <string name="progress_sync_scale_consent_slot">Slot %1$d on %2$s needs the 4-digit PIN set on the scale.</string>
     <string name="progress_sync_scale_consent_hint">PIN (4 digits)</string>
-</resources>
+    <string name="progress_sync_scale_empty_slots">No profiles are stored on the scale yet. Create one on the scale itself (SET button, pick a slot, note its 4-digit code) and retry — or register a new profile from here.</string>
+    <string name="progress_sync_scale_consent_rejected">The scale rejected that code. Check the 4-digit code shown on the scale for this slot. If the scale\'s own app set the slot up, register a new user instead.</string>
+    <string name="progress_sync_scale_bt_unpair">The scale\'s Bluetooth pairing is in a bad state. Unpair (forget) the scale in Android Bluetooth settings, then retry.</string>
+    <string name="progress_sync_scale_bt_settings">Bluetooth settings</string>
+    <string name="notif_channel_scale_sync">Scale sync</string>
+    <string name="notif_channel_scale_sync_desc">Shows while a Bluetooth scale sync is running</string>
+    <string name="notif_scale_sync_title">Scale sync</string>
+    <string name="notif_scale_sync_scanning">Searching for your scale…</string>
+    <string name="notif_scale_sync_reading">Syncing with %1$s…</string>
+    <string name="notif_scale_sync_awaiting_user">Pick the profile slot on your phone</string>
+    <string name="notif_scale_sync_awaiting_consent">Enter the scale\'s 4-digit code on your phone</string>
+    </resources>

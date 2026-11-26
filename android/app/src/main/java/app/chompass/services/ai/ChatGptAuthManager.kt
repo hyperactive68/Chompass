@@ -390,4 +390,3 @@ class ChatGptAuthException(message: String) : Exception(message)
 private fun JSONObject.requiredString(name: String): String =
     optString(name).takeIf(String::isNotBlank)
         ?: throw ChatGptAuthException("ChatGPT response was missing $name.")
-

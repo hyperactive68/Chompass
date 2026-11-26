@@ -399,7 +399,7 @@ export class EntryForm extends HTMLElement {
           ? `<p style="color:var(--muted);font-size:0.85rem;margin:0 1rem 0.75rem;">${escapeHtml(t("entry.saved_meal_review_hint"))}</p>`
           : ""
       }
-      <form class="entry-form entry-form--review">
+      <form class="entry-form entry-form--review" novalidate>
         <section class="entry-section">
           <h2 class="entry-section__title">${escapeHtml(t("entry.food_details"))}</h2>
           <div class="field">
@@ -482,21 +482,21 @@ export class EntryForm extends HTMLElement {
             </div>
             <div class="field">
               <label for="proteinG">${escapeHtml(t("day_types.protein_g"))}</label>
-              <input id="proteinG" name="proteinG" type="number" min="0" step="0.1" value="${numVal(scaled.proteinG, true)}" ${lockAttr} data-nutrition />
+              <input id="proteinG" name="proteinG" type="number" min="0" step="any" value="${numVal(scaled.proteinG, true)}" ${lockAttr} data-nutrition />
             </div>
           </div>
           <div class="field-row">
             <div class="field">
               <label for="carbsG">${escapeHtml(t("day_types.carbs_g"))}</label>
-              <input id="carbsG" name="carbsG" type="number" min="0" step="0.1" value="${numVal(scaled.carbsG, true)}" ${lockAttr} data-nutrition />
+              <input id="carbsG" name="carbsG" type="number" min="0" step="any" value="${numVal(scaled.carbsG, true)}" ${lockAttr} data-nutrition />
             </div>
             <div class="field">
               <label for="fatG">${escapeHtml(t("day_types.fat_g"))}</label>
-              <input id="fatG" name="fatG" type="number" min="0" step="0.1" value="${numVal(scaled.fatG, true)}" ${lockAttr} data-nutrition />
+              <input id="fatG" name="fatG" type="number" min="0" step="any" value="${numVal(scaled.fatG, true)}" ${lockAttr} data-nutrition />
             </div>
             <div class="field">
               <label for="fiberG">${escapeHtml(t("entry.fiber_g"))}</label>
-              <input id="fiberG" name="fiberG" type="number" min="0" step="0.1" value="${scaled.fiberG == null ? "" : numVal(scaled.fiberG, true)}" ${lockAttr} data-nutrition />
+              <input id="fiberG" name="fiberG" type="number" min="0" step="any" value="${scaled.fiberG == null ? "" : numVal(scaled.fiberG, true)}" ${lockAttr} data-nutrition />
             </div>
           </div>
         </section>
@@ -511,7 +511,7 @@ export class EntryForm extends HTMLElement {
               return `
               <div class="field">
                 <label for="${key}">${t(label)}</label>
-                <input id="${key}" name="${key}" type="number" min="0" step="0.1" value="${v == null ? "" : numVal(v, true)}" ${lockAttr} data-nutrition />
+                <input id="${key}" name="${key}" type="number" min="0" step="any" value="${v == null ? "" : numVal(v, true)}" ${lockAttr} data-nutrition />
               </div>`;
             }).join("")}
           </div>
@@ -1509,8 +1509,29 @@ export class EntryForm extends HTMLElement {
     }
   }
 
+  /**
+   * Submit-time check for the `novalidate` form (Codeberg #181): native
+   * validation refuses to submit when an invalid control sits in a collapsed
+   * <details> it cannot focus, so Save did nothing. Open those sections
+   * first, then let the browser report and focus the first invalid control.
+   * @returns {boolean} false when the form is invalid
+   */
+  reportInvalidFields() {
+    const form = /** @type {HTMLFormElement|null} */ (this.querySelector("form"));
+    if (!form) return true;
+    for (const el of form.querySelectorAll("input, select, textarea")) {
+      const control = /** @type {HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement} */ (el);
+      if (!control.willValidate || control.validity.valid) continue;
+      for (let p = control.parentElement; p; p = p.parentElement) {
+        if (p instanceof HTMLDetailsElement) p.open = true;
+      }
+    }
+    return form.reportValidity();
+  }
+
   async onSubmit(ev) {
     ev.preventDefault();
+    if (!this.reportInvalidFields()) return;
     if (!this.existing && hasProgressiveMealItems()) {
       await this.commitToProgressiveMeal({ resumeCapture: false });
       return;

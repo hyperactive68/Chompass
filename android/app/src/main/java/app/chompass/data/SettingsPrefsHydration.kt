@@ -46,6 +46,7 @@ internal data class SettingsPrefsHydration(
     val dailySummaryEnabled: Boolean,
     val dailySummaryHour: Int,
     val dailySummaryMinute: Int,
+    val ongoingSummaryEnabled: Boolean,
     val weightReminderEnabled: Boolean,
     val weightReminderHour: Int,
     val weightReminderMinute: Int,
@@ -115,6 +116,8 @@ internal data class SettingsPrefsHydration(
     val progressMeasurementSites: Set<String>,
     val progressNutrientAverages: Boolean,
     val progressNutrientAveragesSelection: Set<String>,
+    val progressShowGoalRule: Boolean,
+    val progressHiddenTrackedItems: Set<String> = emptySet(),
 
     val userContext: String,
     val maxResponseTokens: Int,
@@ -187,6 +190,7 @@ internal fun Preferences.toSettingsHydration(json: Json): SettingsPrefsHydration
         dailySummaryEnabled = this[Keys.DAILY_ENABLED] ?: false,
         dailySummaryHour = this[Keys.DAILY_HOUR] ?: 21,
         dailySummaryMinute = this[Keys.DAILY_MINUTE] ?: 0,
+        ongoingSummaryEnabled = this[Keys.ONGOING_SUMMARY_ENABLED] ?: false,
         weightReminderEnabled = this[Keys.WEIGHT_REMINDER_ENABLED] ?: true,
         weightReminderHour = this[Keys.WEIGHT_REMINDER_HOUR] ?: 8,
         weightReminderMinute = this[Keys.WEIGHT_REMINDER_MINUTE] ?: 0,
@@ -266,6 +270,8 @@ internal fun Preferences.toSettingsHydration(json: Json): SettingsPrefsHydration
             this[Keys.PROGRESS_NUTRIENT_AVERAGES_SELECTION]
                 ?.let(HomeTopNutrient::normalizeAveragesSelectionStorage)
                 ?: HomeTopNutrient.DefaultAveragesStorage,
+        progressShowGoalRule = this[Keys.PROGRESS_SHOW_GOAL_RULE] ?: true,
+        progressHiddenTrackedItems = this[Keys.PROGRESS_HIDDEN_TRACKED_ITEMS] ?: emptySet(),
 
         userContext = this[Keys.USER_CONTEXT].orEmpty(),
         maxResponseTokens = effectiveMaxResponseTokens(

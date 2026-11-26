@@ -59,6 +59,10 @@ android {
         unitTests {
             // Robolectric (AndroidAppIconManager tests) needs merged resources/manifest.
             isIncludeAndroidResources = true
+            // JVM unit tests touch android.util.Log (via the vendored LogManager);
+            // return defaults instead of throwing "not mocked" so pure-logic
+            // tests (vendored openScale handler tests) can run on the JVM.
+            isReturnDefaultValues = true
         }
     }
 
@@ -66,9 +70,8 @@ android {
         applicationId = "app.chompass"
         minSdk = 26
         targetSdk = 36
-        // Fork-only beta.2.1 remains directly upgradeable from beta.2.
-        versionCode = 121
-        versionName = "6.3.0-beta.2.1"
+        versionCode = 124
+        versionName = "6.3.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         if (releaseAbi != null) {
@@ -253,8 +256,10 @@ dependencies {
     implementation(libs.androidx.room.common)
 
     testImplementation(libs.junit)
-    // JVM DataStore tests use OkioStorage: it exercises the same DataStore
-    // transaction semantics without AndroidX FileStorage's Windows rename path.
+    testImplementation(libs.truth)
+    testImplementation(libs.kotlinx.coroutines.test)
+    // JVM DataStore tests use OkioStorage to avoid AndroidX FileStorage's
+    // Windows temporary-file rename behavior while exercising DataStore itself.
     testImplementation(libs.androidx.datastore.core.okio.jvm)
     testImplementation(libs.robolectric)
     testImplementation("org.json:json:20240303")

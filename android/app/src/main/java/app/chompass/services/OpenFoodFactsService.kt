@@ -1,7 +1,9 @@
 package app.chompass.services
 
 import app.chompass.BuildConfig
+import app.chompass.data.BARCODE_CACHE_SCHEMA
 import app.chompass.data.PreferencesStore
+import app.chompass.debug.DebugTrace
 import app.chompass.models.FoodGroundingProvenance
 import app.chompass.models.FoodProductMetadata
 import app.chompass.models.NutrientBasis
@@ -239,7 +241,14 @@ object OpenFoodFactsService {
         photoStore: BarcodePhotoStore? = null,
         packs: PackResolver? = null,
     ): FoodAnalysis = withContext(Dispatchers.IO) {
-        prefs.barcodeCache.first()[code]?.let { return@withContext it.analysis }
+        // Schema-gated fast path: entries below BARCODE_CACHE_SCHEMA carry
+        // portion bases an older mapping wrote (pre-#168: the 100 g guess).
+        val cached = prefs.barcodeCache.first()[code]
+        DebugTrace.event("op=barcode phase=cache code=$code schema=${cached?.schemaVersion ?: -1}")
+        if (cached != null && cached.schemaVersion >= BARCODE_CACHE_SCHEMA) {
+            DebugTrace.event("op=barcode phase=cache-hit code=$code")
+            return@withContext cached.analysis
+        }
 
         var result: FoodAnalysis? = null
         var failure: Exception? = null
@@ -251,11 +260,19 @@ object OpenFoodFactsService {
             failure = e
         }
         if (result != null) {
+            DebugTrace.event("op=barcode phase=network-ok code=$code")
             prefs.cacheBarcodeLookup(code, result)
             // Photo files never outlive their cache entries: LRU eviction (500)
             // drops keys, retain deletes the photos whose keys are gone.
             photoStore?.retain(prefs.barcodeCache.first().keys)
             return@withContext result
+        }
+        DebugTrace.event("op=barcode phase=network-fail code=$code err=${failure?.javaClass?.simpleName}")
+        // Offline with a stale entry: serve it rather than failing the scan;
+        // the next online scan of this code rewrites it at the current schema.
+        if (cached != null) {
+            DebugTrace.event("op=barcode phase=stale-serve code=$code schema=${cached.schemaVersion}")
+            return@withContext cached.analysis
         }
         // Pack fallback. OFF-NotFound implies the OFF-derived regional pack
         // misses too (same source), so the regional pack only answers the
@@ -560,14 +577,26 @@ object OpenFoodFactsService {
         val fat: Double?,
     )
 
-    private fun macrosPer100g(nutriments: JSONObject?): MacroPer100g = MacroPer100g(
-        calories = nutriments?.flexibleDouble("energy-kcal_100g")
-            ?: nutriments?.flexibleDouble("energy_100g")?.let { it * 0.23900573614 },
-        protein = nutriments?.flexibleDouble("proteins_100g"),
-        carbs = nutriments?.flexibleDouble("carbohydrates_100g")
-            ?: nutriments?.flexibleDouble("carbohydrates-total_100g"),
-        fat = nutriments?.flexibleDouble("fat_100g"),
-    )
+    private val MACRO_KEYS = listOf("energy-kcal", "energy", "proteins", "carbohydrates", "carbohydrates-total", "fat")
+
+    /** Pick one basis for the whole product so prepared and plain values never mix (Codeberg #176). */
+    private fun isPreparedOnly(nutriments: JSONObject?): Boolean {
+        if (nutriments == null) return false
+        fun hasMacro(key: String, suffix: String): Boolean = nutriments.flexibleDouble("$key$suffix") != null
+        return MACRO_KEYS.none { hasMacro(it, "_serving") || hasMacro(it, "_100g") } &&
+            MACRO_KEYS.any { hasMacro(it, "_prepared_serving") || hasMacro(it, "_prepared_100g") }
+    }
+
+    private fun macrosPer100g(nutriments: JSONObject?): MacroPer100g {
+        val suffix = if (isPreparedOnly(nutriments)) "_prepared_100g" else "_100g"
+        fun per100(key: String) = nutriments?.flexibleDouble("$key$suffix")
+        return MacroPer100g(
+            calories = per100("energy-kcal") ?: per100("energy")?.let { it * 0.23900573614 },
+            protein = per100("proteins"),
+            carbs = per100("carbohydrates") ?: per100("carbohydrates-total"),
+            fat = per100("fat"),
+        )
+    }
 
     private fun searchHit(
         code: String,
@@ -753,14 +782,32 @@ object OpenFoodFactsService {
         val nutriments = product.optJSONObject("nutriments")
             ?: throw LookupException("This barcode was found, but nutrition data is incomplete. Scan the nutrition label instead.")
 
+        // Some labels give prepared values only; OFF then stores the product's
+        // nutrition under `<nutrient>_prepared*` keys alone (Codeberg #176).
+        // With no as-sold macro on record, those keys are the one basis
+        // (mirrors the PWA off-client mapProduct).
+        val preparedOnly = isPreparedOnly(nutriments)
+        val basis = if (preparedOnly) "_prepared" else ""
+
         val labeledGrams = labeledServingGrams(product)
-        val servingGrams = maxOf(labeledGrams ?: 100.0, 1.0)
+        // A prepared-only product's package weight is the as-sold weight:
+        // neither a portion basis nor a unit for prepared nutrients.
+        val packageGramsValue = if (preparedOnly) null else packageGrams(product)
+        // Portion basis: the labeled serving when OFF publishes one, else the
+        // whole package — the only portion a barcode proves. The old bare
+        // 100 g guess desynced the review sheet (Codeberg #168): the unit card
+        // opened "1 package ~100 g" while the package option carried the real
+        // weight, and only a quantity edit or save-reopen corrected it.
+        val servingGrams = maxOf(labeledGrams ?: packageGramsValue ?: 100.0, 1.0)
         val scale = servingGrams / 100.0
 
         fun servingValue(key: String): Double? {
-            nutriments.flexibleDouble("${key}_serving")?.let { return it }
-            return nutriments.flexibleDouble("${key}_100g")?.let { it * scale }
+            nutriments.flexibleDouble("${key}${basis}_serving")?.let { return it }
+            return nutriments.flexibleDouble("${key}${basis}_100g")?.let { it * scale }
         }
+
+        /** Per-100 g value on the product's basis, for the plausibility bounds. */
+        fun per100(key: String): Double? = nutriments.flexibleDouble("${key}${basis}_100g")
 
         val calories = servingValue("energy-kcal")
             ?: servingValue("energy")?.let { it * 0.23900573614 }
@@ -775,10 +822,9 @@ object OpenFoodFactsService {
         val servingOption = labeledGrams?.let {
             ServingUnitOption(unit = "serving", gramsPerUnit = it, quantity = 1.0)
         }
-        val packageGramsValue = packageGrams(product)
         val servingOptions = buildList {
             if (servingOption != null) add(servingOption)
-            if (packageGramsValue != null && abs(packageGramsValue - servingGrams) > 0.01) {
+            if (packageGramsValue != null && (servingOption == null || abs(packageGramsValue - servingGrams) > 0.01)) {
                 add(ServingUnitOption(unit = "package", gramsPerUnit = packageGramsValue, quantity = 1.0))
             }
         }
@@ -805,12 +851,10 @@ object OpenFoodFactsService {
             fat = fat,
             servingGrams = servingGrams,
             sodiumMg = milligrams(servingValue("sodium")),
-            caloriesPer100g = nutriments.flexibleDouble("energy-kcal_100g")
-                ?: nutriments.flexibleDouble("energy_100g")?.let { it * 0.23900573614 },
-            proteinPer100g = nutriments.flexibleDouble("proteins_100g"),
-            carbsPer100g = nutriments.flexibleDouble("carbohydrates_100g")
-                ?: nutriments.flexibleDouble("carbohydrates-total_100g"),
-            fatPer100g = nutriments.flexibleDouble("fat_100g"),
+            caloriesPer100g = per100("energy-kcal") ?: per100("energy")?.let { it * 0.23900573614 },
+            proteinPer100g = per100("proteins"),
+            carbsPer100g = per100("carbohydrates") ?: per100("carbohydrates-total"),
+            fatPer100g = per100("fat"),
         )
         return FoodAnalysis(
             name = name,
@@ -856,7 +900,13 @@ object OpenFoodFactsService {
                 identityEvidence = "barcode:$barcode",
                 portionEvidence = "serving_quantity=${servingGrams}g",
                 identityConfirmed = true,
-                validationNotes = validation.notes,
+                // Prepared-only products carry no as-sold basis, so say which
+                // basis the values use (Codeberg #176; mirrors the PWA note).
+                validationNotes = if (preparedOnly) {
+                    validation.notes + "Values are as prepared; this product has no as-sold nutrition on Open Food Facts."
+                } else {
+                    validation.notes
+                },
             ),
             productMetadata = metadata,
         )
@@ -962,10 +1012,14 @@ object OpenFoodFactsService {
             if (grams != null) return grams
         }
         val display = product.string("quantity") ?: return null
-        if (!Regex("""^[0-9]+(?:[.,][0-9]+)?\s*(?:kg|mg|g|oz|ml|l)$""", RegexOption.IGNORE_CASE).matches(display)) {
+        // OFF display strings carry the estimated sign ("400 g e" / "400 g ℮")
+        // and occasional NBSPs; normalize before the strict full-string match
+        // (device pass 2026-11-12: Nutella "400 g e" fell back to 100 g).
+        val normalized = display.replace('\u00A0', ' ').replace('\u202F', ' ')
+        if (!Regex("""^[0-9]+(?:[.,][0-9]+)?\s*(?:kg|mg|g|oz|ml|l)\s*[e℮]?$""", RegexOption.IGNORE_CASE).matches(normalized)) {
             return null
         }
-        return gramsFrom(display)
+        return gramsFrom(normalized)
     }
 
     private fun JSONObject.string(key: String): String? =

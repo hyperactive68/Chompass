@@ -997,6 +997,7 @@
     <string name="cd_new_recipe">Nouvelle recette</string>
     <string name="cd_open_camera">Ouvrir la caméra</string>
     <string name="cd_open_gallery">Ouvrir la galerie</string>
+    <string name="cd_camera_shutter">Prendre une photo</string>
     <string name="cd_quantity_operator">Insérer %1$s dans la quantité</string>
     <string name="cd_remove_image">Retirer l\'image</string>
     <string name="cd_selected">Sélectionné</string>
@@ -1118,6 +1119,7 @@
     <string name="finish_onboarding_hint">Terminez d\'abord l\'intégration pour comparer ce repas à vos objectifs quotidiens.</string>
     <string name="food_search_source_off">Open Food Facts</string>
     <string name="add_food_off_unreachable">Open Food Facts est inaccessible pour le moment. Les résultats enregistrés et hors ligne s\'affichent toujours.</string>
+    <string name="add_food_off_no_match">Open Food Facts n\'a renvoyé aucune correspondance pour cette recherche.</string>
     <string name="food_search_source_usda">USDA</string>
     <string name="frame_large">Grande</string>
     <string name="frame_medium">Moyenne</string>
@@ -1129,9 +1131,19 @@
     <string name="height_cm_format">%1$d cm</string>
     <string name="home_active_burn_a11y">Dépense active %1$d</string>
     <string name="home_active_burn_caption">%1$d actif</string>
-    <string name="home_active_burn_caption_progress">%1$d sur %2$d actif</string>
-    <string name="home_active_burn_caption_progress_day_type">%1$d of %2$d active · %3$s</string>
-    <string name="home_active_burn_over">+%1$d au-dessus de la normale</string>
+    <string name="home_active_burn_caption_progress">%1$d/%2$d actif</string>
+    <string name="home_budget_class_usual">Jour habituel</string>
+    <string name="home_budget_class_lean_lighter">Plutôt léger</string>
+    <string name="home_budget_class_lean_harder">Plutôt dur</string>
+    <string name="home_budget_class_lighter">Jour léger</string>
+    <string name="home_budget_class_harder">Jour dur</string>
+    <string name="home_budget_class_lean_type">Vers %1$s</string>
+    <string name="home_budget_class_type">Jour %1$s</string>
+    <string name="home_budget_class_sheet_hourly">Pas assez d\'historique à la même heure. L\'objectif reste votre jour habituel.</string>
+    <string name="home_budget_class_sheet_usual">Pas encore classé. L\'objectif est votre jour habituel, pas un jour d\'entraînement deviné.</string>
+    <string name="home_budget_class_sheet_moved">Classé sur vos 28 derniers jours. Votre objectif enregistré ne change pas.</string>
+    <string name="home_active_burn_caption_progress_day_type">%1$d/%2$d actif · %3$s</string>
+    <string name="home_active_burn_over">+%1$d de plus</string>
     <string name="home_active_burn_over_a11y">Dépense active %1$d, %2$d de plus qu\'un jour type</string>
     <string name="home_active_burn_progress_a11y">Dépense active %1$d, %2$d type</string>
     <string name="home_active_burn_progress_day_type_a11y">Active burn %1$d, %2$d typical for %3$s days</string>
@@ -1401,8 +1413,16 @@
     <string name="onboarding_safety_settings_hint">Vous pouvez consulter l\'intégralité des consignes de sécurité et médicales dans les Réglages.</string>
     <string name="onboarding_safety_title">Avis de sécurité</string>
     <string name="onboarding_safety_water">Les objectifs d\'hydratation et les rappels de boisson sont des estimations approximatives, pas un avis médical. La soif est un meilleur guide que n\'importe quelle app, et votre médecin sait ce qui est bon pour vous.</string>
-    <string name="paste_busy">Collage…</string>
-    <string name="paste_n_entries">Coller %1$d entrées</string>
+    <plurals name="paste_n_entries">
+        <item quantity="one">Coller 1 entrée</item>
+        <item quantity="other">Coller %1$d entrées</item>
+    </plurals>
+    <plurals name="paste_complete_n">
+        <item quantity="one">1 entrée collée</item>
+        <item quantity="other">%1$d entrées collées</item>
+    </plurals>
+    <string name="paste_at_original_times">Coller aux heures d’origine</string>
+    <string name="paste_at_current_time">Coller à l’heure actuelle</string>
     <string name="placeholder_hour">Heure</string>
     <string name="placeholder_minute">Minute</string>
     <string name="progress_activity_exercise_week">Exercice (7 j)</string>
@@ -2144,6 +2164,9 @@
     <string name="home_day_type_chip_a11y">Type de journée du jour : %1$s. Touchez pour changer.</string>
     <string name="day_type_sheet_title">Type de journée</string>
     <string name="day_type_sheet_subtitle">Passez les objectifs du jour à un autre type de journée.</string>
+    <string name="home_day_type_diverge_named">Cette heure ressemble plutôt à %1$s, pas à %2$s.</string>
+    <string name="home_day_type_diverge_unnamed">Cette heure ne ressemble pas à une journée %1$s.</string>
+    <string name="cd_dismiss_day_type_prompt">Fermer la suggestion de type de journée</string>
     <string name="day_type_base_goals">Objectifs de base</string>
     <string name="day_type_clear_override">Retirer la dérogation du jour</string>
     <string name="day_type_edit_settings">Modifier les types de journée</string>
@@ -2502,6 +2525,9 @@ macros rééquilibrées au nouveau total calorique</string>
         <item>calories</item>
         <item>kcal</item>
         <item>objectif calorique</item>
+        <item>limite</item>
+        <item>manuel</item>
+        <item>personnalisé</item>
     </string-array>
     <string-array name="settings_search_kw_macro_protein">
         <item>macro</item>

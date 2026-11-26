@@ -95,6 +95,7 @@ import app.chompass.models.OptionalNutrientGoals
 import app.chompass.ui.components.ClockTimeWheelPicker
 import app.chompass.ui.components.parseClockDigits
 import app.chompass.ui.components.DateWheelPicker
+import app.chompass.ui.components.parseTypedDate
 
 import app.chompass.ui.components.ChompassDialog
 import app.chompass.ui.components.ChompassDialogActions
@@ -146,6 +147,8 @@ fun EditFoodEntrySheet(
     useSystemDateTimePickers: Boolean = false,
     dayEntries: List<FoodEntry> = emptyList(),
     mealTimesEnabled: Boolean = true,
+    /** #159: one-shot from a saved-food tap: open with the amount ready to type. */
+    focusServingAmountOnOpen: Boolean = false,
     onReprocess: suspend (
         updatedNote: String,
         /** RECALCULATE only: the sheet's current edited mix the estimate runs over; null = Reanalyze (stored entry + note). */
@@ -194,6 +197,10 @@ fun EditFoodEntrySheet(
     // sheet thresholds (maintainer decision 2026-08-18) so a read-only scroll
     // gesture cannot dismiss; only a decisive pull/flick can.
     val listState = rememberLazyListState()
+    // #159: consume focus when the serving item first composes, which can be
+    // after the scroll-to-serving effect when the card starts below the fold.
+    var servingFocusConsumed by remember(entry.id) { mutableStateOf(false) }
+    val focusServingOnOpen = focusServingAmountOnOpen && !servingFocusConsumed
 
     // #159: with the compact hero + name + meal/date rows the serving card can
     // open below the fold, leaving the amount — the field the user tapped the
@@ -812,6 +819,7 @@ fun EditFoodEntrySheet(
             item { SheetSectionHeader(stringResource(R.string.sheet_serving)) }
             item(key = "serving-quantity") {
                 ServingQuantityCard(
+                    focusAmountOnOpen = focusServingOnOpen,
                     quantityText = servingQuantityText,
                     onQuantityChange = { newValue ->
                         servingQuantityText = newValue
@@ -843,6 +851,7 @@ fun EditFoodEntrySheet(
                     },
                     onQuantityEditingDone = resolveServingDraft,
                 )
+                LaunchedEffect(Unit) { servingFocusConsumed = true }
             }
             if (nutritionUnlocked) {
                 item {
@@ -1382,6 +1391,7 @@ fun EditFoodEntrySheet(
         } else {
 
             var pickedDate by remember(loggedDate) { mutableStateOf(loggedDate) }
+            var typedDateDigits by remember { mutableStateOf<String?>(null) }
             ChompassDialog(onDismissRequest = { showDatePicker = false }) {
                 Text(stringResource(R.string.label_date), fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 DateWheelPicker(
@@ -1389,12 +1399,14 @@ fun EditFoodEntrySheet(
                     onSelect = { pickedDate = it },
                     minYear = LocalDate.now().year - 10,
                     maxYear = LocalDate.now().year,
+                    onTypedDraftChange = { typedDateDigits = it },
                     modifier = Modifier.fillMaxWidth()
                 )
                 ChompassDialogActions(
                     primaryText = stringResource(R.string.action_done),
                     onPrimary = {
-                        loggedDate = pickedDate
+                        loggedDate = parseTypedDate(typedDateDigits, LocalDate.now().year - 10, LocalDate.now().year)
+                            ?: pickedDate
                         showDatePicker = false
                     },
                     dismissText = stringResource(R.string.action_cancel),

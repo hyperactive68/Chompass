@@ -135,6 +135,7 @@ data class SettingsUiState(
     val dailySummaryEnabled: Boolean = false,
     val dailySummaryHour: Int = 21,
     val dailySummaryMinute: Int = 0,
+    val ongoingSummaryEnabled: Boolean = false,
     val weightReminderEnabled: Boolean = true,
     val weightReminderHour: Int = 8,
     val weightReminderMinute: Int = 0,
@@ -280,6 +281,10 @@ data class SettingsUiState(
     /** #75: which nutrients the Progress averages card shows (non-macro storage keys). */
     val progressNutrientAveragesSelection: Set<String> =
         app.chompass.models.HomeTopNutrient.DefaultAveragesStorage,
+    /** Codeberg #190: show the goal line in the Progress weight chart; default on. */
+    val progressShowGoalRule: Boolean = true,
+    /** #154: tracker rows hidden from the Progress averages card. */
+    val progressHiddenTrackedItems: Set<String> = emptySet(),
 
     val userContext: String = "",
     val fallbackEnabled: Boolean = true,
@@ -371,6 +376,7 @@ internal fun commitSettingsHydrate(
     incoming: SettingsUiState,
     writeGenAtStart: Int,
     writeGenNow: Int,
+    storePaintedHomeDisplay: HomeDisplayPreferences? = null,
 ): SettingsUiState {
     val hydrated = if (writeGenAtStart == writeGenNow) incoming
     else current.copy(
@@ -393,6 +399,13 @@ internal fun commitSettingsHydrate(
     // screen (add, provider, key, select) and a hydrate that started before them
     // must never repaint the pre-action profile. The init snapshot is only a
     // first paint, so anything the live state already holds wins.
+    // Home display is store-driven the same way (Codeberg #92): the Customize
+    // Home toggles write through [launchPref] without bumping the write gen,
+    // and the store collector repaints them within a frame — but the slow
+    // hydrate tail (weather, Health Connect, KeyStore) commits afterwards from
+    // its pre-toggle snapshot and used to flip the toggle visually back.
+    // null = the collector has not painted yet (cold start), so the snapshot
+    // still paints and no default flashes.
     return hydrated.copy(
         profiles = current.profiles.ifEmpty { incoming.profiles },
         activeProfile = current.activeProfile ?: incoming.activeProfile,
@@ -415,6 +428,7 @@ internal fun commitSettingsHydrate(
         } else {
             current.openRouterReasoningEffort
         },
+        homeDisplay = storePaintedHomeDisplay ?: incoming.homeDisplay,
     )
 }
 
@@ -444,6 +458,14 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
     private var lastRecalcSignature: String? = null
 
     private var settingsWriteGen = 0
+
+    /**
+     * Last emission of the home-display store collector, or null before its
+     * first paint. Lets [commitSettingsHydrate] keep the store-driven
+     * home-display slice over the (possibly stale) hydration snapshot —
+     * Codeberg #92. Main-thread only, like [settingsWriteGen].
+     */
+    private var paintedHomeDisplay: HomeDisplayPreferences? = null
 
     /** True when [profile]'s goal inputs differ from the last-recalculated baseline. */
     private fun needsRecalc(profile: app.chompass.models.UserProfile?): Boolean =
@@ -630,6 +652,7 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
                     dailySummaryEnabled = snap.dailySummaryEnabled,
                     dailySummaryHour = snap.dailySummaryHour,
                     dailySummaryMinute = snap.dailySummaryMinute,
+                    ongoingSummaryEnabled = snap.ongoingSummaryEnabled,
                     weightReminderEnabled = snap.weightReminderEnabled,
                     weightReminderHour = snap.weightReminderHour,
                     weightReminderMinute = snap.weightReminderMinute,
@@ -719,6 +742,8 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
                     progressMeasurementSites = snap.progressMeasurementSites,
                     progressNutrientAverages = snap.progressNutrientAverages,
                     progressNutrientAveragesSelection = snap.progressNutrientAveragesSelection,
+                    progressShowGoalRule = snap.progressShowGoalRule,
+                    progressHiddenTrackedItems = snap.progressHiddenTrackedItems,
 
                     userContext = snap.userContext,
                     fallbackEnabled = snap.fallbackEnabled,
@@ -745,7 +770,7 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
                 val sheet = runCatching { container.prefs.loadLastGoalChangeSheet() }.getOrNull()
                 state to sheet
             }
-            _ui.value = commitSettingsHydrate(_ui.value, state, hydrateGen, settingsWriteGen)
+            _ui.value = commitSettingsHydrate(_ui.value, state, hydrateGen, settingsWriteGen, paintedHomeDisplay)
             if (hydrateGen == settingsWriteGen) {
                 _ui.update { it.copy(lastRecalcSheet = sheet) }
             } else {
@@ -754,7 +779,10 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
         }
 
         container.prefs.homeDisplayPreferences
-            .onEach { display -> _ui.value = _ui.value.copy(homeDisplay = display) }
+            .onEach { display ->
+                paintedHomeDisplay = display
+                _ui.value = _ui.value.copy(homeDisplay = display)
+            }
             .launchIn(viewModelScope)
 
         // Weather input state (source, shared-app cache, Open-Meteo cache).
@@ -1034,7 +1062,10 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
     fun setAskPhotoNotePrompt(ask: Boolean) = updateUiPref(
         {
             container.prefs.setSkipPhotoNotePrompt(!ask)
-            if (ask) container.prefs.setPhotoNoteSkipCount(0)
+            if (ask) {
+                container.prefs.setPhotoNoteSkipCount(0)
+                container.prefs.setPhotoAnalyzeConfirmAcknowledged(false)
+            }
         },
         { copy(skipPhotoNotePrompt = !ask) },
     )
@@ -1237,6 +1268,15 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
     fun setProgressNutrientAveragesSelection(keys: Set<String>) = updateUiPref(
         { container.prefs.setProgressNutrientAveragesSelection(keys) },
         { copy(progressNutrientAveragesSelection = keys) },
+    )
+    fun setProgressHiddenTrackedItems(keys: Set<String>) = updateUiPref(
+        { container.prefs.setProgressHiddenTrackedItems(keys) },
+        { copy(progressHiddenTrackedItems = keys) },
+    )
+
+    fun setProgressShowGoalRule(v: Boolean) = updateUiPref(
+        { container.prefs.setProgressShowGoalRule(v) },
+        { copy(progressShowGoalRule = v) },
     )
 
     fun setMealSchedule(schedule: app.chompass.models.MealSchedule) {
@@ -1853,6 +1893,14 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
         { copy(dailySummaryHour = hour, dailySummaryMinute = minute) },
     )
 
+    fun setOngoingSummaryEnabled(v: Boolean) = updateUiPref(
+        {
+            container.prefs.setOngoingSummaryEnabled(v)
+            syncNotificationSchedules()
+        },
+        { copy(ongoingSummaryEnabled = v) },
+    )
+
     fun setWeightReminderEnabled(v: Boolean) = updateUiPref(
         {
             container.prefs.setWeightReminderEnabled(v)
@@ -1904,6 +1952,7 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
                 if (!enabled || !container.notifications.canPostNotifications()) {
                     container.notifications.cancelStreakReminder()
                     container.notifications.cancelDailySummary()
+                    container.notifications.cancelOngoingSummary()
                     container.notifications.cancelWeightReminder()
                     container.notifications.cancelBodyFatReminder()
                     container.notifications.cancelWaterReminder()
@@ -1926,6 +1975,21 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
                     )
                 } else {
                     container.notifications.cancelDailySummary()
+                }
+
+                if (container.prefs.ongoingSummaryEnabled.first()) {
+                    val cached = container.prefs.widgetSnapshot.first()
+                    if (cached == null || cached.isStale) {
+                        container.widgetSnapshotWriter.refresh()
+                    }
+                    val snapshot = container.prefs.widgetSnapshot.first()
+                    if (snapshot != null) {
+                        container.notifications.showOngoingSummary(snapshot)
+                    } else {
+                        container.notifications.cancelOngoingSummary()
+                    }
+                } else {
+                    container.notifications.cancelOngoingSummary()
                 }
 
                 if (container.prefs.weightReminderEnabled.first()) {
@@ -2483,6 +2547,12 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
                         today,
                     )
                     container.prefs.setHealthEnergyActiveByDay(merged)
+                }
+                runCatching {
+                    val hourly = container.health.readHourlyActiveBackfill(
+                        container.prefs.healthEnergyActiveByHour.first(),
+                    )
+                    container.prefs.setHealthEnergyActiveByHour(hourly)
                 }
             }
             container.prefs.setHealthEnergyGoalsEnabled(v)

@@ -266,6 +266,12 @@ internal suspend fun PreferencesStore.setProgressNutrientAveragesImpl(v: Boolean
     dataStore.edit { it[Keys.PROGRESS_NUTRIENT_AVERAGES] = v }
 }
 
+internal val PreferencesStore.progressShowGoalRuleImpl: Flow<Boolean> get() =
+    dataStore.data.map { it[Keys.PROGRESS_SHOW_GOAL_RULE] ?: true }
+internal suspend fun PreferencesStore.setProgressShowGoalRuleImpl(v: Boolean) {
+    dataStore.edit { it[Keys.PROGRESS_SHOW_GOAL_RULE] = v }
+}
+
 /**
  * #75: which nutrients Progress averages — [HomeTopNutrient] storage keys,
  * macros excluded. Unset = the original trio so existing toggle users see no
@@ -282,6 +288,13 @@ internal suspend fun PreferencesStore.setProgressNutrientAveragesSelectionImpl(k
         it[Keys.PROGRESS_NUTRIENT_AVERAGES_SELECTION] =
             HomeTopNutrient.normalizeAveragesSelectionStorage(keys)
     }
+}
+
+/** #154: tracker rows the user hid on Progress; empty = show every available tracker. */
+internal val PreferencesStore.progressHiddenTrackedItemsImpl: Flow<Set<String>> get() =
+    dataStore.data.map { it[Keys.PROGRESS_HIDDEN_TRACKED_ITEMS] ?: emptySet() }
+internal suspend fun PreferencesStore.setProgressHiddenTrackedItemsImpl(keys: Set<String>) {
+    dataStore.edit { it[Keys.PROGRESS_HIDDEN_TRACKED_ITEMS] = keys }
 }
 
     /** "RECENTS" | "FREQUENT" | "FAVORITES". */

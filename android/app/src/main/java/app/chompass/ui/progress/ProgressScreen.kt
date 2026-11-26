@@ -203,6 +203,7 @@ fun ProgressScreen(container: AppContainer, onOpenCustomize: (() -> Unit)? = nul
                         profileBodyFatFraction = ui.profile?.bodyFatPercentage,
                         goalWeightKg = ui.profile?.goalWeightKg,
                         goalBodyFatFraction = ui.profile?.goalBodyFatPercentage,
+                        showGoalRule = ui.showGoalRule,
                         useMetricWeight = weightMetric,
                         useMetricLength = heightMetric,
                         bodyFatAvailable = bodyFatAvailable,
@@ -331,6 +332,16 @@ fun ProgressScreen(container: AppContainer, onOpenCustomize: (() -> Unit)? = nul
                 item { CardSection { ChartPlaceholder(height = 120.dp) } }
             }
 
+            if (ui.trackerAverages.isNotEmpty()) {
+                item {
+                    CardSection {
+                        TrackedItemsSection(
+                            averages = ui.trackerAverages,
+                            useMetricWater = weightMetric,
+                        )
+                    }
+                }
+            }
             if (activity.isNotEmpty()) {
                 item {
                     CardSection { ActivitySection(days = activity) }
@@ -402,9 +413,10 @@ fun ProgressScreen(container: AppContainer, onOpenCustomize: (() -> Unit)? = nul
     }
     if (showScaleSyncSheet) {
         val syncState by vm.scaleSyncState.collectAsState()
+        val syncContext = androidx.compose.ui.platform.LocalContext.current
         ScaleSyncSheet(
             syncState = syncState,
-            onStart = { vm.startScaleSync() },
+            onStart = { vm.startScaleSync(syncContext) },
             onCancel = { vm.cancelScaleSync() },
             onUserSelected = { vm.onScaleUserSelected(it) },
             onConsentEntered = { vm.onScaleConsentEntered(it) },
@@ -489,6 +501,7 @@ internal fun ProgressScreenPreviewContent(
                         profileBodyFatFraction = ui.profile?.bodyFatPercentage,
                         goalWeightKg = ui.profile?.goalWeightKg,
                         goalBodyFatFraction = ui.profile?.goalBodyFatPercentage,
+                        showGoalRule = ui.showGoalRule,
                         useMetricWeight = weightMetric,
                         useMetricLength = heightMetric,
                         bodyFatAvailable = bodyFatAvailable,
@@ -587,6 +600,16 @@ internal fun ProgressScreenPreviewContent(
                     }
                 }
 
+            }
+            if (ui.trackerAverages.isNotEmpty()) {
+                item {
+                    CardSection {
+                        TrackedItemsSection(
+                            averages = ui.trackerAverages,
+                            useMetricWater = weightMetric,
+                        )
+                    }
+                }
             }
             if (activity.isNotEmpty()) {
                 item {

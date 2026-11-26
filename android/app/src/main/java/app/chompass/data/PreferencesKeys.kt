@@ -51,6 +51,7 @@ internal object Keys {
         val DAILY_ENABLED = booleanPreferencesKey("dailySummaryEnabled")
         val DAILY_HOUR = intPreferencesKey("dailySummaryHour")
         val DAILY_MINUTE = intPreferencesKey("dailySummaryMinute")
+        val ONGOING_SUMMARY_ENABLED = booleanPreferencesKey("ongoingSummaryEnabled")
         val WEIGHT_REMINDER_ENABLED = booleanPreferencesKey("weightReminderEnabled")
         val WEIGHT_REMINDER_HOUR = intPreferencesKey("weightReminderHour")
         val WEIGHT_REMINDER_MINUTE = intPreferencesKey("weightReminderMinute")
@@ -161,6 +162,8 @@ internal object Keys {
         val HEALTH_ENERGY_MEASURED_ACTIVE = intPreferencesKey("healthEnergyMeasuredActiveCalories")
         /** Compact ISO-date → active kcal map (internal, never synced). Pruned to 60 days. */
         val HEALTH_ENERGY_ACTIVE_BY_DAY = stringPreferencesKey("healthEnergyActiveByDayJson")
+        /** ISO date → 24 hourly active kcal slots (internal, never synced). -1 = no sample. Pruned to 60 days. */
+        val HEALTH_ENERGY_ACTIVE_BY_HOUR = stringPreferencesKey("healthEnergyActiveByHourJson")
         val HEALTH_BACKGROUND_SYNC_ENABLED = booleanPreferencesKey("healthBackgroundSyncEnabled")
         val HEALTH_ENERGY_GOALS_PREVIOUS_TARGETS = stringPreferencesKey("healthEnergyGoalsPreviousTargets")
         val HEALTH_ENERGY_GOALS_LAST_AUTO_REFRESH_DAY = stringPreferencesKey("healthEnergyGoalsLastAutoRefreshDay")
@@ -220,6 +223,10 @@ internal object Keys {
         val PROGRESS_NUTRIENT_AVERAGES = booleanPreferencesKey("progressNutrientAverages")
         /** Codeberg #75: which nutrients Progress averages (HomeTopNutrient storage keys, macros excluded). */
         val PROGRESS_NUTRIENT_AVERAGES_SELECTION = stringSetPreferencesKey("progressNutrientAveragesSelection")
+        /** Codeberg #190: show the goal line in the Progress weight chart; default on. */
+        val PROGRESS_SHOW_GOAL_RULE = booleanPreferencesKey("progressShowGoalRule")
+        /** #154: tracker rows hidden from the Progress card; empty = show all available. */
+        val PROGRESS_HIDDEN_TRACKED_ITEMS = stringSetPreferencesKey("progressHiddenTrackedItems")
 
         val MEAL_BREAKFAST_START = intPreferencesKey("mealBreakfastStart")
         val MEAL_LUNCH_START = intPreferencesKey("mealLunchStart")
@@ -278,6 +285,11 @@ internal object Keys {
         val SKIP_PHOTO_NOTE_PROMPT = booleanPreferencesKey("skipPhotoNotePrompt")
         /** Consecutive photo analyzes submitted with an empty note while the prompt was on. */
         val PHOTO_NOTE_SKIP_COUNT = intPreferencesKey("photoNoteSkipCount")
+        /**
+         * User confirmed the sparse “Analyze now?” staging dialog (blank note +
+         * single photo) once; later noteless single-photo analyzes skip it.
+         */
+        val PHOTO_ANALYZE_CONFIRM_ACKNOWLEDGED = booleanPreferencesKey("photoAnalyzeConfirmAcknowledged")
         /**
          * How many photo staging Analyzes the user has completed. Used to show
          * the accuracy tip card for the first few entries, then collapse to Info.

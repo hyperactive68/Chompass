@@ -106,6 +106,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.LocalDate
@@ -186,6 +188,10 @@ data class HomeUiState(
     val measuredActiveAverageCalories: Int = 0,
     /** Internal 60-day HC active-by-day map (never synced). */
     val healthEnergyActiveByDay: Map<String, Int> = emptyMap(),
+    /** Internal same-hour HC active map (never synced). */
+    val healthEnergyActiveByHour: Map<String, List<Int>> = emptyMap(),
+    /** ISO date the day-type switch prompt was dismissed. Hides it for that day. */
+    val dayTypePromptDismissedDay: String? = null,
     /** Manual active totals keyed by ISO date. */
     val manualActiveByDay: Map<String, Int> = emptyMap(),
     val activitySnapshot: HomeActivitySnapshot = HomeActivitySnapshot(date = LocalDate.now()),
@@ -201,6 +207,8 @@ data class HomeUiState(
     val skipPhotoNotePrompt: Boolean = false,
     /** Consecutive empty-note photo analyzes; at ≥3 offer “don’t ask again”. */
     val photoNoteSkipCount: Int = 0,
+    /** User confirmed the sparse “Analyze now?” dialog once; skip it on later noteless single-photo analyzes. */
+    val photoAnalyzeConfirmAcknowledged: Boolean = false,
     /** Completed photo staging Analyzes; tip card while below [HomeViewModel.PHOTO_ACCURACY_GUIDE_COUNT]. */
     val photoAccuracyGuideCount: Int = 0,
     val hasSeenCameraScaleTip: Boolean = true,
@@ -268,6 +276,13 @@ data class HomeUiState(
     val addFoodSuggestNetworkPending: Boolean = false,
     /** True when the last packaged leg ended without reaching Open Food Facts at all. */
     val addFoodSuggestNetworkUnreachable: Boolean = false,
+    /**
+     * True when the last packaged leg reached Open Food Facts and it answered
+     * with zero hits. Only meaningful once [addFoodSuggestNetworkPending] is
+     * false: the Add Food sheet says so explicitly rather than letting the
+     * remaining local rows read as "the app only has USDA / Swiss data".
+     */
+    val addFoodSuggestNetworkEmpty: Boolean = false,
     /**
      * Whether the packaged-product (Open Food Facts) leg may run. Saved foods
      * come from the local index and USDA / Swiss from bundled SQLite on every
@@ -484,6 +499,7 @@ data class HomeUiState(
         val sedentary = measuredActiveAverageCalories.takeIf { it > 0 }
             ?.let { (baseCalorieGoal - it).coerceAtLeast(0) }
             ?: p.sedentaryCalorieBudget(baseCalorieGoal)
+        val classification = budgetClassification
         return HomeCalorieDisplay.resolveGaugeBudget(
             mode = homeDisplay.calorieDisplayMode,
             fullCredit = homeDisplay.fullCreditActiveBurn,
@@ -495,6 +511,8 @@ data class HomeUiState(
                 ?: p.estimatedDailyActiveCalories,
             manual = manualActiveKcal,
             typical = activeBurnTypical,
+            projectedActive = classification.projectedActive,
+            classifying = date == LocalDate.now() && classification.projectedActive > 0,
         )
     }
     val gaugeBaseCalorieGoal: Int get() = gaugeBudget.base
@@ -539,6 +557,96 @@ data class HomeUiState(
     val activeBurnTypical: Int get() = typicalResolution.kcal
 
     /**
+     * Day-type average from the start of today. With no day type, the blend
+     * slides toward a same-hour guess.
+     */
+    val budgetClassification: app.chompass.models.ActiveDayClassifier.ActiveDayClassification get() {
+        val today = LocalDate.now()
+        val viewingToday = date == today
+        val blended = measuredActiveAverageCalories.takeIf { it > 0 }
+            ?: profile?.estimatedDailyActiveCalories
+            ?: 0
+        val profileId = if (viewingToday) resolvedDayTargets.profileId else null
+        val dayTypeAverage = if (viewingToday) dayTypeActiveStats.typicalFor(profileId) else null
+        val tagged = if (dayTypeAverage != null && profileId != null) {
+            dayTypeActiveStats.daily.filter { it.profileId == profileId }.map { it.date }.toSet()
+        } else {
+            emptySet()
+        }
+        val minute = if (viewingToday) {
+            val now = java.time.LocalTime.now()
+            now.hour * 60 + now.minute
+        } else {
+            0
+        }
+        return app.chompass.models.ActiveDayClassifier.classify(
+            today = today,
+            minuteOfDay = minute,
+            isToday = viewingToday,
+            blendedActive = blended,
+            dayTypeAverage = dayTypeAverage,
+            dayTypeName = if (dayTypeAverage != null) resolvedDayTargets.profileName else null,
+            mergedActiveByDay = app.chompass.models.DayTypeActiveStats.mergeDayTotals(
+                healthEnergyActiveByDay,
+                manualActiveByDay,
+            ),
+            hourlyByDay = healthEnergyActiveByHour,
+            liveActive = activitySnapshot.activeCalories.coerceAtLeast(0),
+            dayTypeDates = tagged,
+        )
+    }
+
+    /**
+     * Non-null when this hour looks significantly unlike today's day type.
+     * The ring stays on the day-type average; this only asks for a switch.
+     */
+    val dayTypePrompt: app.chompass.models.ActiveDayClassifier.DayTypeDivergence? get() {
+        if (date != LocalDate.now()) return null
+        if (dayTypePromptDismissedDay == date.toString()) return null
+        if (!activitySnapshot.energyLive) return null
+        val profileId = resolvedDayTargets.profileId ?: return null
+        val name = resolvedDayTargets.profileName ?: return null
+        if (dayTypeActiveStats.typicalFor(profileId) == null) return null
+        val daily = dayTypeActiveStats.daily
+        val currentDates = daily.filter { it.profileId == profileId }.map { it.date }.toSet()
+        val others = daily.groupBy { it.profileId }
+            .filterKeys { it != profileId }
+            .mapNotNull { (id, rows) ->
+                val label = rows.firstNotNullOfOrNull { it.profileName } ?: return@mapNotNull null
+                app.chompass.models.ActiveDayClassifier.DayTypeGroup(
+                    profileId = id,
+                    name = label,
+                    dates = rows.map { it.date }.toSet(),
+                )
+            }
+        val now = java.time.LocalTime.now()
+        return app.chompass.models.ActiveDayClassifier.divergence(
+            today = LocalDate.now(),
+            minuteOfDay = now.hour * 60 + now.minute,
+            liveActive = activitySnapshot.activeCalories.coerceAtLeast(0),
+            currentName = name,
+            currentDates = currentDates,
+            others = others,
+            hourlyByDay = healthEnergyActiveByHour,
+            mergedActiveByDay = app.chompass.models.DayTypeActiveStats.mergeDayTotals(
+                healthEnergyActiveByDay,
+                manualActiveByDay,
+            ),
+        )
+    }
+
+    /** Class line for an untyped-day guess. A named day type uses the chip and the switch prompt. */
+    val budgetClassCue: app.chompass.models.ActiveDayClassifier.ActiveDayClassification?
+        get() = if (
+            gaugeBudget.useExpectedArc &&
+            budgetClassification.kind != app.chompass.models.ActiveDayClassifier.Kind.DAY_TYPE
+        ) {
+            budgetClassification
+        } else {
+            null
+        }
+
+    /**
      * The hero ring's displayed calorie goal — the budget's display target:
      * ADD_ACTIVE hold-back grows to the expected-day target when live burn
      * exceeds the norm, full credit stacks measured burn on the full goal,
@@ -560,7 +668,8 @@ data class HomeUiState(
         // cards scale against the ring exactly as before the day plan existed.
         val base = resolvedDayTargets.targets.calories
         if (base <= 0) return 1f
-        return (heroCalorieGoal.toFloat() / base).coerceAtLeast(1f)
+        val scale = heroCalorieGoal.toFloat() / base
+        return if (gaugeBudget.useExpectedArc) scale.coerceIn(0.5f, 2.0f) else scale.coerceAtLeast(1f)
     }
 
     /**
@@ -588,6 +697,7 @@ data class HomeUiState(
             typicalIsDayType = typicalResolution.typicalIsDayType,
             typicalDayTypeName = resolvedDayTargets.profileName,
             blendedTypical = measuredActiveAverageCalories,
+            projectedActive = budgetClassification.projectedActive,
         )
     }
 
@@ -625,6 +735,8 @@ data class HomeUiState(
             foodLogMacroChips == other.foodLogMacroChips &&
             measuredActiveAverageCalories == other.measuredActiveAverageCalories &&
             healthEnergyActiveByDay == other.healthEnergyActiveByDay &&
+            dayTypePromptDismissedDay == other.dayTypePromptDismissedDay &&
+            healthEnergyActiveByHour == other.healthEnergyActiveByHour &&
             manualActiveByDay == other.manualActiveByDay &&
             activitySnapshot == other.activitySnapshot &&
             optionalNutrientGoals == other.optionalNutrientGoals &&
@@ -635,6 +747,7 @@ data class HomeUiState(
             recalcSheet == other.recalcSheet &&
             skipPhotoNotePrompt == other.skipPhotoNotePrompt &&
             photoNoteSkipCount == other.photoNoteSkipCount &&
+            photoAnalyzeConfirmAcknowledged == other.photoAnalyzeConfirmAcknowledged &&
             photoAccuracyGuideCount == other.photoAccuracyGuideCount &&
             hasSeenCameraScaleTip == other.hasSeenCameraScaleTip &&
             weightMetric == other.weightMetric &&
@@ -660,6 +773,7 @@ data class HomeUiState(
             addFoodSavedRows == other.addFoodSavedRows &&
             addFoodSuggestNetworkPending == other.addFoodSuggestNetworkPending &&
             addFoodSuggestNetworkUnreachable == other.addFoodSuggestNetworkUnreachable &&
+            addFoodSuggestNetworkEmpty == other.addFoodSuggestNetworkEmpty &&
             addFoodPackagedSearchEnabled == other.addFoodPackagedSearchEnabled &&
             pendingIdentityName == other.pendingIdentityName &&
             queueEntries == other.queueEntries &&
@@ -735,6 +849,8 @@ data class HomeUiState(
         result = 31 * result + foodLogMacroChips.hashCode()
         result = 31 * result + measuredActiveAverageCalories
         result = 31 * result + healthEnergyActiveByDay.hashCode()
+        result = 31 * result + (dayTypePromptDismissedDay?.hashCode() ?: 0)
+        result = 31 * result + healthEnergyActiveByHour.hashCode()
         result = 31 * result + manualActiveByDay.hashCode()
         result = 31 * result + activitySnapshot.hashCode()
         result = 31 * result + optionalNutrientGoals.hashCode()
@@ -745,6 +861,7 @@ data class HomeUiState(
         result = 31 * result + (recalcSheet?.hashCode() ?: 0)
         result = 31 * result + skipPhotoNotePrompt.hashCode()
         result = 31 * result + photoNoteSkipCount
+        result = 31 * result + photoAnalyzeConfirmAcknowledged.hashCode()
         result = 31 * result + photoAccuracyGuideCount
         result = 31 * result + hasSeenCameraScaleTip.hashCode()
         result = 31 * result + weightMetric.hashCode()
@@ -769,6 +886,7 @@ data class HomeUiState(
         result = 31 * result + addFoodSavedRows.hashCode()
         result = 31 * result + addFoodSuggestNetworkPending.hashCode()
         result = 31 * result + addFoodSuggestNetworkUnreachable.hashCode()
+        result = 31 * result + addFoodSuggestNetworkEmpty.hashCode()
         result = 31 * result + addFoodPackagedSearchEnabled.hashCode()
         result = 31 * result + (pendingIdentityName?.hashCode() ?: 0)
         result = 31 * result + queueEntries.hashCode()
@@ -930,6 +1048,9 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
     private val analysisRunGate = AnalysisRunGate()
     /** Last-requested-wins guard for [refreshActivitySnapshot] (Codeberg #22). */
     private val activitySnapshotGuard = ActivitySnapshotRefreshGuard()
+    /** One full hourly backfill per calendar day. Later refreshes only rewrite today. */
+    private var hourlyBackfillDay: LocalDate? = null
+    private val hourlyHistoryMutex = Mutex()
 
     /**
      * Bumped on any diary/favorites change (see the init combine) so the Add
@@ -1447,6 +1568,12 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
             }
             .launchIn(viewModelScope)
 
+        container.prefs.healthEnergyActiveByHour
+            .onEach { map ->
+                _ui.update { it.copy(healthEnergyActiveByHour = map) }
+            }
+            .launchIn(viewModelScope)
+
         _selectedDate
             .onEach { refreshActivitySnapshot() }
             .launchIn(viewModelScope)
@@ -1478,6 +1605,12 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
         container.prefs.photoNoteSkipCount
             .onEach { count ->
                 _ui.update { it.copy(photoNoteSkipCount = count) }
+            }
+            .launchIn(viewModelScope)
+
+        container.prefs.photoAnalyzeConfirmAcknowledged
+            .onEach { acknowledged ->
+                _ui.update { it.copy(photoAnalyzeConfirmAcknowledged = acknowledged) }
             }
             .launchIn(viewModelScope)
 
@@ -1982,6 +2115,37 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
             if (activitySnapshotGuard.isCurrent(gen)) {
                 _ui.update { it.copy(activitySnapshot = snapshot) }
             }
+            if (
+                day == LocalDate.now() &&
+                snapshot.energyLive &&
+                snapshot.source != ActivityDataSource.DEBUG
+            ) {
+                runCatching { refreshHourlyActiveHistory(day) }
+                    .onFailure { if (it is CancellationException) throw it }
+            }
+        }
+    }
+    fun dismissDayTypePrompt() {
+        _ui.update { it.copy(dayTypePromptDismissedDay = LocalDate.now().toString()) }
+    }
+
+    /**
+     * Same-hour history for the ring. The first successful refresh of a day
+     * backfills past days; later refreshes only rewrite today, so a snapshot
+     * tick does not issue another 28 Health Connect reads.
+     */
+    private suspend fun refreshHourlyActiveHistory(day: LocalDate) {
+        hourlyHistoryMutex.withLock {
+            val existing = container.prefs.healthEnergyActiveByHour.first()
+            val backfill = hourlyBackfillDay != day
+            val next = if (backfill) {
+                container.health.readHourlyActiveBackfill(existing)
+            } else {
+                val slots = container.health.readHourlyActive(day) ?: return@withLock
+                app.chompass.models.HourlyActiveHistory.mergeDay(existing, day, slots, day)
+            }
+            if (next != existing) container.prefs.setHealthEnergyActiveByHour(next)
+            if (backfill) hourlyBackfillDay = day
         }
     }
 
@@ -2103,12 +2267,15 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
     /**
      * Photo staging Analyze: update skip / don’t-ask prefs, then run [analyzePhotos].
      * [dontAskAgain] persists opt-out when the user checked the offer after ≥3 skips.
+     * [acknowledgeAnalyzeConfirm] persists the sparse “Analyze now?” confirmation so
+     * later noteless single-photo analyzes run without the dialog.
      */
     fun analyzePhotosFromStaging(
         imageBytesList: List<ByteArray>,
         note: String?,
         confirmedPortionGrams: Double?,
         dontAskAgain: Boolean = false,
+        acknowledgeAnalyzeConfirm: Boolean = false,
     ) {
         viewModelScope.launch {
             val trimmed = note?.trim().orEmpty()
@@ -2121,6 +2288,9 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
                 } else {
                     container.prefs.setPhotoNoteSkipCount(0)
                 }
+            }
+            if (acknowledgeAnalyzeConfirm) {
+                container.prefs.setPhotoAnalyzeConfirmAcknowledged(true)
             }
             val guideCount = _ui.value.photoAccuracyGuideCount
             if (guideCount < PHOTO_ACCURACY_GUIDE_COUNT) {
@@ -2205,6 +2375,7 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
                     addFoodSuggestions = emptyList(),
                     addFoodSuggestNetworkPending = false,
                     addFoodSuggestNetworkUnreachable = false,
+                    addFoodSuggestNetworkEmpty = false,
                 )
             }
             return
@@ -2260,10 +2431,14 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
             FoodSuggestionRanker.rank(state.query, state.index, state.recipes, database)
         }
         if (gen != suggestGeneration) return
+        // True only while the packaged leg has finished and found nothing; a
+        // still-outstanding leg (pending) keeps this from claiming an OFF miss.
+        val networkEmpty = !state.onlineUnreachable && state.online.isEmpty()
         _ui.update {
             if (it.addFoodSuggestions == ranked &&
                 it.addFoodSuggestNetworkPending == networkPending &&
-                it.addFoodSuggestNetworkUnreachable == state.onlineUnreachable
+                it.addFoodSuggestNetworkUnreachable == state.onlineUnreachable &&
+                it.addFoodSuggestNetworkEmpty == networkEmpty
             ) {
                 it
             } else {
@@ -2271,6 +2446,7 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
                     addFoodSuggestions = ranked,
                     addFoodSuggestNetworkPending = networkPending,
                     addFoodSuggestNetworkUnreachable = state.onlineUnreachable,
+                    addFoodSuggestNetworkEmpty = networkEmpty,
                 )
             }
         }
@@ -2448,12 +2624,19 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
 
     /**
      * Tap on a suggestion row. Saved foods log straight away (the chips have
-     * always behaved that way); recipes log every ingredient; database rows go
-     * through the review sheet because their portion still needs confirming.
+     * always behaved that way), then Home opens the edit sheet on the new row
+     * with its amount focused (Codeberg #159); recipes log every ingredient;
+     * database rows go through the review sheet because their portion still
+     * needs confirming. Only [onSavedFoodLogged] is passed for this sheet:
+     * the Saved Meals sheet calls [relogMeal] without it and keeps plain
+     * tap-to-log.
      */
-    fun pickSuggestion(suggestion: FoodSuggestion) {
+    fun pickSuggestion(
+        suggestion: FoodSuggestion,
+        onSavedFoodLogged: ((FoodEntry) -> Unit)? = null,
+    ) {
         when (suggestion) {
-            is FoodSuggestion.SavedFood -> relogMeal(suggestion.template)
+            is FoodSuggestion.SavedFood -> relogMeal(suggestion.template, onSavedFoodLogged)
             is FoodSuggestion.SavedRecipe -> logRecipe(suggestion.recipe)
             is FoodSuggestion.DatabaseHit -> selectFoodSearchResult(suggestion.result)
         }
@@ -3783,7 +3966,10 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
     }
 
     /** Re-log a saved meal (from Saved Meals sheet) as a new entry timestamped to the selected day. */
-    fun relogMeal(template: FoodEntry) {
+    fun relogMeal(
+        template: FoodEntry,
+        onLogged: ((FoodEntry) -> Unit)? = null,
+    ) {
         if (PerfLog.enabled) {
             relogAckAtNs = System.nanoTime()
             relogAckPriorCount = _ui.value.todayEntries.size
@@ -3801,6 +3987,7 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
                         )
                     )
                 container.foodRepository.addEntry(entry, writeHealth = false)
+                onLogged?.invoke(entry)
                 // Health Connect mirrors in the background so the relog ack does
                 // not wait on the HC binder (same contract as saveAnalysis).
                 mirrorToHealthBackground(listOf(entry))
@@ -3808,7 +3995,7 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
         }
     }
 
-    /** Log every ingredient of a Recipe as its own diary row, timestamped to the selected day. */
+    /** Log a Recipe as one named diary row (constituents inside), timestamped to the selected day. */
     fun logRecipe(recipe: app.chompass.models.Recipe) {
         viewModelScope.launch {
             val entries = container.recipeRepository.logRecipe(
@@ -3833,39 +4020,83 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
         }
     }
 
-    /** Copy rows onto the currently viewed day (selection-bar paste). */
-    fun copyEntriesToSelectedDay(entries: List<FoodEntry>) =
-        copyEntriesToDate(entries, _selectedDate.value)
-
     /**
-     * Copy [entries] onto [targetDate] (Copy-from-day sheet; the target is the
-     * viewed day by default but is now pickable inside the sheet).
+     * Copy [entries] onto [targetDate] at the current logging time.
+     * The paste sheet's day circles pick [targetDate].
      */
-    fun copyEntriesToDate(entries: List<FoodEntry>, targetDate: LocalDate) {
+    fun copyEntriesToDate(entries: List<FoodEntry>, targetDate: LocalDate) =
+        pasteEntriesToDate(entries, targetDate, PasteTime.Logging)
+
+    fun pasteEntriesAtOriginalTimes(entries: List<FoodEntry>, targetDate: LocalDate) =
+        pasteEntriesToDate(entries, targetDate, PasteTime.Original)
+
+    private fun pasteEntriesToDate(
+        entries: List<FoodEntry>,
+        targetDate: LocalDate,
+        pasteTime: PasteTime,
+    ) {
         if (entries.isEmpty() || _ui.value.saving) return
-        viewModelScope.launch {
+        pasteJob = viewModelScope.launch {
             if (_ui.value.saving) return@launch
             _ui.update { it.copy(saving = true) }
             try {
-                // Upstream #149 / Android 6.0: reused copies log at now + current meal
-                // (not the source entry's clock time / meal bucket). One batched
-                // DataStore edit instead of one full-file write per copied row;
+                val zone = ZoneId.systemDefault()
+                val now = Instant.now()
+                // One batched DataStore edit instead of one full-file write per copied row;
                 // Health Connect mirrors in the background.
-                val duplicated = entries.map {
-                    it.duplicatedForLogging(timestampForFoodLog(targetDate), loggingMealId(it.mealType))
-                        .copy(
-                            planned = plannedFor(
-                                _ui.value.mealPlanningEnabled,
-                                planAction = false,
-                                targetDate = targetDate,
-                                today = LocalDate.now(),
-                            )
-                        )
+                val duplicated = entries.map { entry ->
+                    // Logging: reuse at now + current meal (upstream #149 / Android 6.0).
+                    // Original: keep the source entry's clock time and meal bucket.
+                    val timestamp = pasteTimestamp(
+                        pasteTime,
+                        targetDate,
+                        entry.timestamp,
+                        now,
+                        zone,
+                        _ui.value.logTimeOverride,
+                    )
+                    val mealType = pasteMealType(
+                        pasteTime,
+                        entry.mealType,
+                        _ui.value.mealTimesEnabled,
+                        CurrentMealCatalog.value,
+                        _ui.value.logTimeOverride,
+                        LocalTime.now(),
+                    )
+                    entry.duplicatedForLogging(timestamp, mealType).copy(
+                        planned = plannedFor(
+                            _ui.value.mealPlanningEnabled,
+                            planAction = false,
+                            targetDate = targetDate,
+                            today = LocalDate.now(),
+                        ),
+                    )
                 }
                 container.foodRepository.addEntries(duplicated, writeHealth = false)
-                mirrorToHealthBackground(duplicated)
+                mirrorToHealthBackground(duplicated.filterNot { it.planned })
+                // Switch the diary view to the day pasted into.
+                _selectedDate.value = targetDate
+                lastPastedEntries = duplicated
             } finally {
                 _ui.update { it.copy(saving = false) }
+            }
+        }
+    }
+
+    private var lastPastedEntries: List<FoodEntry> = emptyList()
+    private var pasteJob: Job? = null
+
+    /** Remove the entries created by the most recent paste. */
+    fun undoPaste() {
+        viewModelScope.launch {
+            // Wait for the paste write to finish so a fast undo sees the real rows.
+            pasteJob?.join()
+            val entries = lastPastedEntries
+            if (entries.isEmpty()) return@launch
+            lastPastedEntries = emptyList()
+            entries.forEach { entry ->
+                container.foodRepository.deleteEntry(entry)
+                container.caffeineRepository.clearLinkedFood(entry.id)
             }
         }
     }
@@ -3966,10 +4197,13 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
     private fun timestampForDate(day: LocalDate): Instant =
         timestampForLogging(day, Instant.now(), ZoneId.systemDefault(), timeOverride = null)
 
-    private fun timestampForFoodLog(day: LocalDate = _selectedDate.value): Instant =
+    private fun timestampForFoodLog(
+        day: LocalDate = _selectedDate.value,
+        now: Instant = Instant.now(),
+    ): Instant =
         timestampForLogging(
             day,
-            Instant.now(),
+            now,
             ZoneId.systemDefault(),
             _ui.value.logTimeOverride,
         )

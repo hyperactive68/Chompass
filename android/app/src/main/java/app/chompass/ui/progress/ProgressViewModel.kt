@@ -24,6 +24,9 @@ import app.chompass.models.DailyFoodTotals
 import app.chompass.models.HomeTopNutrient
 import app.chompass.models.FoodEntry
 import app.chompass.scale.ScaleSyncState
+import app.chompass.models.CaffeineEntry
+import app.chompass.models.NicotineEntry
+import app.chompass.models.WaterEntry
 import app.chompass.models.GoalJournalEntry
 import app.chompass.models.MacroPlanResolver
 import app.chompass.models.UserProfile
@@ -57,6 +60,19 @@ data class NutrientAverage(
     val nutrient: HomeTopNutrient,
     val avg: Double,
     val goal: Int,
+)
+
+enum class TrackedItemType(val storageId: String) {
+    WATER("water"),
+    NICOTINE("nicotine"),
+    CAFFEINE("caffeine");
+
+}
+
+data class TrackedItemAverage(
+    val type: TrackedItemType,
+    val average: Double,
+    val loggedDays: Int,
 )
 
 data class ProgressUiState(
@@ -102,6 +118,10 @@ data class ProgressUiState(
      */
     val nutrientAverages: List<NutrientAverage> = emptyList(),
     val showNutrientAverages: Boolean = false,
+    /** Codeberg #190: show the goal line in the weight chart; default on. */
+    val showGoalRule: Boolean = true,
+    /** Daily averages for available trackers in the selected range, empty when all are hidden. */
+    val trackerAverages: List<TrackedItemAverage> = emptyList(),
 
     val weightStats: WeightSummaryStats = WeightSummaryStats(),
     val bodyFatStats: BodyFatSummaryStats = BodyFatSummaryStats(),
@@ -134,6 +154,13 @@ private data class BaseProgressData(
     /** #75: nutrients the averages card shows, canonical order (macros excluded). */
     val averagesSelection: List<HomeTopNutrient> =
         HomeTopNutrient.averagesSelectionFromStorage(HomeTopNutrient.DefaultAveragesStorage),
+    val waterTrackingEnabled: Boolean = false,
+    val nicotineTrackingEnabled: Boolean = false,
+    val caffeineTrackingEnabled: Boolean = false,
+    val waterEntries: List<WaterEntry> = emptyList(),
+    val nicotineEntries: List<NicotineEntry> = emptyList(),
+    val caffeineEntries: List<CaffeineEntry> = emptyList(),
+    val hiddenTrackedItems: Set<String> = emptySet(),
 )
 
 class ProgressViewModel(private val container: AppContainer) : ViewModel() {
@@ -156,11 +183,14 @@ class ProgressViewModel(private val container: AppContainer) : ViewModel() {
     val wellness: StateFlow<List<DailyWellness>> = _wellness.asStateFlow()
 
     /** Native BLE scale sync (vendored openScale drivers). One run at a time;
-     *  entries land through the normal repository Flows, so no extra refresh. */
+     *  entries land through the normal repository Flows, so no extra refresh.
+     *  The run itself is hosted by [app.chompass.scale.ScaleSyncService] (a
+     *  connectedDevice foreground service), so it survives the sheet and the
+     *  screen turning off; this method only starts that host. */
     val scaleSyncState: StateFlow<ScaleSyncState> = container.scaleSyncController.state
 
-    fun startScaleSync() {
-        viewModelScope.launch { container.scaleSyncController.startAndAwait() }
+    fun startScaleSync(context: android.content.Context) {
+        app.chompass.scale.ScaleSyncService.start(context)
     }
 
     fun cancelScaleSync() {
@@ -202,15 +232,36 @@ class ProgressViewModel(private val container: AppContainer) : ViewModel() {
                 container.bodyCompositionRepository.entries,
                 container.prefs.progressMeasurementSites,
             ) { measures, compositions, sites -> Triple(measures, compositions, sites) },
-        ) { profile, weights, bodyFats, bodyExtras ->
+            combine(
+                combine(
+                    container.prefs.waterTrackingEnabled,
+                    container.prefs.nicotineTrackingEnabled,
+                    container.prefs.caffeineTrackingEnabled,
+                ) { water, nicotine, caffeine -> Triple(water, nicotine, caffeine) },
+                combine(
+                    container.waterRepository.entries,
+                    container.nicotineRepository.entries,
+                    container.caffeineRepository.entries,
+                ) { water, nicotine, caffeine -> Triple(water, nicotine, caffeine) },
+                container.prefs.progressHiddenTrackedItems,
+            ) { enabled, entries, hidden -> Triple(enabled, entries, hidden) },
+        ) { profile, weights, bodyFats, bodyExtras, trackerExtras ->
             val (measures, compositions, measurementSites) = bodyExtras
+            val (enabled, entries, hiddenTrackedItems) = trackerExtras
             BaseProgressData(
                 profile = profile,
                 entries = weights,
                 bodyFatEntries = bodyFats,
                 bodyMeasurements = measures,
                 compositions = compositions,
-                measurementSites = measurementSites
+                measurementSites = measurementSites,
+                waterTrackingEnabled = enabled.first,
+                nicotineTrackingEnabled = enabled.second,
+                caffeineTrackingEnabled = enabled.third,
+                waterEntries = entries.first,
+                nicotineEntries = entries.second,
+                caffeineEntries = entries.third,
+                hiddenTrackedItems = hiddenTrackedItems,
             )
         }.let { base ->
             combine(
@@ -238,7 +289,10 @@ class ProgressViewModel(private val container: AppContainer) : ViewModel() {
                 combine(
                     container.prefs.progressOverlaySeries,
                     container.prefs.progressCalorieOverlay,
-                ) { series, calorie -> series to calorie },
+                    container.prefs.progressShowGoalRule,
+                ) { series, calorie, showGoalRule ->
+                    Triple(series, calorie, showGoalRule)
+                },
             ) { base, weightUnit, selectedRange, showGoalReached, overlayPrefs ->
                 ProgressRangeInputs(
                     base = base,
@@ -247,6 +301,7 @@ class ProgressViewModel(private val container: AppContainer) : ViewModel() {
                     showGoalReached = showGoalReached,
                     overlaySeriesPref = overlayPrefs.first,
                     calorieOverlayPref = overlayPrefs.second,
+                    showGoalRule = overlayPrefs.third,
                 )
             }.flatMapLatest { inputs ->
                 val (start, end) = inputs.selectedRange.dateRange()
@@ -266,6 +321,7 @@ class ProgressViewModel(private val container: AppContainer) : ViewModel() {
                         untrackedDays = untracked,
                         overlaySeriesPref = inputs.overlaySeriesPref,
                         calorieOverlayPref = inputs.calorieOverlayPref,
+                        showGoalRule = inputs.showGoalRule,
                     )
                 }
             }.mapLatest { snapshot ->
@@ -388,6 +444,7 @@ private data class ProgressRangeInputs(
     val showGoalReached: Boolean,
     val overlaySeriesPref: Set<String>?,
     val calorieOverlayPref: String?,
+    val showGoalRule: Boolean,
 )
 
 private data class ProgressSnapshot(
@@ -402,6 +459,8 @@ private data class ProgressSnapshot(
     val overlaySeriesPref: Set<String>? = null,
     /** Calorie-card metric overlay; null = apply the data-dependent default. */
     val calorieOverlayPref: String? = null,
+    /** Codeberg #190: show the goal line in the weight chart; default on. */
+    val showGoalRule: Boolean = true,
 )
 
 private fun ProgressSnapshot.toUiState(anchorDate: LocalDate = LocalDate.now()): ProgressUiState {
@@ -431,6 +490,36 @@ private fun ProgressSnapshot.toUiState(anchorDate: LocalDate = LocalDate.now()):
         .filter { it.date.toString() !in untrackedDays }
         .associate { it.date to it }
     val (rangeStartDay, rangeEndDay) = selectedRange.dateRange(anchorDate)
+    val waterByDay = mutableMapOf<LocalDate, Double>()
+    val nicotineByDay = mutableMapOf<LocalDate, Double>()
+    val caffeineByDay = mutableMapOf<LocalDate, Double>()
+    fun MutableMap<LocalDate, Double>.add(day: LocalDate, amount: Double) {
+        if (amount > 0 && day in rangeStartDay..rangeEndDay && day.toString() !in untrackedDays) {
+            this[day] = getOrDefault(day, 0.0) + amount
+        }
+    }
+    base.waterEntries.forEach { waterByDay.add(it.date.atZone(zone).toLocalDate(), it.milliliters.toDouble()) }
+    base.nicotineEntries.forEach { nicotineByDay.add(it.date.atZone(zone).toLocalDate(), it.count.toDouble()) }
+    base.caffeineEntries.forEach { caffeineByDay.add(it.date.atZone(zone).toLocalDate(), it.mg) }
+    foodByDay.forEach { (day, totals) -> caffeineByDay.add(day, totals.caffeine) }
+    fun dailyAverage(byDay: Map<LocalDate, Double>): Pair<Double, Int> {
+        val amounts = byDay.values.filter { it > 0 }
+        return if (amounts.isEmpty()) 0.0 to 0 else amounts.average() to amounts.size
+    }
+    val availableTrackers = buildList {
+        if (base.waterTrackingEnabled || base.waterEntries.isNotEmpty()) add(TrackedItemType.WATER)
+        if (base.nicotineTrackingEnabled || base.nicotineEntries.isNotEmpty()) add(TrackedItemType.NICOTINE)
+        if (base.caffeineTrackingEnabled || base.caffeineEntries.isNotEmpty()) add(TrackedItemType.CAFFEINE)
+    }.filter { it.storageId !in base.hiddenTrackedItems }
+    val trackerAverages = buildList {
+        fun addAverage(type: TrackedItemType, byDay: Map<LocalDate, Double>) {
+            val (average, days) = dailyAverage(byDay)
+            add(TrackedItemAverage(type, average, days))
+        }
+        if (TrackedItemType.WATER in availableTrackers) addAverage(TrackedItemType.WATER, waterByDay)
+        if (TrackedItemType.NICOTINE in availableTrackers) addAverage(TrackedItemType.NICOTINE, nicotineByDay)
+        if (TrackedItemType.CAFFEINE in availableTrackers) addAverage(TrackedItemType.CAFFEINE, caffeineByDay)
+    }
     // "All" spans from the first logged day to today, not the fixed 10-year
     // window — an axis padded with years of empty slots read as a broken
     // range. Fixed ranges keep their windows.
@@ -527,6 +616,8 @@ private fun ProgressSnapshot.toUiState(anchorDate: LocalDate = LocalDate.now()):
         macroAverages = macroAverages,
         nutrientAverages = nutrientAverages,
         showNutrientAverages = base.showNutrientAverages,
+        showGoalRule = showGoalRule,
+        trackerAverages = trackerAverages,
         untrackedDays = untrackedDays,
         dayTypeByDay = dayTypeByDay,
 
@@ -598,6 +689,14 @@ internal fun buildProgressPreviewUiState(
     goalJournal: List<GoalJournalEntry> = emptyList(),
     /** #75: which nutrients the averages card shows; default = the original trio. */
     averagesSelection: Collection<String> = HomeTopNutrient.DefaultAveragesStorage,
+    /** Tracker inputs for preview parity with the live snapshot. */
+    waterTrackingEnabled: Boolean = false,
+    nicotineTrackingEnabled: Boolean = false,
+    caffeineTrackingEnabled: Boolean = false,
+    waterEntries: List<WaterEntry> = emptyList(),
+    nicotineEntries: List<NicotineEntry> = emptyList(),
+    caffeineEntries: List<CaffeineEntry> = emptyList(),
+    hiddenTrackedItems: Set<String> = emptySet(),
     /** Sample untracked days for preview parity with the live snapshot. */
     untrackedDays: Set<String> = emptySet(),
 ): ProgressUiState {
@@ -614,6 +713,13 @@ internal fun buildProgressPreviewUiState(
             measurementSites = measurementSites.map { it.storageId }.toSet(),
             goalJournal = goalJournal,
             averagesSelection = HomeTopNutrient.averagesSelectionFromStorage(averagesSelection),
+            waterTrackingEnabled = waterTrackingEnabled,
+            nicotineTrackingEnabled = nicotineTrackingEnabled,
+            caffeineTrackingEnabled = caffeineTrackingEnabled,
+            waterEntries = waterEntries,
+            nicotineEntries = nicotineEntries,
+            caffeineEntries = caffeineEntries,
+            hiddenTrackedItems = hiddenTrackedItems,
         ),
         dailyTotals = aggregateFoodEntriesByDay(
             foods.filter { it.timestamp in rangeStart..rangeEnd }

@@ -264,4 +264,3 @@ object ChatGptResponsesClient {
         return text.toString().takeIf(String::isNotBlank)?.trim()
     }
 }
-

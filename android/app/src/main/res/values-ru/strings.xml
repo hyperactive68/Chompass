@@ -914,6 +914,7 @@
     <string name="cd_open_camera">Открыть камеру</string>
     <string name="cd_close_camera">Закрыть камеру</string>
     <string name="cd_open_gallery">Открыть галерею</string>
+    <string name="cd_camera_shutter">Сделать фото</string>
     
     <string name="unit_mcg">мкг</string>
     <string name="home_food_log">Журнал питания</string>
@@ -1636,9 +1637,19 @@
     <string name="grounding_validation_notes">Примечания: %1$s</string>
     <string name="home_active_burn_a11y">Активный расход %1$d</string>
     <string name="home_active_burn_caption">%1$d активных</string>
-    <string name="home_active_burn_caption_progress">%1$d из %2$d активных</string>
-    <string name="home_active_burn_caption_progress_day_type">%1$d of %2$d active · %3$s</string>
-    <string name="home_active_burn_over">+%1$d сверх обычного</string>
+    <string name="home_active_burn_caption_progress">%1$d/%2$d активных</string>
+    <string name="home_budget_class_usual">Обычный день</string>
+    <string name="home_budget_class_lean_lighter">Ближе к лёгкому</string>
+    <string name="home_budget_class_lean_harder">Ближе к тяжёлому</string>
+    <string name="home_budget_class_lighter">Лёгкий день</string>
+    <string name="home_budget_class_harder">Тяжёлый день</string>
+    <string name="home_budget_class_lean_type">Ближе к %1$s</string>
+    <string name="home_budget_class_type">День %1$s</string>
+    <string name="home_budget_class_sheet_hourly">Мало истории за этот час. Цель остаётся обычным днём.</string>
+    <string name="home_budget_class_sheet_usual">Ещё не классифицировано. Цель — обычный день, не угаданный тренировочный.</string>
+    <string name="home_budget_class_sheet_moved">Классификация по последним 28 дням. Сохранённая цель не меняется.</string>
+    <string name="home_active_burn_caption_progress_day_type">%1$d/%2$d активных · %3$s</string>
+    <string name="home_active_burn_over">+%1$d сверх</string>
     <string name="home_active_burn_over_a11y">Активный расход %1$d, на %2$d больше обычного дня</string>
     <string name="home_active_burn_progress_a11y">Активный расход %1$d, обычно %2$d</string>
     <string name="home_active_burn_progress_day_type_a11y">Active burn %1$d, %2$d typical for %3$s days</string>
@@ -1707,8 +1718,20 @@
     <string name="onboarding_privacy_ondevice_title">Локальная Gemma 4 (полная приватность)</string>
     <string name="onboarding_privacy_title">Приватность и твой ИИ-провайдер</string>
     <string name="onboarding_safety_water">Цели гидратации и напоминания о питье лишь приблизительные оценки, а не медицинские советы. Жажда подскажет лучше любого приложения, а врач знает, что подходит именно тебе.</string>
-    <string name="paste_busy">Вставка…</string>
-    <string name="paste_n_entries">Вставить %1$d записей</string>
+    <plurals name="paste_n_entries">
+        <item quantity="one">Вставить 1 запись</item>
+        <item quantity="few">Вставить %1$d записи</item>
+        <item quantity="many">Вставить %1$d записей</item>
+        <item quantity="other">Вставить %1$d записей</item>
+    </plurals>
+    <plurals name="paste_complete_n">
+        <item quantity="one">Вставлена 1 запись</item>
+        <item quantity="few">Вставлено %1$d записи</item>
+        <item quantity="many">Вставлено %1$d записей</item>
+        <item quantity="other">Вставлено %1$d записей</item>
+    </plurals>
+    <string name="paste_at_original_times">Вставить в исходное время</string>
+    <string name="paste_at_current_time">Вставить в текущее время</string>
     <string name="progress_chart_loading">Загрузка графика…</string>
     <string name="progress_wellness_hydration_format">%1$s мл</string>
     <string name="progressive_meal_add_another">Добавить ещё</string>
@@ -1996,6 +2019,7 @@
     <string name="feet_inches_format">%1$d\' %2$d\"</string>
     <string name="food_search_source_off">Open Food Facts</string>
     <string name="add_food_off_unreachable">Open Food Facts сейчас недоступен. Сохранённые и офлайн-результаты всё равно показываются.</string>
+    <string name="add_food_off_no_match">Open Food Facts не вернул совпадений для этого запроса.</string>
     <string name="food_search_source_usda">USDA</string>
     <string name="ft_label_format">%1$d ft</string>
     <string name="home_macro_chip_format">%1$s %2$dg</string>
@@ -2200,6 +2224,9 @@
     <string name="home_day_type_chip_a11y">Тип дня сегодня: %1$s. Нажмите, чтобы сменить.</string>
     <string name="day_type_sheet_title">Тип дня</string>
     <string name="day_type_sheet_subtitle">Переключить цели сегодняшнего дня на другой тип дня.</string>
+    <string name="home_day_type_diverge_named">Этот час больше похож на %1$s, а не на %2$s.</string>
+    <string name="home_day_type_diverge_unnamed">Этот час не похож на день «%1$s».</string>
+    <string name="cd_dismiss_day_type_prompt">Закрыть подсказку о типе дня</string>
     <string name="day_type_base_goals">Базовые цели</string>
     <string name="day_type_clear_override">Убрать исключение на сегодня</string>
     <string name="day_type_edit_settings">Изменить типы дней</string>
@@ -2584,6 +2611,9 @@
         <item>калории</item>
         <item>kcal</item>
         <item>цель по калориям</item>
+        <item>лимит</item>
+        <item>вручную</item>
+        <item>свой</item>
     </string-array>
     <string-array name="settings_search_kw_macro_protein">
         <item>макрос</item>

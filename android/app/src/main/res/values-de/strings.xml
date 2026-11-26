@@ -726,6 +726,7 @@ für dich ein</string>
 
     <string name="food_search_source_off">Open Food Facts</string>
     <string name="add_food_off_unreachable">Open Food Facts ist gerade nicht erreichbar. Gespeicherte und Offline-Ergebnisse werden weiterhin angezeigt.</string>
+    <string name="add_food_off_no_match">Open Food Facts liefert keine Treffer für diese Suche.</string>
 
     <string name="food_search_source_usda">USDA</string>
 
@@ -1514,6 +1515,8 @@ für dich ein</string>
     <string name="progress_macro_averages">Makro-Durchschnittswerte</string>
 
     <string name="progress_nutrient_averages">Nährstoff-Durchschnitt</string>
+    <string name="progress_trackers_title">Verfolgte Werte</string>
+    <string name="progress_trackers_subtitle">Durchschnitt pro erfasstem Tag</string>
 
 
     <string name="progress_macro_progress_format">%1$dg / %2$dg</string>
@@ -1966,6 +1969,8 @@ für dich ein</string>
     <string name="settings_progress_nutrient_averages_warning_body">Open Food Facts und die Fotoanalyse lassen diese Werte oft weg oder schätzen sie, wenn das Etikett sie nicht nennt. Der Durchschnitt zählt nur das Geloggte und kann daher danebenliegen.</string>
 
     <string name="settings_progress_nutrient_averages_confirm">Anzeigen</string>
+    <string name="settings_progress_show_goal_rule">Ziellinie anzeigen</string>
+    <string name="settings_progress_show_goal_rule_subtitle">Ein streckt das Gewichtsdiagramm bis zu deinem Zielgewicht. Aus zoomt es auf deine erfassten Gewichte, damit kleine Änderungen besser zu sehen sind.</string>
 
 
     <string name="settings_meal_times_enabled">Mahlzeiten nach Tageszeit vorschlagen</string>
@@ -2514,6 +2519,15 @@ für dich ein</string>
 
     <string name="notif_channel_daily_desc">Tägliche Zusammenfassung deiner Kalorien und Makronährstoffe am Ende des Tages.</string>
 
+    <string name="notif_channel_ongoing">Dauerhafte Übersicht</string>
+
+    <string name="notif_channel_ongoing_desc">Kalorien und Makros von heute bleiben in den Benachrichtigungen sichtbar.</string>
+
+    <string name="notif_ongoing_title">%1$s von %2$s %3$s</string>
+    <string name="notif_ongoing_remaining">Noch %1$s %2$s</string>
+    <string name="notif_ongoing_over">%1$s %2$s drüber</string>
+    <string name="notif_ongoing_goal_reached">Tagesziel erreicht</string>
+
     <string name="notif_channel_weight_goal">Gewichtsziel</string>
 
     <string name="notif_channel_weight_goal_desc">Feier, wenn du dein Zielgewicht erreichst.</string>
@@ -2830,6 +2844,9 @@ für dich ein</string>
     <string name="untracked_sheet_kcal_optional">Grobe Kalorien (optional)</string>
     <string name="day_type_sheet_title">Tagestyp</string>
     <string name="day_type_sheet_subtitle">Wechsle die heutigen Ziele zu einem anderen Tagestyp.</string>
+    <string name="home_day_type_diverge_named">Diese Stunde wirkt eher wie %1$s, nicht wie %2$s.</string>
+    <string name="home_day_type_diverge_unnamed">Diese Stunde wirkt nicht wie ein %1$s-Tag.</string>
+    <string name="cd_dismiss_day_type_prompt">Tagestyp-Hinweis schließen</string>
     <string name="day_type_targets_summary">%1$s %5$s · %2$dP %3$dC %4$dF</string>
     <string name="day_type_active_typical">≈ %1$d %2$s aktiv typisch</string>
     <string name="day_type_base_goals">Basisziele</string>
@@ -2904,13 +2921,23 @@ für dich ein</string>
 
     <string name="home_active_burn_a11y">Aktiver Kalorienverbrauch %1$d</string>
 
-    <string name="home_active_burn_caption_progress">%1$d von %2$d aktiv</string>
-    <string name="home_active_burn_caption_progress_day_type">%1$d von %2$d aktiv · %3$s</string>
+    <string name="home_active_burn_caption_progress">%1$d/%2$d aktiv</string>
+    <string name="home_budget_class_usual">Üblicher Tag</string>
+    <string name="home_budget_class_lean_lighter">Eher leichter</string>
+    <string name="home_budget_class_lean_harder">Eher härter</string>
+    <string name="home_budget_class_lighter">Leichter Tag</string>
+    <string name="home_budget_class_harder">Härterer Tag</string>
+    <string name="home_budget_class_lean_type">Eher %1$s</string>
+    <string name="home_budget_class_type">%1$s-Tag</string>
+    <string name="home_budget_class_sheet_hourly">Noch zu wenig Stundenverlauf. Ziel bleibt dein üblicher Tag.</string>
+    <string name="home_budget_class_sheet_usual">Noch nicht eingeordnet. Ziel ist dein üblicher Tag, kein geratener Trainingstag.</string>
+    <string name="home_budget_class_sheet_moved">Eingeordnet aus den letzten 28 Tagen. Dein gespeichertes Ziel bleibt.</string>
+    <string name="home_active_burn_caption_progress_day_type">%1$d/%2$d aktiv · %3$s</string>
 
     <string name="home_active_burn_progress_a11y">Aktiver Kalorienverbrauch %1$d, typischer Wert %2$d</string>
     <string name="home_active_burn_progress_day_type_a11y">Aktiver Kalorienverbrauch %1$d, typischer Wert %2$d an %3$s-Tagen</string>
 
-    <string name="home_active_burn_over">+%1$d über dem typischen Wert</string>
+    <string name="home_active_burn_over">+%1$d drüber</string>
 
     <string name="home_active_burn_over_a11y">Aktiver Kalorienverbrauch %1$d, %2$d mehr als an einem typischen Tag</string>
 
@@ -2982,9 +3009,17 @@ für dich ein</string>
 
     <string name="cd_dismiss_paste">Einfügen abbrechen</string>
 
-    <string name="paste_n_entries">%1$d Einträge einfügen</string>
+    <plurals name="paste_n_entries">
+        <item quantity="one">1 Eintrag einfügen</item>
+        <item quantity="other">%1$d Einträge einfügen</item>
+    </plurals>
 
-    <string name="paste_busy">Einfügen…</string>
+    <plurals name="paste_complete_n">
+        <item quantity="one">1 Eintrag eingefügt</item>
+        <item quantity="other">%1$d Einträge eingefügt</item>
+    </plurals>
+    <string name="paste_at_original_times">Zu den ursprünglichen Zeiten einfügen</string>
+    <string name="paste_at_current_time">Zur aktuellen Uhrzeit einfügen</string>
 
     <string name="recovered_review_chip">Wiederhergestellte Analyse: %1$s</string>
 
@@ -3042,6 +3077,7 @@ für dich ein</string>
     <string name="cd_close_camera">Kamera schließen</string>
 
     <string name="cd_open_gallery">Galerie öffnen</string>
+    <string name="cd_camera_shutter">Foto aufnehmen</string>
 
     <string name="unit_mcg">mcg</string>
 
@@ -3238,6 +3274,7 @@ für dich ein</string>
     <string name="settings_notif_water_reminder">Erinnerung zum Wassertrinken</string>
 
     <string name="settings_notif_goal_alerts">Benachrichtigungen bei Erreichen des Ziels</string>
+    <string name="settings_notif_ongoing">Dauerhafte Übersicht</string>
 
     <string name="settings_notif_app_updates">App-Updates</string>
 
@@ -4032,6 +4069,9 @@ für dich ein</string>
         <item>Kalorien</item>
         <item>kcal</item>
         <item>Kalorienziel</item>
+        <item>Limit</item>
+        <item>manuell</item>
+        <item>benutzerdefiniert</item>
     </string-array>
     <string-array name="settings_search_kw_macro_protein">
         <item>Makro</item>
@@ -4196,6 +4236,13 @@ für dich ein</string>
         <item>Nährstoff</item>
         <item>Durchschnitte</item>
     </string-array>
+    <string-array name="settings_search_kw_progress_show_goal_rule">
+        <item>Ziel</item>
+        <item>Ziellinie</item>
+        <item>Diagramm</item>
+        <item>Gewicht</item>
+        <item>Gewichtskurve</item>
+    </string-array>
     <string-array name="settings_search_kw_week_starts">
         <item>Kalender</item>
         <item>Montag</item>
@@ -4240,6 +4287,7 @@ für dich ein</string>
         <item>Erinnerungen</item>
         <item>Serien</item>
         <item>Zusammenfassung</item>
+        <item>dauerhaft</item>
         <item>Gewichtserinnerung</item>
         <item>Akku</item>
     </string-array>
@@ -4420,4 +4468,15 @@ für dich ein</string>
     <string name="progress_sync_scale_user_new">Als neuen Benutzer registrieren</string>
     <string name="progress_sync_scale_consent_slot">Platz %1$d an %2$s braucht die 4-stellige PIN von der Waage.</string>
     <string name="progress_sync_scale_consent_hint">PIN (4 Ziffern)</string>
-    </resources>
+    <string name="progress_sync_scale_empty_slots">Auf der Waage sind noch keine Profile gespeichert. Leg eins direkt an der Waage an (SET-Taste, Platz wählen, 4-stelligen Code notieren) und versuch es erneut — oder registriere hier ein neues Profil.</string>
+    <string name="progress_sync_scale_consent_rejected">Die Waage hat diesen Code abgelehnt. Prüfe den 4-stelligen Code, den die Waage für diesen Platz zeigt. Falls der Platz über die Hersteller-App der Waage eingerichtet wurde, registriere stattdessen einen neuen Benutzer.</string>
+    <string name="progress_sync_scale_bt_unpair">Die Bluetooth-Kopplung der Waage ist in einem fehlerhaften Zustand. Entferne (vergiss) die Waage in den Android-Bluetooth-Einstellungen und versuch es erneut.</string>
+    <string name="progress_sync_scale_bt_settings">Bluetooth-Einstellungen</string>
+    <string name="notif_channel_scale_sync">Waage-Sync</string>
+    <string name="notif_channel_scale_sync_desc">Wird angezeigt, während ein Bluetooth-Waage-Sync läuft</string>
+    <string name="notif_scale_sync_title">Waage-Sync</string>
+    <string name="notif_scale_sync_scanning">Suche nach deiner Waage …</string>
+    <string name="notif_scale_sync_reading">Synchronisiere mit %1$s …</string>
+    <string name="notif_scale_sync_awaiting_user">Wähle den Profil-Platz auf deinem Telefon</string>
+    <string name="notif_scale_sync_awaiting_consent">Gib den 4-stelligen Code der Waage auf deinem Telefon ein</string>
+</resources>
