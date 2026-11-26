@@ -1515,6 +1515,8 @@ für dich ein</string>
     <string name="progress_macro_averages">Makro-Durchschnittswerte</string>
 
     <string name="progress_nutrient_averages">Nährstoff-Durchschnitt</string>
+    <string name="progress_trackers_title">Verfolgte Werte</string>
+    <string name="progress_trackers_subtitle">Durchschnitt pro erfasstem Tag</string>
 
 
     <string name="progress_macro_progress_format">%1$dg / %2$dg</string>

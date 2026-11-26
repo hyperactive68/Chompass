@@ -1,5 +1,5 @@
 // @ts-check
-import { weights, foodEntries, profile as profileStore, bodyFat, bodyComposition, prefs, goalJournal, untrackedDays } from "../lib/db.js";
+import { weights, foodEntries, profile as profileStore, bodyFat, bodyComposition, water, nicotine, caffeine, prefs, goalJournal, untrackedDays } from "../lib/db.js";
 import { dailyTargets, estimatedSkeletalMuscleMassKgFromBody } from "../lib/chompass-core/formulas.js";
 import { journalAverage } from "../lib/chompass-core/macro-plan.js";
 import { phaseAdherence } from "../lib/chompass-core/goal-phase-edit.js";
@@ -21,6 +21,7 @@ import {
 import { escapeHtml } from "../lib/ui/html.js";
 import { shiftDate, todayIso } from "../lib/date.js";
 import { chevronRight } from "../lib/icons.js";
+import { trackerDailyAverage } from "../lib/chompass-core/tracker-averages.js";
 
 const RANGES = [
   { id: "1W", labelKey: "progress.range_1w", days: 7 },
@@ -107,7 +108,7 @@ export class ProgressView extends HTMLElement {
   }
 
   async render() {
-    const [allWeights, allEntries, allBf, allComp, prof, appPrefs, journal, untrackedRows] = await Promise.all([
+    const [allWeights, allEntries, allBf, allComp, prof, appPrefs, journal, untrackedRows, waterLogs, nicotineLogs, caffeineLogs] = await Promise.all([
       weights.all(),
       foodEntries.all(),
       bodyFat.all(),
@@ -116,6 +117,9 @@ export class ProgressView extends HTMLElement {
       prefs.load(),
       goalJournal.all(),
       untrackedDays.all(),
+      water.all(),
+      nicotine.all(),
+      caffeine.all(),
     ]);
     const untrackedSet = new Set(untrackedRows.map((r) => r.date));
     this.rangeId = resolveProgressRangeId(
@@ -187,6 +191,39 @@ export class ProgressView extends HTMLElement {
     }
     // Match Android: one bar per logged non-zero day (no calendar zero-padding).
     const today = todayIso();
+    const trackerAverage = (logs) => trackerDailyAverage(logs, startIso, today, untrackedSet);
+    const trackerRows = [];
+    const hiddenTrackers = new Set(appPrefs.progressHiddenTrackedItems ?? []);
+    if (appPrefs.showWater === true || waterLogs.length) {
+      if (!hiddenTrackers.has("water")) {
+        trackerRows.push({
+          label: t("diary.water"),
+          unit: "ml",
+          ...trackerAverage(waterLogs.map((log) => ({ date: log.date, amount: log.amountMl }))),
+        });
+      }
+    }
+    if (appPrefs.showNicotine === true || nicotineLogs.length) {
+      if (!hiddenTrackers.has("nicotine")) {
+        trackerRows.push({
+          label: t("diary.nicotine"),
+          unit: "",
+          ...trackerAverage(nicotineLogs.map((log) => ({ date: log.date, amount: log.count ?? 1 }))),
+        });
+      }
+    }
+    if (appPrefs.showCaffeine === true || caffeineLogs.length) {
+      if (!hiddenTrackers.has("caffeine")) {
+        trackerRows.push({
+          label: t("diary.caffeine"),
+          unit: "mg",
+          ...trackerAverage([
+            ...caffeineLogs.map((log) => ({ date: log.date, amount: log.mg })),
+            ...allEntries.map((entry) => ({ date: entry.date, amount: entry.caffeineMg })),
+          ]),
+        });
+      }
+    }
     const calorieEntries = [...totalsByDate.entries()]
       .filter(([, t]) => t.calories !== 0)
       .sort(([a], [b]) => a.localeCompare(b));
@@ -604,6 +641,23 @@ export class ProgressView extends HTMLElement {
             return macroRow(n.label, macroAvg(key), nutrientGoals[key], n.tubeCss, n.unit);
           })
           .join("")}
+      </div>`
+          : ""
+      }
+      ${
+        trackerRows.length
+          ? `<div class="card card--glass">
+        <h2 class="progress-title">${t("progress.trackers_title")}</h2>
+        <p class="progress-subtitle">${t("progress.trackers_subtitle")}</p>
+        <div class="stat-badges">
+          ${trackerRows
+            .map(
+              (row) => `<div class="stat-badge"><strong>${
+                row.loggedDays ? `${formatNumber(row.average, { maximumFractionDigits: 0 })} ${row.unit}`.trim() : "—"
+              }</strong>${row.label}</div>`,
+            )
+            .join("")}
+        </div>
       </div>`
           : ""
       }

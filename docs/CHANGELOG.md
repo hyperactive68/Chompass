@@ -10,6 +10,8 @@ Style: entries follow the release-text style guide (maintainer-local, not publis
 
 - **The weight chart can hide the goal line** (Android and web app): the chart stretches to include the goal, so small changes look flat while the goal is far away. A new *Show goal line* switch turns the line off; the chart then zooms to the logged weights. Find it in *Settings → Display → Customize progress* on Android and under *Settings → App & Display → Units & schedule* in the web app. It is on by default. Closes Codeberg [#190](https://codeberg.org/fitguy/Chompass/issues/190) by @NiklasMM
 
+- **Trackers get a Progress card** (Android and web app): turn on water, nicotine, or caffeine tracking and Progress shows their average per logged day for the chosen 1W, 1M, 3M, 6M, 1Y, or All range. Caffeine follows the Home total, including caffeine from food entries. Settings → Display → Customize progress controls which rows appear, offering only trackers that are on now or have past logs. Closes Codeberg [#154](https://codeberg.org/fitguy/Chompass/issues/154)
+
 ### Changed
 
 - **Tapping a saved food in Add Food opens the amount right away** (Android): the row is logged at its last or default amount and its edit sheet opens with the serving amount focused, so correcting it is one tap on the keyboard instead of finding the row, opening it and scrolling to the amount. Save applies the change to that row; closing the sheet keeps the logged amount. The Saved Meals sheet behind More options still logs on tap without opening a sheet, and a long-press still reviews first. By DontBlameMe. Closes Codeberg [#159](https://codeberg.org/fitguy/Chompass/issues/159)

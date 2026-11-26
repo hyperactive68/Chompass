@@ -2124,6 +2124,12 @@ body:has(coach-view) .toast {
   font-weight: 600;
 }
 
+.progress-subtitle {
+  margin: 0.2rem 0 0.75rem;
+  font-size: 0.78rem;
+  color: color-mix(in srgb, var(--text) var(--opacity-muted), transparent);
+}
+
 .progress-avg {
   font-size: 0.94rem;
   font-weight: 500;

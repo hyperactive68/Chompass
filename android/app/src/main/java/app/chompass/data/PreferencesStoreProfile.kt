@@ -283,6 +283,13 @@ internal suspend fun PreferencesStore.setProgressNutrientAveragesSelectionImpl(k
     }
 }
 
+/** #154: tracker rows the user hid on Progress; empty = show every available tracker. */
+internal val PreferencesStore.progressHiddenTrackedItemsImpl: Flow<Set<String>> get() =
+    dataStore.data.map { it[Keys.PROGRESS_HIDDEN_TRACKED_ITEMS] ?: emptySet() }
+internal suspend fun PreferencesStore.setProgressHiddenTrackedItemsImpl(keys: Set<String>) {
+    dataStore.edit { it[Keys.PROGRESS_HIDDEN_TRACKED_ITEMS] = keys }
+}
+
     /** "RECENTS" | "FREQUENT" | "FAVORITES". */
 internal val PreferencesStore.lastSavedMealsSegmentImpl: Flow<String> get() = dataStore.data.map { it[Keys.LAST_SAVED_MEALS_SEGMENT] ?: "RECENTS" }
 internal suspend fun PreferencesStore.setLastSavedMealsSegmentImpl(v: String) { dataStore.edit { it[Keys.LAST_SAVED_MEALS_SEGMENT] = v } }

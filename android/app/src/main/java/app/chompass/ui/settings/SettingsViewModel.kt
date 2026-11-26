@@ -275,6 +275,8 @@ data class SettingsUiState(
         app.chompass.models.HomeTopNutrient.DefaultAveragesStorage,
     /** Codeberg #190: show the goal line in the Progress weight chart; default on. */
     val progressShowGoalRule: Boolean = true,
+    /** #154: tracker rows hidden from the Progress averages card. */
+    val progressHiddenTrackedItems: Set<String> = emptySet(),
 
     val userContext: String = "",
     val fallbackEnabled: Boolean = true,
@@ -700,6 +702,7 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
                     progressNutrientAverages = snap.progressNutrientAverages,
                     progressNutrientAveragesSelection = snap.progressNutrientAveragesSelection,
                     progressShowGoalRule = snap.progressShowGoalRule,
+                    progressHiddenTrackedItems = snap.progressHiddenTrackedItems,
 
                     userContext = snap.userContext,
                     fallbackEnabled = snap.fallbackEnabled,
@@ -1211,6 +1214,10 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
     fun setProgressNutrientAveragesSelection(keys: Set<String>) = updateUiPref(
         { container.prefs.setProgressNutrientAveragesSelection(keys) },
         { copy(progressNutrientAveragesSelection = keys) },
+    )
+    fun setProgressHiddenTrackedItems(keys: Set<String>) = updateUiPref(
+        { container.prefs.setProgressHiddenTrackedItems(keys) },
+        { copy(progressHiddenTrackedItems = keys) },
     )
 
     fun setProgressShowGoalRule(v: Boolean) = updateUiPref(

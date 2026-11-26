@@ -6,6 +6,9 @@ import {
   weights,
   bodyFat,
   measurements,
+  water,
+  nicotine,
+  caffeine,
   dailyNotes,
   prefs,
   goalJournal,
@@ -1269,7 +1272,18 @@ export class SettingsView extends HTMLElement {
   }
 
   async renderUnits() {
-    const p = await prefs.load();
+    const [p, waterLogs, nicotineLogs, caffeineLogs] = await Promise.all([
+      prefs.load(),
+      water.all(),
+      nicotine.all(),
+      caffeine.all(),
+    ]);
+    const hiddenTrackers = new Set(p.progressHiddenTrackedItems ?? []);
+    const trackerToggles = [
+      { id: "water", label: t("diary.water"), available: p.showWater === true || waterLogs.length > 0 },
+      { id: "nicotine", label: t("diary.nicotine"), available: p.showNicotine === true || nicotineLogs.length > 0 },
+      { id: "caffeine", label: t("diary.caffeine"), available: p.showCaffeine === true || caffeineLogs.length > 0 },
+    ].filter((toggle) => toggle.available);
     this.innerHTML = `
       ${subpageBar(t("settings.app.units"), { backHref: SETTINGS_PARENT.units })}
       <form class="entry-form card" id="units-form">
@@ -1367,6 +1381,20 @@ export class SettingsView extends HTMLElement {
             })()}
           </fieldset>
 
+          ${trackerToggles.length
+            ? `<fieldset class="nutrient-picker" id="trackedItemsPicker">
+                <legend class="section-label">${escapeHtml(t("progress.trackers_title"))}</legend>
+                ${trackerToggles
+                  .map(
+                    (toggle) => `
+                    <label class="nutrient-picker__row">
+                      <input type="checkbox" name="progressTrackedItems" value="${toggle.id}" ${hiddenTrackers.has(toggle.id) ? "" : "checked"} />
+                      <span>${escapeHtml(toggle.label)}</span>
+                    </label>`,
+                  )
+                  .join("")}
+              </fieldset>`
+            : ""}
         </div>
         <p class="section-label">${t("settings.units.meal_times")}</p>
         <div class="field-row field-row--2">
@@ -1382,6 +1410,22 @@ export class SettingsView extends HTMLElement {
     this.querySelector("#units-form")?.addEventListener("submit", async (ev) => {
       ev.preventDefault();
       const fd = new FormData(/** @type {HTMLFormElement} */ (ev.target));
+      const shownTrackedItems = new Set(
+        [
+          .../** @type {NodeListOf<HTMLInputElement>} */ (
+            (/** @type {HTMLFormElement} */ (ev.target)).querySelectorAll(
+              'input[name="progressTrackedItems"]',
+            )
+          ),
+        ]
+          .filter((el) => el.checked)
+          .map((el) => el.value),
+      );
+      const hiddenAfterSave = new Set(hiddenTrackers);
+      for (const toggle of trackerToggles) {
+        if (shownTrackedItems.has(toggle.id)) hiddenAfterSave.delete(toggle.id);
+        else hiddenAfterSave.add(toggle.id);
+      }
       await prefs.save({
         energyUnit: /** @type {"kcal"|"kj"} */ (fd.get("energyUnit") || "kcal"),
         weightUnit: /** @type {any} */ (fd.get("weightUnit")),
@@ -1400,6 +1444,7 @@ export class SettingsView extends HTMLElement {
             )
           ),
         ].filter((el) => el.checked).map((el) => el.value),
+        progressHiddenTrackedItems: [...hiddenAfterSave],
         mealBreakfastStart: timeInputToMinutes(String(fd.get("mealBreakfastStart"))),
         mealLunchStart: timeInputToMinutes(String(fd.get("mealLunchStart"))),
         mealDinnerStart: timeInputToMinutes(String(fd.get("mealDinnerStart"))),

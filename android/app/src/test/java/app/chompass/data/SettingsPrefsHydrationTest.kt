@@ -41,6 +41,7 @@ class SettingsPrefsHydrationTest {
         assertFalse(snap.progressNutrientAverages)
         assertTrue(snap.progressShowGoalRule)
 
+        assertEquals(emptySet<String>(), snap.progressHiddenTrackedItems)
         assertEquals(OptionalNutrientGoals.Default, snap.optionalNutrientGoals)
         assertEquals(HomeTopNutrient.DefaultSelection, snap.homeDisplay.homeTopNutrients)
         assertFalse(snap.homeDisplay.showSteps)

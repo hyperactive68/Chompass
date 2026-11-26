@@ -224,6 +224,8 @@ internal object Keys {
         val PROGRESS_NUTRIENT_AVERAGES_SELECTION = stringSetPreferencesKey("progressNutrientAveragesSelection")
         /** Codeberg #190: show the goal line in the Progress weight chart; default on. */
         val PROGRESS_SHOW_GOAL_RULE = booleanPreferencesKey("progressShowGoalRule")
+        /** #154: tracker rows hidden from the Progress card; empty = show all available. */
+        val PROGRESS_HIDDEN_TRACKED_ITEMS = stringSetPreferencesKey("progressHiddenTrackedItems")
 
         val MEAL_BREAKFAST_START = intPreferencesKey("mealBreakfastStart")
         val MEAL_LUNCH_START = intPreferencesKey("mealLunchStart")

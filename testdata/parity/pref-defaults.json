@@ -41,6 +41,7 @@
   "progressNutrientAverages": false,
   "progressNutrientAveragesSelection": ["fiber", "sugar", "sodium"],
   "progressShowGoalRule": true,
+  "progressHiddenTrackedItems": [],
 
   "optionalNutrientGoals": {
     "sugar": 50,

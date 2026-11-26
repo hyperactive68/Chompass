@@ -116,6 +116,7 @@ internal data class SettingsPrefsHydration(
     val progressNutrientAverages: Boolean,
     val progressNutrientAveragesSelection: Set<String>,
     val progressShowGoalRule: Boolean,
+    val progressHiddenTrackedItems: Set<String> = emptySet(),
 
     val userContext: String,
     val aiReadTimeoutSeconds: Int,
@@ -267,6 +268,7 @@ internal fun Preferences.toSettingsHydration(json: Json): SettingsPrefsHydration
                 ?.let(HomeTopNutrient::normalizeAveragesSelectionStorage)
                 ?: HomeTopNutrient.DefaultAveragesStorage,
         progressShowGoalRule = this[Keys.PROGRESS_SHOW_GOAL_RULE] ?: true,
+        progressHiddenTrackedItems = this[Keys.PROGRESS_HIDDEN_TRACKED_ITEMS] ?: emptySet(),
 
         userContext = this[Keys.USER_CONTEXT].orEmpty(),
         aiReadTimeoutSeconds = clampAiReadTimeoutSeconds(

@@ -86,6 +86,7 @@ describe("pref defaults (parity fixture)", () => {
     // Codeberg #190: the goal line shows until it is switched off.
     assert.equal(DEFAULT_PREFS.progressShowGoalRule, fixture.progressShowGoalRule);
     assert.equal(DEFAULT_PREFS.progressShowGoalRule, true);
+    assert.deepEqual(DEFAULT_PREFS.progressHiddenTrackedItems, fixture.progressHiddenTrackedItems);
     // Codeberg #75: the averages selection defaults to the original trio.
     assert.deepEqual(
       normalizeAveragesSelection(DEFAULT_PREFS.progressNutrientAveragesSelection),
