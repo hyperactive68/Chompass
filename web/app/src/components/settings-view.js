@@ -1345,6 +1345,11 @@ export class SettingsView extends HTMLElement {
               .join("")}
           </select>
           <label class="checkbox-row">
+            <input type="checkbox" id="progressShowGoalRule" name="progressShowGoalRule" value="true" ${p.progressShowGoalRule !== false ? "checked" : ""} />
+            <span>${escapeHtml(t("settings.progress_show_goal_rule"))}</span>
+          </label>
+          <p class="field-hint">${escapeHtml(t("settings.progress_show_goal_rule_subtitle"))}</p>
+          <label class="checkbox-row">
             <input type="checkbox" id="progressNutrientAverages" name="progressNutrientAverages" value="true" ${p.progressNutrientAverages ? "checked" : ""} />
             <span>${escapeHtml(t("settings.progress_nutrient_averages"))}</span>
           </label>
@@ -1386,6 +1391,7 @@ export class SettingsView extends HTMLElement {
         weekStartDay: /** @type {"monday"|"sunday"|"saturday"} */ (String(fd.get("weekStartDay") || "monday")),
         weekStartsOnMonday: String(fd.get("weekStartDay") || "monday") === "monday",
         progressDefaultRangeId: String(fd.get("progressDefaultRangeId") || "1W"),
+        progressShowGoalRule: fd.get("progressShowGoalRule") === "true",
         progressNutrientAverages: fd.get("progressNutrientAverages") === "true",
         progressNutrientAveragesSelection: [
           .../** @type {NodeListOf<HTMLInputElement>} */ (

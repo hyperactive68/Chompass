@@ -40,6 +40,7 @@
   "progressMeasurementSites": [],
   "progressNutrientAverages": false,
   "progressNutrientAveragesSelection": ["fiber", "sugar", "sodium"],
+  "progressShowGoalRule": true,
 
   "optionalNutrientGoals": {
     "sugar": 50,

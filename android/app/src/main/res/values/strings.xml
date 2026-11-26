@@ -1450,6 +1450,13 @@
         <item>averages</item>
 
     </string-array>
+    <string-array name="settings_search_kw_progress_show_goal_rule">
+        <item>goal</item>
+        <item>target</item>
+        <item>line</item>
+        <item>chart</item>
+        <item>weight</item>
+    </string-array>
     <string-array name="settings_search_kw_week_starts">
         <item>calendar</item>
         <item>monday</item>
@@ -1842,6 +1849,8 @@
     <string name="settings_progress_nutrient_averages_warning_title">Not a complete picture</string>
     <string name="settings_progress_nutrient_averages_warning_body">Open Food Facts and photo analysis often omit or guess these values when the label does not list them. The average only includes what was logged, so it can be off.</string>
     <string name="settings_progress_nutrient_averages_confirm">Show them</string>
+    <string name="settings_progress_show_goal_rule">Show goal line</string>
+    <string name="settings_progress_show_goal_rule_subtitle">On stretches the weight chart to your goal weight. Off zooms it to your logged weights, so small changes are easier to see.</string>
 
 
     <string name="settings_meal_times_enabled">Suggest meals by time of day</string>

@@ -85,6 +85,14 @@ fun CustomizeProgressScreen(
                     onClick = { sheet = SettingsSheet.PROGRESS_DEFAULT_RANGE },
                 )
                 HorizontalDivider()
+                ToggleRow(label = stringResource(R.string.settings_progress_show_goal_rule), checked = ui.progressShowGoalRule, onChange = vm::setProgressShowGoalRule)
+                Text(
+                    stringResource(R.string.settings_progress_show_goal_rule_subtitle),
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
+                )
+                HorizontalDivider()
                 ToggleRow(
                     label = stringResource(R.string.settings_progress_nutrient_averages),
                     checked = ui.progressNutrientAverages,

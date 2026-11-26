@@ -39,7 +39,7 @@ export function epochDay(iso) {
 
 /**
  * @param {{label: string, value: number, day?: string}[]} points chronological, ascending
- * @param {{width?: number, height?: number, color?: string, unit?: string, goal?: number|null, interactive?: boolean, trend?: {label: string, value: number, day?: string}[]|null, trendColor?: string, rangeLabel?: string|null, grid?: boolean}} [opts]
+ * @param {{width?: number, height?: number, color?: string, unit?: string, goal?: number|null, showGoalLine?: boolean, interactive?: boolean, trend?: {label: string, value: number, day?: string}[]|null, trendColor?: string, rangeLabel?: string|null, grid?: boolean}} [opts]
  * @returns {string} inline SVG markup
  */
 export function lineChartSvg(points, opts = {}) {
@@ -49,7 +49,8 @@ export function lineChartSvg(points, opts = {}) {
   const color = opts.color ?? "var(--teal)";
   const trendColor = opts.trendColor ?? "var(--protein)";
   const unit = opts.unit ?? "";
-  const goal = opts.goal;
+  // null already skips both the scale entry and the goal line (#190).
+  const goal = opts.showGoalLine === false ? null : opts.goal;
   const interactive = opts.interactive !== false;
   const series = downsamplePoints(points);
   const gridLines = opts.grid

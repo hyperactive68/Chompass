@@ -208,6 +208,8 @@ export const en = Object.freeze({
   "progress.log_first_body_fat": "Log your first body fat % to see trends",
   "progress.no_food": "No food logged yet",
   "settings.progress_default_range": "Progress default range",
+  "settings.progress_show_goal_rule": "Show goal line",
+  "settings.progress_show_goal_rule_subtitle": "On stretches the weight chart to your goal weight. Off zooms it to your logged weights, so small changes are easier to see.",
   "settings.progress_nutrient_averages": "Nutrient averages",
   "settings.progress_nutrient_averages_subtitle": "Off until you turn them on. Choose which nutrients to average below. Open Food Facts and photos often miss or guess these values.",
   "settings.progress_nutrient_averages_warning_title": "Not a complete picture",

@@ -83,6 +83,7 @@ internal fun BodySection(
     profileBodyFatFraction: Double?,
     goalWeightKg: Double?,
     goalBodyFatFraction: Double?,
+    showGoalRule: Boolean = true,
     useMetricWeight: Boolean,
     useMetricLength: Boolean,
     bodyFatAvailable: Boolean,
@@ -244,6 +245,7 @@ internal fun BodySection(
                             immediate = chartsImmediate,
                             title = stringResource(R.string.progress_body_section),
                             untrackedDays = untrackedDays,
+                            showGoalRules = showGoalRule,
                         )
                     }
                     // Legend chips: real value + signed range delta per

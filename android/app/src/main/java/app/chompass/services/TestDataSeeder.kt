@@ -891,6 +891,7 @@ class TestDataSeeder(private val container: AppContainer) {
                 foodLogMacroChips = container.prefs.foodLogMacroChips.first(),
                 progressNutrientAverages = container.prefs.progressNutrientAverages.first(),
                 progressNutrientAveragesSelection = container.prefs.progressNutrientAveragesSelection.first(),
+                progressShowGoalRule = container.prefs.progressShowGoalRule.first(),
             ),
             notesJson = json.encodeToString(
                 ListSerializer(DailyNote.serializer()),
@@ -1140,6 +1141,7 @@ class TestDataSeeder(private val container: AppContainer) {
             settings.progressNutrientAveragesSelection?.let {
                 container.prefs.setProgressNutrientAveragesSelection(it)
             }
+            settings.progressShowGoalRule?.let { container.prefs.setProgressShowGoalRule(it) }
         }
         backup.profileJson?.let {
             container.profileRepository.save(json.decodeFromString(UserProfile.serializer(), it))
@@ -1687,4 +1689,5 @@ internal data class SeedSettingsSnapshot(
     val foodLogMacroChips: String? = null,
     val progressNutrientAverages: Boolean? = null,
     val progressNutrientAveragesSelection: Set<String>? = null,
+    val progressShowGoalRule: Boolean? = null,
 )

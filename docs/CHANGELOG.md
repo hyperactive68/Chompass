@@ -6,6 +6,10 @@ Style: entries follow the release-text style guide (maintainer-local, not publis
 
 ## [Unreleased]
 
+### Added
+
+- **The weight chart can hide the goal line** (Android and web app): the chart stretches to include the goal, so small changes look flat while the goal is far away. A new *Show goal line* switch turns the line off; the chart then zooms to the logged weights. Find it in *Settings → App & Display → Customize progress* on Android and under *Settings → App & Display → Units & schedule* in the web app. It is on by default. Closes Codeberg [#190](https://codeberg.org/fitguy/Chompass/issues/190) by @NiklasMM
+
 ### Fixed
 
 - **The last diary entry no longer hides under the bottom bar** (web app): the page reserved the bottom chrome (nav, install banner, add button) inside the first screenful only, so with enough entries the last row ended under the bottom navigation and the floating add button covered part of it. The page now grows with its content and Home reserves the add-button zone, so every entry scrolls fully clear — on phones and on the wide layout alike. Closes Codeberg [#182](https://codeberg.org/fitguy/Chompass/issues/182)

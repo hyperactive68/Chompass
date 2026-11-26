@@ -259,6 +259,12 @@ internal suspend fun PreferencesStore.setProgressNutrientAveragesImpl(v: Boolean
     dataStore.edit { it[Keys.PROGRESS_NUTRIENT_AVERAGES] = v }
 }
 
+internal val PreferencesStore.progressShowGoalRuleImpl: Flow<Boolean> get() =
+    dataStore.data.map { it[Keys.PROGRESS_SHOW_GOAL_RULE] ?: true }
+internal suspend fun PreferencesStore.setProgressShowGoalRuleImpl(v: Boolean) {
+    dataStore.edit { it[Keys.PROGRESS_SHOW_GOAL_RULE] = v }
+}
+
 /**
  * #75: which nutrients Progress averages — [HomeTopNutrient] storage keys,
  * macros excluded. Unset = the original trio so existing toggle users see no

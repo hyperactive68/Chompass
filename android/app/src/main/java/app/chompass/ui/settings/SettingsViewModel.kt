@@ -273,6 +273,8 @@ data class SettingsUiState(
     /** #75: which nutrients the Progress averages card shows (non-macro storage keys). */
     val progressNutrientAveragesSelection: Set<String> =
         app.chompass.models.HomeTopNutrient.DefaultAveragesStorage,
+    /** Codeberg #190: show the goal line in the Progress weight chart; default on. */
+    val progressShowGoalRule: Boolean = true,
 
     val userContext: String = "",
     val fallbackEnabled: Boolean = true,
@@ -697,6 +699,7 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
                     progressMeasurementSites = snap.progressMeasurementSites,
                     progressNutrientAverages = snap.progressNutrientAverages,
                     progressNutrientAveragesSelection = snap.progressNutrientAveragesSelection,
+                    progressShowGoalRule = snap.progressShowGoalRule,
 
                     userContext = snap.userContext,
                     fallbackEnabled = snap.fallbackEnabled,
@@ -1208,6 +1211,11 @@ class SettingsViewModel(val container: AppContainer) : ViewModel() {
     fun setProgressNutrientAveragesSelection(keys: Set<String>) = updateUiPref(
         { container.prefs.setProgressNutrientAveragesSelection(keys) },
         { copy(progressNutrientAveragesSelection = keys) },
+    )
+
+    fun setProgressShowGoalRule(v: Boolean) = updateUiPref(
+        { container.prefs.setProgressShowGoalRule(v) },
+        { copy(progressShowGoalRule = v) },
     )
 
     fun setMealSchedule(schedule: app.chompass.models.MealSchedule) {

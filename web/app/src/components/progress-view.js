@@ -437,6 +437,7 @@ export class ProgressView extends HTMLElement {
           color: "var(--teal)",
           unit: weightUnit,
           goal: goalWeight,
+          showGoalLine: appPrefs.progressShowGoalRule !== false,
           trend: hasTrend ? trendPoints.map(({ label, value, day }) => ({ label, value, day })) : null,
           trendColor: "var(--protein)",
           rangeLabel: yearSpanLabel(weightPoints),

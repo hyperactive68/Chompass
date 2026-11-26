@@ -69,6 +69,7 @@ class SeedBackupRoundTripTest {
                 foodLogMacroChips = "protein,carbs",
                 progressNutrientAverages = true,
                 progressNutrientAveragesSelection = setOf("fiber", "sugar"),
+                progressShowGoalRule = false,
             ),
             notesJson = json.encodeToString(
                 ListSerializer(DailyNote.serializer()),
@@ -167,6 +168,7 @@ class SeedBackupRoundTripTest {
         assertEquals("protein,carbs", decoded.settings?.foodLogMacroChips)
         assertEquals(true, decoded.settings?.progressNutrientAverages)
         assertEquals(setOf("fiber", "sugar"), decoded.settings?.progressNutrientAveragesSelection)
+        assertEquals(false, decoded.settings?.progressShowGoalRule)
         assertEquals(1, json.decodeFromString(ListSerializer(WaterEntry.serializer()), decoded.waterJson!!).size)
         assertEquals(4, json.decodeFromString(ListSerializer(app.chompass.models.Recipe.serializer()), decoded.recipesJson!!).size)
         assertEquals("oats", json.decodeFromString(ListSerializer(FoodEntry.serializer()), decoded.favoritesJson!!).single().favoriteKey)

@@ -166,6 +166,8 @@ export const de = Object.freeze({
   "settings.progress_nutrient_averages_confirm": "Anzeigen",
   "add_food.saved_meals_sub": "Zuletzt, Favoriten, Rezepte",
 "settings.progress_default_range": "Progress-Standardzeitraum",
+"settings.progress_show_goal_rule": "Ziellinie anzeigen",
+"settings.progress_show_goal_rule_subtitle": "Ein streckt das Gewichtsdiagramm bis zu deinem Zielgewicht. Aus zoomt es auf deine erfassten Gewichte, damit kleine Änderungen besser zu sehen sind.",
   "onboarding.welcome_title": "Willkommen bei Chompass",
   "onboarding.welcome_body": "Essen tracken. Kontrolle behalten.",
   "onboarding.get_started": "Loslegen",

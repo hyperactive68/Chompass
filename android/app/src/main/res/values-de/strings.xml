@@ -1967,6 +1967,8 @@ für dich ein</string>
     <string name="settings_progress_nutrient_averages_warning_body">Open Food Facts und die Fotoanalyse lassen diese Werte oft weg oder schätzen sie, wenn das Etikett sie nicht nennt. Der Durchschnitt zählt nur das Geloggte und kann daher danebenliegen.</string>
 
     <string name="settings_progress_nutrient_averages_confirm">Anzeigen</string>
+    <string name="settings_progress_show_goal_rule">Ziellinie anzeigen</string>
+    <string name="settings_progress_show_goal_rule_subtitle">Ein streckt das Gewichtsdiagramm bis zu deinem Zielgewicht. Aus zoomt es auf deine erfassten Gewichte, damit kleine Änderungen besser zu sehen sind.</string>
 
 
     <string name="settings_meal_times_enabled">Mahlzeiten nach Tageszeit vorschlagen</string>
@@ -4231,6 +4233,13 @@ für dich ein</string>
         <item>Mikro</item>
         <item>Nährstoff</item>
         <item>Durchschnitte</item>
+    </string-array>
+    <string-array name="settings_search_kw_progress_show_goal_rule">
+        <item>Ziel</item>
+        <item>Ziellinie</item>
+        <item>Diagramm</item>
+        <item>Gewicht</item>
+        <item>Gewichtskurve</item>
     </string-array>
     <string-array name="settings_search_kw_week_starts">
         <item>Kalender</item>

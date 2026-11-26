@@ -103,6 +103,8 @@ data class ProgressUiState(
      */
     val nutrientAverages: List<NutrientAverage> = emptyList(),
     val showNutrientAverages: Boolean = false,
+    /** Codeberg #190: show the goal line in the weight chart; default on. */
+    val showGoalRule: Boolean = true,
 
     val weightStats: WeightSummaryStats = WeightSummaryStats(),
     val bodyFatStats: BodyFatSummaryStats = BodyFatSummaryStats(),
@@ -242,7 +244,10 @@ class ProgressViewModel(private val container: AppContainer) : ViewModel() {
                 combine(
                     container.prefs.progressOverlaySeries,
                     container.prefs.progressCalorieOverlay,
-                ) { series, calorie -> series to calorie },
+                    container.prefs.progressShowGoalRule,
+                ) { series, calorie, showGoalRule ->
+                    Triple(series, calorie, showGoalRule)
+                },
             ) { base, weightUnit, selectedRange, showGoalReached, overlayPrefs ->
                 ProgressRangeInputs(
                     base = base,
@@ -251,6 +256,7 @@ class ProgressViewModel(private val container: AppContainer) : ViewModel() {
                     showGoalReached = showGoalReached,
                     overlaySeriesPref = overlayPrefs.first,
                     calorieOverlayPref = overlayPrefs.second,
+                    showGoalRule = overlayPrefs.third,
                 )
             }.flatMapLatest { inputs ->
                 val (start, end) = inputs.selectedRange.dateRange()
@@ -270,6 +276,7 @@ class ProgressViewModel(private val container: AppContainer) : ViewModel() {
                         untrackedDays = untracked,
                         overlaySeriesPref = inputs.overlaySeriesPref,
                         calorieOverlayPref = inputs.calorieOverlayPref,
+                        showGoalRule = inputs.showGoalRule,
                     )
                 }
             }.mapLatest { snapshot ->
@@ -392,6 +399,7 @@ private data class ProgressRangeInputs(
     val showGoalReached: Boolean,
     val overlaySeriesPref: Set<String>?,
     val calorieOverlayPref: String?,
+    val showGoalRule: Boolean,
 )
 
 private data class ProgressSnapshot(
@@ -406,6 +414,8 @@ private data class ProgressSnapshot(
     val overlaySeriesPref: Set<String>? = null,
     /** Calorie-card metric overlay; null = apply the data-dependent default. */
     val calorieOverlayPref: String? = null,
+    /** Codeberg #190: show the goal line in the weight chart; default on. */
+    val showGoalRule: Boolean = true,
 )
 
 private fun ProgressSnapshot.toUiState(anchorDate: LocalDate = LocalDate.now()): ProgressUiState {
@@ -531,6 +541,7 @@ private fun ProgressSnapshot.toUiState(anchorDate: LocalDate = LocalDate.now()):
         macroAverages = macroAverages,
         nutrientAverages = nutrientAverages,
         showNutrientAverages = base.showNutrientAverages,
+        showGoalRule = showGoalRule,
         untrackedDays = untrackedDays,
         dayTypeByDay = dayTypeByDay,
 
