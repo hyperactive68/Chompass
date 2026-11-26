@@ -27,14 +27,6 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      - name: Refresh lint baseline for upstream changes
-        shell: bash
-        run: |
-          set -euo pipefail
-          chmod +x android/gradlew
-          cd android
-          ./gradlew :app:updateLintBaseline --no-daemon
-
       - name: Run JVM tests, lint, and debug build
         shell: bash
         run: |
@@ -47,11 +39,3 @@ jobs:
             :app:lintVitalRelease \
             :app:assembleDebug \
             --no-daemon
-
-      - name: Upload refreshed lint baseline for review
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: chompass-lint-baseline
-          path: android/app/lint-baseline.xml
-          retention-days: 1
