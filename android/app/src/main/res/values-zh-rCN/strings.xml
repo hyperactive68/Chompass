@@ -2884,4 +2884,6 @@
     <string name="progress_sync_scale_reading">正在从 %1$s 读取…</string>
     <string name="progress_sync_scale_done">已导入 %1$d 条新的体重记录</string>
     <string name="progress_sync_scale_failed">体脂秤同步失败：%1$s</string>
+    <string name="paste_busy">粘贴中…</string>
+    <string name="paste_n_entries">粘贴 %1$d 条记录</string>
     </resources>

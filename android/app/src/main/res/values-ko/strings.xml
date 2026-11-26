@@ -2885,4 +2885,6 @@
     <string name="progress_sync_scale_reading">%1$s에서 읽는 중…</string>
     <string name="progress_sync_scale_done">새 측정 %1$d개를 가져왔습니다</string>
     <string name="progress_sync_scale_failed">저울 동기화 실패: %1$s</string>
+    <string name="paste_busy">붙여넣는 중…</string>
+    <string name="paste_n_entries">기록 %1$d개 붙여넣기</string>
     </resources>

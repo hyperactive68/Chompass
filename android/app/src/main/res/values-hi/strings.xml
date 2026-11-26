@@ -2887,4 +2887,6 @@
     <string name="progress_sync_scale_reading">%1$s से पढ़ा जा रहा है…</string>
     <string name="progress_sync_scale_done">%1$d नई वज़न माप आयात की गईं</string>
     <string name="progress_sync_scale_failed">स्केल सिंक विफल: %1$s</string>
+    <string name="paste_busy">पेस्ट हो रहा है…</string>
+    <string name="paste_n_entries">%1$d प्रविष्टियां पेस्ट करें</string>
     </resources>

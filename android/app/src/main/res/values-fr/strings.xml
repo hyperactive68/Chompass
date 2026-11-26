@@ -2902,4 +2902,6 @@ macros rééquilibrées au nouveau total calorique</string>
     <string name="progress_sync_scale_reading">Lecture depuis %1$s…</string>
     <string name="progress_sync_scale_done">%1$d nouvelles pesées importées</string>
     <string name="progress_sync_scale_failed">Échec de la synchronisation de la balance : %1$s</string>
+    <string name="paste_busy">Collage…</string>
+    <string name="paste_n_entries">Coller %1$d entrées</string>
     </resources>

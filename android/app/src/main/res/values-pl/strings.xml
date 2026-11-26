@@ -2932,4 +2932,6 @@ makro rebalansowane do nowej sumy kalorii</string>
     <string name="progress_sync_scale_reading">Odczyt z %1$s…</string>
     <string name="progress_sync_scale_done">Zaimportowano %1$d nowych pomiarów wagi</string>
     <string name="progress_sync_scale_failed">Synchronizacja z wagą nie powiodła się: %1$s</string>
+    <string name="paste_n_entries">Wklej wpisy (%1$d)</string>
+    <string name="paste_busy">Wklejanie…</string>
     </resources>

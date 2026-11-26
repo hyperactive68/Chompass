@@ -2884,4 +2884,6 @@
     <string name="progress_sync_scale_reading">%1$s から読み込み中…</string>
     <string name="progress_sync_scale_done">%1$d 件の新しい計測を取り込みました</string>
     <string name="progress_sync_scale_failed">スケール同期に失敗しました: %1$s</string>
+    <string name="paste_busy">貼り付け中…</string>
+    <string name="paste_n_entries">%1$d 件の記録を貼り付け</string>
     </resources>

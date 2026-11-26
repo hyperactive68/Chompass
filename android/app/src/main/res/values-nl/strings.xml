@@ -2889,4 +2889,6 @@ macro\'s opnieuw verdeeld over het nieuwe calorieëntotaal</string>
     <string name="settings_chatgpt_revoke_unconfirmed">Lokaal losgekoppeld. Intrekken op afstand kon niet worden bevestigd; je kunt Chompass ook verwijderen in de ChatGPT-instellingen.</string>
     <string name="settings_chatgpt_manage_usage">ChatGPT-verbruik beheren</string>
     <string name="settings_chatgpt_disconnect">ChatGPT loskoppelen</string>
+    <string name="paste_busy">Plakken…</string>
+    <string name="paste_n_entries">%1$d items plakken</string>
 </resources>

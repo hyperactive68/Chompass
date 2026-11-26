@@ -4479,4 +4479,6 @@ für dich ein</string>
     <string name="notif_scale_sync_reading">Synchronisiere mit %1$s …</string>
     <string name="notif_scale_sync_awaiting_user">Wähle den Profil-Platz auf deinem Telefon</string>
     <string name="notif_scale_sync_awaiting_consent">Gib den 4-stelligen Code der Waage auf deinem Telefon ein</string>
+    <string name="paste_n_entries">%1$d Einträge einfügen</string>
+    <string name="paste_busy">Einfügen…</string>
 </resources>

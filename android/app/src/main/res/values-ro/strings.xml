@@ -2905,4 +2905,6 @@ macro-urile reechilibrate la noul total caloric</string>
     <string name="progress_sync_scale_reading">Se citește de la %1$s…</string>
     <string name="progress_sync_scale_done">%1$d cântăriri noi importate</string>
     <string name="progress_sync_scale_failed">Sincronizarea cu cântarul a eșuat: %1$s</string>
+    <string name="paste_busy">Se lipește…</string>
+    <string name="paste_n_entries">Lipește %1$d înregistrări</string>
     </resources>

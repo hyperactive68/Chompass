@@ -2906,4 +2906,6 @@ makrolar yeni kalori toplamına göre yeniden dengelenir</string>
     <string name="progress_sync_scale_reading">%1$s cihazından okunuyor…</string>
     <string name="progress_sync_scale_done">%1$d yeni tartım içe aktarıldı</string>
     <string name="progress_sync_scale_failed">Tartı senkronizasyonu başarısız: %1$s</string>
+    <string name="paste_n_entries">%1$d kaydı yapıştır</string>
+    <string name="paste_busy">Yapıştırılıyor…</string>
     </resources>

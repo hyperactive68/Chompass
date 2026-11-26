@@ -2837,4 +2837,6 @@ LBM = вага × (1 − %жиру)</string>
     <string name="progress_sync_scale_reading">Читання з %1$s…</string>
     <string name="progress_sync_scale_done">Імпортовано %1$d нових зважувань</string>
     <string name="progress_sync_scale_failed">Не вдалося синхронізуватися з вагами: %1$s</string>
+    <string name="paste_busy">Вставлення…</string>
+    <string name="paste_n_entries">Вставити %1$d записів</string>
     </resources>
