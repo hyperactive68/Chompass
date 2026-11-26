@@ -289,6 +289,8 @@ class OpenFoodFactsMappingTest {
         // The 60 g package is the as-sold weight: not a unit for prepared values.
         assertEquals(listOf("serving"), food.servingUnitOptions.map { it.unit })
         assertEquals("serving", food.selectedServingUnit)
+        // The review sheet says which basis the values use (PR #188's note).
+        assertTrue(food.grounding!!.validationNotes.any { it.contains("as prepared") })
     }
 
     @Test
@@ -314,6 +316,7 @@ class OpenFoodFactsMappingTest {
         assertEquals(100.0, food.servingSizeGrams!!, 0.001)
         assertEquals(76, food.calories)
         assertTrue(food.servingUnitOptions.isEmpty())
+        assertTrue(food.grounding!!.validationNotes.any { it.contains("as prepared") })
     }
 
     @Test
@@ -338,6 +341,7 @@ class OpenFoodFactsMappingTest {
         val food = OpenFoodFactsService.analysis(product, "3017620422003")
         assertEquals(270, food.calories)
         assertEquals(5.4, food.protein, 0.001)
+        assertTrue(food.grounding!!.validationNotes.none { it.contains("as prepared") })
     }
 
     @Test

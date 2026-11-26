@@ -900,7 +900,13 @@ object OpenFoodFactsService {
                 identityEvidence = "barcode:$barcode",
                 portionEvidence = "serving_quantity=${servingGrams}g",
                 identityConfirmed = true,
-                validationNotes = validation.notes,
+                // Prepared-only products carry no as-sold basis, so say which
+                // basis the values use (Codeberg #176; mirrors the PWA note).
+                validationNotes = if (preparedOnly) {
+                    validation.notes + "Values are as prepared; this product has no as-sold nutrition on Open Food Facts."
+                } else {
+                    validation.notes
+                },
             ),
             productMetadata = metadata,
         )
