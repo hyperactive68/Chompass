@@ -8,7 +8,7 @@ Style: entries follow the release-text style guide (maintainer-local, not publis
 
 ### Added
 
-- **The weight chart can hide the goal line** (Android and web app): the chart stretches to include the goal, so small changes look flat while the goal is far away. A new *Show goal line* switch turns the line off; the chart then zooms to the logged weights. Find it in *Settings → App & Display → Customize progress* on Android and under *Settings → App & Display → Units & schedule* in the web app. It is on by default. Closes Codeberg [#190](https://codeberg.org/fitguy/Chompass/issues/190) by @NiklasMM
+- **The weight chart can hide the goal line** (Android and web app): the chart stretches to include the goal, so small changes look flat while the goal is far away. A new *Show goal line* switch turns the line off; the chart then zooms to the logged weights. Find it in *Settings → Display → Customize progress* on Android and under *Settings → App & Display → Units & schedule* in the web app. It is on by default. Closes Codeberg [#190](https://codeberg.org/fitguy/Chompass/issues/190) by @NiklasMM
 
 ### Fixed
 
