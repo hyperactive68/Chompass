@@ -2612,12 +2612,17 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
 
     /**
      * Tap on a suggestion row. Saved foods log straight away (the chips have
-     * always behaved that way); recipes log every ingredient; database rows go
-     * through the review sheet because their portion still needs confirming.
+     * always behaved that way), then Home opens the edit sheet on the new row
+     * with its amount focused (Codeberg #159); recipes log every ingredient;
+     * database rows go through the review sheet because their portion still
+     * needs confirming.
      */
-    fun pickSuggestion(suggestion: FoodSuggestion) {
+    fun pickSuggestion(
+        suggestion: FoodSuggestion,
+        onSavedFoodLogged: ((FoodEntry) -> Unit)? = null,
+    ) {
         when (suggestion) {
-            is FoodSuggestion.SavedFood -> relogMeal(suggestion.template)
+            is FoodSuggestion.SavedFood -> relogMeal(suggestion.template, onSavedFoodLogged)
             is FoodSuggestion.SavedRecipe -> logRecipe(suggestion.recipe)
             is FoodSuggestion.DatabaseHit -> selectFoodSearchResult(suggestion.result)
         }
@@ -3943,7 +3948,10 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
     }
 
     /** Re-log a saved meal (from Saved Meals sheet) as a new entry timestamped to the selected day. */
-    fun relogMeal(template: FoodEntry) {
+    fun relogMeal(
+        template: FoodEntry,
+        onLogged: ((FoodEntry) -> Unit)? = null,
+    ) {
         if (PerfLog.enabled) {
             relogAckAtNs = System.nanoTime()
             relogAckPriorCount = _ui.value.todayEntries.size
@@ -3961,6 +3969,7 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
                         )
                     )
                 container.foodRepository.addEntry(entry, writeHealth = false)
+                onLogged?.invoke(entry)
                 // Health Connect mirrors in the background so the relog ack does
                 // not wait on the HC binder (same contract as saveAnalysis).
                 mirrorToHealthBackground(listOf(entry))
